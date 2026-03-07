@@ -5,7 +5,6 @@ import { Github } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type {
   Segment,
-  ChipSegment,
   TriggerConfig,
   PromptAreaHandle,
 } from '@/registry/new-york/blocks/prompt-area/types'
