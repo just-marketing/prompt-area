@@ -14,4 +14,4 @@ pre-commit:
     'build registry':
       priority: 3
       glob: 'registry/**/*.{js,jsx,ts,tsx,mjs}'
-      run: pnpm registry:build && git add public/r/
+      run: pnpm registry:build
