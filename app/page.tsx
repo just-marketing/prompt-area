@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Github, PlusCircle, AtSign, Slash, Hash, Mic, ArrowUp, Code, Type, Upload, Image as ImageIcon } from 'lucide-react'
+import { Github, PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type, Upload, Image as ImageIcon } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
@@ -809,7 +809,7 @@ function ActionBarFullExample() {
                   <PlusCircle className="size-4" />
                 </button>
                 {menuOpen && (
-                  <div className="absolute bottom-full left-0 mb-1 flex flex-col rounded-md border bg-popover p-1 shadow-md">
+                  <div className="absolute left-0 top-full z-10 mt-1 flex w-max flex-col rounded-md border bg-popover p-1 shadow-md">
                     <button
                       type="button"
                       className={MENU_ITEM_CLASS}
@@ -841,9 +841,19 @@ function ActionBarFullExample() {
                 type="button"
                 className={ICON_BUTTON_CLASS}
                 aria-label="Commands"
-                onClick={() => insertTrigger('/')}
+                onClick={() => {
+                  promptRef.current?.focus()
+                  requestAnimationFrame(() => {
+                    const sel = window.getSelection()
+                    const el = document.activeElement
+                    if (sel && el) {
+                      sel.collapse(el, 0)
+                    }
+                    document.execCommand('insertText', false, '/')
+                  })
+                }}
               >
-                <Slash className="size-4" />
+                <SquareSlash className="size-4" />
               </button>
               <button
                 type="button"

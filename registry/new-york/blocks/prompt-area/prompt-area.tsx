@@ -41,6 +41,7 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
       placeholder,
       className,
       disabled = false,
+      markdown,
       onSubmit,
       onEscape,
       onChipClick,
@@ -86,6 +87,7 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
       onPaste,
       onUndo,
       onRedo,
+      markdown,
     })
 
     // Expose imperative handle via ref

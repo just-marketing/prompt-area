@@ -63,6 +63,7 @@ type UsePromptAreaOptions = {
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
+  markdown?: boolean
 }
 
 type UsePromptAreaReturn = {
@@ -110,6 +111,7 @@ export function usePromptArea({
   onPaste,
   onUndo,
   onRedo,
+  markdown: markdownEnabled = true,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
@@ -241,7 +243,7 @@ export function usePromptArea({
 
       // Decorate URLs and markdown formatting in text nodes
       decorateURLsInEditor(editor)
-      decorateMarkdownInEditor(editor)
+      if (markdownEnabled) decorateMarkdownInEditor(editor)
 
       if (savedCursor) {
         restoreCursorPosition(editor, savedCursor)
@@ -447,7 +449,7 @@ export function usePromptArea({
     // Decorate URLs and markdown formatting in text nodes
     if (editor) {
       decorateURLsInEditor(editor)
-      decorateMarkdownInEditor(editor)
+      if (markdownEnabled) decorateMarkdownInEditor(editor)
       if (savedCursorOffset !== null) {
         setCursorAtOffset(editor, savedCursorOffset)
       }
@@ -763,7 +765,7 @@ export function usePromptArea({
       if (events.handleKeyDownForUndoRedo(e)) return
 
       // 1.5 Markdown formatting shortcuts (Cmd+B bold, Cmd+I italic)
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && (e.key === 'b' || e.key === 'i')) {
+      if (markdownEnabled && (e.metaKey || e.ctrlKey) && !e.shiftKey && (e.key === 'b' || e.key === 'i')) {
         e.preventDefault()
         const editor = editorRef.current
         if (!editor) return
