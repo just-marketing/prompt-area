@@ -13,4 +13,5 @@ node_modules
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+public/r/
 packages/db/prisma/schema/generated/
