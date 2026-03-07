@@ -188,7 +188,7 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
           data-test-id={dataTestId}
           className={cn(
             'prompt-area-editor',
-            'w-full min-w-0 whitespace-pre-wrap break-words outline-none',
+            'w-full min-w-0 break-words whitespace-pre-wrap outline-none',
             'text-sm leading-relaxed',
             disabled && 'cursor-not-allowed opacity-50',
           )}
@@ -210,7 +210,7 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
         {/* Placeholder overlay */}
         {isEmpty && placeholder && (
           <div
-            className="pointer-events-none absolute left-0 top-0 select-none text-sm leading-relaxed text-muted-foreground"
+            className="text-muted-foreground pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
             aria-hidden="true">
             {placeholder}
           </div>

@@ -1,0 +1,16 @@
+.git
+.github
+.next
+.yarn
+.pnp*
+dist
+*.css
+!packages/ui/src/*.css
+**/*.d.ts
+build
+manifests
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+packages/db/prisma/schema/generated/

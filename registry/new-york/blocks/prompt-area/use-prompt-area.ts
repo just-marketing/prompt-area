@@ -765,7 +765,12 @@ export function usePromptArea({
       if (events.handleKeyDownForUndoRedo(e)) return
 
       // 1.5 Markdown formatting shortcuts (Cmd+B bold, Cmd+I italic)
-      if (markdownEnabled && (e.metaKey || e.ctrlKey) && !e.shiftKey && (e.key === 'b' || e.key === 'i')) {
+      if (
+        markdownEnabled &&
+        (e.metaKey || e.ctrlKey) &&
+        !e.shiftKey &&
+        (e.key === 'b' || e.key === 'i')
+      ) {
         e.preventDefault()
         const editor = editorRef.current
         if (!editor) return

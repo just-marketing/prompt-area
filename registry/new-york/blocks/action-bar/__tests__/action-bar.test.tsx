@@ -20,12 +20,7 @@ describe('ActionBar', () => {
   })
 
   it('renders both slots simultaneously', () => {
-    render(
-      <ActionBar
-        left={<button>Left</button>}
-        right={<button>Right</button>}
-      />,
-    )
+    render(<ActionBar left={<button>Left</button>} right={<button>Right</button>} />)
     expect(screen.getByText('Left')).toBeInTheDocument()
     expect(screen.getByText('Right')).toBeInTheDocument()
   })

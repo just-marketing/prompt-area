@@ -481,9 +481,7 @@ describe('decorateURLsInEditor', () => {
     expect(anchor?.href).toBe('https://example.com/')
     expect(anchor?.textContent).toBe('https://example.com')
     expect(anchor?.dataset.url).toBe('true')
-    expect(anchor?.className).toBe(
-      'text-primary hover:text-primary/80 underline cursor-pointer',
-    )
+    expect(anchor?.className).toBe('text-primary hover:text-primary/80 underline cursor-pointer')
   })
 
   it('wraps multiple URLs', () => {

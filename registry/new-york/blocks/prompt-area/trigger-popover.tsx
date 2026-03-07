@@ -62,15 +62,15 @@ export function TriggerPopover({
     <div
       ref={popoverRef}
       className={cn(
-        'max-h-[240px] min-w-[200px] max-w-[320px] overflow-y-auto',
-        'rounded-xl border bg-popover p-2 shadow-md',
+        'max-h-[240px] max-w-[320px] min-w-[200px] overflow-y-auto',
+        'bg-popover rounded-xl border p-2 shadow-md',
         'animate-in fade-in-0 zoom-in-95',
       )}
       style={style}
       role="listbox"
       aria-label={`${triggerChar} suggestions`}>
       {loading ? (
-        <div className="px-3 py-2 text-sm text-muted-foreground">Loading suggestions...</div>
+        <div className="text-muted-foreground px-3 py-2 text-sm">Loading suggestions...</div>
       ) : (
         suggestions.map((suggestion, index) => (
           <button
@@ -80,8 +80,8 @@ export function TriggerPopover({
             role="option"
             aria-selected={index === selectedIndex}
             className={cn(
-              'flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground',
-              'cursor-pointer transition-colors hover:bg-accent',
+              'text-foreground flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm',
+              'hover:bg-accent cursor-pointer transition-colors',
               index === selectedIndex && 'bg-accent',
             )}
             onMouseDown={(e) => {
@@ -92,7 +92,7 @@ export function TriggerPopover({
             <div className="min-w-0 flex-1">
               <div className="truncate font-medium">{suggestion.label}</div>
               {suggestion.description && (
-                <div className="truncate text-xs text-muted-foreground">
+                <div className="text-muted-foreground truncate text-xs">
                   {suggestion.description}
                 </div>
               )}
