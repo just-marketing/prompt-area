@@ -254,7 +254,7 @@ function DemoSection() {
           onSubmit={handleSubmit}
           markdown={markdownEnabled}
           autoGrow
-          minHeight={48}
+          minHeight={72}
           maxHeight={200}
         />
         <ActionBar
