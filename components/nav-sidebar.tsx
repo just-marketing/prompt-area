@@ -2,8 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Github, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 // ---------------------------------------------------------------------------
 // Nav config
@@ -40,6 +41,11 @@ const NAV_ITEMS: NavItem[] = [
       { id: 'action-bar-minimal', label: 'Minimal' },
       { id: 'action-bar-disabled', label: 'Disabled' },
     ],
+  },
+  {
+    id: 'dark-theme',
+    label: 'Dark Theme',
+    children: [{ id: 'dark-theme-preview', label: 'Preview' }],
   },
 ]
 
@@ -325,6 +331,7 @@ function NavSidebar() {
       const el = document.getElementById(id)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        history.replaceState(null, '', `#${id}`)
       }
       // On smaller screens, auto-close after navigating
       if (!isDesktop) {
@@ -344,7 +351,9 @@ function NavSidebar() {
   return (
     <aside
       ref={sidebarRef}
-      tabIndex={-1}
+      tabIndex={isOpen || isDesktop ? -1 : undefined}
+      aria-hidden={!isOpen && !isDesktop ? true : undefined}
+      inert={!isOpen && !isDesktop ? true : undefined}
       className={cn(
         'border-sidebar-border bg-sidebar fixed inset-y-0 left-0 z-40 w-[280px] border-r',
         'flex flex-col outline-none',
@@ -383,6 +392,22 @@ function NavSidebar() {
           ),
         )}
       </nav>
+
+      <div className="border-sidebar-border flex flex-col gap-3 border-t px-4 py-3">
+        <a
+          href="https://github.com/team-gpt/prompt-area"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            'group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            'bg-accent/50 text-foreground hover:bg-accent',
+          )}>
+          <Github className="size-4 shrink-0" />
+          <span className="flex-1">GitHub Repo</span>
+          <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
+        </a>
+        <ThemeToggle />
+      </div>
     </aside>
   )
 }
@@ -412,6 +437,19 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
     }
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Scroll to hash target on initial load
+  useEffect(() => {
+    const hash = window.location.hash.slice(1)
+    if (hash) {
+      // Small delay to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        const el = document.getElementById(hash)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   // Keyboard shortcut: Cmd/Ctrl+B to toggle (mobile), Escape to close (mobile)
@@ -452,7 +490,9 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
       />
 
       {/* Main content — margin on desktop, no transform */}
-      <main className="min-h-screen overflow-x-hidden lg:ml-[280px]">{children}</main>
+      <main role="main" className="min-h-screen overflow-x-hidden lg:ml-[280px]">
+        {children}
+      </main>
     </SidebarContext.Provider>
   )
 }
