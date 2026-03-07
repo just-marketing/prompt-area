@@ -134,7 +134,6 @@ export function usePromptArea({
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
 
-
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoBaseState = useRef<Segment[] | null>(null)
@@ -888,6 +887,26 @@ export function usePromptArea({
         e.preventDefault()
         const editor = editorRef.current
         if (editor) {
+          // Check for list continuation first (same as Enter)
+          if (markdownEnabled) {
+            const segments = readSegmentsFromDOM()
+            const cursorPos = getCursorOffset(editor)
+            if (cursorPos !== null) {
+              const plainText = segmentsToPlainText(segments)
+              const ctx = getListContext(plainText, cursorPos)
+              if (ctx) {
+                const result = insertListContinuation(segments, cursorPos)
+                if (result) {
+                  lastRenderedValue.current = result.segments
+                  onChange(result.segments)
+                  renderSegmentsToDOM(result.segments)
+                  setCursorAtOffset(editor, result.cursorOffset)
+                }
+                return
+              }
+            }
+          }
+          // Fallback: plain newline (existing behavior)
           const offsets = getSelectionOffsets(editor)
           if (offsets) {
             const currentSegments = readSegmentsFromDOM()
