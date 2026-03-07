@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { File, FileText, FileSpreadsheet, FileCode, Image as ImageIcon } from 'lucide-react'
+import { RemoveButton } from './remove-button'
 import type { PromptAreaFile } from './types'
 
 type FileStripProps = {
@@ -103,30 +104,7 @@ function FileCard({
       )}
 
       {onRemove && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(file)
-          }}
-          className={cn(
-            'absolute top-0.5 right-0.5 grid h-3.5 w-3.5 cursor-pointer place-items-center',
-            'rounded-full bg-black/60 text-white hover:bg-black/80 dark:bg-white/60 dark:text-black dark:hover:bg-white/80',
-            'transition-colors',
-          )}
-          aria-label={`Remove ${file.name}`}>
-          <svg
-            width="8"
-            height="8"
-            viewBox="0 0 10 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round">
-            <line x1="2.75" y1="2.75" x2="7.25" y2="7.25" />
-            <line x1="7.25" y1="2.75" x2="2.75" y2="7.25" />
-          </svg>
-        </button>
+        <RemoveButton onClick={() => onRemove(file)} label={`Remove ${file.name}`} />
       )}
     </div>
   )
