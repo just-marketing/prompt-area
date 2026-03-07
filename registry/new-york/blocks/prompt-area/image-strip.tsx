@@ -39,12 +39,22 @@ export function ImageStrip({ images, onRemove, onClick, className }: ImageStripP
               type="button"
               onClick={() => onRemove(image)}
               className={cn(
-                'absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center',
+                'absolute top-0.5 right-0.5 grid h-3.5 w-3.5 cursor-pointer place-items-center',
                 'rounded-full bg-black/60 text-white hover:bg-black/80',
-                'text-xs leading-none transition-colors',
+                'transition-colors',
               )}
               aria-label={`Remove ${image.alt ?? 'image'}`}>
-              ×
+              <svg
+                width="8"
+                height="8"
+                viewBox="0 0 10 10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round">
+                <line x1="2.75" y1="2.75" x2="7.25" y2="7.25" />
+                <line x1="7.25" y1="2.75" x2="2.75" y2="7.25" />
+              </svg>
             </button>
           )}
         </div>
