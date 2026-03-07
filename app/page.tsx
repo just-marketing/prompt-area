@@ -1,7 +1,19 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Github, PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type, Upload, Image as ImageIcon } from 'lucide-react'
+import {
+  Github,
+  PlusCircle,
+  AtSign,
+  SquareSlash,
+  Hash,
+  Mic,
+  ArrowUp,
+  Code,
+  Type,
+  Upload,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
@@ -56,8 +68,7 @@ const ICON_BUTTON_CLASS =
 const SEND_BUTTON_CLASS =
   'rounded-lg bg-primary p-1.5 text-primary-foreground hover:bg-primary/90 disabled:opacity-50'
 
-const MENU_ITEM_CLASS =
-  'flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent'
+const MENU_ITEM_CLASS = 'flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent'
 
 // ActionBar trigger configs (no component-scoped deps, safe to hoist)
 const ACTION_BAR_TRIGGERS: TriggerConfig[] = [
@@ -146,8 +157,7 @@ function ComprehensiveExample() {
       resolveOnSpace: true,
       chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
       accessibilityLabel: 'tag',
-      onSearch: (query) =>
-        TAGS.filter((t) => t.label.toLowerCase().includes(query.toLowerCase())),
+      onSearch: (query) => TAGS.filter((t) => t.label.toLowerCase().includes(query.toLowerCase())),
       onSelect: (s) => {
         log(`Tag selected: #${s.label}`)
         return s.label
@@ -206,19 +216,19 @@ function ComprehensiveExample() {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => promptRef.current?.focus()}>
           Focus
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => promptRef.current?.blur()}>
           Blur
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => {
             promptRef.current?.clear()
             setSegments([])
@@ -227,7 +237,7 @@ function ComprehensiveExample() {
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => {
             promptRef.current?.insertChip({
               trigger: '@',
@@ -240,7 +250,7 @@ function ComprehensiveExample() {
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => {
             promptRef.current?.insertChip({
               trigger: '#',
@@ -253,7 +263,7 @@ function ComprehensiveExample() {
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => {
             const text = promptRef.current?.getPlainText() ?? ''
             log(`Plain text (${text.length} chars): ${text || '(empty)'}`)
@@ -263,15 +273,15 @@ function ComprehensiveExample() {
       </div>
 
       {submitted && (
-        <div className="rounded-lg border bg-muted/50 p-3">
-          <div className="mb-1 text-xs font-medium text-muted-foreground">Submitted:</div>
+        <div className="bg-muted/50 rounded-lg border p-3">
+          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
           <div className="text-sm">{submitted}</div>
         </div>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border p-3">
-          <div className="mb-2 text-xs font-medium text-muted-foreground">
+          <div className="text-muted-foreground mb-2 text-xs font-medium">
             Segments ({segments.length})
           </div>
           <pre className="max-h-[200px] overflow-auto text-xs">
@@ -279,13 +289,13 @@ function ComprehensiveExample() {
           </pre>
         </div>
         <div className="rounded-lg border p-3">
-          <div className="mb-2 text-xs font-medium text-muted-foreground">Event Log</div>
+          <div className="text-muted-foreground mb-2 text-xs font-medium">Event Log</div>
           <div className="max-h-[200px] overflow-auto text-xs">
             {eventLog.length === 0 ? (
               <span className="text-muted-foreground">No events yet — try interacting above</span>
             ) : (
               eventLog.map((entry, i) => (
-                <div key={i} className="border-b border-border/50 py-0.5">
+                <div key={i} className="border-border/50 border-b py-0.5">
                   {entry}
                 </div>
               ))
@@ -418,9 +428,7 @@ function CallbackExample() {
           minHeight={48}
         />
       </div>
-      {lastCallback && (
-        <div className="text-xs text-muted-foreground">{lastCallback}</div>
-      )}
+      {lastCallback && <div className="text-muted-foreground text-xs">{lastCallback}</div>}
     </div>
   )
 }
@@ -471,7 +479,7 @@ function CopyPasteExample() {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div className="flex flex-col gap-1">
-        <div className="text-xs text-muted-foreground">Source (select & copy)</div>
+        <div className="text-muted-foreground text-xs">Source (select & copy)</div>
         <div className="rounded-lg border p-4">
           <PromptArea
             value={sourceSegments}
@@ -483,7 +491,7 @@ function CopyPasteExample() {
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="text-xs text-muted-foreground">Target (paste here)</div>
+        <div className="text-muted-foreground text-xs">Target (paste here)</div>
         <div className="rounded-lg border p-4">
           <PromptArea
             value={targetSegments}
@@ -564,8 +572,7 @@ function AllOptionsExample() {
       resolveOnSpace: true,
       chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
       accessibilityLabel: 'tag',
-      onSearch: (query) =>
-        TAGS.filter((t) => t.label.toLowerCase().includes(query.toLowerCase())),
+      onSearch: (query) => TAGS.filter((t) => t.label.toLowerCase().includes(query.toLowerCase())),
       onSelect: (s) => {
         log(`# onSelect → ${s.label}`)
         return s.label
@@ -668,19 +675,19 @@ function AllOptionsExample() {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => promptRef.current?.focus()}>
           focus()
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => promptRef.current?.blur()}>
           blur()
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() =>
             promptRef.current?.insertChip({
               trigger: '@',
@@ -692,13 +699,13 @@ function AllOptionsExample() {
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => log(`getPlainText() → "${promptRef.current?.getPlainText()}"`)}>
           getPlainText()
         </button>
         <button
           type="button"
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-accent"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
           onClick={() => {
             promptRef.current?.clear()
             setSegments([])
@@ -711,7 +718,7 @@ function AllOptionsExample() {
       {/* Live state & event log */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border p-3">
-          <div className="mb-2 text-xs font-medium text-muted-foreground">
+          <div className="text-muted-foreground mb-2 text-xs font-medium">
             Segments ({segments.length})
           </div>
           <pre className="max-h-[200px] overflow-auto text-xs">
@@ -719,13 +726,13 @@ function AllOptionsExample() {
           </pre>
         </div>
         <div className="rounded-lg border p-3">
-          <div className="mb-2 text-xs font-medium text-muted-foreground">Event Log</div>
+          <div className="text-muted-foreground mb-2 text-xs font-medium">Event Log</div>
           <div className="max-h-[200px] overflow-auto text-xs">
             {eventLog.length === 0 ? (
               <span className="text-muted-foreground">Interact to see events…</span>
             ) : (
               eventLog.map((entry, i) => (
-                <div key={i} className="border-b border-border/50 py-0.5">
+                <div key={i} className="border-border/50 border-b py-0.5">
                   {entry}
                 </div>
               ))
@@ -770,16 +777,13 @@ function ActionBarFullExample() {
     setSegments([])
   }, [segments])
 
-  const insertTrigger = useCallback(
-    (char: string) => {
-      promptRef.current?.focus()
-      // Uses deprecated execCommand as PromptAreaHandle does not yet expose insertText
-      requestAnimationFrame(() => {
-        document.execCommand('insertText', false, char)
-      })
-    },
-    [],
-  )
+  const insertTrigger = useCallback((char: string) => {
+    promptRef.current?.focus()
+    // Uses deprecated execCommand as PromptAreaHandle does not yet expose insertText
+    requestAnimationFrame(() => {
+      document.execCommand('insertText', false, char)
+    })
+  }, [])
 
   return (
     <div className="flex flex-col gap-2">
@@ -804,25 +808,22 @@ function ActionBarFullExample() {
                   type="button"
                   className={ICON_BUTTON_CLASS}
                   aria-label="Attach"
-                  onClick={() => setMenuOpen((v) => !v)}
-                >
+                  onClick={() => setMenuOpen((v) => !v)}>
                   <PlusCircle className="size-4" />
                 </button>
                 {menuOpen && (
-                  <div className="absolute left-0 top-full z-10 mt-1 flex w-max flex-col rounded-md border bg-popover p-1 shadow-md">
+                  <div className="bg-popover absolute top-full left-0 z-10 mt-1 flex w-max flex-col rounded-md border p-1 shadow-md">
                     <button
                       type="button"
                       className={MENU_ITEM_CLASS}
-                      onClick={() => setMenuOpen(false)}
-                    >
+                      onClick={() => setMenuOpen(false)}>
                       <Upload className="size-4" />
                       Upload file
                     </button>
                     <button
                       type="button"
                       className={MENU_ITEM_CLASS}
-                      onClick={() => setMenuOpen(false)}
-                    >
+                      onClick={() => setMenuOpen(false)}>
                       <ImageIcon className="size-4" />
                       Upload image
                     </button>
@@ -833,8 +834,7 @@ function ActionBarFullExample() {
                 type="button"
                 className={ICON_BUTTON_CLASS}
                 aria-label="Mention"
-                onClick={() => insertTrigger('@')}
-              >
+                onClick={() => insertTrigger('@')}>
                 <AtSign className="size-4" />
               </button>
               <button
@@ -851,16 +851,14 @@ function ActionBarFullExample() {
                     }
                     document.execCommand('insertText', false, '/')
                   })
-                }}
-              >
+                }}>
                 <SquareSlash className="size-4" />
               </button>
               <button
                 type="button"
                 className={ICON_BUTTON_CLASS}
                 aria-label="Tags"
-                onClick={() => insertTrigger('#')}
-              >
+                onClick={() => insertTrigger('#')}>
                 <Hash className="size-4" />
               </button>
             </>
@@ -875,15 +873,10 @@ function ActionBarFullExample() {
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
                 aria-label="Toggle markdown"
-                onClick={() => setMarkdownEnabled((v) => !v)}
-              >
+                onClick={() => setMarkdownEnabled((v) => !v)}>
                 {markdownEnabled ? <Code className="size-4" /> : <Type className="size-4" />}
               </button>
-              <button
-                type="button"
-                className={ICON_BUTTON_CLASS}
-                aria-label="Voice input"
-              >
+              <button type="button" className={ICON_BUTTON_CLASS} aria-label="Voice input">
                 <Mic className="size-4" />
               </button>
               <button
@@ -891,8 +884,7 @@ function ActionBarFullExample() {
                 className={SEND_BUTTON_CLASS}
                 aria-label="Send message"
                 disabled={isEmpty}
-                onClick={handleSubmit}
-              >
+                onClick={handleSubmit}>
                 <ArrowUp className="size-4" />
               </button>
             </>
@@ -900,8 +892,8 @@ function ActionBarFullExample() {
         />
       </div>
       {submitted && (
-        <div className="rounded-lg border bg-muted/50 p-3">
-          <div className="mb-1 text-xs font-medium text-muted-foreground">Submitted:</div>
+        <div className="bg-muted/50 rounded-lg border p-3">
+          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
           <div className="text-sm">{submitted}</div>
         </div>
       )}
@@ -938,8 +930,7 @@ function ActionBarMinimalExample() {
             className={SEND_BUTTON_CLASS}
             aria-label="Send message"
             disabled={isEmpty}
-            onClick={handleSubmit}
-          >
+            onClick={handleSubmit}>
             <ArrowUp className="size-4" />
           </button>
         }
@@ -949,9 +940,7 @@ function ActionBarMinimalExample() {
 }
 
 function ActionBarDisabledExample() {
-  const [segments] = useState<Segment[]>([
-    { type: 'text', text: 'This input is disabled...' },
-  ])
+  const [segments] = useState<Segment[]>([{ type: 'text', text: 'This input is disabled...' }])
 
   return (
     <div className="rounded-lg border p-4">
@@ -966,10 +955,10 @@ function ActionBarDisabledExample() {
         disabled
         left={
           <>
-            <button type="button" className="rounded-md p-1.5 text-muted-foreground">
+            <button type="button" className="text-muted-foreground rounded-md p-1.5">
               <PlusCircle className="size-4" />
             </button>
-            <button type="button" className="rounded-md p-1.5 text-muted-foreground">
+            <button type="button" className="text-muted-foreground rounded-md p-1.5">
               <AtSign className="size-4" />
             </button>
           </>
@@ -977,9 +966,8 @@ function ActionBarDisabledExample() {
         right={
           <button
             type="button"
-            className="rounded-lg bg-primary p-1.5 text-primary-foreground"
-            disabled
-          >
+            className="bg-primary text-primary-foreground rounded-lg p-1.5"
+            disabled>
             <ArrowUp className="size-4" />
           </button>
         }
@@ -1003,13 +991,13 @@ export default function Home() {
             href="https://github.com/team-gpt/prompt-area"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground transition-colors hover:text-foreground">
+            className="text-muted-foreground hover:text-foreground transition-colors">
             <Github className="size-6" />
           </a>
         </div>
         <p className="text-muted-foreground">
-          A contentEditable rich text input with trigger-based chips, inline markdown,
-          undo/redo, and list auto-formatting. Built as a{' '}
+          A contentEditable rich text input with trigger-based chips, inline markdown, undo/redo,
+          and list auto-formatting. Built as a{' '}
           <a
             href="https://ui.shadcn.com/docs/registry"
             target="_blank"
@@ -1019,7 +1007,7 @@ export default function Home() {
           </a>{' '}
           component.
         </p>
-        <div className="rounded-md bg-muted px-3 py-2 font-mono text-sm">
+        <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
           npx shadcn@latest add https://prompt-area.vercel.app/r/prompt-area.json
         </div>
       </div>
@@ -1027,14 +1015,13 @@ export default function Home() {
       {/* Comprehensive example – all capabilities */}
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">Try It</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           All capabilities in one editor. <code>/</code> commands (start of line, inline style),{' '}
           <code>@</code> mentions (pill style), <code>#</code> tags (auto-resolve on space),{' '}
-          <code>!</code> callback mode. <strong>Cmd+B</strong> bold, <strong>Cmd+I</strong>{' '}
-          italic, <strong>Ctrl+Z</strong>/<strong>Ctrl+Shift+Z</strong> undo/redo. Type{' '}
-          <code>- </code> for lists, paste a URL for auto-linking, or use the buttons below to
-          call the imperative API. <strong>Enter</strong> to submit, <strong>Escape</strong> to
-          dismiss.
+          <code>!</code> callback mode. <strong>Cmd+B</strong> bold, <strong>Cmd+I</strong> italic,{' '}
+          <strong>Ctrl+Z</strong>/<strong>Ctrl+Shift+Z</strong> undo/redo. Type <code>- </code> for
+          lists, paste a URL for auto-linking, or use the buttons below to call the imperative API.{' '}
+          <strong>Enter</strong> to submit, <strong>Escape</strong> to dismiss.
         </p>
         <ComprehensiveExample />
       </div>
@@ -1042,18 +1029,18 @@ export default function Home() {
       {/* All Options */}
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">All Options</h2>
-        <p className="text-sm text-muted-foreground">
-          Every prop and option in a single example. Toggles for{' '}
-          <code>disabled</code>, <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger
-          types (<code>/</code> start-of-line dropdown, <code>@</code> pill dropdown,{' '}
-          <code>#</code> auto-resolve on space, <code>!</code> callback mode). Every callback
-          (<code>onSubmit</code>, <code>onEscape</code>, <code>onChipClick</code>,{' '}
-          <code>onChipAdd</code>, <code>onChipDelete</code>, <code>onLinkClick</code>,{' '}
-          <code>onPaste</code>, <code>onUndo</code>, <code>onRedo</code>) logs to the event panel.
-          Imperative handle methods (<code>focus</code>, <code>blur</code>,{' '}
-          <code>insertChip</code>, <code>getPlainText</code>, <code>clear</code>) are wired to
-          buttons. Also sets <code>minHeight</code>, <code>maxHeight</code>,{' '}
-          <code>className</code>, <code>aria-label</code>, and <code>data-test-id</code>.
+        <p className="text-muted-foreground text-sm">
+          Every prop and option in a single example. Toggles for <code>disabled</code>,{' '}
+          <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>{' '}
+          start-of-line dropdown, <code>@</code> pill dropdown, <code>#</code> auto-resolve on
+          space, <code>!</code> callback mode). Every callback (<code>onSubmit</code>,{' '}
+          <code>onEscape</code>, <code>onChipClick</code>, <code>onChipAdd</code>,{' '}
+          <code>onChipDelete</code>, <code>onLinkClick</code>, <code>onPaste</code>,{' '}
+          <code>onUndo</code>, <code>onRedo</code>) logs to the event panel. Imperative handle
+          methods (<code>focus</code>, <code>blur</code>, <code>insertChip</code>,{' '}
+          <code>getPlainText</code>, <code>clear</code>) are wired to buttons. Also sets{' '}
+          <code>minHeight</code>, <code>maxHeight</code>, <code>className</code>,{' '}
+          <code>aria-label</code>, and <code>data-test-id</code>.
         </p>
         <AllOptionsExample />
       </div>
@@ -1064,15 +1051,13 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Basic (no triggers)</h3>
-          <p className="text-xs text-muted-foreground">
-            Simple text input with Enter to submit.
-          </p>
+          <p className="text-muted-foreground text-xs">Simple text input with Enter to submit.</p>
           <BasicExample />
         </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">@Mentions</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Type <code>@</code> followed by a name to search users.
           </p>
           <MentionsExample />
@@ -1080,7 +1065,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">/Commands (start of line)</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Type <code>/</code> at the beginning of a line for commands.
           </p>
           <CommandsExample />
@@ -1088,7 +1073,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">#Tags (auto-resolve on space)</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Type <code>#tag</code> and press space to auto-create a chip. Backspace reverts it.
           </p>
           <TagsExample />
@@ -1096,7 +1081,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Callback mode (!)</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Type <code>!</code> to fire a callback that programmatically inserts a chip.
           </p>
           <CallbackExample />
@@ -1104,21 +1089,20 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Markdown Formatting</h3>
-          <p className="text-xs text-muted-foreground">
-            Wrap text in <code>**bold**</code>, <code>*italic*</code>, or{' '}
-            <code>***both***</code> to see inline styling. Use{' '}
-            <strong>Cmd+B</strong> / <strong>Cmd+I</strong> shortcuts. Start a line with{' '}
-            <code>- </code> or <code>* </code> for auto-formatted lists (Tab to indent).
+          <p className="text-muted-foreground text-xs">
+            Wrap text in <code>**bold**</code>, <code>*italic*</code>, or <code>***both***</code> to
+            see inline styling. Use <strong>Cmd+B</strong> / <strong>Cmd+I</strong> shortcuts. Start
+            a line with <code>- </code> or <code>* </code> for auto-formatted lists (Tab to indent).
           </p>
           <MarkdownExample />
         </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Copy & Paste</h3>
-          <p className="text-xs text-muted-foreground">
-            Select content with chips in the source editor and <strong>Cmd+C</strong> to copy,
-            then <strong>Cmd+V</strong> in the target to paste — chips are preserved. Pasting
-            plain text like <code>@alice #bug</code> from outside auto-resolves matching triggers.
+          <p className="text-muted-foreground text-xs">
+            Select content with chips in the source editor and <strong>Cmd+C</strong> to copy, then{' '}
+            <strong>Cmd+V</strong> in the target to paste — chips are preserved. Pasting plain text
+            like <code>@alice #bug</code> from outside auto-resolves matching triggers.
           </p>
           <CopyPasteExample />
         </div>
@@ -1132,14 +1116,14 @@ export default function Home() {
             A horizontal toolbar with left and right slots. Pairs with PromptArea for a complete
             chat input experience. Independently installable.
           </p>
-          <div className="rounded-md bg-muted px-3 py-2 font-mono text-sm">
+          <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
             npx shadcn@latest add https://prompt-area.vercel.app/r/action-bar.json
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Full-Featured</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Left slot with attach menu (<code>+</code>), <code>@</code> mention, <code>/</code>{' '}
             command, and <code>#</code> tag buttons. Right slot with markdown toggle, microphone,
             and send button. The send button submits the message just like pressing Enter.
@@ -1149,7 +1133,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Minimal</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Just a send button on the right. The simplest composition.
           </p>
           <ActionBarMinimalExample />
@@ -1157,7 +1141,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Disabled</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Both PromptArea and ActionBar in disabled state.
           </p>
           <ActionBarDisabledExample />

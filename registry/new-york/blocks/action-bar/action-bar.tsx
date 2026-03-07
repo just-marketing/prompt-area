@@ -56,18 +56,9 @@ export const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
           'flex items-center justify-between gap-2 pt-2',
           disabled && 'pointer-events-none opacity-50',
           className,
-        )}
-      >
-        {left && (
-          <div className="flex items-center gap-1">
-            {left}
-          </div>
-        )}
-        {right && (
-          <div className="ml-auto flex items-center gap-1">
-            {right}
-          </div>
-        )}
+        )}>
+        {left && <div className="flex items-center gap-1">{left}</div>}
+        {right && <div className="ml-auto flex items-center gap-1">{right}</div>}
       </div>
     )
   },
