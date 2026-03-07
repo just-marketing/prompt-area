@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { PromptArea } from '../prompt-area'
-import type { PromptAreaHandle, Segment } from '../types'
+import type { PromptAreaHandle, PromptAreaImage, Segment } from '../types'
 
 describe('PromptArea', () => {
   const defaultProps = {
@@ -66,5 +67,84 @@ describe('PromptArea', () => {
   it('sets data-test-id', () => {
     render(<PromptArea {...defaultProps} data-test-id="prompt-input" />)
     expect(screen.getByRole('textbox')).toHaveAttribute('data-test-id', 'prompt-input')
+  })
+
+  describe('image support', () => {
+    const sampleImages: PromptAreaImage[] = [
+      { id: '1', url: 'https://example.com/img1.png', alt: 'First' },
+      { id: '2', url: 'https://example.com/img2.png', alt: 'Second' },
+    ]
+
+    it('renders images above the editor by default', () => {
+      const { container } = render(<PromptArea {...defaultProps} images={sampleImages} />)
+      const imageList = screen.getByRole('list', { name: 'Attached images' })
+      const editor = screen.getByRole('textbox')
+      // Image list should come before the editor wrapper in DOM order
+      const children = Array.from(container.firstElementChild!.children)
+      const editorWrapper = editor.closest('.prompt-area-container > div:not([role="list"])')!
+      expect(children.indexOf(imageList)).toBeLessThan(children.indexOf(editorWrapper))
+    })
+
+    it('renders images below the editor when imagePosition is "below"', () => {
+      const { container } = render(
+        <PromptArea {...defaultProps} images={sampleImages} imagePosition="below" />,
+      )
+      const imageList = screen.getByRole('list', { name: 'Attached images' })
+      const editor = screen.getByRole('textbox')
+      const children = Array.from(container.firstElementChild!.children)
+      const editorWrapper = editor.closest('.prompt-area-container > div:not([role="list"])')!
+      expect(children.indexOf(imageList)).toBeGreaterThan(children.indexOf(editorWrapper))
+    })
+
+    it('does not render image strip when images is empty', () => {
+      render(<PromptArea {...defaultProps} images={[]} />)
+      expect(screen.queryByRole('list', { name: 'Attached images' })).not.toBeInTheDocument()
+    })
+
+    it('does not render image strip when images prop is omitted', () => {
+      render(<PromptArea {...defaultProps} />)
+      expect(screen.queryByRole('list', { name: 'Attached images' })).not.toBeInTheDocument()
+    })
+
+    it('calls onImageRemove when clicking X on an image', async () => {
+      const user = userEvent.setup()
+      const onImageRemove = vi.fn()
+      render(<PromptArea {...defaultProps} images={sampleImages} onImageRemove={onImageRemove} />)
+      const removeButtons = screen.getAllByRole('button', { name: /remove/i })
+      await user.click(removeButtons[0])
+      expect(onImageRemove).toHaveBeenCalledWith(sampleImages[0])
+    })
+
+    it('calls onImagePaste when pasting an image file', () => {
+      const onImagePaste = vi.fn()
+      render(<PromptArea {...defaultProps} onImagePaste={onImagePaste} />)
+      const editor = screen.getByRole('textbox')
+
+      const file = new File(['pixels'], 'screenshot.png', { type: 'image/png' })
+      const clipboardData = {
+        files: [file],
+        getData: () => '',
+      }
+
+      fireEvent.paste(editor, { clipboardData })
+      expect(onImagePaste).toHaveBeenCalledWith(file)
+    })
+
+    it('does not call onChange when pasting an image file', () => {
+      const onChange = vi.fn()
+      const onImagePaste = vi.fn()
+      render(<PromptArea value={[]} onChange={onChange} onImagePaste={onImagePaste} />)
+      const editor = screen.getByRole('textbox')
+
+      const file = new File(['pixels'], 'screenshot.png', { type: 'image/png' })
+      const clipboardData = {
+        files: [file],
+        getData: () => '',
+      }
+
+      fireEvent.paste(editor, { clipboardData })
+      expect(onImagePaste).toHaveBeenCalled()
+      expect(onChange).not.toHaveBeenCalled()
+    })
   })
 })

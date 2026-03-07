@@ -142,6 +142,21 @@ export type ActiveTrigger = {
 }
 
 /**
+ * An image attachment displayed in the prompt area.
+ * State is managed externally by the parent component.
+ */
+export type PromptAreaImage = {
+  /** Unique identifier for this image */
+  id: string
+  /** URL to display (CDN URL or temporary blob URL for preview) */
+  url: string
+  /** Optional alt text for accessibility */
+  alt?: string
+  /** When true, shows a loading indicator over the thumbnail */
+  loading?: boolean
+}
+
+/**
  * Props for the PromptArea component.
  */
 export type PromptAreaProps = {
@@ -189,6 +204,16 @@ export type PromptAreaProps = {
   'aria-label'?: string
   /** data-test-id for e2e testing */
   'data-test-id'?: string
+  /** Array of image attachments to display */
+  images?: PromptAreaImage[]
+  /** Where to render the image strip relative to the text area. Defaults to 'above'. */
+  imagePosition?: 'above' | 'below'
+  /** Called when the user pastes an image from clipboard. Receives the File object. */
+  onImagePaste?: (file: File) => void
+  /** Called when the user clicks the remove button on an image */
+  onImageRemove?: (image: PromptAreaImage) => void
+  /** Called when the user clicks an image thumbnail */
+  onImageClick?: (image: PromptAreaImage) => void
 }
 
 /**

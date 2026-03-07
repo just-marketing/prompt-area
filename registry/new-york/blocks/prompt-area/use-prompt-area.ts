@@ -63,6 +63,7 @@ type UsePromptAreaOptions = {
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
+  onImagePaste?: (file: File) => void
   markdown?: boolean
 }
 
@@ -111,6 +112,7 @@ export function usePromptArea({
   onPaste,
   onUndo,
   onRedo,
+  onImagePaste,
   markdown: markdownEnabled = true,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -168,6 +170,7 @@ export function usePromptArea({
           })
         }
       } else if (isBRElement(node)) {
+        if (node.dataset.sentinel) continue // skip sentinel <br>
         segments.push({ type: 'text', text: '\n' })
       } else if (isHTMLElement(node)) {
         // Unknown element — extract text content
@@ -239,6 +242,13 @@ export function usePromptArea({
           chip.setAttribute('tabindex', '-1')
           editor.appendChild(chip)
         }
+      }
+
+      // Append sentinel <br> so trailing newlines are visible in contentEditable
+      if (editor.lastChild && isBRElement(editor.lastChild)) {
+        const sentinel = document.createElement('br')
+        sentinel.dataset.sentinel = 'true'
+        editor.appendChild(sentinel)
       }
 
       // Decorate URLs and markdown formatting in text nodes
@@ -369,6 +379,7 @@ export function usePromptArea({
     onUndo,
     onRedo,
     onChipAdd,
+    onImagePaste,
   })
 
   // -----------------------------------------------------------------------
@@ -1235,6 +1246,7 @@ function createRangeAtOffset(editor: HTMLElement, targetOffset: number): Range |
       }
       remaining -= chipLen
     } else if (isBRElement(child)) {
+      if (child.dataset.sentinel) continue // skip sentinel <br>
       if (remaining <= 1) {
         const range = document.createRange()
         range.setStartAfter(child)
@@ -1282,6 +1294,7 @@ function setCursorAtOffset(editor: HTMLElement, targetOffset: number): void {
       }
       remaining -= chipLen
     } else if (isBRElement(child)) {
+      if (child.dataset.sentinel) continue // skip sentinel <br>
       if (remaining <= 1) {
         const range = document.createRange()
         range.setStartAfter(child)
@@ -1315,6 +1328,7 @@ function getTextLengthInRange(range: Range): number {
       const display = node.dataset.chipDisplay ?? node.textContent ?? ''
       length += trigger.length + display.length
     } else if (isHTMLElement(node) && node.tagName === 'BR') {
+      if (node.dataset.sentinel) return // skip sentinel <br>
       length += 1
     } else if (isHTMLElement(node)) {
       node.childNodes.forEach(walk)
@@ -1402,6 +1416,7 @@ function findDOMPosition(
       }
       remaining -= chipLen
     } else if (isBRElement(child)) {
+      if (child.dataset.sentinel) continue // skip sentinel <br>
       if (remaining <= 1) {
         return { node: container, offset: i + 1 }
       }
