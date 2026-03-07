@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 // ---------------------------------------------------------------------------
 // Nav config
@@ -40,6 +41,11 @@ const NAV_ITEMS: NavItem[] = [
       { id: 'action-bar-minimal', label: 'Minimal' },
       { id: 'action-bar-disabled', label: 'Disabled' },
     ],
+  },
+  {
+    id: 'dark-theme',
+    label: 'Dark Theme',
+    children: [{ id: 'dark-theme-preview', label: 'Preview' }],
   },
 ]
 
@@ -383,6 +389,10 @@ function NavSidebar() {
           ),
         )}
       </nav>
+
+      <div className="border-sidebar-border border-t px-4 py-3">
+        <ThemeToggle />
+      </div>
     </aside>
   )
 }

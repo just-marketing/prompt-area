@@ -1127,6 +1127,54 @@ function ActionBarDisabledExample() {
 }
 
 // ---------------------------------------------------------------------------
+// Dark theme preview
+// ---------------------------------------------------------------------------
+
+function DarkThemePreview() {
+  const [lightSegments, setLightSegments] = useState<Segment[]>([])
+  const [darkSegments, setDarkSegments] = useState<Segment[]>([])
+
+  const triggers: TriggerConfig[] = [
+    {
+      char: '@',
+      position: 'any',
+      mode: 'dropdown',
+      chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+    },
+  ]
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="rounded-lg border p-4">
+        <p className="text-muted-foreground mb-2 text-xs font-medium">Light</p>
+        <div className="rounded-lg border bg-white p-3 text-[oklch(0.145_0_0)]">
+          <PromptArea
+            value={lightSegments}
+            onChange={setLightSegments}
+            triggers={triggers}
+            placeholder="Type @ to mention..."
+            minHeight={48}
+          />
+        </div>
+      </div>
+      <div className="rounded-lg border p-4">
+        <p className="text-muted-foreground mb-2 text-xs font-medium">Dark</p>
+        <div className="dark rounded-lg border border-[oklch(1_0_0/10%)] bg-[oklch(0.145_0_0)] p-3 text-[oklch(0.985_0_0)]">
+          <PromptArea
+            value={darkSegments}
+            onChange={setDarkSegments}
+            triggers={triggers}
+            placeholder="Type @ to mention..."
+            minHeight={48}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -1314,6 +1362,25 @@ export default function Home() {
             Both PromptArea and ActionBar in disabled state.
           </p>
           <ActionBarDisabledExample />
+        </div>
+      </div>
+
+      {/* Dark Theme */}
+      <div className="flex flex-col gap-6">
+        <div id="dark-theme" className="flex scroll-mt-16 flex-col gap-3">
+          <h2 className="text-xl font-semibold">Dark Theme</h2>
+          <p className="text-muted-foreground">
+            Toggle between light, dark, and system themes using the switch in the sidebar. All
+            components adapt automatically via CSS variables.
+          </p>
+        </div>
+
+        <div id="dark-theme-preview" className="flex scroll-mt-16 flex-col gap-2">
+          <h3 className="text-sm font-medium">Preview</h3>
+          <p className="text-muted-foreground text-xs">
+            A side-by-side comparison of the prompt area in light and dark themes.
+          </p>
+          <DarkThemePreview />
         </div>
       </div>
     </div>
