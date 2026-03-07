@@ -136,7 +136,6 @@ export function resolveChip(
   activeTrigger: ActiveTrigger,
   chip: { value: string; displayText: string; data?: unknown; autoResolved?: boolean },
 ): { segments: Segment[]; cursorOffset: number } {
-  const plainText = segmentsToPlainText(segments)
   const triggerStart = activeTrigger.startOffset
   const triggerEnd = triggerStart + 1 + activeTrigger.query.length // +1 for trigger char
 
@@ -544,9 +543,6 @@ export function toggleMarkdownWrap(
 // ---------------------------------------------------------------------------
 // List auto-formatting
 // ---------------------------------------------------------------------------
-
-/** Characters that indicate a bullet list item */
-const BULLET_CHARS = ['\u2022', '-', '*'] as const
 
 /**
  * Information about a list line at a given cursor position.

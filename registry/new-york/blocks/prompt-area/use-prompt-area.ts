@@ -341,7 +341,15 @@ export function usePromptArea({
       setActiveTrigger(null)
       resetSearch()
     }
-  }, [triggers, readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, resetSearch])
+  }, [
+    triggers,
+    readSegmentsFromDOM,
+    onChange,
+    renderSegmentsToDOM,
+    onChipAdd,
+    resetSearch,
+    runSearch,
+  ])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -487,8 +495,7 @@ export function usePromptArea({
     runTriggerDetection,
     renderSegmentsToDOM,
     markdownEnabled,
-    events.isComposing,
-    events.pushUndo,
+    events,
   ])
 
   // -----------------------------------------------------------------------
@@ -558,98 +565,6 @@ export function usePromptArea({
     },
     [onChipClick, onLinkClick],
   )
-
-  // -----------------------------------------------------------------------
-  // Chip backspace (delete chip behind cursor as whole unit)
-  // -----------------------------------------------------------------------
-
-  const handleChipBackspace = useCallback((): boolean => {
-    const editor = editorRef.current
-    if (!editor) return false
-
-    const range = getSelectionRange()
-    if (!range || !range.collapsed) return false
-
-    const node = range.startContainer
-    const offset = range.startOffset
-
-    // Case 1: cursor is at the editor level (between child nodes)
-    if (node === editor && offset > 0) {
-      const prevChild = editor.childNodes[offset - 1]
-      if (prevChild && isChipElement(prevChild)) {
-        if (getChipAutoResolved(prevChild)) {
-          return revertChipNodeToText(editor, prevChild)
-        }
-        return removeChipNodeFromDOM(editor, prevChild)
-      }
-    }
-
-    // Case 2: cursor is at start of a text node, check previous sibling
-    if (node.nodeType === Node.TEXT_NODE && offset === 0) {
-      const directChild = getDirectChildContaining(editor, node)
-      if (!directChild) return false
-
-      let prevSibling = directChild.previousSibling
-      while (
-        prevSibling &&
-        prevSibling.nodeType === Node.TEXT_NODE &&
-        prevSibling.textContent === ''
-      ) {
-        prevSibling = prevSibling.previousSibling
-      }
-      if (prevSibling && isChipElement(prevSibling)) {
-        if (getChipAutoResolved(prevSibling)) {
-          return revertChipNodeToText(editor, prevSibling)
-        }
-        return removeChipNodeFromDOM(editor, prevSibling)
-      }
-    }
-
-    return false
-  }, [readSegmentsFromDOM, onChange, renderSegmentsToDOM])
-
-  // -----------------------------------------------------------------------
-  // Chip forward delete (delete chip in front of cursor)
-  // -----------------------------------------------------------------------
-
-  const handleChipForwardDelete = useCallback((): boolean => {
-    const editor = editorRef.current
-    if (!editor) return false
-
-    const range = getSelectionRange()
-    if (!range || !range.collapsed) return false
-
-    const node = range.startContainer
-    const offset = range.startOffset
-
-    // Case 1: cursor at the editor level
-    if (node === editor && offset < editor.childNodes.length) {
-      const nextChild = editor.childNodes[offset]
-      if (nextChild && isChipElement(nextChild)) {
-        return removeChipNodeFromDOM(editor, nextChild)
-      }
-    }
-
-    // Case 2: cursor at end of a text node, check next sibling
-    if (node.nodeType === Node.TEXT_NODE && offset === (node.textContent ?? '').length) {
-      const directChild = getDirectChildContaining(editor, node)
-      if (!directChild) return false
-
-      let nextSibling = directChild.nextSibling
-      while (
-        nextSibling &&
-        nextSibling.nodeType === Node.TEXT_NODE &&
-        nextSibling.textContent === ''
-      ) {
-        nextSibling = nextSibling.nextSibling
-      }
-      if (nextSibling && isChipElement(nextSibling)) {
-        return removeChipNodeFromDOM(editor, nextSibling)
-      }
-    }
-
-    return false
-  }, [readSegmentsFromDOM, onChange, renderSegmentsToDOM])
 
   // -----------------------------------------------------------------------
   // Remove a chip node from DOM and sync model
@@ -741,6 +656,98 @@ export function usePromptArea({
   )
 
   // -----------------------------------------------------------------------
+  // Chip backspace (delete chip behind cursor as whole unit)
+  // -----------------------------------------------------------------------
+
+  const handleChipBackspace = useCallback((): boolean => {
+    const editor = editorRef.current
+    if (!editor) return false
+
+    const range = getSelectionRange()
+    if (!range || !range.collapsed) return false
+
+    const node = range.startContainer
+    const offset = range.startOffset
+
+    // Case 1: cursor is at the editor level (between child nodes)
+    if (node === editor && offset > 0) {
+      const prevChild = editor.childNodes[offset - 1]
+      if (prevChild && isChipElement(prevChild)) {
+        if (getChipAutoResolved(prevChild)) {
+          return revertChipNodeToText(editor, prevChild)
+        }
+        return removeChipNodeFromDOM(editor, prevChild)
+      }
+    }
+
+    // Case 2: cursor is at start of a text node, check previous sibling
+    if (node.nodeType === Node.TEXT_NODE && offset === 0) {
+      const directChild = getDirectChildContaining(editor, node)
+      if (!directChild) return false
+
+      let prevSibling = directChild.previousSibling
+      while (
+        prevSibling &&
+        prevSibling.nodeType === Node.TEXT_NODE &&
+        prevSibling.textContent === ''
+      ) {
+        prevSibling = prevSibling.previousSibling
+      }
+      if (prevSibling && isChipElement(prevSibling)) {
+        if (getChipAutoResolved(prevSibling)) {
+          return revertChipNodeToText(editor, prevSibling)
+        }
+        return removeChipNodeFromDOM(editor, prevSibling)
+      }
+    }
+
+    return false
+  }, [removeChipNodeFromDOM, revertChipNodeToText])
+
+  // -----------------------------------------------------------------------
+  // Chip forward delete (delete chip in front of cursor)
+  // -----------------------------------------------------------------------
+
+  const handleChipForwardDelete = useCallback((): boolean => {
+    const editor = editorRef.current
+    if (!editor) return false
+
+    const range = getSelectionRange()
+    if (!range || !range.collapsed) return false
+
+    const node = range.startContainer
+    const offset = range.startOffset
+
+    // Case 1: cursor at the editor level
+    if (node === editor && offset < editor.childNodes.length) {
+      const nextChild = editor.childNodes[offset]
+      if (nextChild && isChipElement(nextChild)) {
+        return removeChipNodeFromDOM(editor, nextChild)
+      }
+    }
+
+    // Case 2: cursor at end of a text node, check next sibling
+    if (node.nodeType === Node.TEXT_NODE && offset === (node.textContent ?? '').length) {
+      const directChild = getDirectChildContaining(editor, node)
+      if (!directChild) return false
+
+      let nextSibling = directChild.nextSibling
+      while (
+        nextSibling &&
+        nextSibling.nodeType === Node.TEXT_NODE &&
+        nextSibling.textContent === ''
+      ) {
+        nextSibling = nextSibling.nextSibling
+      }
+      if (nextSibling && isChipElement(nextSibling)) {
+        return removeChipNodeFromDOM(editor, nextSibling)
+      }
+    }
+
+    return false
+  }, [removeChipNodeFromDOM])
+
+  // -----------------------------------------------------------------------
   // Auto-resolve active trigger on space
   // -----------------------------------------------------------------------
 
@@ -783,6 +790,51 @@ export function usePromptArea({
     },
     [readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
   )
+
+  // -----------------------------------------------------------------------
+  // Select a suggestion from the dropdown
+  // -----------------------------------------------------------------------
+
+  const selectSuggestionInternal = useCallback(
+    (suggestion: TriggerSuggestion) => {
+      if (!activeTrigger) return
+
+      const segments = readSegmentsFromDOM()
+      const displayText = activeTrigger.config.onSelect?.(suggestion) ?? suggestion.label
+
+      const chipData = {
+        value: suggestion.value,
+        displayText: displayText || suggestion.label,
+        data: suggestion.data,
+      }
+      const result = resolveChip(segments, activeTrigger, chipData)
+
+      onChange(result.segments)
+      renderSegmentsToDOM(result.segments)
+
+      onChipAdd?.({
+        type: 'chip',
+        trigger: activeTrigger.config.char,
+        ...chipData,
+      })
+
+      // Position cursor after the chip + trailing space
+      const editor = editorRef.current
+      if (editor) {
+        setCursorAtOffset(editor, result.cursorOffset)
+      }
+
+      dismissTrigger()
+
+      // Refocus editor after popover interaction
+      setTimeout(() => {
+        editorRef.current?.focus()
+      }, 0)
+    },
+    [activeTrigger, readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
+  )
+
+  const selectSuggestion = selectSuggestionInternal
 
   // -----------------------------------------------------------------------
   // Handle key events
@@ -1016,55 +1068,10 @@ export function usePromptArea({
       handleChipForwardDelete,
       autoResolveActiveTrigger,
       runTriggerDetection,
-      events.handleKeyDownForUndoRedo,
-      events.pushUndo,
+      selectSuggestionInternal,
+      events,
     ],
   )
-
-  // -----------------------------------------------------------------------
-  // Select a suggestion from the dropdown
-  // -----------------------------------------------------------------------
-
-  const selectSuggestionInternal = useCallback(
-    (suggestion: TriggerSuggestion) => {
-      if (!activeTrigger) return
-
-      const segments = readSegmentsFromDOM()
-      const displayText = activeTrigger.config.onSelect?.(suggestion) ?? suggestion.label
-
-      const chipData = {
-        value: suggestion.value,
-        displayText: displayText || suggestion.label,
-        data: suggestion.data,
-      }
-      const result = resolveChip(segments, activeTrigger, chipData)
-
-      onChange(result.segments)
-      renderSegmentsToDOM(result.segments)
-
-      onChipAdd?.({
-        type: 'chip',
-        trigger: activeTrigger.config.char,
-        ...chipData,
-      })
-
-      // Position cursor after the chip + trailing space
-      const editor = editorRef.current
-      if (editor) {
-        setCursorAtOffset(editor, result.cursorOffset)
-      }
-
-      dismissTrigger()
-
-      // Refocus editor after popover interaction
-      setTimeout(() => {
-        editorRef.current?.focus()
-      }, 0)
-    },
-    [activeTrigger, readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
-  )
-
-  const selectSuggestion = selectSuggestionInternal
 
   // -----------------------------------------------------------------------
   // Imperative handle (memoized to avoid identity changes)
@@ -1097,7 +1104,7 @@ export function usePromptArea({
         undoBaseState.current = null
       },
     }),
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events.resetUndoHistory],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events],
   )
 
   // -----------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from 'react'
 import type { Segment, ChipSegment, TriggerConfig } from './types'
-import { segmentsToPlainText, resolveTriggersInSegments, segmentsEqual } from './prompt-area-engine'
+import { resolveTriggersInSegments } from './prompt-area-engine'
 import {
   isChipElement,
   isHTMLElement,
@@ -120,25 +120,6 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     undoState.current = { undoStack: [], redoStack: [] }
     prevSegments.current = []
   }, [])
-
-  // -----------------------------------------------------------------------
-  // Public method: record a snapshot for undo (called from main hook)
-  // -----------------------------------------------------------------------
-
-  /**
-   * Called by the main hook whenever onChange fires, to maintain the undo stack.
-   */
-  const recordSnapshot = useCallback(
-    (segments: Segment[]) => {
-      const prev = prevSegments.current
-      // Only record if segments actually changed (content comparison)
-      if (!segmentsEqual(prev, segments) && prev.length > 0) {
-        pushUndo(prev)
-      }
-      prevSegments.current = segments
-    },
-    [pushUndo],
-  )
 
   // -----------------------------------------------------------------------
   // Paste: strip HTML, insert plain text only
@@ -565,8 +546,6 @@ function insertSegmentsAtCursor(
   pastedSegments: Segment[],
   editor: HTMLElement,
 ): Segment[] {
-  const plainText = segmentsToPlainText(currentSegments)
-
   // Get cursor offset in the editor
   const range = getSelectionRange()
   if (!range) return [...currentSegments, ...pastedSegments]

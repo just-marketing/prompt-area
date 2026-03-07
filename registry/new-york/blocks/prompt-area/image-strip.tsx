@@ -25,6 +25,7 @@ export function ImageStrip({ images, onRemove, onClick, className }: ImageStripP
             onClick && 'cursor-pointer',
           )}
           onClick={() => onClick?.(image)}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- registry component used outside Next.js */}
           <img
             src={image.url}
             alt={image.alt ?? 'Attached image'}
@@ -36,7 +37,10 @@ export function ImageStrip({ images, onRemove, onClick, className }: ImageStripP
             </div>
           )}
           {onRemove && (
-            <RemoveButton onClick={() => onRemove(image)} label={`Remove ${image.alt ?? 'image'}`} />
+            <RemoveButton
+              onClick={() => onRemove(image)}
+              label={`Remove ${image.alt ?? 'image'}`}
+            />
           )}
         </div>
       ))}

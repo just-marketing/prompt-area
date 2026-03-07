@@ -290,7 +290,6 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
 
     const itemEl = itemRefs.current.get(activeId)
     if (!itemEl) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing DOM measurements
       setStyle((s) => ({ ...s, opacity: 0 }))
       return
     }
@@ -300,7 +299,6 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
     const pillHeight = 24
     const top = itemRect.top - navRect.top + (itemRect.height - pillHeight) / 2
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing DOM measurements
     setStyle({ opacity: 1, top })
   }, [activeId, itemRefs, navRef])
 
@@ -429,7 +427,6 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
     const mq = window.matchMedia('(min-width: 1024px)')
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initializing from browser API
     setIsDesktop(mq.matches)
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- initializing from browser API
     setIsOpen(mq.matches)
     const handler = (e: MediaQueryListEvent) => {
       setIsDesktop(e.matches)

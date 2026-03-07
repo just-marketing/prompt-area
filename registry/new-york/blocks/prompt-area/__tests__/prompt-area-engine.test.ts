@@ -329,11 +329,6 @@ describe('resolveChip', () => {
       { type: 'chip', trigger: '@', value: 'user-1', displayText: 'Alice' },
       { type: 'text', text: ' and @bob' },
     ]
-    const activeTrigger: ActiveTrigger = {
-      config: mentionTrigger,
-      startOffset: 5, // relative to the text segment's contribution to plain text
-      query: 'bob',
-    }
 
     // The plain text is "@Alice and @bob" - the trigger starts at offset 11
     // We need to reconsider - the activeTrigger.startOffset is relative to
