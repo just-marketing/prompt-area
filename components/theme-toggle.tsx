@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Theme = 'light' | 'dark' | 'system'
@@ -84,7 +84,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={label}
       title={label}
       className={cn(
-        'text-muted-foreground hover:text-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+        'text-muted-foreground hover:text-foreground rounded-md p-2 transition-colors',
         className,
       )}>
       {theme === 'dark' ? (
@@ -92,9 +92,8 @@ export function ThemeToggle({ className }: { className?: string }) {
       ) : theme === 'light' ? (
         <Sun className="size-4" />
       ) : (
-        <Sun className="size-4 opacity-50" />
+        <Monitor className="size-4" />
       )}
-      <span className="capitalize">{theme}</span>
     </button>
   )
 }
