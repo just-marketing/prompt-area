@@ -546,7 +546,7 @@ export function toggleMarkdownWrap(
 // ---------------------------------------------------------------------------
 
 /** Characters that indicate a bullet list item */
-const BULLET_CHARS = ['\u2022', '-', '*'] as const
+const BULLET_CHARS = ['\u25CF', '-', '*'] as const
 
 /**
  * Information about a list line at a given cursor position.
@@ -554,7 +554,7 @@ const BULLET_CHARS = ['\u2022', '-', '*'] as const
 export type ListContext = {
   /** Offset in plain text where the line begins */
   lineStart: number
-  /** The full prefix including indentation (e.g., "  \u2022 ") */
+  /** The full prefix including indentation (e.g., "  \u25CF ") */
   prefix: string
   /** Number of indentation levels (each = 2 spaces) */
   indent: number
@@ -580,7 +580,7 @@ export function getListContext(text: string, cursorPos: number): ListContext | n
   const line = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd)
 
   // Match bullet: (spaces)(bullet_char) (space)
-  const bulletMatch = line.match(/^(\s*)([•\-*]) /)
+  const bulletMatch = line.match(/^(\s*)([●\-*]) /)
   if (bulletMatch) {
     const indentStr = bulletMatch[1]
     return {
@@ -630,7 +630,7 @@ export function autoFormatListPrefix(
   if (!match) return null
 
   const indent = match[1]
-  const replacement = `${indent}\u2022 `
+  const replacement = `${indent}\u25CF `
   const rangeStart = lineStart
   const rangeEnd = lineStart + lineText.length
 
@@ -678,7 +678,7 @@ export function insertListContinuation(
   const indent = '  '.repeat(ctx.indent)
   let nextPrefix: string
   if (ctx.listType === 'bullet') {
-    nextPrefix = `${indent}\u2022 `
+    nextPrefix = `${indent}\u25CF `
   } else {
     const nextNum = (ctx.number ?? 1) + 1
     nextPrefix = `${indent}${nextNum}. `

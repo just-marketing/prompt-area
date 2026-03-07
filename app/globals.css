@@ -176,11 +176,6 @@
     font-size: 0;
     display: inline;
   }
-  .prompt-area-bullet {
-    font-size: 1.3em;
-    line-height: 1;
-    vertical-align: middle;
-  }
   .prompt-area-chip--inline {
     padding: 0;
     border-radius: 0;

@@ -41,7 +41,6 @@ import {
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
-  decorateBulletsInEditor,
   safeJsonStringify,
   getSelectionRange,
 } from './dom-helpers'
@@ -260,7 +259,6 @@ export function usePromptArea({
       // Decorate URLs, markdown formatting, and bullets in text nodes
       decorateURLsInEditor(editor)
       if (markdownEnabled) decorateMarkdownInEditor(editor)
-      if (markdownEnabled) decorateBulletsInEditor(editor)
 
       if (savedCursor) {
         restoreCursorPosition(editor, savedCursor)
@@ -385,7 +383,7 @@ export function usePromptArea({
   }, [value, renderSegmentsToDOM])
 
   // Re-render when markdown mode changes to apply/strip decorations
-  // Also convert bullet characters: • ↔ - in text segments
+  // Also convert bullet characters: ● ↔ - in text segments
   const prevMarkdown = useRef(markdownEnabled)
   useEffect(() => {
     if (prevMarkdown.current === markdownEnabled) return
@@ -393,10 +391,10 @@ export function usePromptArea({
 
     const converted = value.map((seg) => {
       if (seg.type !== 'text') return seg
-      // markdown OFF: replace "• " with "- " | markdown ON: replace "- " with "• "
+      // markdown OFF: replace "● " with "- " | markdown ON: replace "- " with "● "
       const newText = markdownEnabled
-        ? seg.text.replace(/(^|\n)(\s*)- /g, '$1$2\u2022 ')
-        : seg.text.replace(/(^|\n)(\s*)\u2022 /g, '$1$2- ')
+        ? seg.text.replace(/(^|\n)(\s*)- /g, '$1$2\u25CF ')
+        : seg.text.replace(/(^|\n)(\s*)\u25CF /g, '$1$2- ')
       return newText === seg.text ? seg : { ...seg, text: newText }
     })
 
@@ -477,7 +475,6 @@ export function usePromptArea({
     if (editor) {
       decorateURLsInEditor(editor)
       if (markdownEnabled) decorateMarkdownInEditor(editor)
-      if (markdownEnabled) decorateBulletsInEditor(editor)
       if (savedCursorOffset !== null) {
         setCursorAtOffset(editor, savedCursorOffset)
       }
