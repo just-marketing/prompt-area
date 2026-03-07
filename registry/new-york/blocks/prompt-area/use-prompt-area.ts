@@ -1353,15 +1353,16 @@ function setSelectionAtOffsets(editor: HTMLElement, startOffset: number, endOffs
 
 /**
  * Maps a plain-text offset to a DOM node + offset pair.
+ * Recurses into decoration elements (markdown spans, URL anchors).
  */
 function findDOMPosition(
-  editor: HTMLElement,
+  container: HTMLElement,
   targetOffset: number,
 ): { node: Node; offset: number } | null {
   let remaining = targetOffset
 
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const child = editor.childNodes[i]
+  for (let i = 0; i < container.childNodes.length; i++) {
+    const child = container.childNodes[i]
 
     if (child.nodeType === Node.TEXT_NODE) {
       const len = (child.textContent ?? '').length
@@ -1375,17 +1376,25 @@ function findDOMPosition(
       const chipLen = trigger.length + display.length
       if (remaining <= chipLen) {
         // Position after the chip element
-        return { node: editor, offset: i + 1 }
+        return { node: container, offset: i + 1 }
       }
       remaining -= chipLen
     } else if (isBRElement(child)) {
       if (remaining <= 1) {
-        return { node: editor, offset: i + 1 }
+        return { node: container, offset: i + 1 }
       }
       remaining -= 1
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      // Decoration element (markdown span, URL anchor) — recurse
+      const textLen = (child.textContent ?? '').length
+      if (remaining <= textLen) {
+        const result = findDOMPosition(child as HTMLElement, remaining)
+        if (result) return result
+      }
+      remaining -= textLen
     }
   }
 
-  // Fallback: end of editor
-  return { node: editor, offset: editor.childNodes.length }
+  // Fallback: end of container
+  return { node: container, offset: container.childNodes.length }
 }
