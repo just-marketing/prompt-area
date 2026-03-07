@@ -451,6 +451,51 @@ function CallbackExample() {
   )
 }
 
+function AsyncSearchExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="rounded-lg border p-4">
+        <PromptArea
+          value={segments}
+          onChange={setSegments}
+          triggers={[
+            {
+              char: '@',
+              position: 'any',
+              mode: 'dropdown',
+              searchDebounceMs: 300,
+              emptyMessage: 'No users found',
+              accessibilityLabel: 'mention',
+              onSearch: async (query, { signal }) => {
+                // Simulate a 500ms API call
+                await new Promise<void>((resolve, reject) => {
+                  const timer = setTimeout(resolve, 500)
+                  signal.addEventListener('abort', () => {
+                    clearTimeout(timer)
+                    reject(new DOMException('Aborted', 'AbortError'))
+                  })
+                })
+                return USERS.filter(
+                  (u) =>
+                    u.label.toLowerCase().includes(query.toLowerCase()) ||
+                    u.description.toLowerCase().includes(query.toLowerCase()),
+                )
+              },
+              onSearchError: (err) => {
+                // eslint-disable-next-line no-console
+                console.error('Search failed:', err)
+              },
+            },
+          ]}
+          placeholder="Type @ to search users (async, 300ms debounce)..."
+          minHeight={48}
+        />
+      </div>
+    </div>
+  )
+}
+
 function MarkdownExample() {
   const [segments, setSegments] = useState<Segment[]>([])
   return (
@@ -1190,6 +1235,15 @@ export default function Home() {
             Type <code>!</code> to fire a callback that programmatically inserts a chip.
           </p>
           <CallbackExample />
+        </div>
+
+        <div id="example-async" className="flex scroll-mt-16 flex-col gap-2">
+          <h3 className="text-sm font-medium">Async Search</h3>
+          <p className="text-muted-foreground text-xs">
+            Type <code>@</code> to trigger an async search with 300ms debounce, AbortSignal
+            cancellation, and an empty-state message. Results load after a simulated 500ms delay.
+          </p>
+          <AsyncSearchExample />
         </div>
 
         <div id="example-markdown" className="flex scroll-mt-16 flex-col gap-2">

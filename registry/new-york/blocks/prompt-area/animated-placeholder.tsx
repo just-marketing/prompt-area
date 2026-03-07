@@ -24,16 +24,14 @@ export function AnimatedPlaceholder({ texts, interval = 3000 }: AnimatedPlacehol
   return (
     <div
       className="text-muted-foreground pointer-events-none absolute top-0 left-0 overflow-hidden text-sm leading-relaxed select-none"
-      aria-hidden="true"
-    >
+      aria-hidden="true">
       <AnimatePresence mode="wait">
         <motion.div
           key={texts[index]}
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 20, opacity: 0 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
-        >
+          transition={{ duration: 0.3, ease: 'easeInOut' }}>
           {texts[index]}
         </motion.div>
       </AnimatePresence>

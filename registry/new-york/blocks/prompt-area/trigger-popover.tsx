@@ -7,6 +7,8 @@ import type { TriggerSuggestion } from './types'
 type TriggerPopoverProps = {
   suggestions: TriggerSuggestion[]
   loading: boolean
+  error?: string | null
+  emptyMessage?: string
   selectedIndex: number
   onSelect: (suggestion: TriggerSuggestion) => void
   onDismiss: () => void
@@ -21,6 +23,8 @@ type TriggerPopoverProps = {
 export function TriggerPopover({
   suggestions,
   loading,
+  error,
+  emptyMessage,
   selectedIndex,
   onSelect,
   onDismiss,
@@ -48,7 +52,7 @@ export function TriggerPopover({
   }, [onDismiss])
 
   if (!triggerRect) return null
-  if (suggestions.length === 0 && !loading) return null
+  if (suggestions.length === 0 && !loading && !error && !emptyMessage) return null
 
   // Position the popover below the trigger character, clamped to viewport
   const popoverMaxWidth = Math.min(320, window.innerWidth - 16)
@@ -74,6 +78,10 @@ export function TriggerPopover({
       aria-label={`${triggerChar} suggestions`}>
       {loading ? (
         <div className="text-muted-foreground px-3 py-2 text-sm">Loading suggestions...</div>
+      ) : error ? (
+        <div className="text-destructive px-3 py-2 text-sm">{error}</div>
+      ) : suggestions.length === 0 && emptyMessage ? (
+        <div className="text-muted-foreground px-3 py-2 text-sm">{emptyMessage}</div>
       ) : (
         suggestions.map((suggestion, index) => (
           <button

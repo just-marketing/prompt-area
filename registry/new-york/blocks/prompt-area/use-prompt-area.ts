@@ -45,6 +45,7 @@ import {
   getSelectionRange,
 } from './dom-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
+import { useTriggerSearch } from './use-trigger-search'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,6 +73,7 @@ type UsePromptAreaReturn = {
   activeTrigger: ActiveTrigger | null
   suggestions: TriggerSuggestion[]
   suggestionsLoading: boolean
+  suggestionsError: string | null
   selectedSuggestionIndex: number
   handleInput: () => void
   handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void
@@ -117,17 +119,21 @@ export function usePromptArea({
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
-  const [suggestions, setSuggestions] = useState<TriggerSuggestion[]>([])
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
+
+  const {
+    suggestions,
+    suggestionsLoading,
+    suggestionsError,
+    search: runSearch,
+    reset: resetSearch,
+  } = useTriggerSearch()
 
   // Guard against circular DOM <-> model syncs
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
 
-  // Version counter for async search race condition prevention
-  const searchVersion = useRef(0)
 
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -298,24 +304,9 @@ export function usePromptArea({
         }
       }
 
-      // Fetch suggestions for dropdown mode with race condition prevention
+      // Fetch suggestions for dropdown mode
       if (detected.config.mode === 'dropdown' && detected.config.onSearch) {
-        setSuggestionsLoading(true)
-        searchVersion.current++
-        const version = searchVersion.current
-        const result = detected.config.onSearch(detected.query)
-
-        if (result instanceof Promise) {
-          void result.then((items) => {
-            if (searchVersion.current === version) {
-              setSuggestions(items)
-              setSuggestionsLoading(false)
-            }
-          })
-        } else {
-          setSuggestions(result)
-          setSuggestionsLoading(false)
-        }
+        runSearch(detected.query, detected.config)
       }
 
       // Fire callback for callback mode
@@ -349,9 +340,9 @@ export function usePromptArea({
       }
     } else {
       setActiveTrigger(null)
-      setSuggestions([])
+      resetSearch()
     }
-  }, [triggers, readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd])
+  }, [triggers, readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, resetSearch])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -359,9 +350,9 @@ export function usePromptArea({
 
   const dismissTrigger = useCallback(() => {
     setActiveTrigger(null)
-    setSuggestions([])
     setSelectedSuggestionIndex(0)
-  }, [])
+    resetSearch()
+  }, [resetSearch])
 
   // -----------------------------------------------------------------------
   // Wire up edge-case event handlers
@@ -1133,6 +1124,7 @@ export function usePromptArea({
     activeTrigger,
     suggestions,
     suggestionsLoading,
+    suggestionsError,
     selectedSuggestionIndex,
     handleInput,
     handleKeyDown,
