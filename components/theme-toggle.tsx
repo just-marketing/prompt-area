@@ -67,33 +67,32 @@ export function useTheme() {
   return { theme, setTheme }
 }
 
+const THEME_OPTIONS: { value: Theme; icon: typeof Sun; label: string }[] = [
+  { value: 'light', icon: Sun, label: 'Light' },
+  { value: 'dark', icon: Moon, label: 'Dark' },
+  { value: 'system', icon: Monitor, label: 'System' },
+]
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()
 
-  const toggleTheme = useCallback(() => {
-    const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'
-    setTheme(next)
-  }, [theme, setTheme])
-
-  const label =
-    theme === 'system' ? 'System theme' : theme === 'dark' ? 'Dark theme' : 'Light theme'
-
   return (
-    <button
-      onClick={toggleTheme}
-      aria-label={label}
-      title={label}
-      className={cn(
-        'text-muted-foreground hover:text-foreground rounded-md p-2 transition-colors',
-        className,
-      )}>
-      {theme === 'dark' ? (
-        <Moon className="size-4" />
-      ) : theme === 'light' ? (
-        <Sun className="size-4" />
-      ) : (
-        <Monitor className="size-4" />
-      )}
-    </button>
+    <div className={cn('flex items-center gap-1', className)}>
+      {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          aria-label={label}
+          title={label}
+          className={cn(
+            'rounded-md p-2 transition-colors',
+            theme === value
+              ? 'text-foreground bg-accent'
+              : 'text-muted-foreground hover:text-foreground',
+          )}>
+          <Icon className="size-4" />
+        </button>
+      ))}
+    </div>
   )
 }
