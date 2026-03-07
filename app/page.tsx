@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { Github } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type {
   Segment,
@@ -322,6 +323,79 @@ function CallbackExample() {
   )
 }
 
+function MarkdownExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  return (
+    <div className="rounded-lg border p-4">
+      <PromptArea
+        value={segments}
+        onChange={setSegments}
+        placeholder="Try **bold**, *italic*, ***both***, or start a line with - for lists..."
+        minHeight={80}
+      />
+    </div>
+  )
+}
+
+const COPY_PASTE_TRIGGERS: TriggerConfig[] = [
+  {
+    char: '@',
+    position: 'any',
+    mode: 'dropdown',
+    chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '#',
+    position: 'any',
+    mode: 'dropdown',
+    resolveOnSpace: true,
+    chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
+  },
+]
+
+const INITIAL_SEGMENTS: Segment[] = [
+  { type: 'text', text: 'Hello ' },
+  { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
+  { type: 'text', text: ' please review ' },
+  { type: 'chip', trigger: '#', value: 'feature', displayText: 'feature' },
+  { type: 'text', text: ' when you can' },
+]
+
+function CopyPasteExample() {
+  const [sourceSegments, setSourceSegments] = useState<Segment[]>(INITIAL_SEGMENTS)
+  const [targetSegments, setTargetSegments] = useState<Segment[]>([])
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      <div className="flex flex-col gap-1">
+        <div className="text-xs text-muted-foreground">Source (select & copy)</div>
+        <div className="rounded-lg border p-4">
+          <PromptArea
+            value={sourceSegments}
+            onChange={setSourceSegments}
+            triggers={COPY_PASTE_TRIGGERS}
+            placeholder="Type here..."
+            minHeight={60}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-1">
+        <div className="text-xs text-muted-foreground">Target (paste here)</div>
+        <div className="rounded-lg border p-4">
+          <PromptArea
+            value={targetSegments}
+            onChange={setTargetSegments}
+            triggers={COPY_PASTE_TRIGGERS}
+            placeholder="Paste content here..."
+            minHeight={60}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -331,7 +405,16 @@ export default function Home() {
     <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-16">
       {/* Hero */}
       <div className="flex flex-col gap-3">
-        <h1 className="text-3xl font-bold tracking-tight">Prompt Area</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold tracking-tight">Prompt Area</h1>
+          <a
+            href="https://github.com/team-gpt/prompt-area"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground transition-colors hover:text-foreground">
+            <Github className="size-6" />
+          </a>
+        </div>
         <p className="text-muted-foreground">
           A contentEditable rich text input with trigger-based chips, inline markdown,
           undo/redo, and list auto-formatting. Built as a{' '}
@@ -403,6 +486,27 @@ export default function Home() {
             Type <code>!</code> to fire a callback that programmatically inserts a chip.
           </p>
           <CallbackExample />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h3 className="text-sm font-medium">Markdown Formatting</h3>
+          <p className="text-xs text-muted-foreground">
+            Wrap text in <code>**bold**</code>, <code>*italic*</code>, or{' '}
+            <code>***both***</code> to see inline styling. Use{' '}
+            <strong>Cmd+B</strong> / <strong>Cmd+I</strong> shortcuts. Start a line with{' '}
+            <code>- </code> or <code>* </code> for auto-formatted lists (Tab to indent).
+          </p>
+          <MarkdownExample />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h3 className="text-sm font-medium">Copy & Paste</h3>
+          <p className="text-xs text-muted-foreground">
+            Select content with chips in the source editor and <strong>Cmd+C</strong> to copy,
+            then <strong>Cmd+V</strong> in the target to paste — chips are preserved. Pasting
+            plain text like <code>@alice #bug</code> from outside auto-resolves matching triggers.
+          </p>
+          <CopyPasteExample />
         </div>
       </div>
     </div>
