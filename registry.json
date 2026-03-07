@@ -35,6 +35,10 @@
           "type": "registry:component"
         },
         {
+          "path": "registry/new-york/blocks/prompt-area/use-trigger-search.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "registry/new-york/blocks/prompt-area/types.ts",
           "type": "registry:component"
         }

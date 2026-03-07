@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { SidebarLayout } from '@/components/nav-sidebar'
@@ -19,6 +19,12 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: 'Prompt Area',
   description: 'A shadcn registry for the prompt-area component',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({

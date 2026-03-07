@@ -86,8 +86,15 @@ export type TriggerConfig = {
   /**
    * For 'dropdown' mode: called with the current query to fetch suggestions.
    * Should return a list of suggestions to display.
+   *
+   * Receives an options object with an `AbortSignal` that is aborted when a
+   * newer search supersedes this one. Pass it to `fetch()` or other async
+   * APIs to cancel in-flight work automatically.
    */
-  onSearch?: (query: string) => TriggerSuggestion[] | Promise<TriggerSuggestion[]>
+  onSearch?: (
+    query: string,
+    options: { signal: AbortSignal },
+  ) => TriggerSuggestion[] | Promise<TriggerSuggestion[]>
   /**
    * For 'dropdown' mode: called when a suggestion is selected.
    * Return the display text for the chip, or void to use `suggestion.label`.
@@ -115,6 +122,22 @@ export type TriggerConfig = {
   chipClassName?: string
   /** Label used for accessibility (e.g., "mention", "command") */
   accessibilityLabel?: string
+  /**
+   * Debounce delay in milliseconds before calling `onSearch`.
+   * Defaults to 0 (immediate). The initial empty-query search always fires
+   * immediately regardless of this setting so the dropdown appears instantly.
+   */
+  searchDebounceMs?: number
+  /**
+   * Called when `onSearch` rejects or throws (non-abort errors only).
+   * Use this to log errors or show toast notifications.
+   */
+  onSearchError?: (error: unknown) => void
+  /**
+   * Message shown in the dropdown when `onSearch` returns an empty array.
+   * If omitted, the popover hides when there are no results (current behavior).
+   */
+  emptyMessage?: string
 }
 
 /**

@@ -127,7 +127,7 @@ function SidebarToggle() {
       aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
       aria-expanded={isOpen}
       className={cn(
-        'fixed top-5 left-5 z-50 flex h-10 w-10 flex-col items-center justify-center gap-[6px] rounded-lg lg:hidden',
+        'fixed top-4 left-4 z-50 flex h-11 w-11 flex-col items-center justify-center gap-[6px] rounded-lg lg:hidden',
         'text-foreground transition-all duration-150',
         'hover:bg-accent active:scale-95',
       )}>
@@ -157,7 +157,7 @@ function NavItemButton({ item, isActive, index, indent, onClick }: NavItemButton
     <button
       onClick={() => onClick(item.id)}
       className={cn(
-        'relative w-full rounded-md py-1.5 text-left text-sm transition-all duration-150',
+        'relative w-full rounded-md py-2.5 text-left text-sm transition-all duration-150 lg:py-1.5',
         indent ? 'pr-3 pl-7' : 'px-3',
         'hover:text-foreground hover:translate-x-0.5',
         isActive ? 'text-foreground font-medium' : 'text-muted-foreground',
@@ -212,7 +212,7 @@ function CollapsibleNavItem({
           onNavigate(item.id)
         }}
         className={cn(
-          'relative flex w-full items-center gap-1 rounded-md px-3 py-1.5 text-left text-sm transition-all duration-150',
+          'relative flex w-full items-center gap-1 rounded-md px-3 py-2.5 text-left text-sm transition-all duration-150 lg:py-1.5',
           'hover:text-foreground',
           isParentActive || hasActiveChild
             ? 'text-foreground font-medium'
@@ -354,7 +354,7 @@ function NavSidebar() {
       )}>
       <nav
         ref={navRef}
-        className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-6 pb-6">
+        className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-16 pb-6 lg:pt-6">
         <ActiveIndicator activeId={activeId} itemRefs={itemRefs} navRef={navRef} />
 
         {NAV_ITEMS.map((item, i) =>

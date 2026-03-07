@@ -17,7 +17,7 @@ describe('registry installability', () => {
     const json = JSON.parse(readFileSync(registryJsonPath, 'utf-8'))
     expect(json.name).toBe('prompt-area')
     expect(json.type).toBe('registry:component')
-    expect(json.files).toHaveLength(7)
+    expect(json.files).toHaveLength(8)
     // Main component file contains PromptArea
     const mainFile = json.files.find((f: { path: string }) => f.path.endsWith('prompt-area.tsx'))
     expect(mainFile).toBeDefined()
