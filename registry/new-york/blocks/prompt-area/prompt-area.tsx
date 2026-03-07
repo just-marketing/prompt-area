@@ -6,6 +6,7 @@ import type { PromptAreaProps, PromptAreaHandle } from './types'
 import { usePromptArea } from './use-prompt-area'
 import { BLUR_DELAY_MS } from './use-prompt-area-events'
 import { TriggerPopover } from './trigger-popover'
+import { AnimatedPlaceholder } from './animated-placeholder'
 import { ImageStrip } from './image-strip'
 
 /**
@@ -228,13 +229,17 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
           />
 
           {/* Placeholder overlay */}
-          {isEmpty && placeholder && (
-            <div
-              className="text-muted-foreground pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
-              aria-hidden="true">
-              {placeholder}
-            </div>
-          )}
+          {isEmpty &&
+            placeholder &&
+            (Array.isArray(placeholder) ? (
+              <AnimatedPlaceholder texts={placeholder} />
+            ) : (
+              <div
+                className="text-muted-foreground pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
+                aria-hidden="true">
+                {placeholder}
+              </div>
+            ))}
         </div>
 
         {imagePosition === 'below' && imageStrip}

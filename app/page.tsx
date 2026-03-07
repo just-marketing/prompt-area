@@ -200,7 +200,12 @@ function ComprehensiveExample() {
           value={segments}
           onChange={setSegments}
           triggers={triggers}
-          placeholder="Type / for commands, @ for mentions, # for tags, ! for callback… Try **bold**, *italic*, lists with - , or paste a URL"
+          placeholder={[
+            'Type / for commands...',
+            'Mention someone with @...',
+            'Add a tag with #...',
+            'Try **bold** or *italic*...',
+          ]}
           onSubmit={(segs) => {
             const text = segs
               .map((s) => (s.type === 'text' ? s.text : `${s.trigger}${s.displayText}`))

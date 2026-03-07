@@ -166,8 +166,8 @@ export type PromptAreaProps = {
   onChange: (segments: Segment[]) => void
   /** Trigger configurations */
   triggers?: TriggerConfig[]
-  /** Placeholder text when empty */
-  placeholder?: string
+  /** Placeholder text when empty. Pass an array of strings to animate between them. */
+  placeholder?: string | string[]
   /** Additional CSS class for the container */
   className?: string
   /** Whether the input is disabled */
