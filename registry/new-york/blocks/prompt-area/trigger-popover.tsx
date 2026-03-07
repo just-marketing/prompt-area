@@ -50,19 +50,22 @@ export function TriggerPopover({
   if (!triggerRect) return null
   if (suggestions.length === 0 && !loading) return null
 
-  // Position the popover below the trigger character
+  // Position the popover below the trigger character, clamped to viewport
+  const popoverMaxWidth = Math.min(320, window.innerWidth - 16)
+  const left = Math.min(triggerRect.left, window.innerWidth - popoverMaxWidth - 8)
   const style: React.CSSProperties = {
     position: 'fixed',
-    left: `${triggerRect.left}px`,
+    left: `${Math.max(8, left)}px`,
     top: `${triggerRect.bottom + 4}px`,
     zIndex: 50,
+    maxWidth: `${popoverMaxWidth}px`,
   }
 
   return (
     <div
       ref={popoverRef}
       className={cn(
-        'max-h-[240px] max-w-[320px] min-w-[200px] overflow-y-auto',
+        'max-h-[240px] min-w-[200px] overflow-y-auto',
         'bg-popover rounded-xl border p-2 shadow-md',
         'animate-in fade-in-0 zoom-in-95',
       )}
