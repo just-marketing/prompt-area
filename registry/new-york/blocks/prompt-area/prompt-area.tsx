@@ -8,6 +8,7 @@ import { BLUR_DELAY_MS } from './use-prompt-area-events'
 import { TriggerPopover } from './trigger-popover'
 import { AnimatedPlaceholder } from './animated-placeholder'
 import { ImageStrip } from './image-strip'
+import { FileStrip } from './file-strip'
 
 /**
  * PromptArea - A lightweight rich text input with trigger support.
@@ -64,6 +65,10 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
       onImagePaste,
       onImageRemove,
       onImageClick,
+      files = [],
+      filePosition = 'above',
+      onFileRemove,
+      onFileClick,
     },
     ref,
   ) => {
@@ -192,9 +197,20 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
         />
       ) : null
 
+    const fileStrip =
+      files.length > 0 ? (
+        <FileStrip
+          files={files}
+          onRemove={onFileRemove}
+          onClick={onFileClick}
+          className={filePosition === 'above' ? 'pb-2' : 'pt-2'}
+        />
+      ) : null
+
     return (
       <div className={cn('prompt-area-container relative', className)}>
         {imagePosition === 'above' && imageStrip}
+        {filePosition === 'above' && fileStrip}
 
         {/* Editor + placeholder wrapper */}
         <div className="relative">
@@ -242,6 +258,7 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
             ))}
         </div>
 
+        {filePosition === 'below' && fileStrip}
         {imagePosition === 'below' && imageStrip}
 
         {/* Trigger suggestion popover */}
