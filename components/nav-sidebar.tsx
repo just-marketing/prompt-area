@@ -344,7 +344,9 @@ function NavSidebar() {
   return (
     <aside
       ref={sidebarRef}
-      tabIndex={-1}
+      tabIndex={isOpen || isDesktop ? -1 : undefined}
+      aria-hidden={!isOpen && !isDesktop ? true : undefined}
+      inert={!isOpen && !isDesktop ? true : undefined}
       className={cn(
         'border-sidebar-border bg-sidebar fixed inset-y-0 left-0 z-40 w-[280px] border-r',
         'flex flex-col outline-none',
@@ -452,7 +454,9 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
       />
 
       {/* Main content — margin on desktop, no transform */}
-      <main className="min-h-screen overflow-x-hidden lg:ml-[280px]">{children}</main>
+      <main role="main" className="min-h-screen overflow-x-hidden lg:ml-[280px]">
+        {children}
+      </main>
     </SidebarContext.Provider>
   )
 }
