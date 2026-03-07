@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Github,
   Link as LinkIcon,
@@ -14,6 +14,12 @@ import {
   Puzzle,
   ArrowUp,
   PlusCircle,
+  SquareSlash,
+  Hash,
+  Mic,
+  Code,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type {
@@ -157,11 +163,16 @@ function SectionHeading({
 
 const DEMO_INITIAL_SEGMENTS: Segment[] = [
   { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
-  { type: 'text', text: ' the notes from ' },
+  { type: 'text', text: ' the meeting notes from ' },
   { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
-  { type: 'text', text: ' and tag anything marked ' },
+  { type: 'text', text: ' and ' },
+  { type: 'chip', trigger: '@', value: 'bob', displayText: 'Bob' },
+  { type: 'text', text: '. Tag anything marked ' },
   { type: 'chip', trigger: '#', value: 'urgent', displayText: 'urgent' },
-  { type: 'text', text: ' — use **bold** for key takeaways' },
+  {
+    type: 'text',
+    text: ' and highlight the **key decisions** with *action items* for each team member',
+  },
 ]
 
 const DEMO_TRIGGERS: TriggerConfig[] = [
@@ -193,19 +204,43 @@ const DEMO_TRIGGERS: TriggerConfig[] = [
   },
 ]
 
+const DEMO_ICON_BTN = 'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
+const DEMO_MENU_ITEM = 'flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent'
+
 function DemoSection() {
   const [segments, setSegments] = useState<Segment[]>(DEMO_INITIAL_SEGMENTS)
+  const [markdownEnabled, setMarkdownEnabled] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const isEmpty =
     segments.length === 0 ||
     (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
 
   const handleSubmit = useCallback(() => {
     if (isEmpty) return
     promptRef.current?.clear()
     setSegments([])
   }, [isEmpty])
+
+  const insertTrigger = useCallback((char: string) => {
+    promptRef.current?.focus()
+    requestAnimationFrame(() => {
+      document.execCommand('insertText', false, char)
+    })
+  }, [])
 
   return (
     <div className="flex flex-col gap-2">
@@ -217,29 +252,99 @@ function DemoSection() {
           triggers={DEMO_TRIGGERS}
           placeholder="Ask anything..."
           onSubmit={handleSubmit}
-          markdown
+          markdown={markdownEnabled}
           autoGrow
           minHeight={48}
           maxHeight={200}
         />
         <ActionBar
           left={
-            <button
-              type="button"
-              className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1.5"
-              aria-label="Attach">
-              <PlusCircle className="size-4" />
-            </button>
+            <>
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  className={DEMO_ICON_BTN}
+                  aria-label="Attach"
+                  onClick={() => setMenuOpen((v) => !v)}>
+                  <PlusCircle className="size-4" />
+                </button>
+                {menuOpen && (
+                  <div className="bg-popover absolute top-full left-0 z-10 mt-1 flex w-max flex-col rounded-md border p-1 shadow-md">
+                    <button
+                      type="button"
+                      className={DEMO_MENU_ITEM}
+                      onClick={() => setMenuOpen(false)}>
+                      <Upload className="size-4" />
+                      Upload file
+                    </button>
+                    <button
+                      type="button"
+                      className={DEMO_MENU_ITEM}
+                      onClick={() => setMenuOpen(false)}>
+                      <ImageIcon className="size-4" />
+                      Upload image
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Mention"
+                onClick={() => insertTrigger('@')}>
+                <AtSign className="size-4" />
+              </button>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Commands"
+                onClick={() => {
+                  promptRef.current?.focus()
+                  requestAnimationFrame(() => {
+                    const sel = window.getSelection()
+                    const el = document.activeElement
+                    if (sel && el) {
+                      sel.collapse(el, 0)
+                    }
+                    document.execCommand('insertText', false, '/')
+                  })
+                }}>
+                <SquareSlash className="size-4" />
+              </button>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Tags"
+                onClick={() => insertTrigger('#')}>
+                <Hash className="size-4" />
+              </button>
+            </>
           }
           right={
-            <button
-              type="button"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg p-1.5 disabled:opacity-50"
-              aria-label="Send message"
-              disabled={isEmpty}
-              onClick={handleSubmit}>
-              <ArrowUp className="size-4" />
-            </button>
+            <>
+              <button
+                type="button"
+                className={`rounded-md p-1.5 ${
+                  markdownEnabled
+                    ? 'bg-accent text-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+                aria-label="Toggle markdown"
+                onClick={() => setMarkdownEnabled((v) => !v)}>
+                {markdownEnabled ? <Code className="size-4" /> : <Type className="size-4" />}
+              </button>
+              <button type="button" className={DEMO_ICON_BTN} aria-label="Voice input">
+                <Mic className="size-4" />
+              </button>
+              <button
+                type="button"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg p-1.5 disabled:opacity-50"
+                aria-label="Send message"
+                disabled={isEmpty}
+                onClick={handleSubmit}>
+                <ArrowUp className="size-4" />
+              </button>
+            </>
           }
         />
       </div>
