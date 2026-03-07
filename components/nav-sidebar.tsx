@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -11,25 +12,17 @@ import { cn } from '@/lib/utils'
 interface NavItem {
   id: string
   label: string
+  children?: NavItem[]
 }
 
-interface NavGroup {
-  group: string
-  items: NavItem[]
-}
-
-const NAV_SECTIONS: NavGroup[] = [
+const NAV_ITEMS: NavItem[] = [
+  { id: 'hero', label: 'Introduction' },
+  { id: 'try-it', label: 'Try It' },
+  { id: 'all-options', label: 'All Options' },
   {
-    group: 'OVERVIEW',
-    items: [
-      { id: 'hero', label: 'Introduction' },
-      { id: 'try-it', label: 'Try It' },
-      { id: 'all-options', label: 'All Options' },
-    ],
-  },
-  {
-    group: 'EXAMPLES',
-    items: [
+    id: 'examples',
+    label: 'Examples',
+    children: [
       { id: 'example-basic', label: 'Basic' },
       { id: 'example-mentions', label: '@Mentions' },
       { id: 'example-commands', label: '/Commands' },
@@ -40,9 +33,9 @@ const NAV_SECTIONS: NavGroup[] = [
     ],
   },
   {
-    group: 'ACTION BAR',
-    items: [
-      { id: 'action-bar', label: 'Overview' },
+    id: 'action-bar',
+    label: 'Action Bar',
+    children: [
       { id: 'action-bar-full', label: 'Full-Featured' },
       { id: 'action-bar-minimal', label: 'Minimal' },
       { id: 'action-bar-disabled', label: 'Disabled' },
@@ -50,7 +43,11 @@ const NAV_SECTIONS: NavGroup[] = [
   },
 ]
 
-const ALL_IDS = NAV_SECTIONS.flatMap((g) => g.items.map((i) => i.id))
+function collectIds(items: NavItem[]): string[] {
+  return items.flatMap((item) => [item.id, ...(item.children ? collectIds(item.children) : [])])
+}
+
+const ALL_IDS = collectIds(NAV_ITEMS)
 
 // ---------------------------------------------------------------------------
 // Sidebar context
@@ -58,6 +55,7 @@ const ALL_IDS = NAV_SECTIONS.flatMap((g) => g.items.map((i) => i.id))
 
 interface SidebarContextType {
   isOpen: boolean
+  isDesktop: boolean
   toggle: () => void
   close: () => void
 }
@@ -68,6 +66,12 @@ function useSidebar() {
   const ctx = useContext(SidebarContext)
   if (!ctx) throw new Error('useSidebar must be used within NavSidebarProvider')
   return ctx
+}
+
+/** Whether sidebar content should be visible (always on desktop, or when open on mobile) */
+function useSidebarVisible() {
+  const { isOpen, isDesktop } = useSidebar()
+  return isDesktop || isOpen
 }
 
 // ---------------------------------------------------------------------------
@@ -123,7 +127,7 @@ function SidebarToggle() {
       aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
       aria-expanded={isOpen}
       className={cn(
-        'fixed top-5 left-5 z-50 flex h-10 w-10 flex-col items-center justify-center gap-[6px] rounded-lg',
+        'fixed top-5 left-5 z-50 flex h-10 w-10 flex-col items-center justify-center gap-[6px] rounded-lg lg:hidden',
         'text-foreground transition-all duration-150',
         'hover:bg-accent active:scale-95',
       )}>
@@ -135,34 +139,114 @@ function SidebarToggle() {
 }
 
 // ---------------------------------------------------------------------------
-// NavItemButton
+// NavItemButton — leaf item
 // ---------------------------------------------------------------------------
 
 interface NavItemButtonProps {
   item: NavItem
   isActive: boolean
   index: number
-  isOpen: boolean
+  indent?: boolean
   onClick: (id: string) => void
 }
 
-function NavItemButton({ item, isActive, index, isOpen, onClick }: NavItemButtonProps) {
+function NavItemButton({ item, isActive, index, indent, onClick }: NavItemButtonProps) {
+  const visible = useSidebarVisible()
+
   return (
     <button
       onClick={() => onClick(item.id)}
       className={cn(
-        'relative w-full rounded-md px-3 py-2 text-left text-sm transition-all duration-150',
+        'relative w-full rounded-md py-1.5 text-left text-sm transition-all duration-150',
+        indent ? 'pl-7 pr-3' : 'px-3',
         'hover:text-foreground hover:translate-x-0.5',
         isActive ? 'text-foreground font-medium' : 'text-muted-foreground',
       )}
       style={{
-        opacity: isOpen ? 1 : 0,
-        transform: isOpen ? 'translateX(0)' : 'translateX(-12px)',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateX(0)' : 'translateX(-12px)',
         transition: `opacity 300ms ease-out, transform 300ms ease-out, color 150ms`,
-        transitionDelay: isOpen ? `${150 + index * 40}ms` : '0ms',
+        transitionDelay: visible ? `${150 + index * 40}ms` : '0ms',
       }}>
       {item.label}
     </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// CollapsibleNavItem — parent with expandable children
+// ---------------------------------------------------------------------------
+
+interface CollapsibleNavItemProps {
+  item: NavItem
+  activeId: string | null
+  index: number
+  onNavigate: (id: string) => void
+  itemRefs: React.RefObject<Map<string, HTMLElement>>
+}
+
+function CollapsibleNavItem({ item, activeId, index, onNavigate, itemRefs }: CollapsibleNavItemProps) {
+  const visible = useSidebarVisible()
+  const childIds = useMemo(() => item.children?.map((c) => c.id) ?? [], [item.children])
+  const hasActiveChild = activeId !== null && childIds.includes(activeId)
+  const isParentActive = activeId === item.id
+  const [expanded, setExpanded] = useState(false)
+
+  // Auto-expand when a child becomes active via scrolling
+  useEffect(() => {
+    if (hasActiveChild) setExpanded(true)
+  }, [hasActiveChild])
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setExpanded((e) => !e)
+          onNavigate(item.id)
+        }}
+        className={cn(
+          'relative flex w-full items-center gap-1 rounded-md px-3 py-1.5 text-left text-sm transition-all duration-150',
+          'hover:text-foreground',
+          isParentActive || hasActiveChild ? 'text-foreground font-medium' : 'text-muted-foreground',
+        )}
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateX(0)' : 'translateX(-12px)',
+          transition: `opacity 300ms ease-out, transform 300ms ease-out, color 150ms`,
+          transitionDelay: visible ? `${150 + index * 40}ms` : '0ms',
+        }}>
+        <ChevronRight
+          className={cn(
+            'size-3.5 shrink-0 transition-transform duration-200',
+            expanded && 'rotate-90',
+          )}
+        />
+        {item.label}
+      </button>
+
+      {/* Collapsible children */}
+      <div
+        className="grid transition-[grid-template-rows] duration-200 ease-out"
+        style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}>
+        <div className="overflow-hidden">
+          {item.children?.map((child, ci) => (
+            <div
+              key={child.id}
+              ref={(el) => {
+                if (el) itemRefs.current.set(child.id, el)
+              }}>
+              <NavItemButton
+                item={child}
+                isActive={activeId === child.id}
+                index={index + 1 + ci}
+                indent
+                onClick={onNavigate}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -196,14 +280,15 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
 
     const navRect = navRef.current.getBoundingClientRect()
     const itemRect = itemEl.getBoundingClientRect()
-    const top = itemRect.top - navRect.top + (itemRect.height - 28) / 2
+    const pillHeight = 24
+    const top = itemRect.top - navRect.top + (itemRect.height - pillHeight) / 2
 
     setStyle({ opacity: 1, top })
   }, [activeId, itemRefs, navRef])
 
   return (
     <div
-      className="bg-foreground pointer-events-none absolute left-0 h-7 w-[3px] rounded-full"
+      className="bg-foreground pointer-events-none absolute left-0 h-6 w-[3px] rounded-full"
       style={{
         ...style,
         transition: 'top 400ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease',
@@ -217,34 +302,32 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
 // ---------------------------------------------------------------------------
 
 function NavSidebar() {
-  const { isOpen, close } = useSidebar()
+  const { isOpen, isDesktop, close } = useSidebar()
   const activeId = useActiveSection(ALL_IDS)
   const navRef = useRef<HTMLElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map())
   const sidebarRef = useRef<HTMLElement>(null)
 
-  const handleClick = useCallback(
+  const handleNavigate = useCallback(
     (id: string) => {
       const el = document.getElementById(id)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
       // On smaller screens, auto-close after navigating
-      if (window.innerWidth < 1024) {
+      if (!isDesktop) {
         setTimeout(close, 150)
       }
     },
-    [close],
+    [close, isDesktop],
   )
 
-  // Focus sidebar on open for keyboard accessibility
+  // Focus sidebar on open for keyboard accessibility (mobile only)
   useEffect(() => {
-    if (isOpen && sidebarRef.current) {
+    if (isOpen && !isDesktop && sidebarRef.current) {
       sidebarRef.current.focus()
     }
-  }, [isOpen])
-
-  let globalIndex = 0
+  }, [isOpen, isDesktop])
 
   return (
     <aside
@@ -254,60 +337,41 @@ function NavSidebar() {
         'border-sidebar-border bg-sidebar fixed inset-y-0 left-0 z-40 w-[280px] border-r',
         'flex flex-col outline-none',
         'transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)]',
-        isOpen ? 'translate-x-0' : '-translate-x-full',
+        'lg:translate-x-0',
+        !isOpen && '-translate-x-full',
       )}>
       <nav
         ref={navRef}
-        className="relative flex flex-1 flex-col gap-8 overflow-y-auto px-6 pt-20 pb-6">
+        className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-6 pb-6">
         <ActiveIndicator activeId={activeId} itemRefs={itemRefs} navRef={navRef} />
 
-        {NAV_SECTIONS.map((group) => (
-          <div key={group.group} className="flex flex-col gap-1">
-            <span
-              className={cn(
-                'text-muted-foreground mb-2 px-3 font-mono text-[10px] tracking-[0.2em] uppercase',
-                'transition-opacity duration-300',
-              )}
-              style={{
-                opacity: isOpen ? 1 : 0,
-                transitionDelay: isOpen ? '100ms' : '0ms',
+        {NAV_ITEMS.map((item, i) =>
+          item.children ? (
+            <CollapsibleNavItem
+              key={item.id}
+              item={item}
+              activeId={activeId}
+              index={i}
+              onNavigate={handleNavigate}
+              itemRefs={itemRefs}
+            />
+          ) : (
+            <div
+              key={item.id}
+              ref={(el) => {
+                if (el) itemRefs.current.set(item.id, el)
               }}>
-              {group.group}
-            </span>
-            {group.items.map((item) => {
-              const idx = globalIndex++
-              return (
-                <div
-                  key={item.id}
-                  ref={(el) => {
-                    if (el) itemRefs.current.set(item.id, el)
-                  }}>
-                  <NavItemButton
-                    item={item}
-                    isActive={activeId === item.id}
-                    index={idx}
-                    isOpen={isOpen}
-                    onClick={handleClick}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        ))}
+              <NavItemButton
+                item={item}
+                isActive={activeId === item.id}
+                index={i}
+                onClick={handleNavigate}
+              />
+            </div>
+          ),
+        )}
       </nav>
 
-      {/* Bottom area — keyboard shortcut hint */}
-      <div
-        className="border-sidebar-border border-t px-6 py-4"
-        style={{
-          opacity: isOpen ? 1 : 0,
-          transition: 'opacity 300ms ease-out',
-          transitionDelay: isOpen ? '400ms' : '0ms',
-        }}>
-        <span className="text-muted-foreground font-mono text-[10px]">
-          <kbd className="border-border rounded border px-1.5 py-0.5 text-[10px]">⌘B</kbd> to toggle
-        </span>
-      </div>
     </aside>
   )
 }
@@ -318,28 +382,45 @@ function NavSidebar() {
 
 export function SidebarLayout({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
 
   const toggle = useCallback(() => setIsOpen((o) => !o), [])
   const close = useCallback(() => setIsOpen(false), [])
 
-  // Keyboard shortcut: Cmd/Ctrl+B to toggle, Escape to close
+  // Sync open state with screen size
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    setIsDesktop(mq.matches)
+    setIsOpen(mq.matches)
+    const handler = (e: MediaQueryListEvent) => {
+      setIsDesktop(e.matches)
+      setIsOpen(e.matches)
+    }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Keyboard shortcut: Cmd/Ctrl+B to toggle (mobile), Escape to close (mobile)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'b' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'b' && (e.metaKey || e.ctrlKey) && !isDesktop) {
         e.preventDefault()
         toggle()
       }
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !isDesktop) {
         close()
         toggleRef.current?.focus()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [toggle, close, isOpen])
+  }, [toggle, close, isOpen, isDesktop])
 
-  const ctx = useMemo(() => ({ isOpen, toggle, close }), [isOpen, toggle, close])
+  const ctx = useMemo(
+    () => ({ isOpen, isDesktop, toggle, close }),
+    [isOpen, isDesktop, toggle, close],
+  )
 
   return (
     <SidebarContext.Provider value={ctx}>
@@ -357,14 +438,8 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
         aria-hidden
       />
 
-      {/* Main content with push effect on lg+ */}
-      <main
-        className={cn(
-          'min-h-screen transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)]',
-          isOpen && 'lg:translate-x-[280px]',
-        )}>
-        {children}
-      </main>
+      {/* Main content — margin on desktop, no transform */}
+      <main className="min-h-screen overflow-x-hidden lg:ml-[280px]">{children}</main>
     </SidebarContext.Provider>
   )
 }

@@ -1061,7 +1061,7 @@ export default function Home() {
       </div>
 
       {/* Examples */}
-      <div className="flex flex-col gap-6">
+      <div id="examples" className="flex scroll-mt-16 flex-col gap-6">
         <h2 className="text-xl font-semibold">Examples</h2>
 
         <div id="example-basic" className="flex scroll-mt-16 flex-col gap-2">
