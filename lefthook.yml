@@ -1,0 +1,13 @@
+output:
+  - summary
+
+pre-commit:
+  parallel: false
+  commands:
+    "lint staged files":
+      priority: 1
+      glob: "*.{js,jsx,ts,tsx,mjs}"
+      run: pnpm lint
+    "auto-format files on commit":
+      priority: 2
+      run: "./node_modules/.bin/pretty-quick --staged"
