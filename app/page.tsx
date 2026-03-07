@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
-import { Github, PlusCircle, AtSign, Slash, Hash, Mic, ArrowUp, Code, Type, Upload, Image } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Github, PlusCircle, AtSign, Slash, Hash, Mic, ArrowUp, Code, Type, Upload, Image as ImageIcon } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
+import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
 import type {
   Segment,
   TriggerConfig,
@@ -36,6 +37,53 @@ const TAGS = [
   { value: 'docs', label: 'docs' },
   { value: 'urgent', label: 'urgent' },
   { value: 'question', label: 'question' },
+]
+
+// ---------------------------------------------------------------------------
+// Shared helpers & style constants
+// ---------------------------------------------------------------------------
+
+function isSegmentsEmpty(segments: Segment[]): boolean {
+  return (
+    segments.length === 0 ||
+    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+  )
+}
+
+const ICON_BUTTON_CLASS =
+  'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
+
+const SEND_BUTTON_CLASS =
+  'rounded-lg bg-primary p-1.5 text-primary-foreground hover:bg-primary/90 disabled:opacity-50'
+
+const MENU_ITEM_CLASS =
+  'flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent'
+
+// ActionBar trigger configs (no component-scoped deps, safe to hoist)
+const ACTION_BAR_TRIGGERS: TriggerConfig[] = [
+  {
+    char: '@',
+    position: 'any',
+    mode: 'dropdown',
+    chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '/',
+    position: 'start',
+    mode: 'dropdown',
+    chipStyle: 'inline',
+    chipClassName: 'text-violet-700 dark:text-violet-400',
+    onSearch: (q) => COMMANDS.filter((c) => c.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '#',
+    position: 'any',
+    mode: 'dropdown',
+    resolveOnSpace: true,
+    chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -699,57 +747,39 @@ function ActionBarFullExample() {
   const [submitted, setSubmitted] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  const isEmpty =
-    segments.length === 0 ||
-    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+  const isEmpty = isSegmentsEmpty(segments)
+
+  // Close menu on click outside
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
 
   const handleSubmit = useCallback(() => {
-    if (isEmpty) return
-    const text = segments
-      .map((s) => (s.type === 'text' ? s.text : `${s.trigger}${s.displayText}`))
-      .join('')
-    setSubmitted(text)
+    if (isSegmentsEmpty(segments)) return
+    setSubmitted(segmentsToPlainText(segments))
     promptRef.current?.clear()
     setSegments([])
-  }, [segments, isEmpty])
+  }, [segments])
 
   const insertTrigger = useCallback(
     (char: string) => {
       promptRef.current?.focus()
-      // Use a small delay so focus lands first, then insert the trigger character
+      // Uses deprecated execCommand as PromptAreaHandle does not yet expose insertText
       requestAnimationFrame(() => {
         document.execCommand('insertText', false, char)
       })
     },
     [],
   )
-
-  const triggers: TriggerConfig[] = [
-    {
-      char: '@',
-      position: 'any',
-      mode: 'dropdown',
-      chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-      onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
-    },
-    {
-      char: '/',
-      position: 'start',
-      mode: 'dropdown',
-      chipStyle: 'inline',
-      chipClassName: 'text-violet-700 dark:text-violet-400',
-      onSearch: (q) => COMMANDS.filter((c) => c.label.toLowerCase().includes(q.toLowerCase())),
-    },
-    {
-      char: '#',
-      position: 'any',
-      mode: 'dropdown',
-      resolveOnSpace: true,
-      chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-      onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
-    },
-  ]
 
   return (
     <div className="flex flex-col gap-2">
@@ -758,7 +788,7 @@ function ActionBarFullExample() {
           ref={promptRef}
           value={segments}
           onChange={setSegments}
-          triggers={triggers}
+          triggers={ACTION_BAR_TRIGGERS}
           placeholder="Type a message..."
           onSubmit={handleSubmit}
           markdown={markdownEnabled}
@@ -769,10 +799,10 @@ function ActionBarFullExample() {
         <ActionBar
           left={
             <>
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   type="button"
-                  className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  className={ICON_BUTTON_CLASS}
                   aria-label="Attach"
                   onClick={() => setMenuOpen((v) => !v)}
                 >
@@ -782,7 +812,7 @@ function ActionBarFullExample() {
                   <div className="absolute bottom-full left-0 mb-1 flex flex-col rounded-md border bg-popover p-1 shadow-md">
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent"
+                      className={MENU_ITEM_CLASS}
                       onClick={() => setMenuOpen(false)}
                     >
                       <Upload className="size-4" />
@@ -790,10 +820,10 @@ function ActionBarFullExample() {
                     </button>
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent"
+                      className={MENU_ITEM_CLASS}
                       onClick={() => setMenuOpen(false)}
                     >
-                      <Image className="size-4" />
+                      <ImageIcon className="size-4" />
                       Upload image
                     </button>
                   </div>
@@ -801,7 +831,7 @@ function ActionBarFullExample() {
               </div>
               <button
                 type="button"
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className={ICON_BUTTON_CLASS}
                 aria-label="Mention"
                 onClick={() => insertTrigger('@')}
               >
@@ -809,7 +839,7 @@ function ActionBarFullExample() {
               </button>
               <button
                 type="button"
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className={ICON_BUTTON_CLASS}
                 aria-label="Commands"
                 onClick={() => insertTrigger('/')}
               >
@@ -817,7 +847,7 @@ function ActionBarFullExample() {
               </button>
               <button
                 type="button"
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className={ICON_BUTTON_CLASS}
                 aria-label="Tags"
                 onClick={() => insertTrigger('#')}
               >
@@ -841,14 +871,14 @@ function ActionBarFullExample() {
               </button>
               <button
                 type="button"
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className={ICON_BUTTON_CLASS}
                 aria-label="Voice input"
               >
                 <Mic className="size-4" />
               </button>
               <button
                 type="button"
-                className="rounded-lg bg-primary p-1.5 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                className={SEND_BUTTON_CLASS}
                 aria-label="Send message"
                 disabled={isEmpty}
                 onClick={handleSubmit}
@@ -873,15 +903,13 @@ function ActionBarMinimalExample() {
   const [segments, setSegments] = useState<Segment[]>([])
   const promptRef = useRef<PromptAreaHandle>(null)
 
-  const isEmpty =
-    segments.length === 0 ||
-    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+  const isEmpty = isSegmentsEmpty(segments)
 
   const handleSubmit = useCallback(() => {
-    if (isEmpty) return
+    if (isSegmentsEmpty(segments)) return
     promptRef.current?.clear()
     setSegments([])
-  }, [isEmpty])
+  }, [segments])
 
   return (
     <div className="rounded-lg border p-4">
@@ -897,7 +925,7 @@ function ActionBarMinimalExample() {
         right={
           <button
             type="button"
-            className="rounded-lg bg-primary p-1.5 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className={SEND_BUTTON_CLASS}
             aria-label="Send message"
             disabled={isEmpty}
             onClick={handleSubmit}
