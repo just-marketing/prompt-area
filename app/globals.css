@@ -112,14 +112,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Shiki dual-theme: resolve CSS variables based on active theme */
-:root {
-  --shiki-color: var(--shiki-light);
-  --shiki-bg: var(--shiki-light-bg);
+/* Shiki dual-theme: apply the correct color variable based on active theme */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }
-.dark {
-  --shiki-color: var(--shiki-dark);
-  --shiki-bg: var(--shiki-dark-bg);
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }
 
 @layer base {
