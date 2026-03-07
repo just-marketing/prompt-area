@@ -20,8 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'hero', label: 'Introduction' },
   { id: 'demo', label: 'Demo' },
   { id: 'features', label: 'Features' },
-  { id: 'try-it', label: 'Inspector' },
-  { id: 'all-options', label: 'All Options' },
+  { id: 'inspector', label: 'Inspector' },
   {
     id: 'examples',
     label: 'Examples',
