@@ -42,6 +42,7 @@ import {
   decorateURLsInEditor,
   decorateMarkdownInEditor,
   safeJsonStringify,
+  getSelectionRange,
 } from './dom-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 
@@ -525,11 +526,8 @@ export function usePromptArea({
     const editor = editorRef.current
     if (!editor) return false
 
-    const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return false
-
-    const range = sel.getRangeAt(0)
-    if (!range.collapsed) return false // let browser handle selection delete
+    const range = getSelectionRange()
+    if (!range || !range.collapsed) return false
 
     const node = range.startContainer
     const offset = range.startOffset
@@ -577,11 +575,8 @@ export function usePromptArea({
     const editor = editorRef.current
     if (!editor) return false
 
-    const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return false
-
-    const range = sel.getRangeAt(0)
-    if (!range.collapsed) return false
+    const range = getSelectionRange()
+    if (!range || !range.collapsed) return false
 
     const node = range.startContainer
     const offset = range.startOffset
@@ -1116,10 +1111,8 @@ type SavedCursor = {
 }
 
 function saveCursorPosition(editor: HTMLElement): SavedCursor | null {
-  const sel = window.getSelection()
-  if (!sel || sel.rangeCount === 0) return null
-
-  const range = sel.getRangeAt(0)
+  const range = getSelectionRange()
+  if (!range) return null
   if (!editor.contains(range.startContainer)) return null
 
   const node = range.startContainer
@@ -1167,10 +1160,8 @@ function restoreCursorPosition(editor: HTMLElement, saved: SavedCursor): void {
 }
 
 function getCursorOffset(editor: HTMLElement): number | null {
-  const sel = window.getSelection()
-  if (!sel || sel.rangeCount === 0) return null
-
-  const range = sel.getRangeAt(0)
+  const range = getSelectionRange()
+  if (!range) return null
   if (!editor.contains(range.startContainer)) return null
 
   const preRange = document.createRange()
@@ -1306,10 +1297,8 @@ function getTextLengthInRange(range: Range): number {
  * Returns null if there's no selection or it's outside the editor.
  */
 function getSelectionOffsets(editor: HTMLElement): { start: number; end: number } | null {
-  const sel = window.getSelection()
-  if (!sel || sel.rangeCount === 0) return null
-
-  const range = sel.getRangeAt(0)
+  const range = getSelectionRange()
+  if (!range) return null
   if (!editor.contains(range.startContainer)) return null
 
   const startRange = document.createRange()
@@ -1384,11 +1373,11 @@ function findDOMPosition(
         return { node: container, offset: i + 1 }
       }
       remaining -= 1
-    } else if (child.nodeType === Node.ELEMENT_NODE) {
+    } else if (isHTMLElement(child)) {
       // Decoration element (markdown span, URL anchor) — recurse
       const textLen = (child.textContent ?? '').length
       if (remaining <= textLen) {
-        const result = findDOMPosition(child as HTMLElement, remaining)
+        const result = findDOMPosition(child, remaining)
         if (result) return result
       }
       remaining -= textLen

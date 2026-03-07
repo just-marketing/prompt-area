@@ -32,6 +32,13 @@ export function isBRElement(node: Node): node is HTMLBRElement {
 }
 
 /**
+ * Type guard: checks if a DOM node is a Text node.
+ */
+export function isTextNode(node: Node): node is Text {
+  return node instanceof Text
+}
+
+/**
  * Checks whether a chip element was auto-resolved (created by pressing space
  * on resolveOnSpace triggers, rather than explicit dropdown selection).
  */
@@ -246,8 +253,8 @@ export function decorateURLsInEditor(editor: HTMLElement): boolean {
   const textNodes: Text[] = []
   for (let i = 0; i < editor.childNodes.length; i++) {
     const node = editor.childNodes[i]
-    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-      textNodes.push(node as Text)
+    if (isTextNode(node) && node.textContent) {
+      textNodes.push(node)
     }
   }
 
@@ -334,8 +341,8 @@ export function decorateMarkdownInEditor(editor: HTMLElement): boolean {
   const textNodes: Text[] = []
   for (let i = 0; i < editor.childNodes.length; i++) {
     const node = editor.childNodes[i]
-    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-      textNodes.push(node as Text)
+    if (isTextNode(node) && node.textContent) {
+      textNodes.push(node)
     }
   }
 
@@ -433,4 +440,18 @@ export function decorateMarkdownInEditor(editor: HTMLElement): boolean {
   }
 
   return decorated
+}
+
+// ---------------------------------------------------------------------------
+// Selection helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the first Range from the current window selection, or null if
+ * there is no selection or it has no ranges.
+ */
+export function getSelectionRange(): Range | null {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0) return null
+  return sel.getRangeAt(0)
 }

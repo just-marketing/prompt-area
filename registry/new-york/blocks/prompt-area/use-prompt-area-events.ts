@@ -13,7 +13,16 @@ import {
   getChipData,
   getChipAutoResolved,
   safeJsonStringify,
+  getSelectionRange,
 } from './dom-helpers'
+
+// ---------------------------------------------------------------------------
+// Type Guards
+// ---------------------------------------------------------------------------
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -150,10 +159,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         const parsed = parseSegmentsFromClipboard(segmentJson)
         if (parsed && parsed.length > 0) {
           // Insert the copied segments at cursor position
-          const sel = window.getSelection()
-          if (!sel || sel.rangeCount === 0) return
+          const range = getSelectionRange()
+          if (!range) return
 
-          const range = sel.getRangeAt(0)
           range.deleteContents()
 
           // Merge pasted segments into current segments at cursor position
@@ -181,10 +189,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       if (!text) return
 
       // Insert plain text at cursor position using Selection API
-      const sel = window.getSelection()
-      if (!sel || sel.rangeCount === 0) return
+      const range = getSelectionRange()
+      if (!range) return
 
-      const range = sel.getRangeAt(0)
       range.deleteContents()
 
       // Handle multi-line paste: split into lines with BR elements
@@ -204,8 +211,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
       // Move cursor to end of pasted content
       range.collapse(false)
-      sel.removeAllRanges()
-      sel.addRange(range)
+      const sel = window.getSelection()
+      sel?.removeAllRanges()
+      sel?.addRange(range)
 
       // Normalize DOM, sync model, detect triggers
       normalizeEditorDOM(editor)
@@ -262,10 +270,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
   const handleCopy = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault()
 
-    const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return
+    const range = getSelectionRange()
+    if (!range) return
 
-    const range = sel.getRangeAt(0)
     const fragment = range.cloneContents()
 
     // Walk fragment and serialize, converting chips to their text representation
@@ -293,13 +300,13 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       handleCopy(e)
 
       // Then delete the selection
-      const sel = window.getSelection()
-      if (!sel || sel.rangeCount === 0) return
+      const range = getSelectionRange()
+      if (!range) return
 
       const currentSegments = readSegmentsFromDOM()
       pushUndo(currentSegments)
 
-      sel.getRangeAt(0).deleteContents()
+      range.deleteContents()
 
       const editor = editorRef.current
       if (editor) {
@@ -503,24 +510,23 @@ function parseSegmentsFromClipboard(json: string): Segment[] | null {
     // Validate each segment has the expected shape
     const segments: Segment[] = []
     for (const item of parsed) {
-      if (typeof item !== 'object' || item === null) return null
-      const record = item as Record<string, unknown>
+      if (!isRecord(item)) return null
 
-      if (record.type === 'text' && typeof record.text === 'string') {
-        segments.push({ type: 'text', text: record.text })
+      if (item.type === 'text' && typeof item.text === 'string') {
+        segments.push({ type: 'text', text: item.text })
       } else if (
-        record.type === 'chip' &&
-        typeof record.trigger === 'string' &&
-        typeof record.value === 'string' &&
-        typeof record.displayText === 'string'
+        item.type === 'chip' &&
+        typeof item.trigger === 'string' &&
+        typeof item.value === 'string' &&
+        typeof item.displayText === 'string'
       ) {
         const chip: ChipSegment = {
           type: 'chip',
-          trigger: record.trigger,
-          value: record.value,
-          displayText: record.displayText,
-          ...(record.data !== undefined ? { data: record.data } : {}),
-          ...(record.autoResolved ? { autoResolved: true } : {}),
+          trigger: item.trigger,
+          value: item.value,
+          displayText: item.displayText,
+          ...(item.data !== undefined ? { data: item.data } : {}),
+          ...(item.autoResolved ? { autoResolved: true } : {}),
         }
         segments.push(chip)
       } else {
@@ -546,10 +552,9 @@ function insertSegmentsAtCursor(
   const plainText = segmentsToPlainText(currentSegments)
 
   // Get cursor offset in the editor
-  const sel = window.getSelection()
-  if (!sel || sel.rangeCount === 0) return [...currentSegments, ...pastedSegments]
+  const range = getSelectionRange()
+  if (!range) return [...currentSegments, ...pastedSegments]
 
-  const range = sel.getRangeAt(0)
   const preRange = document.createRange()
   preRange.selectNodeContents(editor)
   preRange.setEnd(range.startContainer, range.startOffset)

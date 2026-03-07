@@ -4,6 +4,8 @@ import {
   isChipElement,
   isBRElement,
   isLinkElement,
+  isTextNode,
+  getSelectionRange,
   safeJsonParse,
   safeJsonStringify,
   getChipTrigger,
@@ -68,6 +70,23 @@ describe('isChipElement', () => {
   })
 })
 
+describe('isTextNode', () => {
+  it('returns true for a text node', () => {
+    const text = document.createTextNode('hello')
+    expect(isTextNode(text)).toBe(true)
+  })
+
+  it('returns false for an element', () => {
+    const el = document.createElement('div')
+    expect(isTextNode(el)).toBe(false)
+  })
+
+  it('returns false for a comment node', () => {
+    const comment = document.createComment('comment')
+    expect(isTextNode(comment)).toBe(false)
+  })
+})
+
 describe('isBRElement', () => {
   it('returns true for a BR element', () => {
     const br = document.createElement('br')
@@ -82,6 +101,34 @@ describe('isBRElement', () => {
   it('returns false for a text node', () => {
     const text = document.createTextNode('hello')
     expect(isBRElement(text)).toBe(false)
+  })
+})
+
+// ===========================================================================
+// Selection helpers
+// ===========================================================================
+
+describe('getSelectionRange', () => {
+  it('returns null when there is no selection', () => {
+    const sel = window.getSelection()
+    sel?.removeAllRanges()
+    expect(getSelectionRange()).toBeNull()
+  })
+
+  it('returns the first range when a selection exists', () => {
+    const div = document.createElement('div')
+    div.textContent = 'hello'
+    document.body.appendChild(div)
+    const range = document.createRange()
+    range.selectNodeContents(div)
+    const sel = window.getSelection()!
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    const result = getSelectionRange()
+    expect(result).toBeInstanceOf(Range)
+    document.body.removeChild(div)
+    sel.removeAllRanges()
   })
 })
 
