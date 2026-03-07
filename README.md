@@ -20,7 +20,7 @@ A production-grade contentEditable rich text input distributed as a [shadcn regi
 ## Install
 
 ```bash
-npx shadcn@latest add https://prompt-area.vercel.app/r/prompt-area.json
+npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
 > **Note:** Add the required CSS classes to your `globals.css` after `@layer base`:

@@ -135,6 +135,42 @@
     margin: 0 1px;
     background-color: var(--secondary);
     color: var(--foreground);
+    transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prompt-area-chip:hover {
+    background-color: color-mix(in srgb, var(--secondary) 80%, var(--foreground) 20%);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .prompt-area-chip:active {
+    transform: scale(0.93);
+    background-color: color-mix(in srgb, var(--secondary) 70%, var(--foreground) 30%);
+    box-shadow: 0 0 0 transparent;
+    transition: background-color 0.05s ease, transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.05s ease;
+  }
+
+  @keyframes prompt-area-chip-ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .prompt-area-chip-ripple {
+    position: absolute;
+    border-radius: 50%;
+    width: 100%;
+    aspect-ratio: 1;
+    background: color-mix(in srgb, var(--foreground) 15%, transparent);
+    pointer-events: none;
+    animation: prompt-area-chip-ripple 0.45s ease-out forwards;
   }
   .prompt-area-md-marker {
     font-size: 0;

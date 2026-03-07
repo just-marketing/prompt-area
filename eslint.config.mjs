@@ -3,6 +3,7 @@ import nextTypescript from 'eslint-config-next/typescript'
 import reactHooks from 'eslint-plugin-react-hooks'
 
 const eslintConfig = [
+  { ignores: ['next-env.d.ts'] },
   ...nextCoreWebVitals,
   ...nextTypescript,
   {

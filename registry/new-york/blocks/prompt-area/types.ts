@@ -180,6 +180,23 @@ export type PromptAreaImage = {
 }
 
 /**
+ * A file attachment displayed in the prompt area.
+ * State is managed externally by the parent component.
+ */
+export type PromptAreaFile = {
+  /** Unique identifier for this file */
+  id: string
+  /** Display filename (e.g., "report.pdf") */
+  name: string
+  /** File size in bytes */
+  size?: number
+  /** MIME type (used for icon selection, e.g., "application/pdf") */
+  type?: string
+  /** When true, shows a loading indicator over the file card */
+  loading?: boolean
+}
+
+/**
  * Props for the PromptArea component.
  */
 export type PromptAreaProps = {
@@ -237,6 +254,14 @@ export type PromptAreaProps = {
   onImageRemove?: (image: PromptAreaImage) => void
   /** Called when the user clicks an image thumbnail */
   onImageClick?: (image: PromptAreaImage) => void
+  /** Array of file attachments to display */
+  files?: PromptAreaFile[]
+  /** Where to render the file strip relative to the text area. Defaults to 'above'. */
+  filePosition?: 'above' | 'below'
+  /** Called when the user clicks the remove button on a file */
+  onFileRemove?: (file: PromptAreaFile) => void
+  /** Called when the user clicks a file attachment */
+  onFileClick?: (file: PromptAreaFile) => void
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Github, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -393,7 +393,19 @@ function NavSidebar() {
         )}
       </nav>
 
-      <div className="border-sidebar-border border-t px-4 py-3">
+      <div className="border-sidebar-border flex flex-col gap-3 border-t px-4 py-3">
+        <a
+          href="https://github.com/team-gpt/prompt-area"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            'group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            'bg-accent/50 text-foreground hover:bg-accent',
+          )}>
+          <Github className="size-4 shrink-0" />
+          <span className="flex-1">GitHub Repo</span>
+          <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
+        </a>
         <ThemeToggle />
       </div>
     </aside>
