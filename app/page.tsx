@@ -1,13 +1,33 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
-import { Github, Link as LinkIcon } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  Github,
+  Link as LinkIcon,
+  AtSign,
+  Type,
+  RotateCcw,
+  Paperclip,
+  PanelBottom,
+  Moon,
+  Keyboard,
+  Puzzle,
+  ArrowUp,
+  PlusCircle,
+  SquareSlash,
+  Hash,
+  Mic,
+  Code,
+  Upload,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type {
   Segment,
   TriggerConfig,
   PromptAreaHandle,
 } from '@/registry/new-york/blocks/prompt-area/types'
+import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import { ExampleShowcase } from '@/components/example-showcase'
 import {
   BasicExample,
@@ -138,225 +158,281 @@ function SectionHeading({
 }
 
 // ---------------------------------------------------------------------------
-// Comprehensive demo – showcases every capability in a single interaction
+// Demo section – polished chatbot input for the landing page
 // ---------------------------------------------------------------------------
 
-function ComprehensiveExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
-  const [eventLog, setEventLog] = useState<string[]>([])
-  const [submitted, setSubmitted] = useState<string>('')
-  const promptRef = useRef<PromptAreaHandle>(null)
+const DEMO_INITIAL_SEGMENTS: Segment[] = [
+  { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
+  { type: 'text', text: ' the meeting notes from ' },
+  { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
+  { type: 'text', text: ' and ' },
+  { type: 'chip', trigger: '@', value: 'bob', displayText: 'Bob' },
+  { type: 'text', text: '. Tag anything marked ' },
+  { type: 'chip', trigger: '#', value: 'urgent', displayText: 'urgent' },
+  {
+    type: 'text',
+    text: ' and format the output as:\n- **Key decisions** made during the meeting\n- *Action items* assigned to each team member\n- Open questions for follow-up',
+  },
+]
 
-  const log = useCallback((msg: string) => {
-    setEventLog((prev) => [`${new Date().toLocaleTimeString()} ${msg}`, ...prev].slice(0, 80))
+const DEMO_TRIGGERS: TriggerConfig[] = [
+  {
+    char: '@',
+    position: 'any',
+    mode: 'dropdown',
+    chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    accessibilityLabel: 'mention',
+    onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '/',
+    position: 'start',
+    mode: 'dropdown',
+    chipStyle: 'inline',
+    chipClassName: 'text-violet-700 dark:text-violet-400',
+    accessibilityLabel: 'command',
+    onSearch: (q) => COMMANDS.filter((c) => c.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '#',
+    position: 'any',
+    mode: 'dropdown',
+    resolveOnSpace: true,
+    chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    accessibilityLabel: 'tag',
+    onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
+  },
+]
+
+const DEMO_ICON_BTN = 'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
+const DEMO_MENU_ITEM = 'flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent'
+
+function DemoSection() {
+  const [segments, setSegments] = useState<Segment[]>(DEMO_INITIAL_SEGMENTS)
+  const [markdownEnabled, setMarkdownEnabled] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const promptRef = useRef<PromptAreaHandle>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  const isEmpty =
+    segments.length === 0 ||
+    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [menuOpen])
+
+  const handleSubmit = useCallback(() => {
+    if (isEmpty) return
+    promptRef.current?.clear()
+    setSegments([])
+  }, [isEmpty])
+
+  const insertTrigger = useCallback((char: string) => {
+    promptRef.current?.focus()
+    requestAnimationFrame(() => {
+      document.execCommand('insertText', false, char)
+    })
   }, [])
 
-  const triggers: TriggerConfig[] = [
-    // Dropdown trigger – start of line, inline chip style
-    {
-      char: '/',
-      position: 'start',
-      mode: 'dropdown',
-      chipStyle: 'inline',
-      chipClassName: 'text-violet-700 dark:text-violet-400',
-      accessibilityLabel: 'command',
-      onSearch: (query) =>
-        COMMANDS.filter(
-          (c) =>
-            c.label.toLowerCase().includes(query.toLowerCase()) ||
-            c.description.toLowerCase().includes(query.toLowerCase()),
-        ),
-      onSelect: (s) => {
-        log(`Command selected: /${s.label}`)
-        return s.label
-      },
-    },
-    // Dropdown trigger – anywhere, pill chip style
-    {
-      char: '@',
-      position: 'any',
-      mode: 'dropdown',
-      chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-      accessibilityLabel: 'mention',
-      onSearch: (query) =>
-        USERS.filter(
-          (u) =>
-            u.label.toLowerCase().includes(query.toLowerCase()) ||
-            u.description.toLowerCase().includes(query.toLowerCase()),
-        ),
-      onSelect: (s) => {
-        log(`Mention selected: @${s.label}`)
-        return s.label
-      },
-    },
-    // Dropdown trigger – anywhere, auto-resolve on space
-    {
-      char: '#',
-      position: 'any',
-      mode: 'dropdown',
-      resolveOnSpace: true,
-      chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-      accessibilityLabel: 'tag',
-      onSearch: (query) => TAGS.filter((t) => t.label.toLowerCase().includes(query.toLowerCase())),
-      onSelect: (s) => {
-        log(`Tag selected: #${s.label}`)
-        return s.label
-      },
-    },
-    // Callback trigger – fires handler directly, no dropdown
-    {
-      char: '!',
-      position: 'any',
-      mode: 'callback',
-      onActivate: (ctx) => {
-        log(`Callback triggered at position ${ctx.cursorPosition}`)
-        ctx.insertChip({
-          trigger: '!',
-          value: 'alert',
-          displayText: 'alert',
-        })
-      },
-    },
-  ]
-
   return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-lg border p-4">
+    <div className="flex flex-col gap-2">
+      <div className="rounded-xl border p-4 shadow-sm">
         <PromptArea
           ref={promptRef}
           value={segments}
           onChange={setSegments}
-          triggers={triggers}
-          placeholder={[
-            'Type / for commands...',
-            'Mention someone with @...',
-            'Add a tag with #...',
-            'Try **bold** or *italic*...',
-          ]}
-          onSubmit={(segs) => {
-            const text = segs
-              .map((s) => (s.type === 'text' ? s.text : `${s.trigger}${s.displayText}`))
-              .join('')
-            setSubmitted(text)
-            log(`Submitted: ${text}`)
-            promptRef.current?.clear()
-            setSegments([])
-          }}
-          onChipAdd={(chip) => log(`Chip added: ${chip.trigger}${chip.displayText}`)}
-          onChipDelete={(chip) => log(`Chip deleted: ${chip.trigger}${chip.displayText}`)}
-          onChipClick={(chip) => log(`Chip clicked: ${chip.trigger}${chip.displayText}`)}
-          onLinkClick={(url) => log(`Link clicked: ${url}`)}
-          onPaste={(data) => log(`Pasted (${data.source}): ${data.segments.length} segments`)}
-          onUndo={(segs) => log(`Undo → ${segs.length} segments`)}
-          onRedo={(segs) => log(`Redo → ${segs.length} segments`)}
-          onEscape={() => log('Escape pressed')}
+          triggers={DEMO_TRIGGERS}
+          placeholder="Ask anything..."
+          onSubmit={handleSubmit}
+          markdown={markdownEnabled}
           autoGrow
-          autoFocus
-          minHeight={64}
-          maxHeight={320}
+          minHeight={72}
+          maxHeight={280}
+        />
+        <ActionBar
+          left={
+            <>
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  className={DEMO_ICON_BTN}
+                  aria-label="Attach"
+                  onClick={() => setMenuOpen((v) => !v)}>
+                  <PlusCircle className="size-4" />
+                </button>
+                {menuOpen && (
+                  <div className="bg-popover absolute top-full left-0 z-10 mt-1 flex w-max flex-col rounded-md border p-1 shadow-md">
+                    <button
+                      type="button"
+                      className={DEMO_MENU_ITEM}
+                      onClick={() => setMenuOpen(false)}>
+                      <Upload className="size-4" />
+                      Upload file
+                    </button>
+                    <button
+                      type="button"
+                      className={DEMO_MENU_ITEM}
+                      onClick={() => setMenuOpen(false)}>
+                      <ImageIcon className="size-4" />
+                      Upload image
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Mention"
+                onClick={() => insertTrigger('@')}>
+                <AtSign className="size-4" />
+              </button>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Commands"
+                onClick={() => {
+                  promptRef.current?.focus()
+                  requestAnimationFrame(() => {
+                    const sel = window.getSelection()
+                    const el = document.activeElement
+                    if (sel && el) {
+                      sel.collapse(el, 0)
+                    }
+                    document.execCommand('insertText', false, '/')
+                  })
+                }}>
+                <SquareSlash className="size-4" />
+              </button>
+              <button
+                type="button"
+                className={DEMO_ICON_BTN}
+                aria-label="Tags"
+                onClick={() => insertTrigger('#')}>
+                <Hash className="size-4" />
+              </button>
+            </>
+          }
+          right={
+            <>
+              <button
+                type="button"
+                className={`rounded-md p-1.5 ${
+                  markdownEnabled
+                    ? 'bg-accent text-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                }`}
+                aria-label="Toggle markdown"
+                onClick={() => setMarkdownEnabled((v) => !v)}>
+                {markdownEnabled ? <Code className="size-4" /> : <Type className="size-4" />}
+              </button>
+              <button type="button" className={DEMO_ICON_BTN} aria-label="Voice input">
+                <Mic className="size-4" />
+              </button>
+              <button
+                type="button"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg p-1.5 disabled:opacity-50"
+                aria-label="Send message"
+                disabled={isEmpty}
+                onClick={handleSubmit}>
+                <ArrowUp className="size-4" />
+              </button>
+            </>
+          }
         />
       </div>
-
-      {/* Imperative API buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => promptRef.current?.focus()}>
-          Focus
-        </button>
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => promptRef.current?.blur()}>
-          Blur
-        </button>
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => {
-            promptRef.current?.clear()
-            setSegments([])
-          }}>
-          Clear
-        </button>
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => {
-            promptRef.current?.insertChip({
-              trigger: '@',
-              value: 'system',
-              displayText: 'System',
-            })
-            log('Inserted @System chip via imperative API')
-          }}>
-          Insert @System
-        </button>
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => {
-            promptRef.current?.insertChip({
-              trigger: '#',
-              value: 'urgent',
-              displayText: 'urgent',
-            })
-            log('Inserted #urgent chip via imperative API')
-          }}>
-          Insert #urgent
-        </button>
-        <button
-          type="button"
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm"
-          onClick={() => {
-            const text = promptRef.current?.getPlainText() ?? ''
-            log(`Plain text (${text.length} chars): ${text || '(empty)'}`)
-          }}>
-          Get Plain Text
-        </button>
-      </div>
-
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border p-3">
-          <div className="text-muted-foreground mb-2 text-xs font-medium">
-            Segments ({segments.length})
-          </div>
-          <pre className="max-h-[200px] overflow-auto text-xs">
-            {JSON.stringify(segments, null, 2)}
-          </pre>
-        </div>
-        <div className="rounded-lg border p-3">
-          <div className="text-muted-foreground mb-2 text-xs font-medium">Event Log</div>
-          <div className="max-h-[200px] overflow-auto text-xs">
-            {eventLog.length === 0 ? (
-              <span className="text-muted-foreground">No events yet — try interacting above</span>
-            ) : (
-              eventLog.map((entry, i) => (
-                <div key={i} className="border-border/50 border-b py-0.5">
-                  {entry}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+      <p className="text-muted-foreground text-center text-xs">
+        Try editing, type <code>@</code> to mention, <code>/</code> for commands, or just hit Enter
+      </p>
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// All Options – a single example exercising every prop / option
+// Features grid – scannable feature cards
 // ---------------------------------------------------------------------------
 
-function AllOptionsExample() {
+const FEATURES = [
+  {
+    icon: AtSign,
+    title: 'Trigger-Based Chips',
+    description:
+      'Type @, /, or # to invoke mentions, commands, and tags that resolve into structured chips.',
+  },
+  {
+    icon: Type,
+    title: 'Inline Markdown',
+    description:
+      'Bold, italic, lists, and auto-linked URLs render live as you type. Keyboard shortcuts included.',
+  },
+  {
+    icon: RotateCcw,
+    title: 'Undo & Redo',
+    description:
+      'Full history stack with Ctrl+Z / Ctrl+Shift+Z. Every action is tracked and reversible.',
+  },
+  {
+    icon: Paperclip,
+    title: 'File & Image Attachments',
+    description:
+      'Paste screenshots or attach files with thumbnails, loading states, and remove buttons built in.',
+  },
+  {
+    icon: PanelBottom,
+    title: 'Action Bar',
+    description:
+      'A toolbar component with left and right slots that pairs with PromptArea for a complete chat input.',
+  },
+  {
+    icon: Moon,
+    title: 'Dark Mode Ready',
+    description:
+      'Full light and dark theme support via CSS variables. Adapts automatically to your app\u2019s theme.',
+  },
+  {
+    icon: Keyboard,
+    title: 'Accessible by Default',
+    description:
+      'ARIA labels, keyboard navigation, screen reader announcements, and focus management built in.',
+  },
+  {
+    icon: Puzzle,
+    title: 'shadcn Registry',
+    description:
+      'Install with one command. No extra dependencies. Copy-paste friendly and fully customizable.',
+  },
+]
+
+function FeaturesGrid() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {FEATURES.map((feature) => (
+        <div key={feature.title} className="flex items-start gap-3 rounded-lg border p-4">
+          <div className="bg-muted shrink-0 rounded-md p-2">
+            <feature.icon className="size-4" />
+          </div>
+          <div>
+            <div className="text-sm font-medium">{feature.title}</div>
+            <div className="text-muted-foreground text-xs">{feature.description}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Inspector – consolidated playground with toggles, event log & segment viewer
+// ---------------------------------------------------------------------------
+
+function InspectorExample() {
   const [segments, setSegments] = useState<Segment[]>([
     { type: 'text', text: 'Hello ' },
     { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
@@ -372,10 +448,7 @@ function AllOptionsExample() {
     setEventLog((prev) => [`${new Date().toLocaleTimeString()} ${msg}`, ...prev].slice(0, 80))
   }, [])
 
-  // Every trigger variation in one config ----------------------------------
-
   const triggers: TriggerConfig[] = [
-    // 1. Dropdown at start-of-line, inline chip style
     {
       char: '/',
       position: 'start',
@@ -394,7 +467,6 @@ function AllOptionsExample() {
         return s.label
       },
     },
-    // 2. Dropdown anywhere, pill chip style (default), with icons
     {
       char: '@',
       position: 'any',
@@ -413,7 +485,6 @@ function AllOptionsExample() {
         return s.label
       },
     },
-    // 3. Dropdown anywhere + resolveOnSpace (free-form tags)
     {
       char: '#',
       position: 'any',
@@ -427,7 +498,6 @@ function AllOptionsExample() {
         return s.label
       },
     },
-    // 4. Callback mode (no dropdown)
     {
       char: '!',
       position: 'any',
@@ -438,8 +508,6 @@ function AllOptionsExample() {
       },
     },
   ]
-
-  // Disabled state toggle ---------------------------------------------------
 
   const [disabled, setDisabled] = useState(false)
   const [markdownEnabled, setMarkdownEnabled] = useState(true)
@@ -479,25 +547,20 @@ function AllOptionsExample() {
       <div className="rounded-lg border p-4">
         <PromptArea
           ref={promptRef}
-          // ── controlled value ───────────────────────────────────
           value={segments}
           onChange={(segs) => {
             setSegments(segs)
             log(`onChange → ${segs.length} segment(s)`)
           }}
-          // ── trigger configs ───────────────────────────────────
           triggers={triggers}
-          // ── appearance ────────────────────────────────────────
           placeholder="All options active — try /, @, #, !, **bold**, *italic*, - lists, URLs…"
           className="my-custom-class"
           disabled={disabled}
           markdown={markdownEnabled}
-          // ── dimensions ────────────────────────────────────────
           minHeight={60}
           maxHeight={300}
           autoGrow={autoGrow}
           autoFocus={false}
-          // ── callbacks ─────────────────────────────────────────
           onSubmit={(segs) => {
             const text = segs
               .map((s) => (s.type === 'text' ? s.text : `${s.trigger}${s.displayText}`))
@@ -514,9 +577,8 @@ function AllOptionsExample() {
           onPaste={(data) => log(`onPaste → ${data.source}, ${data.segments.length} segment(s)`)}
           onUndo={(segs) => log(`onUndo → ${segs.length} segment(s)`)}
           onRedo={(segs) => log(`onRedo → ${segs.length} segment(s)`)}
-          // ── accessibility / testing ───────────────────────────
-          aria-label="All-options demo input"
-          data-test-id="all-options-prompt"
+          aria-label="Inspector demo input"
+          data-test-id="inspector-prompt"
         />
       </div>
 
@@ -677,41 +739,34 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Comprehensive example – all capabilities */}
-      <div id="try-it" className="flex scroll-mt-16 flex-col gap-3">
-        <SectionHeading id="try-it" as="h2">
-          Try It
-        </SectionHeading>
-        <p className="text-muted-foreground text-sm">
-          All capabilities in one editor. <code>/</code> commands (start of line, inline style),{' '}
-          <code>@</code> mentions (pill style), <code>#</code> tags (auto-resolve on space),{' '}
-          <code>!</code> callback mode. <strong>Cmd+B</strong> bold, <strong>Cmd+I</strong> italic,{' '}
-          <strong>Ctrl+Z</strong>/<strong>Ctrl+Shift+Z</strong> undo/redo. Type <code>- </code> for
-          lists, paste a URL for auto-linking, or use the buttons below to call the imperative API.{' '}
-          <strong>Enter</strong> to submit, <strong>Escape</strong> to dismiss.
-        </p>
-        <ComprehensiveExample />
+      {/* Demo */}
+      <div id="demo" className="scroll-mt-16">
+        <DemoSection />
       </div>
 
-      {/* All Options */}
-      <div id="all-options" className="flex scroll-mt-16 flex-col gap-3">
-        <SectionHeading id="all-options" as="h2">
-          All Options
+      {/* Features */}
+      <div id="features" className="flex scroll-mt-16 flex-col gap-4">
+        <SectionHeading id="features" as="h2">
+          Features
         </SectionHeading>
         <p className="text-muted-foreground text-sm">
-          Every prop and option in a single example. Toggles for <code>disabled</code>,{' '}
-          <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>{' '}
-          start-of-line dropdown, <code>@</code> pill dropdown, <code>#</code> auto-resolve on
-          space, <code>!</code> callback mode). Every callback (<code>onSubmit</code>,{' '}
-          <code>onEscape</code>, <code>onChipClick</code>, <code>onChipAdd</code>,{' '}
-          <code>onChipDelete</code>, <code>onLinkClick</code>, <code>onPaste</code>,{' '}
-          <code>onUndo</code>, <code>onRedo</code>) logs to the event panel. Imperative handle
-          methods (<code>focus</code>, <code>blur</code>, <code>insertChip</code>,{' '}
-          <code>getPlainText</code>, <code>clear</code>) are wired to buttons. Also sets{' '}
-          <code>minHeight</code>, <code>maxHeight</code>, <code>className</code>,{' '}
-          <code>aria-label</code>, and <code>data-test-id</code>.
+          Everything you need for a production-ready rich text input.
         </p>
-        <AllOptionsExample />
+        <FeaturesGrid />
+      </div>
+
+      {/* Inspector */}
+      <div id="inspector" className="flex scroll-mt-16 flex-col gap-3">
+        <SectionHeading id="inspector" as="h2">
+          Inspector
+        </SectionHeading>
+        <p className="text-muted-foreground text-sm">
+          Inspect every event, segment, and API method in real time. Toggle <code>disabled</code>,{' '}
+          <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>,{' '}
+          <code>@</code>, <code>#</code>, <code>!</code>) and every callback log to the event panel.
+          Imperative handle methods are wired to buttons below.
+        </p>
+        <InspectorExample />
       </div>
 
       {/* Examples */}
