@@ -945,12 +945,14 @@ export function usePromptArea({
               onChange(result.segments)
               renderSegmentsToDOM(result.segments)
               setCursorAtOffset(editor, result.cursorOffset)
+              runTriggerDetection()
               return
             }
           }
         }
         if (handleChipBackspace()) {
           e.preventDefault()
+          runTriggerDetection()
           return
         }
       }
@@ -958,6 +960,7 @@ export function usePromptArea({
       // 6. Delete (forward): delete chip as whole unit
       if (e.key === 'Delete' && handleChipForwardDelete()) {
         e.preventDefault()
+        runTriggerDetection()
         return
       }
     },
@@ -974,6 +977,7 @@ export function usePromptArea({
       handleChipBackspace,
       handleChipForwardDelete,
       autoResolveActiveTrigger,
+      runTriggerDetection,
       events.handleKeyDownForUndoRedo,
       events.pushUndo,
     ],
