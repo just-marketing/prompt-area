@@ -1262,7 +1262,7 @@ export default function Home() {
           component.
         </p>
         <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
-          npx shadcn@latest add https://prompt-area.vercel.app/r/prompt-area.json
+          npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
         </div>
       </div>
 
@@ -1398,7 +1398,7 @@ export default function Home() {
             chat input experience. Independently installable.
           </p>
           <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
-            npx shadcn@latest add https://prompt-area.vercel.app/r/action-bar.json
+            npx shadcn@latest add https://prompt-area.com/r/action-bar.json
           </div>
         </div>
 
