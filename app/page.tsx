@@ -13,6 +13,7 @@ import {
   Type,
   Upload,
   Image as ImageIcon,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
@@ -109,6 +110,61 @@ const ACTION_BAR_TRIGGERS: TriggerConfig[] = [
     onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
   },
 ]
+
+// ---------------------------------------------------------------------------
+// SectionHeading — clickable anchor heading with hash link
+// ---------------------------------------------------------------------------
+
+function SectionHeading({
+  id,
+  as: Tag = 'h3',
+  children,
+}: {
+  id: string
+  as?: 'h2' | 'h3'
+  children: React.ReactNode
+}) {
+  const isH2 = Tag === 'h2'
+
+  return (
+    <Tag className="group/anchor relative flex items-center gap-2">
+      <a
+        href={`#${id}`}
+        onClick={(e) => {
+          e.preventDefault()
+          const el = document.getElementById(id)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            history.replaceState(null, '', `#${id}`)
+          }
+        }}
+        className={
+          isH2
+            ? 'decoration-muted-foreground/40 text-2xl font-semibold underline-offset-4 hover:underline'
+            : 'decoration-muted-foreground/40 text-base font-medium underline-offset-4 hover:underline'
+        }>
+        {children}
+      </a>
+      <a
+        href={`#${id}`}
+        onClick={(e) => {
+          e.preventDefault()
+          const el = document.getElementById(id)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            history.replaceState(null, '', `#${id}`)
+          }
+          navigator.clipboard?.writeText(
+            `${window.location.origin}${window.location.pathname}#${id}`,
+          )
+        }}
+        aria-label={`Copy link to ${typeof children === 'string' ? children : 'section'}`}
+        className="text-muted-foreground/0 group-hover/anchor:text-muted-foreground/60 hover:!text-foreground transition-colors duration-150">
+        <LinkIcon className={isH2 ? 'size-4' : 'size-3.5'} />
+      </a>
+    </Tag>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Comprehensive demo – showcases every capability in a single interaction
@@ -1212,7 +1268,9 @@ export default function Home() {
 
       {/* Comprehensive example – all capabilities */}
       <div id="try-it" className="flex scroll-mt-16 flex-col gap-3">
-        <h2 className="text-xl font-semibold">Try It</h2>
+        <SectionHeading id="try-it" as="h2">
+          Try It
+        </SectionHeading>
         <p className="text-muted-foreground text-sm">
           All capabilities in one editor. <code>/</code> commands (start of line, inline style),{' '}
           <code>@</code> mentions (pill style), <code>#</code> tags (auto-resolve on space),{' '}
@@ -1226,7 +1284,9 @@ export default function Home() {
 
       {/* All Options */}
       <div id="all-options" className="flex scroll-mt-16 flex-col gap-3">
-        <h2 className="text-xl font-semibold">All Options</h2>
+        <SectionHeading id="all-options" as="h2">
+          All Options
+        </SectionHeading>
         <p className="text-muted-foreground text-sm">
           Every prop and option in a single example. Toggles for <code>disabled</code>,{' '}
           <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>{' '}
@@ -1245,16 +1305,18 @@ export default function Home() {
 
       {/* Examples */}
       <div id="examples" className="flex scroll-mt-16 flex-col gap-6">
-        <h2 className="text-xl font-semibold">Examples</h2>
+        <SectionHeading id="examples" as="h2">
+          Examples
+        </SectionHeading>
 
         <div id="example-basic" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Basic (no triggers)</h3>
+          <SectionHeading id="example-basic">Basic (no triggers)</SectionHeading>
           <p className="text-muted-foreground text-xs">Simple text input with Enter to submit.</p>
           <BasicExample />
         </div>
 
         <div id="example-mentions" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">@Mentions</h3>
+          <SectionHeading id="example-mentions">@Mentions</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Type <code>@</code> followed by a name to search users.
           </p>
@@ -1262,7 +1324,7 @@ export default function Home() {
         </div>
 
         <div id="example-commands" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">/Commands (start of line)</h3>
+          <SectionHeading id="example-commands">/Commands (start of line)</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Type <code>/</code> at the beginning of a line for commands.
           </p>
@@ -1270,7 +1332,7 @@ export default function Home() {
         </div>
 
         <div id="example-tags" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">#Tags (auto-resolve on space)</h3>
+          <SectionHeading id="example-tags">#Tags (auto-resolve on space)</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Type <code>#tag</code> and press space to auto-create a chip. Backspace reverts it.
           </p>
@@ -1278,7 +1340,7 @@ export default function Home() {
         </div>
 
         <div id="example-callback" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Callback mode (!)</h3>
+          <SectionHeading id="example-callback">Callback mode (!)</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Type <code>!</code> to fire a callback that programmatically inserts a chip.
           </p>
@@ -1286,7 +1348,7 @@ export default function Home() {
         </div>
 
         <div id="example-async" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Async Search</h3>
+          <SectionHeading id="example-async">Async Search</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Type <code>@</code> to trigger an async search with 300ms debounce, AbortSignal
             cancellation, and an empty-state message. Results load after a simulated 500ms delay.
@@ -1295,7 +1357,7 @@ export default function Home() {
         </div>
 
         <div id="example-markdown" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Markdown Formatting</h3>
+          <SectionHeading id="example-markdown">Markdown Formatting</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Wrap text in <code>**bold**</code>, <code>*italic*</code>, or <code>***both***</code> to
             see inline styling. Use <strong>Cmd+B</strong> / <strong>Cmd+I</strong> shortcuts. Start
@@ -1305,7 +1367,7 @@ export default function Home() {
         </div>
 
         <div id="example-copy-paste" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Copy & Paste</h3>
+          <SectionHeading id="example-copy-paste">Copy & Paste</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Select content with chips in the source editor and <strong>Cmd+C</strong> to copy, then{' '}
             <strong>Cmd+V</strong> in the target to paste — chips are preserved. Pasting plain text
@@ -1315,7 +1377,7 @@ export default function Home() {
         </div>
 
         <div id="example-images" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Image Attachments</h3>
+          <SectionHeading id="example-images">Image Attachments</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Paste an image (screenshot or file) to attach it. Images show a loading spinner during
             upload simulation. Click &times; to remove. Use <code>imagePosition</code> to control
@@ -1328,7 +1390,9 @@ export default function Home() {
       {/* ActionBar */}
       <div className="flex flex-col gap-6">
         <div id="action-bar" className="flex scroll-mt-16 flex-col gap-3">
-          <h2 className="text-xl font-semibold">Action Bar</h2>
+          <SectionHeading id="action-bar" as="h2">
+            Action Bar
+          </SectionHeading>
           <p className="text-muted-foreground">
             A horizontal toolbar with left and right slots. Pairs with PromptArea for a complete
             chat input experience. Independently installable.
@@ -1339,7 +1403,7 @@ export default function Home() {
         </div>
 
         <div id="action-bar-full" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Full-Featured</h3>
+          <SectionHeading id="action-bar-full">Full-Featured</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Left slot with attach menu (<code>+</code>), <code>@</code> mention, <code>/</code>{' '}
             command, and <code>#</code> tag buttons. Right slot with markdown toggle, microphone,
@@ -1349,7 +1413,7 @@ export default function Home() {
         </div>
 
         <div id="action-bar-minimal" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Minimal</h3>
+          <SectionHeading id="action-bar-minimal">Minimal</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Just a send button on the right. The simplest composition.
           </p>
@@ -1357,7 +1421,7 @@ export default function Home() {
         </div>
 
         <div id="action-bar-disabled" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Disabled</h3>
+          <SectionHeading id="action-bar-disabled">Disabled</SectionHeading>
           <p className="text-muted-foreground text-xs">
             Both PromptArea and ActionBar in disabled state.
           </p>
@@ -1368,7 +1432,9 @@ export default function Home() {
       {/* Dark Theme */}
       <div className="flex flex-col gap-6">
         <div id="dark-theme" className="flex scroll-mt-16 flex-col gap-3">
-          <h2 className="text-xl font-semibold">Dark Theme</h2>
+          <SectionHeading id="dark-theme" as="h2">
+            Dark Theme
+          </SectionHeading>
           <p className="text-muted-foreground">
             Toggle between light, dark, and system themes using the switch in the sidebar. All
             components adapt automatically via CSS variables.
@@ -1376,7 +1442,7 @@ export default function Home() {
         </div>
 
         <div id="dark-theme-preview" className="flex scroll-mt-16 flex-col gap-2">
-          <h3 className="text-sm font-medium">Preview</h3>
+          <SectionHeading id="dark-theme-preview">Preview</SectionHeading>
           <p className="text-muted-foreground text-xs">
             A side-by-side comparison of the prompt area in light and dark themes.
           </p>

@@ -331,6 +331,7 @@ function NavSidebar() {
       const el = document.getElementById(id)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        history.replaceState(null, '', `#${id}`)
       }
       // On smaller screens, auto-close after navigating
       if (!isDesktop) {
@@ -422,6 +423,19 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
     }
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Scroll to hash target on initial load
+  useEffect(() => {
+    const hash = window.location.hash.slice(1)
+    if (hash) {
+      // Small delay to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        const el = document.getElementById(hash)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   // Keyboard shortcut: Cmd/Ctrl+B to toggle (mobile), Escape to close (mobile)
