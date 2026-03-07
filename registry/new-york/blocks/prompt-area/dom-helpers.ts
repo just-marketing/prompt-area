@@ -446,16 +446,16 @@ export function decorateMarkdownInEditor(editor: HTMLElement): boolean {
 // Bullet decoration
 // ---------------------------------------------------------------------------
 
-/** Pattern to find bullet characters (•) at the start of lines */
-const BULLET_PATTERN = /(^|\n)(\s*)(•)/g
-
 /**
- * Walks direct-child text nodes in the editor and wraps bullet characters
- * (`•`) in styled `<span>` elements for better visibility.
+ * Walks **all** text nodes in the editor (including nested ones) and wraps
+ * bullet characters (`•`) in styled `<span>` elements for better visibility.
  *
  * This is a DOM-only decoration — it does NOT modify the segment model.
  * The `<span>` elements are stripped by `normalizeEditorDOM` on every input
  * cycle, so they are re-applied fresh each time.
+ *
+ * Should be called **after** other decorators so it can find `•` inside
+ * already-wrapped nodes.
  *
  * @param editor - The contentEditable root element
  * @returns Whether any decorations were applied
@@ -463,47 +463,47 @@ const BULLET_PATTERN = /(^|\n)(\s*)(•)/g
 export function decorateBulletsInEditor(editor: HTMLElement): boolean {
   let decorated = false
 
+  // Collect all text nodes in the tree (not just direct children)
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT)
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
-    if (isTextNode(node) && node.textContent) {
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text
+    if (node.textContent && node.textContent.includes('•')) {
       textNodes.push(node)
     }
   }
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
-    BULLET_PATTERN.lastIndex = 0
-    const matches: Array<{ index: number; leadLength: number }> = []
-    let match: RegExpExecArray | null
-
-    while ((match = BULLET_PATTERN.exec(text)) !== null) {
-      // index of the • character = match start + prefix (newline) + indent
-      const bulletIndex = match.index + match[1].length + match[2].length
-      matches.push({ index: bulletIndex, leadLength: 1 })
-    }
-
-    if (matches.length === 0) continue
-
-    decorated = true
     const parent = textNode.parentNode
     if (!parent) continue
 
+    // Skip if already inside a bullet span
+    if (parent instanceof HTMLElement && parent.classList.contains('prompt-area-bullet')) {
+      continue
+    }
+
     const fragment = document.createDocumentFragment()
     let lastIndex = 0
+    let found = false
 
-    for (const { index } of matches) {
-      if (index > lastIndex) {
-        fragment.appendChild(document.createTextNode(text.slice(lastIndex, index)))
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === '•') {
+        found = true
+        if (i > lastIndex) {
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex, i)))
+        }
+        const span = document.createElement('span')
+        span.className = 'prompt-area-bullet'
+        span.textContent = '•'
+        fragment.appendChild(span)
+        lastIndex = i + 1
       }
-
-      const span = document.createElement('span')
-      span.className = 'prompt-area-bullet'
-      span.textContent = '•'
-      fragment.appendChild(span)
-
-      lastIndex = index + 1
     }
+
+    if (!found) continue
+
+    decorated = true
 
     if (lastIndex < text.length) {
       fragment.appendChild(document.createTextNode(text.slice(lastIndex)))
