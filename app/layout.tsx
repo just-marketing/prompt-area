@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { SidebarLayout } from '@/components/nav-sidebar'
+import { Analytics } from '@vercel/analytics/next'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff2',
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SidebarLayout>{children}</SidebarLayout>
+        <Analytics />
       </body>
     </html>
   )
