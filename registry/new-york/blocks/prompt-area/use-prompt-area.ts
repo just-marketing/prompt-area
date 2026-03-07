@@ -45,6 +45,7 @@ import {
   getSelectionRange,
 } from './dom-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
+import { useTriggerSearch } from './use-trigger-search'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,24 +117,21 @@ export function usePromptArea({
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
-  const [suggestions, setSuggestions] = useState<TriggerSuggestion[]>([])
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
-  const [suggestionsError, setSuggestionsError] = useState<string | null>(null)
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
+
+  const {
+    suggestions,
+    suggestionsLoading,
+    suggestionsError,
+    search: runSearch,
+    reset: resetSearch,
+  } = useTriggerSearch()
 
   // Guard against circular DOM <-> model syncs
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
 
-  // Version counter for async search race condition prevention
-  const searchVersion = useRef(0)
-
-  // AbortController for cancelling in-flight async searches
-  const searchAbortController = useRef<AbortController | null>(null)
-
-  // Debounce timer for search queries
-  const searchDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -296,53 +294,9 @@ export function usePromptArea({
         }
       }
 
-      // Fetch suggestions for dropdown mode with debounce, abort, and error handling
+      // Fetch suggestions for dropdown mode
       if (detected.config.mode === 'dropdown' && detected.config.onSearch) {
-        // Cancel any previous in-flight request and pending debounce
-        searchAbortController.current?.abort()
-        if (searchDebounceTimer.current) clearTimeout(searchDebounceTimer.current)
-
-        setSuggestionsLoading(true)
-        setSuggestionsError(null)
-        searchVersion.current++
-        const version = searchVersion.current
-
-        const controller = new AbortController()
-        searchAbortController.current = controller
-        const { onSearch, onSearchError, searchDebounceMs } = detected.config
-        const query = detected.query
-
-        const executeSearch = () => {
-          const result = onSearch(query, { signal: controller.signal })
-
-          if (result instanceof Promise) {
-            void result.then(
-              (items) => {
-                if (controller.signal.aborted || searchVersion.current !== version) return
-                setSuggestions(items)
-                setSuggestionsLoading(false)
-              },
-              (error: unknown) => {
-                if (controller.signal.aborted || searchVersion.current !== version) return
-                // Silently ignore AbortError (expected when superseded)
-                if (error instanceof DOMException && error.name === 'AbortError') return
-                setSuggestionsError(error instanceof Error ? error.message : 'Search failed')
-                setSuggestionsLoading(false)
-                onSearchError?.(error)
-              },
-            )
-          } else {
-            setSuggestions(result)
-            setSuggestionsLoading(false)
-          }
-        }
-
-        // Debounce subsequent searches but fire immediately for the initial empty query
-        if (searchDebounceMs && searchDebounceMs > 0 && query.length > 0) {
-          searchDebounceTimer.current = setTimeout(executeSearch, searchDebounceMs)
-        } else {
-          executeSearch()
-        }
+        runSearch(detected.query, detected.config)
       }
 
       // Fire callback for callback mode
@@ -376,12 +330,9 @@ export function usePromptArea({
       }
     } else {
       setActiveTrigger(null)
-      setSuggestions([])
-      searchAbortController.current?.abort()
-      if (searchDebounceTimer.current) clearTimeout(searchDebounceTimer.current)
-      setSuggestionsError(null)
+      resetSearch()
     }
-  }, [triggers, readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd])
+  }, [triggers, readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, resetSearch])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -389,12 +340,9 @@ export function usePromptArea({
 
   const dismissTrigger = useCallback(() => {
     setActiveTrigger(null)
-    setSuggestions([])
     setSelectedSuggestionIndex(0)
-    searchAbortController.current?.abort()
-    if (searchDebounceTimer.current) clearTimeout(searchDebounceTimer.current)
-    setSuggestionsError(null)
-  }, [])
+    resetSearch()
+  }, [resetSearch])
 
   // -----------------------------------------------------------------------
   // Wire up edge-case event handlers
@@ -448,12 +396,10 @@ export function usePromptArea({
     }
   }, [markdownEnabled, renderSegmentsToDOM, value, onChange])
 
-  // Clean up timers and abort controllers on unmount
+  // Clean up undo debounce timer on unmount
   useEffect(() => {
     return () => {
       if (undoTimer.current) clearTimeout(undoTimer.current)
-      searchAbortController.current?.abort()
-      if (searchDebounceTimer.current) clearTimeout(searchDebounceTimer.current)
     }
   }, [])
 
