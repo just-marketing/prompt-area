@@ -7,13 +7,14 @@ type ImageStripProps = {
   images: PromptAreaImage[]
   onRemove?: (image: PromptAreaImage) => void
   onClick?: (image: PromptAreaImage) => void
+  className?: string
 }
 
-export function ImageStrip({ images, onRemove, onClick }: ImageStripProps) {
+export function ImageStrip({ images, onRemove, onClick, className }: ImageStripProps) {
   if (images.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2 p-2" role="list" aria-label="Attached images">
+    <div className={cn('flex flex-wrap gap-2', className)} role="list" aria-label="Attached images">
       {images.map((image) => (
         <div
           key={image.id}

@@ -183,7 +183,12 @@ export const PromptArea = forwardRef<PromptAreaHandle, PromptAreaProps>(
 
     const imageStrip =
       images.length > 0 ? (
-        <ImageStrip images={images} onRemove={onImageRemove} onClick={onImageClick} />
+        <ImageStrip
+          images={images}
+          onRemove={onImageRemove}
+          onClick={onImageClick}
+          className={imagePosition === 'above' ? 'pb-2' : 'pt-2'}
+        />
       ) : null
 
     return (
