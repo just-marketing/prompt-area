@@ -98,7 +98,7 @@ export function CompactPromptArea({
         isExpanded ? 'rounded-2xl' : 'rounded-full',
         className,
       )}>
-      <div className={cn('flex', isExpanded ? 'flex-col' : 'items-center')}>
+      <div className={cn('flex', isExpanded ? 'flex-col' : 'items-center p-1.5')}>
         {/* Plus button – left side in collapsed mode */}
         {!isExpanded && (
           <button
@@ -106,7 +106,7 @@ export function CompactPromptArea({
             onClick={onPlusClick}
             disabled={disabled}
             className={cn(
-              'ml-1.5 flex shrink-0 items-center justify-center rounded-xl transition-colors',
+              'flex shrink-0 items-center justify-center rounded-xl transition-colors',
               'bg-muted text-muted-foreground size-9',
               'hover:bg-accent hover:text-foreground',
               'disabled:pointer-events-none disabled:opacity-50',
@@ -149,7 +149,7 @@ export function CompactPromptArea({
         <div
           className={cn(
             'flex shrink-0 items-center',
-            isExpanded ? 'justify-between px-3 pt-1 pb-3' : 'gap-1.5 pr-2',
+            isExpanded ? 'justify-between px-3 pt-1 pb-3' : 'gap-1.5',
           )}>
           {/* Plus button – bottom-left in expanded mode */}
           {isExpanded && (
