@@ -431,6 +431,60 @@ function NavSidebar() {
 }
 
 // ---------------------------------------------------------------------------
+// useSwipeGesture — detect horizontal swipes on mobile
+// ---------------------------------------------------------------------------
+
+function useSwipeGesture({
+  onSwipeLeft,
+  onSwipeRight,
+  isDesktop,
+}: {
+  onSwipeLeft?: () => void
+  onSwipeRight?: () => void
+  isDesktop: boolean
+}) {
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    if (isDesktop) return
+
+    const SWIPE_THRESHOLD = 50
+    const MAX_VERTICAL_RATIO = 0.75 // allow slightly diagonal swipes
+
+    function handleTouchStart(e: TouchEvent) {
+      const touch = e.touches[0]
+      touchStart.current = { x: touch.clientX, y: touch.clientY }
+    }
+
+    function handleTouchEnd(e: TouchEvent) {
+      if (!touchStart.current) return
+
+      const touch = e.changedTouches[0]
+      const deltaX = touch.clientX - touchStart.current.x
+      const deltaY = touch.clientY - touchStart.current.y
+      touchStart.current = null
+
+      // Must be primarily horizontal
+      if (Math.abs(deltaX) < SWIPE_THRESHOLD) return
+      if (Math.abs(deltaY) > Math.abs(deltaX) * MAX_VERTICAL_RATIO) return
+
+      if (deltaX < 0) {
+        onSwipeLeft?.()
+      } else {
+        onSwipeRight?.()
+      }
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isDesktop, onSwipeLeft, onSwipeRight])
+}
+
+// ---------------------------------------------------------------------------
 // SidebarLayout — root wrapper with push effect
 // ---------------------------------------------------------------------------
 
@@ -441,6 +495,14 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
 
   const toggle = useCallback(() => setIsOpen((o) => !o), [])
   const close = useCallback(() => setIsOpen(false), [])
+  const open = useCallback(() => setIsOpen(true), [])
+
+  // Swipe right-to-left → open nav, swipe left-to-right → close nav
+  useSwipeGesture({
+    onSwipeLeft: open,
+    onSwipeRight: close,
+    isDesktop,
+  })
 
   // Sync open state with screen size
   useEffect(() => {
