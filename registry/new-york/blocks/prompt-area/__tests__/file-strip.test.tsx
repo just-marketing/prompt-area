@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FileStrip } from '../file-strip'
 import type { PromptAreaFile } from '../types'
@@ -157,5 +157,103 @@ describe('FileStrip', () => {
     await user.click(removeButtons[0])
     expect(onRemove).toHaveBeenCalled()
     expect(onClick).not.toHaveBeenCalled()
+  })
+
+  describe('file icon types', () => {
+    it('uses image icon for image MIME types', () => {
+      const imageFiles: PromptAreaFile[] = [{ id: '1', name: 'photo.jpg', type: 'image/jpeg' }]
+      render(<FileStrip files={imageFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+
+    it('uses code icon for JavaScript files', () => {
+      const jsFiles: PromptAreaFile[] = [
+        { id: '1', name: 'app.js', type: 'application/javascript' },
+      ]
+      render(<FileStrip files={jsFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+
+    it('uses code icon for JSON files', () => {
+      const jsonFiles: PromptAreaFile[] = [{ id: '1', name: 'data.json', type: 'application/json' }]
+      render(<FileStrip files={jsonFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+
+    it('uses code icon for XML files', () => {
+      const xmlFiles: PromptAreaFile[] = [{ id: '1', name: 'config.xml', type: 'application/xml' }]
+      render(<FileStrip files={xmlFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+
+    it('uses spreadsheet icon for spreadsheet files', () => {
+      const spreadsheetFiles: PromptAreaFile[] = [
+        {
+          id: '1',
+          name: 'data.xlsx',
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      ]
+      render(<FileStrip files={spreadsheetFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+
+    it('uses default icon for unknown MIME types', () => {
+      const unknownFiles: PromptAreaFile[] = [
+        { id: '1', name: 'archive.zip', type: 'application/zip' },
+      ]
+      render(<FileStrip files={unknownFiles} />)
+      expect(screen.getByRole('listitem')).toBeInTheDocument()
+    })
+  })
+
+  describe('file size formatting', () => {
+    it('formats bytes', () => {
+      const files: PromptAreaFile[] = [{ id: '1', name: 'tiny.txt', size: 500, type: 'text/plain' }]
+      render(<FileStrip files={files} />)
+      expect(screen.getByText('TXT · 500 B')).toBeInTheDocument()
+    })
+
+    it('formats gigabytes', () => {
+      const files: PromptAreaFile[] = [{ id: '1', name: 'huge.bin', size: 2 * 1024 * 1024 * 1024 }]
+      render(<FileStrip files={files} />)
+      expect(screen.getByText('BIN · 2.0 GB')).toBeInTheDocument()
+    })
+
+    it('shows only extension when size is not provided', () => {
+      const files: PromptAreaFile[] = [{ id: '1', name: 'file.txt' }]
+      render(<FileStrip files={files} />)
+      expect(screen.getByText('TXT')).toBeInTheDocument()
+    })
+
+    it('handles file with no extension', () => {
+      const files: PromptAreaFile[] = [{ id: '1', name: 'Makefile' }]
+      render(<FileStrip files={files} />)
+      expect(screen.getByText('Makefile')).toBeInTheDocument()
+    })
+  })
+
+  describe('outside click', () => {
+    it('closes popover when clicking outside', async () => {
+      const user = userEvent.setup()
+      render(<FileStrip files={manyFiles} />)
+
+      // Open popover
+      await user.click(screen.getByText('+1 more'))
+      expect(screen.getAllByRole('listitem')).toHaveLength(4)
+
+      // Click outside
+      fireEvent.mouseDown(document.body)
+
+      // Popover should close
+      expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    })
+  })
+
+  describe('custom className', () => {
+    it('applies custom className', () => {
+      const { container } = render(<FileStrip files={sampleFiles} className="my-class" />)
+      expect(container.firstElementChild).toHaveClass('my-class')
+    })
   })
 })

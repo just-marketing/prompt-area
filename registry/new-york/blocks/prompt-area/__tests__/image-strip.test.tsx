@@ -81,4 +81,31 @@ describe('ImageStrip', () => {
     expect(screen.getByRole('list')).toHaveAttribute('aria-label', 'Attached images')
     expect(screen.getAllByRole('listitem')).toHaveLength(2)
   })
+
+  it('calls onClick when clicking an image thumbnail', async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    render(<ImageStrip images={sampleImages} onClick={onClick} />)
+
+    const items = screen.getAllByRole('listitem')
+    await user.click(items[0])
+    expect(onClick).toHaveBeenCalledWith(sampleImages[0])
+  })
+
+  it('applies cursor-pointer class when onClick is provided', () => {
+    render(<ImageStrip images={sampleImages} onClick={vi.fn()} />)
+    const items = screen.getAllByRole('listitem')
+    expect(items[0].className).toContain('cursor-pointer')
+  })
+
+  it('does not apply cursor-pointer class when onClick is not provided', () => {
+    render(<ImageStrip images={sampleImages} />)
+    const items = screen.getAllByRole('listitem')
+    expect(items[0].className).not.toContain('cursor-pointer')
+  })
+
+  it('applies custom className', () => {
+    const { container } = render(<ImageStrip images={sampleImages} className="custom-class" />)
+    expect(container.firstElementChild).toHaveClass('custom-class')
+  })
 })

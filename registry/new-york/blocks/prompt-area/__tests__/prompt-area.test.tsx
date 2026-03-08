@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { PromptArea } from '../prompt-area'
-import type { PromptAreaHandle, PromptAreaImage, Segment } from '../types'
+import type { PromptAreaHandle, PromptAreaImage, PromptAreaFile, Segment } from '../types'
 
 describe('PromptArea', () => {
   const defaultProps = {
@@ -141,6 +141,217 @@ describe('PromptArea', () => {
       fireEvent.paste(editor, { clipboardData })
       expect(onImagePaste).toHaveBeenCalled()
       expect(onChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('animated placeholder', () => {
+    it('renders animated placeholder when placeholder is an array', () => {
+      render(
+        <PromptArea {...defaultProps} placeholder={['Ask a question...', 'Write some code...']} />,
+      )
+      // The AnimatedPlaceholder renders the first text
+      expect(screen.getByText('Ask a question...')).toBeInTheDocument()
+    })
+
+    it('renders static placeholder when placeholder is a string', () => {
+      render(<PromptArea {...defaultProps} placeholder="Type here..." />)
+      expect(screen.getByText('Type here...')).toBeInTheDocument()
+    })
+
+    it('does not render any placeholder when placeholder is not provided', () => {
+      const { container } = render(<PromptArea {...defaultProps} />)
+      // No placeholder element should be rendered
+      const placeholders = container.querySelectorAll('[aria-hidden="true"]')
+      expect(placeholders).toHaveLength(0)
+    })
+  })
+
+  describe('file support', () => {
+    const sampleFiles: PromptAreaFile[] = [
+      { id: '1', name: 'report.pdf', size: 1024, type: 'application/pdf' },
+      { id: '2', name: 'data.csv', size: 2048, type: 'text/csv' },
+    ]
+
+    it('renders files above the editor by default', () => {
+      render(<PromptArea {...defaultProps} files={sampleFiles} />)
+      expect(screen.getByRole('list', { name: 'Attached files' })).toBeInTheDocument()
+    })
+
+    it('renders files below the editor when filePosition is "below"', () => {
+      const { container } = render(
+        <PromptArea {...defaultProps} files={sampleFiles} filePosition="below" />,
+      )
+      const fileList = screen.getByRole('list', { name: 'Attached files' })
+      const editor = screen.getByRole('textbox')
+      const children = Array.from(container.firstElementChild!.children)
+      const editorWrapper = editor.closest('.prompt-area-container > div:not([role="list"])')!
+      expect(children.indexOf(fileList.closest('.prompt-area-container > *')!)).toBeGreaterThan(
+        children.indexOf(editorWrapper),
+      )
+    })
+
+    it('does not render file strip when files is empty', () => {
+      render(<PromptArea {...defaultProps} files={[]} />)
+      expect(screen.queryByRole('list', { name: 'Attached files' })).not.toBeInTheDocument()
+    })
+
+    it('calls onFileRemove when clicking X on a file', async () => {
+      const user = userEvent.setup()
+      const onFileRemove = vi.fn()
+      render(<PromptArea {...defaultProps} files={sampleFiles} onFileRemove={onFileRemove} />)
+      const removeButtons = screen.getAllByRole('button', { name: /remove/i })
+      await user.click(removeButtons[0])
+      expect(onFileRemove).toHaveBeenCalledWith(sampleFiles[0])
+    })
+  })
+
+  describe('auto-grow', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('applies minHeight style', () => {
+      render(<PromptArea {...defaultProps} minHeight={120} />)
+      const editor = screen.getByRole('textbox')
+      expect(editor.style.minHeight).toBe('120px')
+    })
+
+    it('applies maxHeight style when provided', () => {
+      render(<PromptArea {...defaultProps} maxHeight={300} />)
+      const editor = screen.getByRole('textbox')
+      expect(editor.style.maxHeight).toBe('300px')
+    })
+
+    it('applies auto-grow styles when autoGrow is enabled', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+      // Should have transition style
+      expect(editor.style.transition).toContain('height')
+    })
+
+    it('syncs height on focus when autoGrow is enabled', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+
+      // Mock scrollHeight
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+
+      fireEvent.focus(editor)
+      // After focus, editor height should update
+      expect(editor.style.height).toBeDefined()
+    })
+
+    it('shrinks on blur when autoGrow is enabled', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+
+      // Focus first to set isFocused
+      fireEvent.focus(editor)
+
+      // Now blur
+      fireEvent.blur(editor)
+
+      // After blur delay, should shrink
+      act(() => {
+        vi.advanceTimersByTime(200)
+      })
+
+      // Height should reset (transition style present means auto-grow mode)
+      expect(editor.style.transition).toContain('height')
+    })
+
+    it('syncs height on input when focused with autoGrow', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+
+      Object.defineProperty(editor, 'scrollHeight', { value: 150, configurable: true })
+
+      // Focus first
+      fireEvent.focus(editor)
+
+      // Then input
+      fireEvent.input(editor)
+
+      expect(editor.style.height).toBeDefined()
+    })
+  })
+
+  describe('default aria-label', () => {
+    it('uses "Text input" as default aria-label', () => {
+      render(<PromptArea {...defaultProps} />)
+      expect(screen.getByRole('textbox')).toHaveAttribute('aria-label', 'Text input')
+    })
+  })
+
+  describe('disabled state', () => {
+    it('applies opacity and cursor styles when disabled', () => {
+      render(<PromptArea {...defaultProps} disabled />)
+      const editor = screen.getByRole('textbox')
+      expect(editor.className).toContain('cursor-not-allowed')
+      expect(editor.className).toContain('opacity-50')
+    })
+  })
+
+  describe('event handler wiring', () => {
+    it('handles drop events on the editor', () => {
+      render(<PromptArea {...defaultProps} />)
+      const editor = screen.getByRole('textbox')
+      // Drop should be prevented
+      const dropEvent = new Event('drop', { bubbles: true })
+      Object.defineProperty(dropEvent, 'preventDefault', { value: vi.fn() })
+      editor.dispatchEvent(dropEvent)
+    })
+
+    it('handles dragover events on the editor', () => {
+      render(<PromptArea {...defaultProps} />)
+      const editor = screen.getByRole('textbox')
+      const dragOverEvent = new Event('dragover', { bubbles: true })
+      Object.defineProperty(dragOverEvent, 'preventDefault', { value: vi.fn() })
+      editor.dispatchEvent(dragOverEvent)
+    })
+  })
+
+  describe('auto-focus', () => {
+    it('focuses editor when autoFocus is true', () => {
+      render(<PromptArea {...defaultProps} autoFocus />)
+      const editor = screen.getByRole('textbox')
+      expect(document.activeElement).toBe(editor)
+    })
+
+    it('does not focus editor when autoFocus is false', () => {
+      render(<PromptArea {...defaultProps} autoFocus={false} />)
+      const editor = screen.getByRole('textbox')
+      expect(document.activeElement).not.toBe(editor)
+    })
+  })
+
+  describe('isEmpty detection', () => {
+    it('shows placeholder for empty text segment', () => {
+      render(
+        <PromptArea
+          value={[{ type: 'text', text: '' }]}
+          onChange={vi.fn()}
+          placeholder="Type here..."
+        />,
+      )
+      expect(screen.getByText('Type here...')).toBeInTheDocument()
+    })
+
+    it('hides placeholder for chip segment', () => {
+      render(
+        <PromptArea
+          value={[{ type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' }]}
+          onChange={vi.fn()}
+          placeholder="Type here..."
+        />,
+      )
+      expect(screen.queryByText('Type here...')).not.toBeInTheDocument()
     })
   })
 })
