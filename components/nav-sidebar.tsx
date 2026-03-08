@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
     id: 'examples',
     label: 'Examples',
     children: [
+      { id: 'example-dx-helpers', label: 'DX Helpers' },
       { id: 'example-basic', label: 'Basic' },
       { id: 'example-mentions', label: '@Mentions' },
       { id: 'example-commands', label: '/Commands' },
