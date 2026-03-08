@@ -77,6 +77,23 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "compact-prompt-area",
+      "type": "registry:component",
+      "title": "Compact Prompt Area",
+      "description": "A compact pill-shaped prompt input that expands downward on focus. Wraps PromptArea with circular plus and submit buttons and a customizable slot.",
+      "registryDependencies": ["prompt-area"],
+      "files": [
+        {
+          "path": "registry/new-york/blocks/compact-prompt-area/compact-prompt-area.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/compact-prompt-area/types.ts",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

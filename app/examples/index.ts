@@ -19,4 +19,5 @@ export {
   StatusBarBothExample,
   statusBarBothCode,
 } from './status-bar'
+export { CompactPromptAreaExample, compactPromptAreaCode } from './compact-prompt-area'
 export { ChatPromptLayoutExample, chatPromptLayoutCode } from './chat-prompt-layout'
