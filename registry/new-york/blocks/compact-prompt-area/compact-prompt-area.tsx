@@ -106,8 +106,8 @@ export function CompactPromptArea({
             onClick={onPlusClick}
             disabled={disabled}
             className={cn(
-              'ml-2 flex shrink-0 items-center justify-center rounded-full transition-colors',
-              'bg-muted text-muted-foreground size-8',
+              'ml-1.5 flex shrink-0 items-center justify-center rounded-xl transition-colors',
+              'bg-muted text-muted-foreground size-9',
               'hover:bg-accent hover:text-foreground',
               'disabled:pointer-events-none disabled:opacity-50',
             )}
@@ -158,8 +158,8 @@ export function CompactPromptArea({
               onClick={onPlusClick}
               disabled={disabled}
               className={cn(
-                'flex shrink-0 items-center justify-center rounded-full transition-colors',
-                'bg-muted text-muted-foreground size-8',
+                'flex shrink-0 items-center justify-center rounded-xl transition-colors',
+                'bg-muted text-muted-foreground size-9',
                 'hover:bg-accent hover:text-foreground',
                 'disabled:pointer-events-none disabled:opacity-50',
               )}
@@ -169,15 +169,15 @@ export function CompactPromptArea({
           )}
 
           {/* Right side: slot + submit */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {beforeSubmitSlot}
             <button
               type="button"
               onClick={handleSubmit}
               disabled={disabled || isEmpty}
               className={cn(
-                'flex shrink-0 items-center justify-center rounded-full transition-colors',
-                'bg-primary text-primary-foreground size-8',
+                'flex shrink-0 items-center justify-center rounded-xl transition-colors',
+                'bg-primary text-primary-foreground size-9',
                 'hover:bg-primary/90',
                 'disabled:pointer-events-none disabled:opacity-50',
               )}
