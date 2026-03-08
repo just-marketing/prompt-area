@@ -81,8 +81,8 @@ const DEMO_FILES: PromptAreaFile[] = [
 ]
 
 const MODELS = [
-  { id: 'opus', label: 'Opus 4.6', icon: '/claude-icon.svg' },
-  { id: 'gpt', label: 'GPT 5.4', icon: '/openai-icon.svg' },
+  { id: 'opus', label: 'Opus 4.6', icon: '/claude-icon.svg', invertInDark: false },
+  { id: 'gpt', label: 'GPT 5.4', icon: '/openai-icon.svg', invertInDark: true },
 ] as const
 
 const ICON_BTN = 'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -273,7 +273,7 @@ export function DemoSection() {
                   alt=""
                   width={14}
                   height={14}
-                  className="dark:invert"
+                  className={selectedModel.invertInDark ? 'dark:invert' : ''}
                 />
                 <span>{selectedModel.label}</span>
                 <ChevronDown className="size-3" />
@@ -294,7 +294,7 @@ export function DemoSection() {
                         alt=""
                         width={14}
                         height={14}
-                        className="dark:invert"
+                        className={model.invertInDark ? 'dark:invert' : ''}
                       />
                       {model.label}
                     </button>
