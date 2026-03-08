@@ -20,9 +20,9 @@ export default async function OGImage() {
   const chipStyle = {
     display: 'flex' as const,
     alignItems: 'center' as const,
-    padding: '2px 10px',
-    borderRadius: '6px',
-    fontSize: 18,
+    padding: '3px 12px',
+    borderRadius: '8px',
+    fontSize: 24,
     fontWeight: 500,
     lineHeight: 1.6,
   }
@@ -43,7 +43,7 @@ export default async function OGImage() {
     display: 'flex' as const,
     color: '#6d28d9',
     fontWeight: 700,
-    fontSize: 18,
+    fontSize: 24,
     lineHeight: 1.6,
   }
 
@@ -51,12 +51,12 @@ export default async function OGImage() {
     display: 'flex' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    width: '32px',
-    height: '32px',
-    borderRadius: '6px',
+    width: '38px',
+    height: '38px',
+    borderRadius: '8px',
     border: '1px solid #e5e5e5',
     color: '#a1a1aa',
-    fontSize: 15,
+    fontSize: 18,
   }
 
   return new ImageResponse(
@@ -82,8 +82,8 @@ export default async function OGImage() {
           marginBottom: '8px',
         }}>
         <svg
-          width="38"
-          height="38"
+          width="46"
+          height="46"
           viewBox="0 0 24 24"
           fill="none"
           stroke="#0f0f0f"
@@ -98,7 +98,7 @@ export default async function OGImage() {
         </svg>
         <div
           style={{
-            fontSize: 42,
+            fontSize: 52,
             fontWeight: 700,
             color: '#0f0f0f',
             letterSpacing: '-1.5px',
@@ -110,7 +110,7 @@ export default async function OGImage() {
       {/* Tagline */}
       <div
         style={{
-          fontSize: 20,
+          fontSize: 24,
           color: '#71717a',
           marginBottom: '28px',
         }}>
@@ -127,7 +127,7 @@ export default async function OGImage() {
           borderRadius: '16px',
           border: '1px solid #e5e5e5',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
-          padding: '24px 28px',
+          padding: '28px 32px',
         }}>
         {/* Rich text content */}
         <div
@@ -142,29 +142,19 @@ export default async function OGImage() {
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
-              gap: '5px',
-              fontSize: 18,
+              gap: '6px',
+              fontSize: 24,
               color: '#0f0f0f',
               lineHeight: 1.6,
             }}>
             <span style={commandStyle}>/summarize</span>
-            <span> the meeting notes from</span>
+            <span>notes from</span>
             <span style={mentionChip}>@Alice</span>
             <span>and</span>
             <span style={mentionChip}>@Bob</span>
-            <span>. Tag anything marked</span>
+            <span>. Tag</span>
             <span style={tagChip}>#urgent</span>
-            <span>and format the</span>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 18,
-              color: '#0f0f0f',
-              lineHeight: 1.6,
-            }}>
-            output as:
+            <span>and format as:</span>
           </div>
 
           {/* Bullet lines */}
@@ -173,21 +163,21 @@ export default async function OGImage() {
               display: 'flex',
               flexDirection: 'column',
               gap: '2px',
-              paddingLeft: '8px',
-              fontSize: 18,
+              paddingLeft: '10px',
+              fontSize: 24,
               color: '#0f0f0f',
               lineHeight: 1.6,
-              marginTop: '2px',
+              marginTop: '4px',
             }}>
             <div style={{ display: 'flex' }}>
               <span>-&nbsp;</span>
               <span style={{ fontWeight: 700 }}>Key decisions</span>
-              <span>&nbsp;made during the meeting</span>
+              <span>&nbsp;from the meeting</span>
             </div>
             <div style={{ display: 'flex' }}>
               <span>-&nbsp;</span>
               <span style={{ fontStyle: 'italic' }}>Action items</span>
-              <span>&nbsp;assigned to each team member</span>
+              <span>&nbsp;per team member</span>
             </div>
             <div style={{ display: 'flex' }}>- Open questions for follow-up</div>
           </div>
@@ -216,13 +206,13 @@ export default async function OGImage() {
           <div style={{ display: 'flex', gap: '6px' }}>
             <div style={iconBtn}>+</div>
             <div style={iconBtn}>@</div>
-            <div style={{ ...iconBtn, fontSize: 16 }}>/</div>
+            <div style={{ ...iconBtn, fontSize: 19 }}>/</div>
             <div style={iconBtn}>#</div>
           </div>
 
           {/* Right icons */}
           <div style={{ display: 'flex', gap: '6px' }}>
-            <div style={{ ...iconBtn, fontSize: 12 }}>&lt;/&gt;</div>
+            <div style={{ ...iconBtn, fontSize: 14 }}>&lt;/&gt;</div>
             <div style={iconBtn}>
               <svg
                 width="16"
@@ -243,12 +233,12 @@ export default async function OGImage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
                 backgroundColor: '#18181b',
                 color: '#ffffff',
-                fontSize: 16,
+                fontSize: 18,
               }}>
               <svg
                 width="16"
