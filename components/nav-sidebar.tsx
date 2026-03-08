@@ -44,6 +44,15 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    id: 'status-bar',
+    label: 'Status Bar',
+    children: [
+      { id: 'status-bar-above', label: 'Above Input' },
+      { id: 'status-bar-below', label: 'Below Input' },
+      { id: 'status-bar-both', label: 'Combined' },
+    ],
+  },
+  {
     id: 'dark-theme',
     label: 'Dark Theme',
     children: [{ id: 'dark-theme-preview', label: 'Preview' }],
