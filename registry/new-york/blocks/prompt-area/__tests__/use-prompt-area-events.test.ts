@@ -1777,7 +1777,7 @@ describe('usePromptAreaEvents', () => {
 
       // Parse the segment JSON to verify structure
       const segmentCall = setData.mock.calls.find(
-        (c: [string, string]) => c[0] === 'text/prompt-area-segments',
+        (c: unknown[]) => c[0] === 'text/prompt-area-segments',
       )
       expect(segmentCall).toBeDefined()
       const parsedSegments = JSON.parse(segmentCall![1])
@@ -1833,7 +1833,7 @@ describe('usePromptAreaEvents', () => {
       expect(setData).toHaveBeenCalledWith('text/prompt-area-segments', expect.any(String))
 
       const segmentCall = setData.mock.calls.find(
-        (c: [string, string]) => c[0] === 'text/prompt-area-segments',
+        (c: unknown[]) => c[0] === 'text/prompt-area-segments',
       )
       const parsedSegments = JSON.parse(segmentCall![1])
       const chipSeg = parsedSegments.find((s: Segment) => s.type === 'chip')
@@ -1885,7 +1885,7 @@ describe('usePromptAreaEvents', () => {
       // Segment JSON should include newline text segments
       expect(setData).toHaveBeenCalledWith('text/prompt-area-segments', expect.any(String))
       const segmentCall = setData.mock.calls.find(
-        (c: [string, string]) => c[0] === 'text/prompt-area-segments',
+        (c: unknown[]) => c[0] === 'text/prompt-area-segments',
       )
       const parsedSegments = JSON.parse(segmentCall![1])
       // Should contain newline segments from BRs
