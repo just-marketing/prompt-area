@@ -14,9 +14,9 @@ function createDeps(overrides: Partial<Parameters<typeof usePromptAreaEvents>[0]
 
   const editorRef = { current: editor } as React.RefObject<HTMLDivElement | null>
 
-  return {
+  const deps = {
     editorRef,
-    readSegmentsFromDOM: vi.fn(() => [] as Segment[]),
+    readSegmentsFromDOM: vi.fn((): Segment[] => []),
     onChange: vi.fn(),
     renderSegmentsToDOM: vi.fn(),
     runTriggerDetection: vi.fn(),
@@ -24,6 +24,15 @@ function createDeps(overrides: Partial<Parameters<typeof usePromptAreaEvents>[0]
     triggers: [] as TriggerConfig[],
     ...overrides,
     _editor: editor, // for cleanup
+  }
+
+  // Re-assert mock types since overrides may have narrowed them
+  return deps as typeof deps & {
+    readSegmentsFromDOM: ReturnType<typeof vi.fn<() => Segment[]>>
+    onChange: ReturnType<typeof vi.fn>
+    renderSegmentsToDOM: ReturnType<typeof vi.fn>
+    runTriggerDetection: ReturnType<typeof vi.fn>
+    dismissTrigger: ReturnType<typeof vi.fn>
   }
 }
 
