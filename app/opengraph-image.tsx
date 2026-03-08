@@ -148,13 +148,13 @@ export default async function OGImage() {
               lineHeight: 1.6,
             }}>
             <span style={commandStyle}>/summarize</span>
-            <span>notes from</span>
-            <span style={mentionChip}>@Alice</span>
+            <span>the campaign brief from</span>
+            <span style={mentionChip}>@Strategist</span>
             <span>and</span>
-            <span style={mentionChip}>@Bob</span>
-            <span>. Tag</span>
-            <span style={tagChip}>#urgent</span>
-            <span>and format as:</span>
+            <span style={mentionChip}>@Copywriter</span>
+            <span>. Tag anything marked</span>
+            <span style={tagChip}>#campaign</span>
+            <span>and format the output as:</span>
           </div>
 
           {/* Bullet lines */}
@@ -171,13 +171,13 @@ export default async function OGImage() {
             }}>
             <div style={{ display: 'flex' }}>
               <span>-&nbsp;</span>
-              <span style={{ fontWeight: 700 }}>Key decisions</span>
-              <span>&nbsp;from the meeting</span>
+              <span style={{ fontWeight: 700 }}>Key messages</span>
+              <span>&nbsp;for the target audience</span>
             </div>
             <div style={{ display: 'flex' }}>
               <span>-&nbsp;</span>
               <span style={{ fontStyle: 'italic' }}>Action items</span>
-              <span>&nbsp;per team member</span>
+              <span>&nbsp;assigned to each agent</span>
             </div>
             <div style={{ display: 'flex' }}>- Open questions for follow-up</div>
           </div>
