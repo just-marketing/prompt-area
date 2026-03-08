@@ -5,15 +5,15 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment, TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
 ]
 
 const TAGS = [
-  { value: 'bug', label: 'bug' },
-  { value: 'feature', label: 'feature' },
-  { value: 'docs', label: 'docs' },
+  { value: 'campaign', label: 'campaign' },
+  { value: 'lead-gen', label: 'lead-gen' },
+  { value: 'conversion', label: 'conversion' },
 ]
 
 const COPY_PASTE_TRIGGERS: TriggerConfig[] = [
@@ -35,11 +35,11 @@ const COPY_PASTE_TRIGGERS: TriggerConfig[] = [
 ]
 
 const INITIAL_SEGMENTS: Segment[] = [
-  { type: 'text', text: 'Hello ' },
-  { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
-  { type: 'text', text: ' please review ' },
-  { type: 'chip', trigger: '#', value: 'feature', displayText: 'feature' },
-  { type: 'text', text: ' when you can' },
+  { type: 'text', text: 'Hey ' },
+  { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
+  { type: 'text', text: ' please review the ' },
+  { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+  { type: 'text', text: ' draft when you can' },
 ]
 
 export function CopyPasteExample() {
@@ -100,10 +100,10 @@ const TRIGGERS: TriggerConfig[] = [
 function CopyPasteExample() {
   const [sourceSegments, setSourceSegments] = useState<Segment[]>([
     { type: 'text', text: 'Hello ' },
-    { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
-    { type: 'text', text: ' please review ' },
-    { type: 'chip', trigger: '#', value: 'feature', displayText: 'feature' },
-    { type: 'text', text: ' when you can' },
+    { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
+    { type: 'text', text: ' please review the ' },
+    { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+    { type: 'text', text: ' draft when you can' },
   ])
   const [targetSegments, setTargetSegments] = useState<Segment[]>([])
   return (

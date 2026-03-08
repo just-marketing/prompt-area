@@ -5,11 +5,11 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
-  { value: 'diana', label: 'Diana', description: 'Marketing' },
-  { value: 'eve', label: 'Eve', description: 'Sales' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
+  { value: 'outreach', label: 'Outreach', description: 'Sales prospecting' },
+  { value: 'designer', label: 'Designer', description: 'Visual & brand assets' },
 ]
 
 export function MentionsExample() {
@@ -28,7 +28,7 @@ export function MentionsExample() {
             onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
           },
         ]}
-        placeholder="Type @ to mention someone..."
+        placeholder="Type @ to mention an agent..."
         minHeight={48}
       />
     </div>
@@ -40,9 +40,9 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
 ]
 
 function MentionsExample() {
@@ -61,7 +61,7 @@ function MentionsExample() {
             USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
         },
       ]}
-      placeholder="Type @ to mention someone..."
+      placeholder="Type @ to mention an agent..."
       minHeight={48}
     />
   )

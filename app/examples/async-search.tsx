@@ -5,11 +5,11 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
-  { value: 'diana', label: 'Diana', description: 'Marketing' },
-  { value: 'eve', label: 'Eve', description: 'Sales' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
+  { value: 'outreach', label: 'Outreach', description: 'Sales prospecting' },
+  { value: 'designer', label: 'Designer', description: 'Visual & brand assets' },
 ]
 
 export function AsyncSearchExample() {
@@ -26,7 +26,7 @@ export function AsyncSearchExample() {
               position: 'any',
               mode: 'dropdown',
               searchDebounceMs: 300,
-              emptyMessage: 'No users found',
+              emptyMessage: 'No agents found',
               accessibilityLabel: 'mention',
               onSearch: async (query, { signal }) => {
                 await new Promise<void>((resolve, reject) => {
@@ -47,7 +47,7 @@ export function AsyncSearchExample() {
               },
             },
           ]}
-          placeholder="Type @ to search users (async, 300ms debounce)..."
+          placeholder="Type @ to search agents (async, 300ms debounce)..."
           minHeight={48}
         />
       </div>
@@ -60,9 +60,9 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
 ]
 
 function AsyncSearchExample() {
@@ -77,7 +77,7 @@ function AsyncSearchExample() {
           position: 'any',
           mode: 'dropdown',
           searchDebounceMs: 300,
-          emptyMessage: 'No users found',
+          emptyMessage: 'No agents found',
           accessibilityLabel: 'mention',
           onSearch: async (query, { signal }) => {
             // Simulate a 500ms API call
@@ -95,7 +95,7 @@ function AsyncSearchExample() {
           onSearchError: (err) => console.error('Search failed:', err),
         },
       ]}
-      placeholder="Type @ to search users (async, 300ms debounce)..."
+      placeholder="Type @ to search agents (async, 300ms debounce)..."
       minHeight={48}
     />
   )

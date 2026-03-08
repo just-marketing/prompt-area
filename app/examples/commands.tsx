@@ -5,11 +5,11 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const COMMANDS = [
+  { value: 'deep-research', label: 'deep-research', description: 'Research a topic in depth' },
   { value: 'summarize', label: 'summarize', description: 'Summarize the conversation' },
-  { value: 'translate', label: 'translate', description: 'Translate to another language' },
-  { value: 'improve', label: 'improve', description: 'Improve writing quality' },
-  { value: 'explain', label: 'explain', description: 'Explain a concept' },
-  { value: 'code', label: 'code', description: 'Generate code snippet' },
+  { value: 'create-slides', label: 'create-slides', description: 'Generate a slide deck' },
+  { value: 'draft-email', label: 'draft-email', description: 'Compose a sales email' },
+  { value: 'analyze', label: 'analyze', description: 'Break down key metrics' },
 ]
 
 export function CommandsExample() {
@@ -42,9 +42,9 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const COMMANDS = [
+  { value: 'deep-research', label: 'deep-research', description: 'Research a topic in depth' },
   { value: 'summarize', label: 'summarize', description: 'Summarize the conversation' },
-  { value: 'translate', label: 'translate', description: 'Translate to another language' },
-  { value: 'improve', label: 'improve', description: 'Improve writing quality' },
+  { value: 'create-slides', label: 'create-slides', description: 'Generate a slide deck' },
 ]
 
 function CommandsExample() {

@@ -23,21 +23,21 @@ import type {
 } from '@/registry/new-york/blocks/prompt-area/types'
 
 const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
 ]
 
 const COMMANDS = [
+  { value: 'deep-research', label: 'deep-research', description: 'Research a topic in depth' },
   { value: 'summarize', label: 'summarize', description: 'Summarize the conversation' },
-  { value: 'translate', label: 'translate', description: 'Translate to another language' },
-  { value: 'improve', label: 'improve', description: 'Improve writing quality' },
+  { value: 'create-slides', label: 'create-slides', description: 'Generate a slide deck' },
 ]
 
 const TAGS = [
-  { value: 'bug', label: 'bug' },
-  { value: 'feature', label: 'feature' },
-  { value: 'docs', label: 'docs' },
+  { value: 'campaign', label: 'campaign' },
+  { value: 'lead-gen', label: 'lead-gen' },
+  { value: 'conversion', label: 'conversion' },
 ]
 
 function isSegmentsEmpty(segments: Segment[]): boolean {

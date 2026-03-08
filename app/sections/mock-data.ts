@@ -1,35 +1,39 @@
 export const USERS = [
-  { value: 'alice', label: 'Alice', description: 'Engineering' },
-  { value: 'bob', label: 'Bob', description: 'Design' },
-  { value: 'charlie', label: 'Charlie', description: 'Product' },
-  { value: 'diana', label: 'Diana', description: 'Marketing' },
-  { value: 'eve', label: 'Eve', description: 'Sales' },
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
+  { value: 'outreach', label: 'Outreach', description: 'Sales prospecting' },
+  { value: 'designer', label: 'Designer', description: 'Visual & brand assets' },
 ]
 
 export const COMMANDS = [
+  {
+    value: 'deep-research',
+    label: 'deep-research',
+    description: 'Research a topic in depth',
+  },
   {
     value: 'summarize',
     label: 'summarize',
     description: 'Summarize the conversation',
   },
   {
-    value: 'translate',
-    label: 'translate',
-    description: 'Translate to another language',
+    value: 'create-slides',
+    label: 'create-slides',
+    description: 'Generate a slide deck',
   },
   {
-    value: 'improve',
-    label: 'improve',
-    description: 'Improve writing quality',
+    value: 'draft-email',
+    label: 'draft-email',
+    description: 'Compose a sales email',
   },
-  { value: 'explain', label: 'explain', description: 'Explain a concept' },
-  { value: 'code', label: 'code', description: 'Generate code snippet' },
+  { value: 'analyze', label: 'analyze', description: 'Break down key metrics' },
 ]
 
 export const TAGS = [
-  { value: 'bug', label: 'bug' },
-  { value: 'feature', label: 'feature' },
-  { value: 'docs', label: 'docs' },
-  { value: 'urgent', label: 'urgent' },
-  { value: 'question', label: 'question' },
+  { value: 'campaign', label: 'campaign' },
+  { value: 'lead-gen', label: 'lead-gen' },
+  { value: 'conversion', label: 'conversion' },
+  { value: 'branding', label: 'branding' },
+  { value: 'outbound', label: 'outbound' },
 ]

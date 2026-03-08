@@ -186,7 +186,7 @@ export default function HomeContent() {
           <p className="text-muted-foreground text-xs">
             Select content with chips in the source editor and <strong>Cmd+C</strong> to copy, then{' '}
             <strong>Cmd+V</strong> in the target to paste — chips are preserved. Pasting plain text
-            like <code>@alice #bug</code> from outside auto-resolves matching triggers.
+            like <code>@Copywriter #campaign</code> from outside auto-resolves matching triggers.
           </p>
           <ExampleShowcase code={copyPasteCode}>
             <CopyPasteExample />

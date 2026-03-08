@@ -12,7 +12,7 @@ import { USERS, COMMANDS, TAGS } from './mock-data'
 export function InspectorSection() {
   const [segments, setSegments] = useState<Segment[]>([
     { type: 'text', text: 'Hello ' },
-    { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
+    { type: 'chip', trigger: '@', value: 'strategist', displayText: 'Strategist' },
     {
       type: 'text',
       text: ' — click a chip, paste text, or try every feature!',

@@ -5,11 +5,11 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const TAGS = [
-  { value: 'bug', label: 'bug' },
-  { value: 'feature', label: 'feature' },
-  { value: 'docs', label: 'docs' },
-  { value: 'urgent', label: 'urgent' },
-  { value: 'question', label: 'question' },
+  { value: 'campaign', label: 'campaign' },
+  { value: 'lead-gen', label: 'lead-gen' },
+  { value: 'conversion', label: 'conversion' },
+  { value: 'branding', label: 'branding' },
+  { value: 'outbound', label: 'outbound' },
 ]
 
 export function TagsExample() {
@@ -41,10 +41,10 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
 const TAGS = [
-  { value: 'bug', label: 'bug' },
-  { value: 'feature', label: 'feature' },
-  { value: 'docs', label: 'docs' },
-  { value: 'urgent', label: 'urgent' },
+  { value: 'campaign', label: 'campaign' },
+  { value: 'lead-gen', label: 'lead-gen' },
+  { value: 'conversion', label: 'conversion' },
+  { value: 'branding', label: 'branding' },
 ]
 
 function TagsExample() {

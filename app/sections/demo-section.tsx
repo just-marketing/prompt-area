@@ -30,15 +30,15 @@ import { USERS, COMMANDS, TAGS } from './mock-data'
 
 const DEMO_INITIAL_SEGMENTS: Segment[] = [
   { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
-  { type: 'text', text: ' the meeting notes from ' },
-  { type: 'chip', trigger: '@', value: 'alice', displayText: 'Alice' },
+  { type: 'text', text: ' the campaign brief from ' },
+  { type: 'chip', trigger: '@', value: 'strategist', displayText: 'Strategist' },
   { type: 'text', text: ' and ' },
-  { type: 'chip', trigger: '@', value: 'bob', displayText: 'Bob' },
+  { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
   { type: 'text', text: '. Tag anything marked ' },
-  { type: 'chip', trigger: '#', value: 'urgent', displayText: 'urgent' },
+  { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
   {
     type: 'text',
-    text: ' and format the output as:\n- **Key decisions** made during the meeting\n- *Action items* assigned to each team member\n- Open questions for follow-up',
+    text: ' and format the output as:\n- **Key messages** for the target audience\n- *Action items* assigned to each agent\n- Open questions for follow-up',
   },
 ]
 
