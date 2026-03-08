@@ -19,3 +19,4 @@ export {
   StatusBarBothExample,
   statusBarBothCode,
 } from './status-bar'
+export { CompactPromptAreaExample, compactPromptAreaCode } from './compact-prompt-area'
