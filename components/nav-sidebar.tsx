@@ -497,10 +497,10 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
   const close = useCallback(() => setIsOpen(false), [])
   const open = useCallback(() => setIsOpen(true), [])
 
-  // Swipe right-to-left → open nav, swipe left-to-right → close nav
+  // Swipe left-to-right → open nav, swipe right-to-left → close nav
   useSwipeGesture({
-    onSwipeLeft: open,
-    onSwipeRight: close,
+    onSwipeLeft: close,
+    onSwipeRight: open,
     isDesktop,
   })
 
