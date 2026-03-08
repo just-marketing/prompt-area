@@ -99,6 +99,23 @@ export function CompactPromptArea({
         className,
       )}>
       <div className={cn('flex', isExpanded ? 'flex-col' : 'items-center')}>
+        {/* Plus button – left side in collapsed mode */}
+        {!isExpanded && (
+          <button
+            type="button"
+            onClick={onPlusClick}
+            disabled={disabled}
+            className={cn(
+              'ml-2 flex shrink-0 items-center justify-center rounded-full transition-colors',
+              'bg-muted text-muted-foreground size-8',
+              'hover:bg-accent hover:text-foreground',
+              'disabled:pointer-events-none disabled:opacity-50',
+            )}
+            aria-label="Add attachment">
+            {plusButtonIcon ?? <Plus className="size-4" />}
+          </button>
+        )}
+
         {/* Prompt area region */}
         <div
           className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'overflow-hidden px-3')}
@@ -131,23 +148,25 @@ export function CompactPromptArea({
         {/* Button bar */}
         <div
           className={cn(
-            'flex shrink-0 items-center justify-between',
-            isExpanded ? 'px-3 pt-1 pb-3' : 'gap-1.5 pr-2',
+            'flex shrink-0 items-center',
+            isExpanded ? 'justify-between px-3 pt-1 pb-3' : 'gap-1.5 pr-2',
           )}>
-          {/* Plus button – circular */}
-          <button
-            type="button"
-            onClick={onPlusClick}
-            disabled={disabled}
-            className={cn(
-              'flex shrink-0 items-center justify-center rounded-full transition-colors',
-              'bg-muted text-muted-foreground size-8',
-              'hover:bg-accent hover:text-foreground',
-              'disabled:pointer-events-none disabled:opacity-50',
-            )}
-            aria-label="Add attachment">
-            {plusButtonIcon ?? <Plus className="size-4" />}
-          </button>
+          {/* Plus button – bottom-left in expanded mode */}
+          {isExpanded && (
+            <button
+              type="button"
+              onClick={onPlusClick}
+              disabled={disabled}
+              className={cn(
+                'flex shrink-0 items-center justify-center rounded-full transition-colors',
+                'bg-muted text-muted-foreground size-8',
+                'hover:bg-accent hover:text-foreground',
+                'disabled:pointer-events-none disabled:opacity-50',
+              )}
+              aria-label="Add attachment">
+              {plusButtonIcon ?? <Plus className="size-4" />}
+            </button>
+          )}
 
           {/* Right side: slot + submit */}
           <div className="flex items-center gap-1">
