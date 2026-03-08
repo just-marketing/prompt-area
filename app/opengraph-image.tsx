@@ -127,14 +127,82 @@ export default async function OGImage() {
           borderRadius: '16px',
           border: '1px solid #e5e5e5',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
-          padding: '28px 32px',
+          overflow: 'hidden',
         }}>
+        {/* Status bar */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 28px',
+            borderBottom: '1px solid #f0f0f0',
+            fontSize: 16,
+          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+            <span
+              style={{
+                display: 'flex',
+                backgroundColor: '#f4f4f5',
+                borderRadius: '6px',
+                padding: '2px 10px',
+                fontWeight: 600,
+                fontSize: 16,
+                color: '#0f0f0f',
+              }}>
+              prompt-area
+            </span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#a1a1aa"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <line x1="6" x2="6" y1="3" y2="15" />
+              <circle cx="18" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <path d="M18 9a9 9 0 0 1-9 9" />
+            </svg>
+            <span style={{ display: 'flex', color: '#a1a1aa', fontSize: 16 }}>main</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: '#a1a1aa',
+              fontSize: 16,
+            }}>
+            <span>Default</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#a1a1aa"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+        </div>
+
         {/* Rich text content */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             gap: '4px',
+            padding: '24px 28px',
           }}>
           {/* Line 1: chips and text */}
           <div
@@ -183,49 +251,48 @@ export default async function OGImage() {
           </div>
         </div>
 
-        {/* Separator */}
-        <div
-          style={{
-            display: 'flex',
-            height: '1px',
-            backgroundColor: '#f0f0f0',
-            width: '100%',
-            marginTop: '16px',
-            marginBottom: '12px',
-          }}
-        />
-
         {/* Action bar */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            padding: '0 28px 20px',
           }}>
-          {/* Left icons */}
-          <div style={{ display: 'flex', gap: '6px' }}>
+          {/* Left: attachment + code toggle */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              color: '#a1a1aa',
+              fontSize: 16,
+            }}>
             <div style={iconBtn}>+</div>
-            <div style={iconBtn}>@</div>
-            <div style={{ ...iconBtn, fontSize: 19 }}>/</div>
-            <div style={iconBtn}>#</div>
+            <span style={{ display: 'flex' }}>&lt;/&gt; Auto accept edits</span>
           </div>
 
-          {/* Right icons */}
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <div style={{ ...iconBtn, fontSize: 14 }}>&lt;/&gt;</div>
-            <div style={iconBtn}>
+          {/* Right: model + send */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: '#a1a1aa',
+                fontSize: 16,
+              }}>
+              <span>Opus 4.6</span>
               <svg
-                width="16"
-                height="16"
+                width="12"
+                height="12"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#a1a1aa"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" x2="12" y1="19" y2="22" />
+                <path d="m6 9 6 6 6-6" />
               </svg>
             </div>
             <div
