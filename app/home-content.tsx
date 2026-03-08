@@ -35,6 +35,8 @@ import {
   statusBarBelowCode,
   StatusBarBothExample,
   statusBarBothCode,
+  ChatPromptLayoutExample,
+  chatPromptLayoutCode,
 } from './examples'
 import { SectionHeading } from './sections/section-heading'
 import { DemoSection } from './sections/demo-section'
@@ -274,8 +276,8 @@ export default function HomeContent() {
           </SectionHeading>
           <p className="text-muted-foreground">
             A horizontal bar with left and right slots for displaying contextual information. Sits
-            above or below the PromptArea to show things like branch name, model selector, or project
-            context. Independently installable.
+            above or below the PromptArea to show things like branch name, model selector, or
+            project context. Independently installable.
           </p>
           <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
             npx shadcn@latest add https://prompt-area.com/r/status-bar.json
@@ -309,6 +311,33 @@ export default function HomeContent() {
           </p>
           <ExampleShowcase code={statusBarBothCode}>
             <StatusBarBothExample />
+          </ExampleShowcase>
+        </div>
+      </div>
+
+      {/* Chat Prompt Layout */}
+      <div className="flex flex-col gap-6">
+        <div id="chat-prompt-layout" className="flex scroll-mt-16 flex-col gap-3">
+          <SectionHeading id="chat-prompt-layout" as="h2">
+            Chat Prompt Layout
+          </SectionHeading>
+          <p className="text-muted-foreground">
+            A full-height chat layout with scrollable messages and a bottom-anchored prompt slot.
+            Includes contextual scroll navigation buttons. Independently installable.
+          </p>
+          <div className="bg-muted rounded-md px-3 py-2 font-mono text-sm">
+            npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json
+          </div>
+        </div>
+
+        <div id="chat-prompt-layout-example" className="flex scroll-mt-16 flex-col gap-2">
+          <SectionHeading id="chat-prompt-layout-example">Chat Layout</SectionHeading>
+          <p className="text-muted-foreground text-xs">
+            Messages scroll independently while the prompt area stays anchored at the bottom. Scroll
+            navigation buttons appear contextually.
+          </p>
+          <ExampleShowcase code={chatPromptLayoutCode}>
+            <ChatPromptLayoutExample />
           </ExampleShowcase>
         </div>
       </div>

@@ -53,6 +53,11 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    id: 'chat-prompt-layout',
+    label: 'Chat Prompt Layout',
+    children: [{ id: 'chat-prompt-layout-example', label: 'Chat Layout' }],
+  },
+  {
     id: 'dark-theme',
     label: 'Dark Theme',
     children: [{ id: 'dark-theme-preview', label: 'Preview' }],
