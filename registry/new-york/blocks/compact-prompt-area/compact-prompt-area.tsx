@@ -1,10 +1,9 @@
 'use client'
 
-import { useCallback, useImperativeHandle, useRef, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Plus, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { BLUR_DELAY_MS } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-events'
 import type { PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 import type { CompactPromptAreaProps } from './types'
 
@@ -60,26 +59,35 @@ export function CompactPromptArea({
 }: CompactPromptAreaProps & { ref?: React.Ref<PromptAreaHandle> }) {
   const promptRef = useRef<PromptAreaHandle>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isFocused, setIsFocused] = useState(false)
+  const promptWrapperRef = useRef<HTMLDivElement>(null)
+  const [isOverflowing, setIsOverflowing] = useState(false)
 
   useImperativeHandle(ref, () => promptRef.current!, [])
 
   const isEmpty =
     value.length === 0 || (value.length === 1 && value[0].type === 'text' && value[0].text === '')
 
-  const isExpanded = isFocused || !isEmpty
+  const hasAttachments = (images && images.length > 0) || (files && files.length > 0)
+  const isExpanded = isOverflowing || hasAttachments
 
-  const handleContainerFocus = useCallback(() => {
-    setIsFocused(true)
-  }, [])
+  // Observe the contenteditable height to detect multiline content
+  useEffect(() => {
+    const wrapper = promptWrapperRef.current
+    if (!wrapper) return
+    const SINGLE_LINE_THRESHOLD = 32
 
-  const handleContainerBlur = useCallback(() => {
-    setTimeout(() => {
-      if (!containerRef.current?.contains(document.activeElement)) {
-        setIsFocused(false)
-      }
-    }, BLUR_DELAY_MS)
-  }, [])
+    const check = () => {
+      const editor = wrapper.querySelector('[contenteditable]') as HTMLElement | null
+      if (!editor) return
+      setIsOverflowing(editor.scrollHeight > SINGLE_LINE_THRESHOLD)
+    }
+
+    const observer = new ResizeObserver(check)
+    observer.observe(wrapper)
+    // Also check immediately in case content already overflows
+    check()
+    return () => observer.disconnect()
+  }, [value])
 
   const handleSubmit = useCallback(() => {
     onSubmit?.(value)
@@ -88,8 +96,6 @@ export function CompactPromptArea({
   return (
     <div
       ref={containerRef}
-      onFocus={handleContainerFocus}
-      onBlur={handleContainerBlur}
       aria-label={ariaLabel}
       data-test-id={dataTestId}
       className={cn(
@@ -118,7 +124,8 @@ export function CompactPromptArea({
 
         {/* Prompt area region */}
         <div
-          className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'overflow-hidden px-3')}
+          ref={promptWrapperRef}
+          className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'px-3')}
           onClick={() => promptRef.current?.focus()}>
           <PromptArea
             ref={promptRef}
@@ -140,7 +147,7 @@ export function CompactPromptArea({
             files={files}
             onFileRemove={onFileRemove}
             autoGrow
-            minHeight={isExpanded ? 48 : 24}
+            minHeight={24}
             maxHeight={maxHeight}
           />
         </div>
