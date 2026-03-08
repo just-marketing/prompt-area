@@ -6,6 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "next dev --turbopack",
+    "prebuild": "pnpm registry:build",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
