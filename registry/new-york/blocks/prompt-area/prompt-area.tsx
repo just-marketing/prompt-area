@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { PromptAreaProps, PromptAreaHandle } from './types'
 import { usePromptArea } from './use-prompt-area'
@@ -163,6 +163,35 @@ export function PromptArea({
   }, [value, autoGrow, isFocused, syncHeight])
 
   // -----------------------------------------------------------------------
+  // Overflow indicator: detect when collapsed content is clipped
+  // -----------------------------------------------------------------------
+
+  const [hasOverflow, setHasOverflow] = useState(false)
+  const overflowCheckRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!autoGrow) return
+
+    const checkOverflow = () => {
+      if (isFocused) {
+        setHasOverflow(false)
+        return
+      }
+      const el = editorRef.current
+      if (!el) return
+      setHasOverflow(el.scrollHeight > el.clientHeight)
+    }
+
+    // Check after render settles
+    overflowCheckRef.current = requestAnimationFrame(checkOverflow)
+    return () => {
+      if (overflowCheckRef.current !== null) {
+        cancelAnimationFrame(overflowCheckRef.current)
+      }
+    }
+  }, [autoGrow, isFocused, value, editorRef])
+
+  // -----------------------------------------------------------------------
   // Compute editor style
   // -----------------------------------------------------------------------
 
@@ -177,7 +206,7 @@ export function PromptArea({
       height: isFocused && editorHeight ? `${editorHeight}px` : `${minHeight}px`,
       minHeight: `${minHeight}px`,
       maxHeight: '70dvh',
-      overflowY: 'auto',
+      overflowY: isFocused ? 'auto' : ('hidden' as const),
       transition: 'height 150ms ease-out',
     }
   }, [autoGrow, minHeight, maxHeight, isFocused, editorHeight])
@@ -241,6 +270,17 @@ export function PromptArea({
           onCompositionEnd={eventHandlers.onCompositionEnd}
           onBlur={autoGrow ? handleBlurWithShrink : eventHandlers.onBlur}
         />
+
+        {/* Overflow gradient indicator – visible when auto-grow is collapsed and content is clipped */}
+        {autoGrow && hasOverflow && !isFocused && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-auto absolute right-0 bottom-0 left-0 cursor-pointer"
+            style={{ height: '32px' }}
+            onClick={() => editorRef.current?.focus()}>
+            <div className="from-background/0 via-background/80 to-background h-full w-full bg-gradient-to-b" />
+          </div>
+        )}
 
         {/* Placeholder overlay */}
         {isEmpty &&

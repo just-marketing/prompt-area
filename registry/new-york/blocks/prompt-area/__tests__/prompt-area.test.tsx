@@ -280,6 +280,122 @@ describe('PromptArea', () => {
 
       expect(editor.style.height).toBeDefined()
     })
+
+    it('shows overflow gradient when collapsed content overflows', async () => {
+      const { container } = render(
+        <PromptArea
+          {...defaultProps}
+          autoGrow
+          minHeight={80}
+          value={[{ type: 'text', text: 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8' }]}
+        />,
+      )
+      const editor = screen.getByRole('textbox')
+
+      // Simulate content taller than container
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+      Object.defineProperty(editor, 'clientHeight', { value: 80, configurable: true })
+
+      // Trigger the rAF-based overflow check
+      await act(async () => {
+        vi.advanceTimersByTime(0)
+        await vi.runAllTimersAsync()
+      })
+
+      const gradient = container.querySelector('[aria-hidden="true"].pointer-events-auto')
+      expect(gradient).toBeInTheDocument()
+    })
+
+    it('does not show overflow gradient when content fits', async () => {
+      const { container } = render(
+        <PromptArea
+          {...defaultProps}
+          autoGrow
+          minHeight={80}
+          value={[{ type: 'text', text: 'Short' }]}
+        />,
+      )
+      const editor = screen.getByRole('textbox')
+
+      // Content fits within the container
+      Object.defineProperty(editor, 'scrollHeight', { value: 40, configurable: true })
+      Object.defineProperty(editor, 'clientHeight', { value: 80, configurable: true })
+
+      await act(async () => {
+        vi.advanceTimersByTime(0)
+        await vi.runAllTimersAsync()
+      })
+
+      const gradient = container.querySelector('[aria-hidden="true"].pointer-events-auto')
+      expect(gradient).not.toBeInTheDocument()
+    })
+
+    it('hides overflow gradient when focused', async () => {
+      const { container } = render(
+        <PromptArea
+          {...defaultProps}
+          autoGrow
+          minHeight={80}
+          value={[{ type: 'text', text: 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8' }]}
+        />,
+      )
+      const editor = screen.getByRole('textbox')
+
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+      Object.defineProperty(editor, 'clientHeight', { value: 80, configurable: true })
+
+      // Let overflow check run
+      await act(async () => {
+        vi.advanceTimersByTime(0)
+        await vi.runAllTimersAsync()
+      })
+
+      // Focus the editor – should hide gradient
+      fireEvent.focus(editor)
+
+      const gradient = container.querySelector('[aria-hidden="true"].pointer-events-auto')
+      expect(gradient).not.toBeInTheDocument()
+    })
+
+    it('focuses editor when overflow gradient is clicked', async () => {
+      const { container } = render(
+        <PromptArea
+          {...defaultProps}
+          autoGrow
+          minHeight={80}
+          value={[{ type: 'text', text: 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8' }]}
+        />,
+      )
+      const editor = screen.getByRole('textbox')
+
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+      Object.defineProperty(editor, 'clientHeight', { value: 80, configurable: true })
+
+      await act(async () => {
+        vi.advanceTimersByTime(0)
+        await vi.runAllTimersAsync()
+      })
+
+      const gradient = container.querySelector('[aria-hidden="true"].pointer-events-auto')
+      expect(gradient).toBeInTheDocument()
+
+      fireEvent.click(gradient!)
+      expect(document.activeElement).toBe(editor)
+    })
+
+    it('uses overflow-hidden when collapsed, auto when focused', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+
+      // Collapsed: overflow should be hidden
+      expect(editor.style.overflowY).toBe('hidden')
+
+      Object.defineProperty(editor, 'scrollHeight', { value: 200, configurable: true })
+      fireEvent.focus(editor)
+
+      // Focused: overflow should be auto
+      expect(editor.style.overflowY).toBe('auto')
+    })
   })
 
   describe('default aria-label', () => {
