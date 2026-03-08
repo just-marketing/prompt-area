@@ -1227,91 +1227,27 @@ function getCursorOffset(editor: HTMLElement): number | null {
  * Returns null if the offset can't be mapped to a DOM position.
  */
 function createRangeAtOffset(editor: HTMLElement, targetOffset: number): Range | null {
-  let remaining = targetOffset
+  const pos = findDOMPosition(editor, targetOffset)
+  if (!pos) return null
 
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const child = editor.childNodes[i]
-
-    if (child.nodeType === Node.TEXT_NODE) {
-      const len = (child.textContent ?? '').length
-      if (remaining <= len) {
-        const range = document.createRange()
-        range.setStart(child, remaining)
-        range.collapse(true)
-        return range
-      }
-      remaining -= len
-    } else if (isChipElement(child)) {
-      const trigger = child.dataset.chipTrigger ?? ''
-      const display = child.dataset.chipDisplay ?? child.textContent ?? ''
-      const chipLen = trigger.length + display.length
-      if (remaining <= chipLen) {
-        const range = document.createRange()
-        range.setStartAfter(child)
-        range.collapse(true)
-        return range
-      }
-      remaining -= chipLen
-    } else if (isBRElement(child)) {
-      if (child.dataset.sentinel) continue // skip sentinel <br>
-      if (remaining <= 1) {
-        const range = document.createRange()
-        range.setStartAfter(child)
-        range.collapse(true)
-        return range
-      }
-      remaining -= 1
-    }
-  }
-
-  return null
+  const range = document.createRange()
+  range.setStart(pos.node, pos.offset)
+  range.collapse(true)
+  return range
 }
 
 function setCursorAtOffset(editor: HTMLElement, targetOffset: number): void {
   const sel = window.getSelection()
   if (!sel) return
 
-  let remaining = targetOffset
-
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const child = editor.childNodes[i]
-
-    if (child.nodeType === Node.TEXT_NODE) {
-      const len = (child.textContent ?? '').length
-      if (remaining <= len) {
-        const range = document.createRange()
-        range.setStart(child, remaining)
-        range.collapse(true)
-        sel.removeAllRanges()
-        sel.addRange(range)
-        return
-      }
-      remaining -= len
-    } else if (isChipElement(child)) {
-      const trigger = child.dataset.chipTrigger ?? ''
-      const display = child.dataset.chipDisplay ?? child.textContent ?? ''
-      const chipLen = trigger.length + display.length
-      if (remaining <= chipLen) {
-        const range = document.createRange()
-        range.setStartAfter(child)
-        range.collapse(true)
-        sel.removeAllRanges()
-        sel.addRange(range)
-        return
-      }
-      remaining -= chipLen
-    } else if (isBRElement(child)) {
-      if (child.dataset.sentinel) continue // skip sentinel <br>
-      if (remaining <= 1) {
-        const range = document.createRange()
-        range.setStartAfter(child)
-        range.collapse(true)
-        sel.removeAllRanges()
-        sel.addRange(range)
-        return
-      }
-      remaining -= 1
-    }
+  const pos = findDOMPosition(editor, targetOffset)
+  if (pos) {
+    const range = document.createRange()
+    range.setStart(pos.node, pos.offset)
+    range.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(range)
+    return
   }
 
   // Fallback: place cursor at end
