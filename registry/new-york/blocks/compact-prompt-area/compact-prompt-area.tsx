@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { Plus, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { BLUR_DELAY_MS } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-events'
 import type { PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 import type { CompactPromptAreaProps } from './types'
 
@@ -59,60 +60,26 @@ export function CompactPromptArea({
 }: CompactPromptAreaProps & { ref?: React.Ref<PromptAreaHandle> }) {
   const promptRef = useRef<PromptAreaHandle>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const promptWrapperRef = useRef<HTMLDivElement>(null)
-  const [isOverflowing, setIsOverflowing] = useState(false)
-  const isOverflowingRef = useRef(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   useImperativeHandle(ref, () => promptRef.current!, [])
 
   const isEmpty =
     value.length === 0 || (value.length === 1 && value[0].type === 'text' && value[0].text === '')
 
-  const hasAttachments = (images && images.length > 0) || (files && files.length > 0)
-  const isExpanded = isOverflowing || hasAttachments
+  const isExpanded = isFocused || !isEmpty
 
-  // Detect multiline content with hysteresis to prevent flickering.
-  // We measure scrollHeight on a hidden clone so layout shifts from
-  // expanding/collapsing don't feed back into the measurement.
-  useEffect(() => {
-    const wrapper = promptWrapperRef.current
-    if (!wrapper) return
-    const EXPAND_THRESHOLD = 32
-    const COLLAPSE_THRESHOLD = 28
+  const handleContainerFocus = useCallback(() => {
+    setIsFocused(true)
+  }, [])
 
-    const check = () => {
-      const editor = wrapper.querySelector('[contenteditable]') as HTMLElement | null
-      if (!editor) return
-
-      // Measure in a detached clone to avoid layout feedback loops
-      const clone = editor.cloneNode(true) as HTMLElement
-      clone.style.cssText = `
-        position:fixed;left:-9999px;top:0;
-        width:${editor.offsetWidth}px;
-        height:auto;min-height:0;max-height:none;
-        visibility:hidden;pointer-events:none;
-        white-space:pre-wrap;word-break:break-word;
-        font:${getComputedStyle(editor).font};
-        padding:${getComputedStyle(editor).padding};
-      `
-      document.body.appendChild(clone)
-      const contentHeight = clone.scrollHeight
-      document.body.removeChild(clone)
-
-      const current = isOverflowingRef.current
-      const next = current ? contentHeight > COLLAPSE_THRESHOLD : contentHeight > EXPAND_THRESHOLD
-
-      if (next !== current) {
-        isOverflowingRef.current = next
-        setIsOverflowing(next)
+  const handleContainerBlur = useCallback(() => {
+    setTimeout(() => {
+      if (!containerRef.current?.contains(document.activeElement)) {
+        setIsFocused(false)
       }
-    }
-
-    const observer = new ResizeObserver(check)
-    observer.observe(wrapper)
-    check()
-    return () => observer.disconnect()
-  }, [value])
+    }, BLUR_DELAY_MS)
+  }, [])
 
   const handleSubmit = useCallback(() => {
     onSubmit?.(value)
@@ -121,6 +88,8 @@ export function CompactPromptArea({
   return (
     <div
       ref={containerRef}
+      onFocus={handleContainerFocus}
+      onBlur={handleContainerBlur}
       aria-label={ariaLabel}
       data-test-id={dataTestId}
       className={cn(
@@ -149,8 +118,7 @@ export function CompactPromptArea({
 
         {/* Prompt area region */}
         <div
-          ref={promptWrapperRef}
-          className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'px-3')}
+          className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'overflow-hidden px-3')}
           onClick={() => promptRef.current?.focus()}>
           <PromptArea
             ref={promptRef}
@@ -172,7 +140,7 @@ export function CompactPromptArea({
             files={files}
             onFileRemove={onFileRemove}
             autoGrow
-            minHeight={24}
+            minHeight={isExpanded ? 48 : 24}
             maxHeight={maxHeight}
           />
         </div>
