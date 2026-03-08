@@ -39,6 +39,8 @@ import {
   compactPromptAreaCode,
   ChatPromptLayoutExample,
   chatPromptLayoutCode,
+  DxHelpersExample,
+  dxHelpersCode,
 } from './examples'
 import { SectionHeading } from './sections/section-heading'
 import { DemoSection } from './sections/demo-section'
@@ -113,6 +115,19 @@ export default function HomeContent() {
         <SectionHeading id="examples" as="h2">
           Examples
         </SectionHeading>
+
+        <div id="example-dx-helpers" className="flex scroll-mt-16 flex-col gap-2">
+          <SectionHeading id="example-dx-helpers">DX Helpers</SectionHeading>
+          <p className="text-muted-foreground text-xs">
+            Use <code>usePromptAreaState()</code> for zero-boilerplate state,{' '}
+            <code>mentionTrigger()</code> / <code>commandTrigger()</code> /{' '}
+            <code>hashtagTrigger()</code> for one-liner trigger setup, and{' '}
+            <code>getChipsByTrigger()</code> to inspect segments.
+          </p>
+          <ExampleShowcase code={dxHelpersCode}>
+            <DxHelpersExample />
+          </ExampleShowcase>
+        </div>
 
         <div id="example-basic" className="flex scroll-mt-16 flex-col gap-2">
           <SectionHeading id="example-basic">Basic (no triggers)</SectionHeading>
