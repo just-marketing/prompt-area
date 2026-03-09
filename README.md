@@ -18,7 +18,8 @@ Most rich text editors are full document editors shoehorned into chat inputs. Pr
 npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
-Add the required CSS classes to your `globals.css` after `@layer base`:
+<details>
+<summary>Add the required CSS classes to your <code>globals.css</code> after <code>@layer base</code></summary>
 
 ```css
 @layer components {
@@ -48,6 +49,8 @@ Add the required CSS classes to your `globals.css` after `@layer base`:
   }
 }
 ```
+
+</details>
 
 ## Quick Start
 
