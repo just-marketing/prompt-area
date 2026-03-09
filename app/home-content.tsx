@@ -92,7 +92,10 @@ export default function HomeContent() {
           Features
         </SectionHeading>
         <p className="text-muted-foreground text-sm">
-          Everything you need for a production-ready rich text input.
+          Everything you need for a production-ready rich text input. See how we stack up against alternatives in the{' '}
+          <a href="#comparison" className="text-foreground underline underline-offset-2 hover:decoration-foreground/50">
+            comparison table
+          </a>.
         </p>
         <FeaturesGrid />
       </div>
