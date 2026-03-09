@@ -68,6 +68,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Dark Theme',
     children: [{ id: 'dark-theme-preview', label: 'Preview' }],
   },
+  { id: 'comparison', label: 'Comparison' },
 ]
 
 function collectIds(items: NavItem[]): string[] {

@@ -47,6 +47,7 @@ import { DemoSection } from './sections/demo-section'
 import { FeaturesGrid } from './sections/features-grid'
 import { InspectorSection } from './sections/inspector-section'
 import { DarkThemePreview } from './sections/dark-theme-preview'
+import { ComparisonSection } from './sections/comparison-section'
 
 export default function HomeContent() {
   return (
@@ -406,6 +407,19 @@ export default function HomeContent() {
           </p>
           <DarkThemePreview />
         </div>
+      </div>
+
+      {/* Comparison */}
+      <div id="comparison" className="flex scroll-mt-16 flex-col gap-3">
+        <SectionHeading id="comparison" as="h2">
+          Comparison
+        </SectionHeading>
+        <p className="text-muted-foreground text-sm">
+          Prompt Area combines mentions, slash commands, auto-resize, and rich text into a single
+          component. Here&apos;s how it compares to popular alternatives that each cover only a
+          subset of these features.
+        </p>
+        <ComparisonSection />
       </div>
     </div>
   )
