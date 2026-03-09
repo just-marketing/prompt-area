@@ -152,7 +152,8 @@ export default async function OGImage() {
             <span style={mentionChip}>@Strategist</span>
             <span>and</span>
             <span style={mentionChip}>@Copywriter</span>
-            <span>. Tag anything marked</span>
+            <span>.</span>
+            <span>Tag anything marked</span>
             <span style={tagChip}>#campaign</span>
             <span>and format the output as:</span>
           </div>
@@ -169,17 +170,20 @@ export default async function OGImage() {
               lineHeight: 1.6,
               marginTop: '4px',
             }}>
-            <div style={{ display: 'flex' }}>
-              <span>-&nbsp;</span>
+            <div style={{ display: 'flex', alignItems: 'baseline' }}>
+              <span style={{ marginRight: '10px' }}>•</span>
               <span style={{ fontWeight: 700 }}>Key messages</span>
               <span>&nbsp;for the target audience</span>
             </div>
-            <div style={{ display: 'flex' }}>
-              <span>-&nbsp;</span>
+            <div style={{ display: 'flex', alignItems: 'baseline' }}>
+              <span style={{ marginRight: '10px' }}>•</span>
               <span style={{ fontStyle: 'italic' }}>Action items</span>
               <span>&nbsp;assigned to each agent</span>
             </div>
-            <div style={{ display: 'flex' }}>- Open questions for follow-up</div>
+            <div style={{ display: 'flex', alignItems: 'baseline' }}>
+              <span style={{ marginRight: '10px' }}>•</span>
+              <span>Open questions for follow-up</span>
+            </div>
           </div>
         </div>
 
