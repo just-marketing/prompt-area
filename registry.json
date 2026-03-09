@@ -41,6 +41,34 @@
         {
           "path": "registry/new-york/blocks/prompt-area/types.ts",
           "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/animated-placeholder.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/image-strip.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/file-strip.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/remove-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/segment-helpers.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/trigger-presets.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/prompt-area/use-prompt-area-state.ts",
+          "type": "registry:component"
         }
       ]
     },
