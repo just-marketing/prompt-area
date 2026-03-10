@@ -277,30 +277,37 @@ export function decorateURLsInEditor(editor: HTMLElement): boolean {
 
     if (matches.length === 0) continue
 
-    decorated = true
     const parent = textNode.parentNode
     if (!parent) continue
 
+    // Validate URLs upfront – only keep those with safe protocols (CWE-79)
+    const safeMatches: Array<{ url: string; href: string; index: number }> = []
+    for (const { url, index } of matches) {
+      try {
+        const parsed = new URL(url)
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          safeMatches.push({ url, href: parsed.href, index })
+        }
+      } catch {
+        // skip malformed URLs
+      }
+    }
+
+    if (safeMatches.length === 0) continue
+
+    decorated = true
     const fragment = document.createDocumentFragment()
     let lastIndex = 0
 
-    for (const { url, index } of matches) {
+    for (const { url, href, index } of safeMatches) {
       // Text before this URL
       if (index > lastIndex) {
         fragment.appendChild(document.createTextNode(text.slice(lastIndex, index)))
       }
 
-      // Create the link element – sanitize the URL to prevent XSS (CWE-79)
+      // Create the link element
       const anchor = document.createElement('a')
-      try {
-        const parsed = new URL(url)
-        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          continue
-        }
-        anchor.href = parsed.href
-      } catch {
-        continue
-      }
+      anchor.href = href
       anchor.target = '_blank'
       anchor.rel = 'noopener noreferrer'
       anchor.dataset.url = 'true'
