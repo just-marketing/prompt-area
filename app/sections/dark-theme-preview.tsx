@@ -23,7 +23,20 @@ export function DarkThemePreview() {
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-lg border p-4">
         <p className="text-muted-foreground mb-2 text-xs font-medium">Light</p>
-        <div className="rounded-lg border bg-white p-3 text-[oklch(0.145_0_0)]">
+        <div
+          className="rounded-lg border bg-white p-3 text-[oklch(0.145_0_0)]"
+          style={
+            {
+              '--popover': 'oklch(1 0 0)',
+              '--popover-foreground': 'oklch(0.145 0 0)',
+              '--foreground': 'oklch(0.145 0 0)',
+              '--accent': 'oklch(0.97 0 0)',
+              '--accent-foreground': 'oklch(0.205 0 0)',
+              '--muted-foreground': 'oklch(0.556 0 0)',
+              '--border': 'oklch(0.922 0 0)',
+              '--secondary': 'oklch(0.97 0 0)',
+            } as React.CSSProperties
+          }>
           <PromptArea
             value={lightSegments}
             onChange={setLightSegments}
@@ -35,7 +48,20 @@ export function DarkThemePreview() {
       </div>
       <div className="rounded-lg border p-4">
         <p className="text-muted-foreground mb-2 text-xs font-medium">Dark</p>
-        <div className="dark rounded-lg border border-[oklch(1_0_0/10%)] bg-[oklch(0.145_0_0)] p-3 text-[oklch(0.985_0_0)]">
+        <div
+          className="dark rounded-lg border border-[oklch(1_0_0/10%)] bg-[oklch(0.145_0_0)] p-3 text-[oklch(0.985_0_0)]"
+          style={
+            {
+              '--popover': 'oklch(0.205 0 0)',
+              '--popover-foreground': 'oklch(0.985 0 0)',
+              '--foreground': 'oklch(0.985 0 0)',
+              '--accent': 'oklch(0.269 0 0)',
+              '--accent-foreground': 'oklch(0.985 0 0)',
+              '--muted-foreground': 'oklch(0.708 0 0)',
+              '--border': 'oklch(1 0 0 / 10%)',
+              '--secondary': 'oklch(0.269 0 0)',
+            } as React.CSSProperties
+          }>
           <PromptArea
             value={darkSegments}
             onChange={setDarkSegments}
