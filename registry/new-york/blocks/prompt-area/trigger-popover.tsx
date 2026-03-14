@@ -77,11 +77,23 @@ export function TriggerPopover({
       role="listbox"
       aria-label={`${triggerChar} suggestions`}>
       {loading ? (
-        <div className="text-muted-foreground px-3 py-2 text-sm">Loading suggestions...</div>
+        <div
+          role="option"
+          aria-selected={false}
+          className="text-muted-foreground px-3 py-2 text-sm">
+          Loading suggestions...
+        </div>
       ) : error ? (
-        <div className="text-destructive px-3 py-2 text-sm">{error}</div>
+        <div role="option" aria-selected={false} className="text-destructive px-3 py-2 text-sm">
+          {error}
+        </div>
       ) : suggestions.length === 0 && emptyMessage ? (
-        <div className="text-muted-foreground px-3 py-2 text-sm">{emptyMessage}</div>
+        <div
+          role="option"
+          aria-selected={false}
+          className="text-muted-foreground px-3 py-2 text-sm">
+          {emptyMessage}
+        </div>
       ) : (
         suggestions.map((suggestion, index) => (
           <button

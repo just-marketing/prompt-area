@@ -250,7 +250,7 @@ export function PromptArea({
           role="textbox"
           aria-label={ariaLabel ?? 'Text input'}
           aria-multiline="true"
-          aria-disabled={disabled}
+          aria-disabled={disabled || undefined}
           data-test-id={dataTestId}
           className={cn(
             'prompt-area-editor',

@@ -22,10 +22,16 @@ export function ActionBarDisabledExample() {
         disabled
         left={
           <>
-            <button type="button" className="text-muted-foreground rounded-md p-1.5">
+            <button
+              type="button"
+              className="text-muted-foreground rounded-md p-1.5"
+              aria-label="Attach">
               <PlusCircle className="size-4" />
             </button>
-            <button type="button" className="text-muted-foreground rounded-md p-1.5">
+            <button
+              type="button"
+              className="text-muted-foreground rounded-md p-1.5"
+              aria-label="Mention">
               <AtSign className="size-4" />
             </button>
           </>
@@ -34,7 +40,8 @@ export function ActionBarDisabledExample() {
           <button
             type="button"
             className="bg-primary text-primary-foreground rounded-lg p-1.5"
-            disabled>
+            disabled
+            aria-label="Send message">
             <ArrowUp className="size-4" />
           </button>
         }
@@ -67,16 +74,16 @@ function ActionBarDisabledExample() {
         disabled
         left={
           <>
-            <button className="text-muted-foreground rounded-md p-1.5">
+            <button className="text-muted-foreground rounded-md p-1.5" aria-label="Attach">
               <PlusCircle className="size-4" />
             </button>
-            <button className="text-muted-foreground rounded-md p-1.5">
+            <button className="text-muted-foreground rounded-md p-1.5" aria-label="Mention">
               <AtSign className="size-4" />
             </button>
           </>
         }
         right={
-          <button className="bg-primary text-primary-foreground rounded-lg p-1.5" disabled>
+          <button className="bg-primary text-primary-foreground rounded-lg p-1.5" disabled aria-label="Send message">
             <ArrowUp className="size-4" />
           </button>
         }
