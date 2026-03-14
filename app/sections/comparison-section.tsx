@@ -306,7 +306,7 @@ export function ComparisonSection() {
                   className="decoration-muted-foreground/30 hover:decoration-foreground/50 text-xs font-semibold underline underline-offset-2">
                   {c.name}
                 </a>
-                <div className="text-muted-foreground text-[10px] font-normal">{c.description}</div>
+                <div className="text-muted-foreground text-[11px] font-normal">{c.description}</div>
               </th>
             ))}
           </tr>

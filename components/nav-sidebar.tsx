@@ -415,6 +415,7 @@ function NavSidebar() {
   return (
     <aside
       ref={sidebarRef}
+      aria-label="Sidebar navigation"
       tabIndex={isOpen || isDesktop ? -1 : undefined}
       aria-hidden={!isOpen && !isDesktop ? true : undefined}
       inert={!isOpen && !isDesktop ? true : undefined}
@@ -427,6 +428,7 @@ function NavSidebar() {
       )}>
       <nav
         ref={navRef}
+        aria-label="Page sections"
         className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-16 pb-6 lg:pt-6">
         <ActiveIndicator activeId={activeId} itemRefs={itemRefs} navRef={navRef} />
 
