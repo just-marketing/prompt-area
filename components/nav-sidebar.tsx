@@ -379,6 +379,7 @@ function PageLinks() {
 
 function NavSidebar() {
   const { isOpen, isDesktop, close } = useSidebar()
+  const pathname = usePathname()
   const activeId = useActiveSection(ALL_IDS)
   const navRef = useRef<HTMLElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLElement>>(new Map())
@@ -386,6 +387,10 @@ function NavSidebar() {
 
   const handleNavigate = useCallback(
     (id: string) => {
+      if (pathname !== '/') {
+        window.location.href = `/#${id}`
+        return
+      }
       const el = document.getElementById(id)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -396,7 +401,7 @@ function NavSidebar() {
         setTimeout(close, 150)
       }
     },
-    [close, isDesktop],
+    [close, isDesktop, pathname],
   )
 
   // Focus sidebar on open for keyboard accessibility (mobile only)
