@@ -88,11 +88,11 @@ describe('FileStrip', () => {
 
   it('collapses to first 3 files with "+N more" when more than 3 files', () => {
     render(<FileStrip files={manyFiles} />)
-    // Only first 3 visible initially
+    // 3 file cards + 1 toggle button wrapper
     const items = screen.getAllByRole('listitem')
-    expect(items).toHaveLength(3)
-    // Compact cards should have w-36 class
-    for (const item of items) {
+    expect(items).toHaveLength(4)
+    // First 3 items are compact file cards with w-36 class
+    for (const item of items.slice(0, 3)) {
       expect(item.className).toContain('w-36')
     }
     // "+1 more" button visible
@@ -104,11 +104,12 @@ describe('FileStrip', () => {
   it('opens popover with hidden files when "+N more" is clicked', async () => {
     const user = userEvent.setup()
     render(<FileStrip files={manyFiles} />)
-    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    // 3 file cards + 1 toggle button wrapper
+    expect(screen.getAllByRole('listitem')).toHaveLength(4)
 
     await user.click(screen.getByText('+1 more'))
-    // 3 inline + 1 hidden in popover
-    expect(screen.getAllByRole('listitem')).toHaveLength(4)
+    // 3 inline + 1 toggle wrapper + 1 hidden in popover
+    expect(screen.getAllByRole('listitem')).toHaveLength(5)
     expect(screen.getByLabelText('More attached files')).toBeInTheDocument()
     expect(screen.getByText('Show less')).toBeInTheDocument()
   })
@@ -118,10 +119,11 @@ describe('FileStrip', () => {
     render(<FileStrip files={manyFiles} />)
 
     await user.click(screen.getByText('+1 more'))
-    expect(screen.getAllByRole('listitem')).toHaveLength(4)
+    expect(screen.getAllByRole('listitem')).toHaveLength(5)
 
     await user.click(screen.getByText('Show less'))
-    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    // 3 file cards + 1 toggle button wrapper
+    expect(screen.getAllByRole('listitem')).toHaveLength(4)
     expect(screen.queryByLabelText('More attached files')).not.toBeInTheDocument()
     expect(screen.getByText('+1 more')).toBeInTheDocument()
   })
@@ -240,13 +242,14 @@ describe('FileStrip', () => {
 
       // Open popover
       await user.click(screen.getByText('+1 more'))
-      expect(screen.getAllByRole('listitem')).toHaveLength(4)
+      // 3 file cards + 1 toggle wrapper + 1 hidden in popover
+      expect(screen.getAllByRole('listitem')).toHaveLength(5)
 
       // Click outside
       fireEvent.mouseDown(document.body)
 
-      // Popover should close
-      expect(screen.getAllByRole('listitem')).toHaveLength(3)
+      // Popover should close: 3 file cards + 1 toggle wrapper
+      expect(screen.getAllByRole('listitem')).toHaveLength(4)
     })
   })
 
