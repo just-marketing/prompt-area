@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Suspense } from 'react'
 import localFont from 'next/font/local'
 import './globals.css'
 import { SidebarLayout } from '@/components/nav-sidebar'
@@ -130,7 +131,9 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SidebarLayout>{children}</SidebarLayout>
+        <Suspense>
+          <SidebarLayout>{children}</SidebarLayout>
+        </Suspense>
         <Analytics />
       </body>
     </html>
