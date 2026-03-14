@@ -433,6 +433,18 @@ export default function HomeContent() {
       <footer className="border-border text-muted-foreground border-t pt-6 text-center text-xs">
         <div className="flex items-center justify-center gap-3">
           <a
+            href="/about"
+            className="hover:text-foreground underline underline-offset-4 transition-colors">
+            About
+          </a>
+          <span aria-hidden="true">&middot;</span>
+          <a
+            href="/contact"
+            className="hover:text-foreground underline underline-offset-4 transition-colors">
+            Contact
+          </a>
+          <span aria-hidden="true">&middot;</span>
+          <a
             href="/llms.txt"
             className="hover:text-foreground underline underline-offset-4 transition-colors">
             llms.txt
