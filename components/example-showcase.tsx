@@ -13,7 +13,7 @@ interface ExampleShowcaseProps {
 export function ExampleShowcase({ children, code }: ExampleShowcaseProps) {
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [copied, setCopied] = useState(false)
-  const highlightedHtml = useShikiHighlight(code)
+  const highlightedHtml = useShikiHighlight(code, 'tsx', tab === 'code')
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code)

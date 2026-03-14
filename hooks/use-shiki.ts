@@ -14,10 +14,11 @@ function getHighlighter() {
   return highlighterPromise
 }
 
-export function useShikiHighlight(code: string, lang: string = 'tsx') {
+export function useShikiHighlight(code: string, lang: string = 'tsx', enabled: boolean = true) {
   const [html, setHtml] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!enabled) return
     let cancelled = false
     getHighlighter().then((hl) => {
       if (cancelled) return
@@ -34,7 +35,7 @@ export function useShikiHighlight(code: string, lang: string = 'tsx') {
     return () => {
       cancelled = true
     }
-  }, [code, lang])
+  }, [code, lang, enabled])
 
   return html
 }

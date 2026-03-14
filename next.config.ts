@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: 'bottom-right',
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'shiki'],
+  },
   async redirects() {
     return [
       { source: '/about-us', destination: '/about', permanent: true },
