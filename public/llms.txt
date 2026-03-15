@@ -5,46 +5,64 @@
 ## About
 
 - [Homepage](https://prompt-area.com): Interactive demo, feature showcase, live inspector, and comparison matrix against alternatives like Tiptap, Lexical, and Plate.js
+- [About](https://prompt-area.com/about): Project information, team, and open source details
+- [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
+- [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
+- [Partners](https://prompt-area.com/partners): Integration partnerships and technology partner opportunities
 - [GitHub Repository](https://github.com/team-gpt/prompt-area): Source code, issue tracker, and contribution guidelines for the prompt-area component
 - [shadcn Registry](https://ui.shadcn.com/docs/registry): Learn how shadcn registry distribution works for installing prompt-area into any Next.js or React project
 
 ## Installation
 
-- [Install prompt-area](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` to add the main component with types, helpers, and engine
-- [Install action-bar](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/action-bar.json` to add the horizontal toolbar companion
-- [Install status-bar](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/status-bar.json` to add the contextual info bar companion
-- [Install compact-prompt-area](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json` to add the pill-shaped collapsible variant
-- [Install chat-prompt-layout](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json` to add the full-height chat layout with scroll navigation
+- [Install prompt-area](https://prompt-area.com/#demo): Run `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` to add the main component with types, helpers, and engine
+- [Install action-bar](https://prompt-area.com/#action-bar): Run `npx shadcn@latest add https://prompt-area.com/r/action-bar.json` to add the horizontal toolbar companion
+- [Install status-bar](https://prompt-area.com/#status-bar): Run `npx shadcn@latest add https://prompt-area.com/r/status-bar.json` to add the contextual info bar companion
+- [Install compact-prompt-area](https://prompt-area.com/#compact-prompt-area): Run `npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json` to add the pill-shaped collapsible variant
+- [Install chat-prompt-layout](https://prompt-area.com/#chat-prompt-layout): Run `npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json` to add the full-height chat layout with scroll navigation
 
 ## Core Features
 
-- [Trigger-Based Chips](https://prompt-area.com): Type @, /, # or any character to activate dropdown suggestions or callbacks that resolve into structured, immutable chip segments
-- [Inline Markdown](https://prompt-area.com): Live preview of **bold**, *italic*, ***bold-italic***, auto-linked URLs, and bullet/numbered list auto-formatting with indentation
-- [File & Image Attachments](https://prompt-area.com): Paste screenshots or attach files with thumbnails, MIME-type icons, loading indicators, and collapsible file strips
-- [Undo/Redo](https://prompt-area.com): Full history stack (100 entries) with Ctrl+Z / Ctrl+Shift+Z, debounced snapshots, and undo/redo callbacks
-- [Copy & Paste](https://prompt-area.com): Preserves chip data through internal paste via custom clipboard format, auto-resolves triggers on external paste
-- [Auto-Grow](https://prompt-area.com): Textarea expands on focus and shrinks on blur with smooth CSS transitions and overflow gradient indicators
-- [IME Support](https://prompt-area.com): Proper composition handling for Chinese, Japanese, and Korean input — defers trigger detection during active composition
-- [Accessibility](https://prompt-area.com): ARIA labels, keyboard navigation, screen reader announcements, and role-based popover with listbox semantics
-- [Dark Mode](https://prompt-area.com): Full light/dark theme support via CSS variables with no additional configuration
+- [Trigger-Based Chips](https://prompt-area.com/#examples): Type @, /, # or any character to activate dropdown suggestions or callbacks that resolve into structured, immutable chip segments
+- [Inline Markdown](https://prompt-area.com/#example-markdown): Live preview of **bold**, *italic*, ***bold-italic***, auto-linked URLs, and bullet/numbered list auto-formatting with indentation
+- [File & Image Attachments](https://prompt-area.com/#example-files): Paste screenshots or attach files with thumbnails, MIME-type icons, loading indicators, and collapsible file strips
+- [Rotating Placeholders](https://prompt-area.com/#example-rotating-placeholders): Pass a string array to animate between placeholder texts with smooth slide transitions
+- [Undo/Redo](https://prompt-area.com/#features): Full history stack (100 entries) with Ctrl+Z / Ctrl+Shift+Z, debounced snapshots, and undo/redo callbacks
+- [Copy & Paste](https://prompt-area.com/#example-copy-paste): Preserves chip data through internal paste via custom clipboard format, auto-resolves triggers on external paste
+- [Auto-Grow](https://prompt-area.com/#features): Textarea expands on focus and shrinks on blur with smooth CSS transitions and overflow gradient indicators
+- [IME Support](https://prompt-area.com/#features): Proper composition handling for Chinese, Japanese, and Korean input — defers trigger detection during active composition
+- [Accessibility](https://prompt-area.com/#features): ARIA labels, keyboard navigation, screen reader announcements, and role-based popover with listbox semantics
+- [Dark Mode](https://prompt-area.com/#dark-theme): Full light/dark theme support via CSS variables with no additional configuration
 
 ## Developer Experience
 
-- [usePromptAreaState Hook](https://prompt-area.com): Convenience hook that manages segments, ref, and derived state (plainText, isEmpty, hasChips, chips) with a single `bind` spread
-- [Trigger Presets](https://prompt-area.com): Pre-built factories — mentionTrigger(), commandTrigger(), hashtagTrigger(), callbackTrigger() — for common trigger patterns
-- [Segment Helpers](https://prompt-area.com): Utility functions — text(), chip(), isSegmentsEmpty(), hasChips(), getChips(), getChipsByTrigger(), segmentsToPlainText()
-- [Imperative API](https://prompt-area.com): Ref methods — focus(), blur(), insertChip(), getPlainText(), clear() — for programmatic control
+- [usePromptAreaState Hook](https://prompt-area.com/#example-dx-helpers): Convenience hook that manages segments, ref, and derived state (plainText, isEmpty, hasChips, chips) with a single `bind` spread
+- [Trigger Presets](https://prompt-area.com/#example-dx-helpers): Pre-built factories — mentionTrigger(), commandTrigger(), hashtagTrigger(), callbackTrigger() — for common trigger patterns
+- [Segment Helpers](https://prompt-area.com/#example-dx-helpers): Utility functions — text(), chip(), isSegmentsEmpty(), hasChips(), getChips(), getChipsByTrigger(), segmentsToPlainText()
+- [Imperative API](https://prompt-area.com/#features): Ref methods — focus(), blur(), insertChip(), getPlainText(), clear() — for programmatic control
+
+## Examples
+
+- [DX Helpers](https://prompt-area.com/#example-dx-helpers): usePromptAreaState, mentionTrigger, commandTrigger, getChipsByTrigger
+- [Basic](https://prompt-area.com/#example-basic): Plain text input with no triggers
+- [Rotating Placeholders](https://prompt-area.com/#example-rotating-placeholders): Animated cycling through placeholder texts
+- [@Mentions](https://prompt-area.com/#example-mentions): Trigger-based user mentions with dropdown
+- [/Commands](https://prompt-area.com/#example-commands): Start-of-line command triggers
+- [#Tags](https://prompt-area.com/#example-tags): Auto-resolving hashtag triggers on space
+- [Callback](https://prompt-area.com/#example-callback): Callback mode triggers (e.g., file pickers)
+- [Async Search](https://prompt-area.com/#example-async): Debounced async search with AbortController
+- [Markdown](https://prompt-area.com/#example-markdown): Inline bold, italic, URLs, and list formatting
+- [Copy & Paste](https://prompt-area.com/#example-copy-paste): Chip data preservation and trigger auto-resolution
 
 ## Companion Components
 
-- [Action Bar](https://prompt-area.com): Horizontal toolbar with left/right slots for buttons like attach, mic, and send — pairs below PromptArea
-- [Status Bar](https://prompt-area.com): Compact info bar with left/right slots for model name, branch, or other contextual metadata
-- [Compact Prompt Area](https://prompt-area.com): Pill-shaped single-row input that expands on focus with plus button, submit button, and optional before-submit slot
-- [Chat Prompt Layout](https://prompt-area.com): Full-height flex layout with scrollable messages area, bottom prompt slot, and contextual scroll-to-top/bottom buttons
+- [Action Bar](https://prompt-area.com/#action-bar): Horizontal toolbar with left/right slots for buttons like attach, mic, and send — pairs below PromptArea
+- [Status Bar](https://prompt-area.com/#status-bar): Compact info bar with left/right slots for model name, branch, or other contextual metadata
+- [Compact Prompt Area](https://prompt-area.com/#compact-prompt-area): Pill-shaped single-row input that expands on focus with plus button, submit button, and optional before-submit slot
+- [Chat Prompt Layout](https://prompt-area.com/#chat-prompt-layout): Full-height flex layout with scrollable messages area, bottom prompt slot, and contextual scroll-to-top/bottom buttons
 
 ## Comparison
 
-- [Feature Matrix](https://prompt-area.com): Side-by-side comparison of prompt-area against react-mentions, Tiptap, Lexical, Plate.js, BlockNote, BlockSuite, and react-textarea-autosize across 14 feature dimensions
+- [Feature Matrix](https://prompt-area.com/#comparison): Side-by-side comparison of prompt-area against react-mentions, Tiptap, Lexical, Plate.js, BlockNote, BlockSuite, and react-textarea-autosize across 14 feature dimensions
 
 ## Full Documentation
 
