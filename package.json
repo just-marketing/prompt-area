@@ -60,7 +60,10 @@
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.14"
+      "@types/react": "19.2.14",
+      "undici": ">=7.24.0",
+      "flatted": ">=3.4.0",
+      "hono": ">=4.12.6"
     },
     "onlyBuiltDependencies": [
       "esbuild",
