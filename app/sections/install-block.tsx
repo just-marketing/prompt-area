@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { SectionHeading } from './section-heading'
 
-const AGENT_PROMPT = `Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input. If there are any existing textarea elements in the project, replace them with PromptArea.`
+const AGENT_PROMPT = `Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input. If there are any existing chat or prompt textarea inputs in the project, replace them with PromptArea using the context from the documentation.`
 
 const COMPONENTS = [
   {
