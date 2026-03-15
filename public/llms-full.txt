@@ -2,6 +2,15 @@
 
 > A production-grade contentEditable rich text input distributed as a shadcn registry component. Built with React and TypeScript. Zero extra dependencies beyond React + shadcn/tailwind.
 
+## Website
+
+- [Homepage](https://prompt-area.com): Interactive demo, feature showcase, live inspector, examples, and comparison matrix
+- [About](https://prompt-area.com/about): Project information, team, and open source details
+- [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
+- [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
+- [Partners](https://prompt-area.com/partners): Integration partnerships and technology partner opportunities
+- [GitHub](https://github.com/team-gpt/prompt-area): Source code, issue tracker, and contribution guidelines
+
 ## Installation
 
 ```bash
@@ -53,35 +62,33 @@ Add the following CSS classes to your `globals.css` after `@layer base`:
 'use client'
 
 import { useState } from 'react'
-import { PromptArea } from '@/components/prompt-area'
-import type { Segment, TriggerConfig } from '@/components/types'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
 
-const triggers: TriggerConfig[] = [
-  {
-    char: '@',
-    position: 'any',
-    mode: 'dropdown',
-    onSearch: (query) =>
-      [
-        { value: 'alice', label: 'Alice' },
-        { value: 'bob', label: 'Bob' },
-      ].filter((u) => u.label.toLowerCase().includes(query.toLowerCase())),
-  },
+const USERS = [
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
 ]
 
-export function Chat() {
+function MentionsExample() {
   const [segments, setSegments] = useState<Segment[]>([])
-
   return (
     <PromptArea
       value={segments}
       onChange={setSegments}
-      triggers={triggers}
-      placeholder="Type @ to mention someone..."
-      onSubmit={(segs) => {
-        console.log('Submitted:', segs)
-        setSegments([])
-      }}
+      triggers={[
+        {
+          char: '@',
+          position: 'any',
+          mode: 'dropdown',
+          chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+          onSearch: (q) =>
+            USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+        },
+      ]}
+      placeholder="Type @ to mention an agent..."
+      minHeight={48}
     />
   )
 }
@@ -245,18 +252,39 @@ type PromptAreaFile = {
 
 ## Trigger Presets
 
-Pre-built trigger configuration factories for common patterns. Import from `trigger-presets`.
+Pre-built trigger configuration factories for common patterns. Import from `trigger-presets` (installed with prompt-area).
 
 ```tsx
-import { mentionTrigger, commandTrigger, hashtagTrigger, callbackTrigger } from './trigger-presets'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/registry/new-york/blocks/prompt-area/trigger-presets'
+import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 
-<PromptArea
-  triggers={[
-    mentionTrigger({ onSearch: searchUsers }),
-    commandTrigger({ onSearch: searchCommands }),
-    hashtagTrigger(),
-  ]}
-/>
+function ChatInput() {
+  const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
+  const mentions = getChipsByTrigger(bind.value, '@')
+
+  return (
+    <>
+      <PromptArea
+        {...bind}
+        triggers={[
+          mentionTrigger({ onSearch: searchAgents }),
+          commandTrigger({ onSearch: searchCommands }),
+          hashtagTrigger({ onSearch: searchTags }),
+        ]}
+        placeholder="Try @mention, /command, and #tags..."
+        onSubmit={() => {
+          sendMessage(plainText, mentions)
+          clear()
+        }}
+      />
+      <button disabled={isEmpty} onClick={() => focus()}>
+        Send
+      </button>
+    </>
+  )
+}
 ```
 
 ### mentionTrigger(opts?)
@@ -279,14 +307,14 @@ All presets accept any additional `TriggerConfig` fields as overrides, including
 
 ## Segment Helpers
 
-Convenience helpers for creating and inspecting segments. Import from `segment-helpers`.
+Convenience helpers for creating and inspecting segments. Import from `segment-helpers` (installed with prompt-area).
 
 ```ts
 import {
   text, chip,
   isSegmentsEmpty, hasChips, getChips, getChipsByTrigger,
   segmentsToPlainText, plainTextToSegments,
-} from './segment-helpers'
+} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 ```
 
 ### Factories
@@ -326,19 +354,34 @@ getChipsByTrigger(greeting, '@') // [{ type: 'chip', trigger: '@', value: 'u1', 
 A convenience hook that wires up all boilerplate state for PromptArea. Manages `useState<Segment[]>`, `useRef<PromptAreaHandle>`, and derived values.
 
 ```tsx
-import { usePromptAreaState } from './use-prompt-area-state'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/registry/new-york/blocks/prompt-area/trigger-presets'
+import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 
 function ChatInput() {
   const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
+  const mentions = getChipsByTrigger(bind.value, '@')
 
   return (
-    <PromptArea
-      {...bind}
-      onSubmit={() => {
-        sendMessage(plainText)
-        clear()
-      }}
-    />
+    <>
+      <PromptArea
+        {...bind}
+        triggers={[
+          mentionTrigger({ onSearch: searchAgents }),
+          commandTrigger({ onSearch: searchCommands }),
+          hashtagTrigger({ onSearch: searchTags }),
+        ]}
+        placeholder="Try @mention, /command, and #tags..."
+        onSubmit={() => {
+          sendMessage(plainText, mentions)
+          clear()
+        }}
+      />
+      <button disabled={isEmpty} onClick={() => focus()}>
+        Send
+      </button>
+    </>
   )
 }
 ```
@@ -368,6 +411,18 @@ function ChatInput() {
 Style chips per-trigger using `chipClassName` and `chipStyle`:
 
 ```tsx
+const COMMANDS = [
+  { value: 'deep-research', label: 'deep-research', description: 'Research a topic in depth' },
+  { value: 'summarize', label: 'summarize', description: 'Summarize the conversation' },
+  { value: 'create-slides', label: 'create-slides', description: 'Generate a slide deck' },
+]
+
+const USERS = [
+  { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
+  { value: 'strategist', label: 'Strategist', description: 'Campaign planning' },
+  { value: 'analyst', label: 'Analyst', description: 'Performance insights' },
+]
+
 const triggers: TriggerConfig[] = [
   {
     char: '/',
@@ -375,14 +430,16 @@ const triggers: TriggerConfig[] = [
     mode: 'dropdown',
     chipStyle: 'inline',  // Bold inline text, no pill
     chipClassName: 'text-violet-700 dark:text-violet-400',
-    onSearch: searchCommands,
+    onSearch: (q) =>
+      COMMANDS.filter((c) => c.label.toLowerCase().includes(q.toLowerCase())),
   },
   {
     char: '@',
     position: 'any',
     mode: 'dropdown',
     chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    onSearch: searchUsers,
+    onSearch: (q) =>
+      USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
   },
 ]
 ```
@@ -443,13 +500,43 @@ npx shadcn@latest add https://prompt-area.com/r/status-bar.json
 #### StatusBar Example
 
 ```tsx
-<div className="rounded-lg border">
-  <StatusBar
-    left={<span>prompt-area</span>}
-    right={<span>Default</span>}
-  />
-  <PromptArea value={segments} onChange={setSegments} />
-</div>
+import { useState } from 'react'
+import { GitBranch, ChevronDown } from 'lucide-react'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
+import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+
+function StatusBarAboveExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  return (
+    <div className="rounded-lg border">
+      <StatusBar
+        className="border-b"
+        left={
+          <div className="flex items-center gap-1.5">
+            <span className="bg-muted rounded px-1.5 py-0.5 font-medium">prompt-area</span>
+            <GitBranch className="text-muted-foreground size-3" />
+            <span className="text-muted-foreground">main</span>
+          </div>
+        }
+        right={
+          <button className="text-muted-foreground flex items-center gap-1">
+            Default <ChevronDown className="size-3" />
+          </button>
+        }
+      />
+      <div className="p-4">
+        <PromptArea
+          value={segments}
+          onChange={setSegments}
+          placeholder="Type a message..."
+          onSubmit={() => setSegments([])}
+          minHeight={48}
+        />
+      </div>
+    </div>
+  )
+}
 ```
 
 ### Compact Prompt Area
@@ -485,14 +572,42 @@ Accepts all core PromptArea props (`value`, `onChange`, `triggers`, `placeholder
 #### CompactPromptArea Example
 
 ```tsx
-<CompactPromptArea
-  value={segments}
-  onChange={setSegments}
-  placeholder="Ask anything..."
-  onSubmit={handleSubmit}
-  onPlusClick={() => setMenuOpen(true)}
-  beforeSubmitSlot={<button aria-label="Voice"><Mic className="size-4" /></button>}
-/>
+import { useCallback, useRef, useState } from 'react'
+import { Mic } from 'lucide-react'
+import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
+import type { Segment, TriggerConfig, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+
+const triggers: TriggerConfig[] = [
+  { char: '@', position: 'any', mode: 'dropdown', onSearch: (q) => USERS.filter(...) },
+  { char: '/', position: 'start', mode: 'dropdown', chipStyle: 'inline', onSearch: (q) => COMMANDS.filter(...) },
+]
+
+function CompactPromptAreaExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  const promptRef = useRef<PromptAreaHandle>(null)
+
+  const handleSubmit = useCallback((segs: Segment[]) => {
+    promptRef.current?.clear()
+    setSegments([])
+  }, [])
+
+  return (
+    <CompactPromptArea
+      ref={promptRef}
+      value={segments}
+      onChange={setSegments}
+      triggers={triggers}
+      placeholder="Ask anything..."
+      onSubmit={handleSubmit}
+      onPlusClick={() => console.log('Plus clicked')}
+      beforeSubmitSlot={
+        <button aria-label="Voice input">
+          <Mic className="size-4" />
+        </button>
+      }
+    />
+  )
+}
 ```
 
 ### Chat Prompt Layout
@@ -525,20 +640,76 @@ Scroll buttons appear/hide with hysteresis to prevent flicker:
 #### ChatPromptLayout Example
 
 ```tsx
-<ChatPromptLayout
-  className="h-[600px]"
-  prompt={
-    <div className="border-t p-4">
-      <PromptArea value={segments} onChange={setSegments} onSubmit={handleSubmit} />
-      <ActionBar left={<AttachButton />} right={<SendButton />} />
-    </div>
-  }
->
-  {messages.map(msg => <ChatBubble key={msg.id} {...msg} />)}
-</ChatPromptLayout>
+import { useCallback, useRef, useState } from 'react'
+import { ArrowUp } from 'lucide-react'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
+import { ChatPromptLayout } from '@/registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout'
+import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
+import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+
+type Message = { id: number; role: 'user' | 'assistant'; content: string }
+
+function ChatPromptLayoutExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
+  const promptRef = useRef<PromptAreaHandle>(null)
+
+  const isEmpty = segments.length === 0 ||
+    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+
+  const handleSubmit = useCallback(() => {
+    if (isEmpty) return
+    const text = segmentsToPlainText(segments)
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: text }])
+    promptRef.current?.clear()
+    setSegments([])
+  }, [isEmpty, segments])
+
+  return (
+    <ChatPromptLayout
+      className="h-[600px]"
+      prompt={
+        <div className="border-t p-4">
+          <div className="mx-auto max-w-3xl rounded-lg border p-4">
+            <PromptArea
+              ref={promptRef}
+              value={segments}
+              onChange={setSegments}
+              placeholder="Type a message..."
+              onSubmit={handleSubmit}
+              autoGrow
+            />
+            <ActionBar
+              right={
+                <button aria-label="Send" disabled={isEmpty} onClick={handleSubmit}>
+                  <ArrowUp className="size-4" />
+                </button>
+              }
+            />
+          </div>
+        </div>
+      }
+    >
+      <div className="mx-auto max-w-3xl space-y-4 p-4">
+        {messages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+              msg.role === 'user'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-foreground'
+            }`}>
+              {msg.content}
+            </div>
+          </div>
+        ))}
+      </div>
+    </ChatPromptLayout>
+  )
+}
 ```
 
-## Animated Placeholder
+## Rotating Placeholder
 
 When `placeholder` is passed as a `string[]`, the placeholder animates between items:
 
@@ -546,6 +717,30 @@ When `placeholder` is passed as a `string[]`, the placeholder animates between i
 - Uses `framer-motion` for slide-up/slide-down transitions (300ms, easeInOut)
 - Hidden from screen readers (`aria-hidden="true"`)
 - Automatically stops cycling when only one string is provided
+
+```tsx
+import { useState } from 'react'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+
+function RotatingPlaceholdersExample() {
+  const [segments, setSegments] = useState<Segment[]>([])
+  return (
+    <PromptArea
+      value={segments}
+      onChange={setSegments}
+      placeholder={[
+        'Ask a question...',
+        'Write a story...',
+        'Summarize an article...',
+        'Generate some code...',
+      ]}
+      onSubmit={() => { setSegments([]) }}
+      minHeight={48}
+    />
+  )
+}
+```
 
 ## Engine API (prompt-area-engine)
 
@@ -802,7 +997,7 @@ When you install `prompt-area`, the following modules are available:
 - **Copy/paste**: Preserves chip data on internal paste, auto-resolves triggers on external paste
 - **IME support**: Proper composition handling for CJK input
 - **Auto-grow**: Expands on focus, shrinks on blur with smooth transitions
-- **Animated placeholder**: Pass `string[]` to cycle through placeholder texts
+- **Rotating placeholders**: Pass `string[]` to cycle through placeholder texts with smooth slide animations
 - **Keyboard shortcuts**: Cmd+B bold, Cmd+I italic, Enter submit, Escape dismiss
 - **Imperative API**: `focus()`, `blur()`, `insertChip()`, `getPlainText()`, `clear()`
 - **Convenience hook**: `usePromptAreaState()` eliminates boilerplate
@@ -818,5 +1013,9 @@ When you install `prompt-area`, the following modules are available:
 ## Links
 
 - Website: https://prompt-area.com
+- About: https://prompt-area.com/about
+- Contact: https://prompt-area.com/contact
+- Press: https://prompt-area.com/press
+- Partners: https://prompt-area.com/partners
 - GitHub: https://github.com/team-gpt/prompt-area
 - shadcn Registry: https://ui.shadcn.com/docs/registry
