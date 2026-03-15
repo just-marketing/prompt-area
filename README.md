@@ -18,6 +18,12 @@ Most rich text editors are full document editors shoehorned into chat inputs. Pr
 npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
+### Install with AI coding agents
+
+Copy this prompt and give it to your AI coding agent (Claude Code, Codex, Cursor, etc.):
+
+> Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input.
+
 <details>
 <summary>Add the required CSS classes to your <code>globals.css</code> after <code>@layer base</code></summary>
 
@@ -96,24 +102,24 @@ export function Chat() {
 
 How Prompt Area stacks up against popular alternatives:
 
-> **Legend:** :white_check_mark: Full support  :large_orange_diamond: Partial  :x: None
+> **Legend:** :white_check_mark: Full support :large_orange_diamond: Partial :x: None
 
-| Feature | Prompt Area | react-mentions | Tiptap | Lexical | Plate.js | BlockNote | BlockSuite | react-textarea-autosize |
-| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| @Mentions / Tagging | :white_check_mark: | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: | :white_check_mark: | :large_orange_diamond: | :white_check_mark: | :x: |
-| Slash Commands | :white_check_mark: | :x: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Auto-grow on Focus | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: | :white_check_mark: |
-| Inline Markdown | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :large_orange_diamond: | :white_check_mark: | :x: |
-| Undo / Redo | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| File & Image Attachments | :white_check_mark: | :x: | :large_orange_diamond: | :x: | :large_orange_diamond: | :white_check_mark: | :white_check_mark: | :x: |
-| Dark Mode | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :large_orange_diamond: | :x: |
-| Accessibility (ARIA) | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: | :white_check_mark: | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: | :white_check_mark: |
-| IME Support (CJK) | :white_check_mark: | :large_orange_diamond: | :white_check_mark: | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :white_check_mark: |
-| Copy/Paste Chip Preservation | :white_check_mark: | :x: | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: | :white_check_mark: | :white_check_mark: | :x: |
-| Action Bar / Toolbar | :white_check_mark: | :x: | :large_orange_diamond: | :x: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Zero-config State Hook | :white_check_mark: | :x: | :x: | :x: | :x: | :white_check_mark: | :x: | :x: |
-| Bundle Approach | shadcn registry | npm package | npm package | npm package | npm package | npm package | npm package | npm package |
-| Extra Dependencies | **0** | 0 | 3+ | 2+ | 5+ | 5+ | 5+ | 0 |
+| Feature                      |    Prompt Area     |     react-mentions     |         Tiptap         |        Lexical         |        Plate.js        |       BlockNote        |       BlockSuite       | react-textarea-autosize |
+| ---------------------------- | :----------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :---------------------: |
+| @Mentions / Tagging          | :white_check_mark: |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
+| Slash Commands               | :white_check_mark: |          :x:           |   :white_check_mark:   |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Auto-grow on Focus           | :white_check_mark: |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:    |
+| Inline Markdown              | :white_check_mark: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
+| Undo / Redo                  | :white_check_mark: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| File & Image Attachments     | :white_check_mark: |          :x:           | :large_orange_diamond: |          :x:           | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Dark Mode                    | :white_check_mark: |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |           :x:           |
+| Accessibility (ARIA)         | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
+| IME Support (CJK)            | :white_check_mark: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
+| Copy/Paste Chip Preservation | :white_check_mark: |          :x:           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Action Bar / Toolbar         | :white_check_mark: |          :x:           | :large_orange_diamond: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Zero-config State Hook       | :white_check_mark: |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |          :x:           |           :x:           |
+| Bundle Approach              |  shadcn registry   |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |       npm package       |
+| Extra Dependencies           |       **0**        |           0            |           3+           |           2+           |           5+           |           5+           |           5+           |            0            |
 
 ## Features
 
@@ -133,30 +139,30 @@ How Prompt Area stacks up against popular alternatives:
 
 ### `PromptAreaProps`
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `Segment[]` | required | Controlled segment array |
-| `onChange` | `(segments: Segment[]) => void` | required | Called on content changes |
-| `triggers` | `TriggerConfig[]` | `[]` | Trigger character configurations |
-| `placeholder` | `string` | — | Placeholder text when empty |
-| `className` | `string` | — | CSS class for the container |
-| `disabled` | `boolean` | `false` | Disable the input |
-| `markdown` | `boolean` | — | Enable inline markdown rendering |
-| `onSubmit` | `(segments: Segment[]) => void` | — | Called on Enter (without Shift) |
-| `onEscape` | `() => void` | — | Called on Escape |
-| `onChipClick` | `(chip: ChipSegment) => void` | — | Called when a chip is clicked |
-| `onChipAdd` | `(chip: ChipSegment) => void` | — | Called when a chip is added |
-| `onChipDelete` | `(chip: ChipSegment) => void` | — | Called when a chip is deleted |
-| `onLinkClick` | `(url: string) => void` | — | Called on Cmd/Ctrl+Click on a URL |
-| `onPaste` | `(data) => void` | — | Called after paste with segments and source |
-| `onUndo` | `(segments: Segment[]) => void` | — | Called after undo |
-| `onRedo` | `(segments: Segment[]) => void` | — | Called after redo |
-| `minHeight` | `number` | `80` | Minimum height in pixels |
-| `maxHeight` | `number` | — | Maximum height in pixels |
-| `autoFocus` | `boolean` | `false` | Auto-focus on mount |
-| `autoGrow` | `boolean` | `false` | Expand on focus, shrink on blur |
-| `aria-label` | `string` | `'Text input'` | Accessible label |
-| `data-test-id` | `string` | — | Test ID for e2e testing |
+| Prop           | Type                            | Default        | Description                                 |
+| -------------- | ------------------------------- | -------------- | ------------------------------------------- |
+| `value`        | `Segment[]`                     | required       | Controlled segment array                    |
+| `onChange`     | `(segments: Segment[]) => void` | required       | Called on content changes                   |
+| `triggers`     | `TriggerConfig[]`               | `[]`           | Trigger character configurations            |
+| `placeholder`  | `string`                        | —              | Placeholder text when empty                 |
+| `className`    | `string`                        | —              | CSS class for the container                 |
+| `disabled`     | `boolean`                       | `false`        | Disable the input                           |
+| `markdown`     | `boolean`                       | —              | Enable inline markdown rendering            |
+| `onSubmit`     | `(segments: Segment[]) => void` | —              | Called on Enter (without Shift)             |
+| `onEscape`     | `() => void`                    | —              | Called on Escape                            |
+| `onChipClick`  | `(chip: ChipSegment) => void`   | —              | Called when a chip is clicked               |
+| `onChipAdd`    | `(chip: ChipSegment) => void`   | —              | Called when a chip is added                 |
+| `onChipDelete` | `(chip: ChipSegment) => void`   | —              | Called when a chip is deleted               |
+| `onLinkClick`  | `(url: string) => void`         | —              | Called on Cmd/Ctrl+Click on a URL           |
+| `onPaste`      | `(data) => void`                | —              | Called after paste with segments and source |
+| `onUndo`       | `(segments: Segment[]) => void` | —              | Called after undo                           |
+| `onRedo`       | `(segments: Segment[]) => void` | —              | Called after redo                           |
+| `minHeight`    | `number`                        | `80`           | Minimum height in pixels                    |
+| `maxHeight`    | `number`                        | —              | Maximum height in pixels                    |
+| `autoFocus`    | `boolean`                       | `false`        | Auto-focus on mount                         |
+| `autoGrow`     | `boolean`                       | `false`        | Expand on focus, shrink on blur             |
+| `aria-label`   | `string`                        | `'Text input'` | Accessible label                            |
+| `data-test-id` | `string`                        | —              | Test ID for e2e testing                     |
 
 ### `PromptAreaHandle` (ref)
 
@@ -174,18 +180,18 @@ ref.current.clear()          // Clear all content and undo history
 
 ### `TriggerConfig`
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `char` | `string` | Trigger character (e.g., `'@'`, `'/'`, `'#'`) |
-| `position` | `'start' \| 'any'` | Where the trigger is valid |
-| `mode` | `'dropdown' \| 'callback'` | Show dropdown or fire callback |
-| `onSearch` | `(query: string) => TriggerSuggestion[]` | Fetch suggestions (dropdown mode) |
-| `onSelect` | `(suggestion) => string \| void` | Customize chip display text |
-| `onActivate` | `(context) => void` | Handler for callback mode |
-| `resolveOnSpace` | `boolean` | Auto-resolve on space (e.g., `#tag`) |
-| `chipStyle` | `'pill' \| 'inline'` | Visual style for chips |
-| `chipClassName` | `string` | CSS class for chips |
-| `accessibilityLabel` | `string` | ARIA label for the trigger |
+| Field                | Type                                     | Description                                   |
+| -------------------- | ---------------------------------------- | --------------------------------------------- |
+| `char`               | `string`                                 | Trigger character (e.g., `'@'`, `'/'`, `'#'`) |
+| `position`           | `'start' \| 'any'`                       | Where the trigger is valid                    |
+| `mode`               | `'dropdown' \| 'callback'`               | Show dropdown or fire callback                |
+| `onSearch`           | `(query: string) => TriggerSuggestion[]` | Fetch suggestions (dropdown mode)             |
+| `onSelect`           | `(suggestion) => string \| void`         | Customize chip display text                   |
+| `onActivate`         | `(context) => void`                      | Handler for callback mode                     |
+| `resolveOnSpace`     | `boolean`                                | Auto-resolve on space (e.g., `#tag`)          |
+| `chipStyle`          | `'pill' \| 'inline'`                     | Visual style for chips                        |
+| `chipClassName`      | `string`                                 | CSS class for chips                           |
+| `accessibilityLabel` | `string`                                 | ARIA label for the trigger                    |
 
 ### `Segment`
 
@@ -196,8 +202,8 @@ type TextSegment = { type: 'text'; text: string }
 
 type ChipSegment = {
   type: 'chip'
-  trigger: string    // e.g., '@'
-  value: string      // e.g., 'user-123'
+  trigger: string // e.g., '@'
+  value: string // e.g., 'user-123'
   displayText: string // e.g., 'Alice'
   data?: unknown
   autoResolved?: boolean
@@ -230,17 +236,17 @@ const triggers: TriggerConfig[] = [
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| `Enter` | Submit (or continue list) |
-| `Shift+Enter` | Insert newline |
-| `Escape` | Dismiss dropdown / fire onEscape |
-| `Cmd/Ctrl+B` | Toggle **bold** |
-| `Cmd/Ctrl+I` | Toggle _italic_ |
-| `Cmd/Ctrl+Z` | Undo |
-| `Cmd/Ctrl+Shift+Z` | Redo |
-| `Tab` / `Shift+Tab` | Indent / outdent list item |
-| `ArrowUp/Down` | Navigate dropdown suggestions |
+| Shortcut            | Action                                   |
+| ------------------- | ---------------------------------------- |
+| `Enter`             | Submit (or continue list)                |
+| `Shift+Enter`       | Insert newline                           |
+| `Escape`            | Dismiss dropdown / fire onEscape         |
+| `Cmd/Ctrl+B`        | Toggle **bold**                          |
+| `Cmd/Ctrl+I`        | Toggle _italic_                          |
+| `Cmd/Ctrl+Z`        | Undo                                     |
+| `Cmd/Ctrl+Shift+Z`  | Redo                                     |
+| `Tab` / `Shift+Tab` | Indent / outdent list item               |
+| `ArrowUp/Down`      | Navigate dropdown suggestions            |
 | `Backspace` on chip | Delete chip (or revert if auto-resolved) |
 
 ## Development

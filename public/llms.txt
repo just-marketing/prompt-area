@@ -15,6 +15,7 @@
 - [Install status-bar](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/status-bar.json` to add the contextual info bar companion
 - [Install compact-prompt-area](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json` to add the pill-shaped collapsible variant
 - [Install chat-prompt-layout](https://prompt-area.com): Run `npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json` to add the full-height chat layout with scroll navigation
+- [Install with AI agents](https://prompt-area.com): Give your AI coding agent this prompt: "Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input."
 
 ## Core Features
 

@@ -8,6 +8,12 @@
 npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
+### Install with AI Coding Agents
+
+Give your AI coding agent (Claude Code, Codex, Cursor, etc.) this prompt:
+
+"Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input."
+
 ### Required CSS
 
 Add the following CSS classes to your `globals.css` after `@layer base`:
