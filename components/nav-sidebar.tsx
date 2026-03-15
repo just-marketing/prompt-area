@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { id: 'example-dx-helpers', label: 'DX Helpers' },
       { id: 'example-basic', label: 'Basic' },
+      { id: 'example-rotating-placeholders', label: 'Rotating Placeholders' },
       { id: 'example-mentions', label: '@Mentions' },
       { id: 'example-commands', label: '/Commands' },
       { id: 'example-tags', label: '#Tags' },
