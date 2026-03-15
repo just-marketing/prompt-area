@@ -40,6 +40,8 @@ import {
   chatPromptLayoutCode,
   DxHelpersExample,
   dxHelpersCode,
+  RotatingPlaceholdersExample,
+  rotatingPlaceholdersCode,
 } from './examples'
 import { SectionHeading } from './sections/section-heading'
 import { FeaturesGrid } from './sections/features-grid'
@@ -106,6 +108,17 @@ export default function BelowFoldSections() {
           <p className="text-muted-foreground text-xs">Simple text input with Enter to submit.</p>
           <ExampleShowcase code={basicCode}>
             <BasicExample />
+          </ExampleShowcase>
+        </div>
+
+        <div id="example-rotating-placeholders" className="flex scroll-mt-16 flex-col gap-2">
+          <SectionHeading id="example-rotating-placeholders">Rotating Placeholders</SectionHeading>
+          <p className="text-muted-foreground text-xs">
+            Pass an array of strings to <code>placeholder</code> to cycle through them with a smooth
+            animation. Great for hinting at what the input can do.
+          </p>
+          <ExampleShowcase code={rotatingPlaceholdersCode}>
+            <RotatingPlaceholdersExample />
           </ExampleShowcase>
         </div>
 
