@@ -1,77 +1,48 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Copy, Check, Terminal, Bot } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Copy, Check } from 'lucide-react'
 
 const CLI_COMMAND = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
 
 const AGENT_PROMPT = `Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input.`
 
-type Tab = 'cli' | 'agent'
-
-export function InstallBlock() {
-  const [tab, setTab] = useState<Tab>('cli')
+function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
 
-  const content = tab === 'cli' ? CLI_COMMAND : AGENT_PROMPT
-
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(content)
+    navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }, [content])
+  }, [text])
 
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between border-b">
-        <div className="flex">
-          <button
-            type="button"
-            onClick={() => {
-              setTab('cli')
-              setCopied(false)
-            }}
-            className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors',
-              tab === 'cli'
-                ? 'border-foreground text-foreground border-b-2 font-medium'
-                : 'text-muted-foreground hover:text-foreground',
-            )}>
-            <Terminal className="size-3.5" />
-            CLI
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTab('agent')
-              setCopied(false)
-            }}
-            className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors',
-              tab === 'agent'
-                ? 'border-foreground text-foreground border-b-2 font-medium'
-                : 'text-muted-foreground hover:text-foreground',
-            )}>
-            <Bot className="size-3.5" />
-            AI Agent
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="text-muted-foreground hover:text-foreground rounded-md p-1.5 transition-colors"
-          aria-label={`Copy ${tab === 'cli' ? 'command' : 'prompt'}`}>
-          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-        </button>
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="text-muted-foreground hover:text-foreground shrink-0 rounded-md p-1 transition-colors"
+      aria-label="Copy to clipboard">
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+    </button>
+  )
+}
+
+export function InstallBlock() {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 font-mono text-sm">
+        <span>{CLI_COMMAND}</span>
+        <CopyButton text={CLI_COMMAND} />
       </div>
 
-      <div
-        className={cn(
-          'bg-muted mt-2 rounded-md px-3 py-2 text-sm',
-          tab === 'cli' ? 'font-mono' : 'leading-relaxed',
-        )}>
-        {content}
+      <div className="flex flex-col gap-1.5">
+        <p className="text-muted-foreground text-xs font-medium">
+          AI Agent Prompt (Claude Code, Codex, Cursor, etc.)
+        </p>
+        <div className="bg-muted flex items-start justify-between gap-2 rounded-md px-3 py-2 text-sm leading-relaxed">
+          <span>{AGENT_PROMPT}</span>
+          <CopyButton text={AGENT_PROMPT} />
+        </div>
       </div>
     </div>
   )
