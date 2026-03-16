@@ -274,9 +274,9 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
     top: 0,
   })
 
-  useEffect(() => {
+  // Measure and update the indicator position
+  const measure = useCallback(() => {
     if (!activeId || !itemRefs.current || !navRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing DOM measurements
       setStyle((s) => ({ ...s, opacity: 0 }))
       return
     }
@@ -294,6 +294,20 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
 
     setStyle({ opacity: 1, top })
   }, [activeId, itemRefs, navRef])
+
+  // Re-measure when activeId changes
+  useEffect(() => {
+    measure()
+  }, [measure])
+
+  // Re-measure when nav layout changes (e.g. collapsible sections expanding)
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const ro = new ResizeObserver(() => measure())
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [measure, navRef])
 
   return (
     <div
