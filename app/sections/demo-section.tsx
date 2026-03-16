@@ -161,7 +161,7 @@ export function DemoSection() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded-xl border shadow-sm">
+      <div className="rounded-xl border shadow-sm dark:bg-card dark:shadow-md dark:shadow-black/20">
         <div className="p-4">
           <PromptArea
             ref={promptRef}
