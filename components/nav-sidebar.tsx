@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Github, Star } from 'lucide-react'
+import { ChevronRight, Github, Star, TextCursorInput } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -395,10 +395,15 @@ function NavSidebar() {
         'lg:translate-x-0',
         !isOpen && '-translate-x-full',
       )}>
+      <div className="flex items-center gap-2.5 px-4 pt-16 pb-2 lg:pt-6">
+        <TextCursorInput className="text-foreground size-5 shrink-0" />
+        <span className="text-foreground text-sm font-semibold tracking-tight">Prompt Area</span>
+      </div>
+
       <nav
         ref={navRef}
         aria-label="Page sections"
-        className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-16 pb-6 lg:pt-6">
+        className="relative flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-2 pb-6">
         <ActiveIndicator activeId={activeId} itemRefs={itemRefs} navRef={navRef} />
 
         {NAV_ITEMS.map((item, i) =>
