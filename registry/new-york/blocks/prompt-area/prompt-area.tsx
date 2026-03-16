@@ -281,12 +281,10 @@ export function PromptArea({
             style={{ height: '32px' }}
             onClick={() => editorRef.current?.focus()}>
             <div
-              className="h-full w-full bg-gradient-to-b"
+              className="h-full w-full"
               style={{
-                '--tw-gradient-from': 'oklch(0 0 0 / 0)',
-                '--tw-gradient-via': 'color-mix(in srgb, var(--prompt-area-surface, var(--background)) 80%, transparent)',
-                '--tw-gradient-to': 'var(--prompt-area-surface, var(--background))',
-              } as React.CSSProperties}
+                background: 'linear-gradient(to bottom, transparent, color-mix(in srgb, var(--prompt-area-surface, var(--background)) 80%, transparent), var(--prompt-area-surface, var(--background)))',
+              }}
             />
           </div>
         )}
