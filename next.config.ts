@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       { source: '/contact-us', destination: '/contact', permanent: true },
       { source: '/contactus', destination: '/contact', permanent: true },
       { source: '/media', destination: '/press', permanent: true },
+      { source: '/.well-known/llms.txt', destination: '/llms.txt', permanent: true },
+      { source: '/.well-known/llms-full.txt', destination: '/llms-full.txt', permanent: true },
     ]
   },
 }
