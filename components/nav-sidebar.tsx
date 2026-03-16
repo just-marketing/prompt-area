@@ -318,7 +318,7 @@ function PageLinksAndTheme() {
   const pathname = usePathname()
 
   return (
-    <div className="flex items-center gap-0.5 py-1">
+    <div className="flex items-center gap-0.5 px-3 py-1">
       {PAGE_LINKS.map((link) => (
         <a
           key={link.href}
