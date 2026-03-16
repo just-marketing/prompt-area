@@ -315,30 +315,24 @@ const PAGE_LINKS = [
   { href: '/contact', label: 'Contact' },
 ] as const
 
-function PageLinks() {
+function PageLinksAndTheme() {
   const pathname = usePathname()
-  const visible = useSidebarVisible()
 
   return (
-    <div className="border-sidebar-border flex flex-col gap-0.5 border-t px-4 py-3">
+    <div className="flex items-center gap-0.5 px-1 py-1">
       {PAGE_LINKS.map((link) => (
         <a
           key={link.href}
           href={link.href}
           className={cn(
-            'rounded-md px-3 py-2.5 text-sm transition-all duration-150 lg:py-1.5',
-            'hover:text-foreground hover:translate-x-0.5',
+            'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
+            'hover:text-foreground',
             pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
-          )}
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translateX(0)' : 'translateX(-12px)',
-            transition: 'opacity 300ms ease-out, transform 300ms ease-out, color 150ms',
-            transitionDelay: visible ? '300ms' : '0ms',
-          }}>
+          )}>
           {link.label}
         </a>
       ))}
+      <ThemeToggle className="ml-auto" />
     </div>
   )
 }
@@ -434,9 +428,7 @@ function NavSidebar() {
         )}
       </nav>
 
-      <PageLinks />
-
-      <div className="border-sidebar-border flex flex-col gap-3 border-t px-4 py-3">
+      <div className="border-sidebar-border flex flex-col gap-2 border-t px-4 py-3">
         <a
           href="https://github.com/team-gpt/prompt-area"
           target="_blank"
@@ -449,7 +441,7 @@ function NavSidebar() {
           <span className="flex-1">GitHub Repo</span>
           <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
         </a>
-        <ThemeToggle />
+        <PageLinksAndTheme />
       </div>
     </aside>
   )
