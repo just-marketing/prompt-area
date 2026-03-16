@@ -54,6 +54,38 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+function ComponentInstallTabs() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const active = COMPONENTS[activeIndex]
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1" role="tablist">
+        {COMPONENTS.map((comp, i) => (
+          <button
+            key={comp.name}
+            type="button"
+            role="tab"
+            aria-selected={i === activeIndex}
+            onClick={() => setActiveIndex(i)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              i === activeIndex
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}>
+            {comp.name}
+          </button>
+        ))}
+      </div>
+      <p className="text-muted-foreground text-xs">{active.description}</p>
+      <div className="bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 font-mono text-sm">
+        <span className="min-w-0 truncate">{active.command}</span>
+        <CopyButton text={active.command} />
+      </div>
+    </div>
+  )
+}
+
 export function InstallSection() {
   return (
     <div id="installation" className="flex scroll-mt-16 flex-col gap-4">
@@ -65,21 +97,8 @@ export function InstallSection() {
         everything up in one go.
       </p>
 
-      {/* Component install commands */}
-      <div className="flex flex-col gap-2">
-        {COMPONENTS.map((comp) => (
-          <div key={comp.name} className="flex flex-col gap-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-sm font-medium">{comp.name}</span>
-              <span className="text-muted-foreground text-xs">{comp.description}</span>
-            </div>
-            <div className="bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 font-mono text-sm">
-              <span className="min-w-0 truncate">{comp.command}</span>
-              <CopyButton text={comp.command} />
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Component install commands as tabs */}
+      <ComponentInstallTabs />
 
       {/* AI Agent Prompt */}
       <div className="flex flex-col gap-2 pt-2">
