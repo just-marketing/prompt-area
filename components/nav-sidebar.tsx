@@ -324,7 +324,7 @@ function PageLinksAndTheme() {
           key={link.href}
           href={link.href}
           className={cn(
-            'rounded-md px-3 py-1.5 text-sm transition-colors duration-150',
+            'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
             'hover:text-foreground',
             pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
           )}>
