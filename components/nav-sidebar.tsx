@@ -298,6 +298,7 @@ function ActiveIndicator({ activeId, itemRefs, navRef }: ActiveIndicatorProps) {
   // Re-measure when activeId changes, and again after collapsible expansion
   // animation completes (200ms CSS grid transition in CollapsibleNavItem)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing DOM measurements
     measure()
     const timer = setTimeout(measure, 250)
     return () => clearTimeout(timer)
@@ -404,7 +405,9 @@ function NavSidebar() {
         'lg:translate-x-0',
         !isOpen && '-translate-x-full',
       )}>
-      <Link href="/" className="flex items-center gap-2.5 px-4 pt-16 pb-2 lg:pt-6 transition-opacity hover:opacity-70">
+      <Link
+        href="/"
+        className="flex items-center gap-2.5 px-4 pt-16 pb-2 transition-opacity hover:opacity-70 lg:pt-6">
         <TextCursorInput className="text-foreground size-5 shrink-0" />
         <span className="text-foreground text-sm font-semibold tracking-tight">Prompt Area</span>
       </Link>
