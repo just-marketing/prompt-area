@@ -319,7 +319,7 @@ function PageLinks() {
   const visible = useSidebarVisible()
 
   return (
-    <div className="border-sidebar-border flex flex-col gap-0.5 border-t px-4 py-3">
+    <div className="border-sidebar-border flex flex-row gap-0.5 border-t px-4 py-3">
       {PAGE_LINKS.map((link) => (
         <a
           key={link.href}
