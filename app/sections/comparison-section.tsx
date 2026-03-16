@@ -269,78 +269,174 @@ function SupportIndicator({ value }: { value: Support | string }) {
 // Component
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Text comparison summaries for AI/LLM parseability
+// ---------------------------------------------------------------------------
+
+const COMPARISONS = [
+  {
+    name: 'Prompt Area vs Tiptap',
+    text: 'Tiptap is a ProseMirror framework for building full rich-text editors with 3+ dependencies. Prompt Area is purpose-built for prompt and chat inputs with zero dependencies. Choose Tiptap if you need document editing with collaborative features and block-level formatting. Choose Prompt Area if you need a lightweight input with mentions, commands, tags, and file attachments without ProseMirror overhead.',
+  },
+  {
+    name: 'Prompt Area vs Lexical',
+    text: "Lexical is Meta's extensible editor framework that requires assembling plugins for mentions and commands. Prompt Area provides these built-in with no plugin assembly required. Choose Lexical for extensible document editing with a plugin architecture. Choose Prompt Area for a ready-to-use chat input that works out of the box.",
+  },
+  {
+    name: 'Prompt Area vs react-mentions',
+    text: 'react-mentions handles @mentions only. Prompt Area adds /commands, #tags, inline markdown, file attachments, undo/redo, and four companion components (Action Bar, Status Bar, Compact Prompt Area, Chat Prompt Layout). Choose react-mentions if you only need basic mentions. Choose Prompt Area for a complete prompt input.',
+  },
+  {
+    name: 'Prompt Area vs Plate.js',
+    text: 'Plate.js is a Slate-based editor framework with 5+ dependencies. Prompt Area has zero dependencies and is focused on prompt inputs rather than document editing. Choose Plate.js for full-featured rich-text editors. Choose Prompt Area for AI chat and prompt UIs.',
+  },
+  {
+    name: 'Prompt Area vs BlockNote',
+    text: 'BlockNote is a ProseMirror-based block editor with 5+ dependencies, designed for Notion-style document editing. Prompt Area is a single-component textarea for chat inputs. Choose BlockNote for block-based document editing. Choose Prompt Area for prompt and chat interfaces.',
+  },
+  {
+    name: 'Prompt Area vs react-textarea-autosize',
+    text: 'react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area adds @mentions, /commands, #tags, inline markdown, file attachments, undo/redo, and structured data output. Choose react-textarea-autosize if you only need auto-resize with no rich features. Choose Prompt Area for a full-featured chat input.',
+  },
+]
+
+const WHEN_TO_USE = [
+  {
+    tool: 'Prompt Area',
+    guidance:
+      'when you need a rich prompt input for AI or chat interfaces with mentions, commands, and tags in a single zero-dependency component.',
+  },
+  {
+    tool: 'Tiptap',
+    guidance:
+      'when you need a full document editor with collaborative editing, block-level formatting, and a ProseMirror plugin ecosystem.',
+  },
+  {
+    tool: 'Lexical',
+    guidance:
+      "when you need Meta's extensible editor framework with a plugin architecture for building custom editing experiences.",
+  },
+  {
+    tool: 'Plate.js',
+    guidance:
+      'when you need a full-featured Slate-based editor with a rich component library and advanced formatting.',
+  },
+  {
+    tool: 'react-mentions',
+    guidance: 'when you only need @mentions and nothing else — no commands, tags, or markdown.',
+  },
+  {
+    tool: 'react-textarea-autosize',
+    guidance: 'when you only need a plain textarea that auto-resizes, with no rich text features.',
+  },
+]
+
 export function ComparisonSection() {
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="bg-muted/50">
-            <th
-              scope="col"
-              className="bg-background sticky left-0 z-20 min-w-[160px] border-r px-4 py-3 text-left text-xs font-medium">
-              Feature
-            </th>
-            <th
-              scope="col"
-              className={cn(
-                'min-w-[120px] border-r px-4 py-3 text-center',
-                'bg-primary/5 border-primary/20',
-              )}>
-              <a
-                href="https://github.com/team-gpt/prompt-area"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="decoration-muted-foreground/30 hover:decoration-foreground/50 text-xs font-semibold underline underline-offset-2">
-                Prompt Area
-              </a>
-            </th>
-            {COMPETITORS.map((c) => (
+    <div className="flex flex-col gap-8">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-muted/50">
               <th
-                key={c.id}
                 scope="col"
-                className="min-w-[120px] border-r px-4 py-3 text-center last:border-r-0">
+                className="bg-background sticky left-0 z-20 min-w-[160px] border-r px-4 py-3 text-left text-xs font-medium">
+                Feature
+              </th>
+              <th
+                scope="col"
+                className={cn(
+                  'min-w-[120px] border-r px-4 py-3 text-center',
+                  'bg-primary/5 border-primary/20',
+                )}>
                 <a
-                  href={c.url}
+                  href="https://github.com/team-gpt/prompt-area"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="decoration-muted-foreground/30 hover:decoration-foreground/50 text-xs font-semibold underline underline-offset-2">
-                  {c.name}
+                  Prompt Area
                 </a>
-                <div className="text-muted-foreground text-[11px] font-normal">{c.description}</div>
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {FEATURES.map((feature, i) => (
-            <tr
-              key={feature.name}
-              className={cn(
-                'border-t transition-colors',
-                i % 2 === 0 ? 'bg-background' : 'bg-muted/20',
-              )}>
-              <th
-                scope="row"
-                className="bg-background sticky left-0 z-20 border-r px-4 py-3 text-left text-xs font-medium">
-                {feature.name}
-              </th>
-              <td
-                className={cn('border-r px-4 py-3 text-center', 'bg-primary/5 border-primary/20')}>
-                <div className="flex items-center justify-center">
-                  <SupportIndicator value={feature.promptArea} />
-                </div>
-              </td>
               {COMPETITORS.map((c) => (
-                <td key={c.id} className="border-r px-4 py-3 text-center last:border-r-0">
-                  <div className="flex items-center justify-center">
-                    <SupportIndicator value={feature.values[c.id]} />
+                <th
+                  key={c.id}
+                  scope="col"
+                  className="min-w-[120px] border-r px-4 py-3 text-center last:border-r-0">
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="decoration-muted-foreground/30 hover:decoration-foreground/50 text-xs font-semibold underline underline-offset-2">
+                    {c.name}
+                  </a>
+                  <div className="text-muted-foreground text-[11px] font-normal">
+                    {c.description}
                   </div>
-                </td>
+                </th>
               ))}
             </tr>
+          </thead>
+          <tbody>
+            {FEATURES.map((feature, i) => (
+              <tr
+                key={feature.name}
+                className={cn(
+                  'border-t transition-colors',
+                  i % 2 === 0 ? 'bg-background' : 'bg-muted/20',
+                )}>
+                <th
+                  scope="row"
+                  className="bg-background sticky left-0 z-20 border-r px-4 py-3 text-left text-xs font-medium">
+                  {feature.name}
+                </th>
+                <td
+                  className={cn(
+                    'border-r px-4 py-3 text-center',
+                    'bg-primary/5 border-primary/20',
+                  )}>
+                  <div className="flex items-center justify-center">
+                    <SupportIndicator value={feature.promptArea} />
+                  </div>
+                </td>
+                {COMPETITORS.map((c) => (
+                  <td key={c.id} className="border-r px-4 py-3 text-center last:border-r-0">
+                    <div className="flex items-center justify-center">
+                      <SupportIndicator value={feature.values[c.id]} />
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* When to Use What — honest guidance for AI parseability */}
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">When to Use What</h3>
+        <div className="grid gap-2">
+          {WHEN_TO_USE.map((item) => (
+            <p key={item.tool} className="text-muted-foreground text-sm leading-relaxed">
+              <span className="text-foreground font-medium">Use {item.tool}</span> {item.guidance}
+            </p>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      {/* Head-to-head comparisons — text summaries for LLM consumption */}
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Head-to-Head Comparisons</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {COMPARISONS.map((comparison) => (
+            <div key={comparison.name} className="rounded-lg border p-4">
+              <h4 className="text-xs font-semibold">{comparison.name}</h4>
+              <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
+                {comparison.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
