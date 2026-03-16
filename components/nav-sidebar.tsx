@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { ChevronRight, Github, Star } from 'lucide-react'
@@ -19,10 +20,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'hero', label: 'Introduction' },
+  { id: 'what-is-prompt-area', label: 'What is Prompt Area?' },
   { id: 'demo', label: 'Demo' },
+  { id: 'why-prompt-area', label: 'Why Prompt Area?' },
+  { id: 'how-it-works', label: 'How It Works' },
   { id: 'installation', label: 'Installation' },
   { id: 'features', label: 'Features' },
-  { id: 'inspector', label: 'Inspector' },
   {
     id: 'examples',
     label: 'Examples',
@@ -66,6 +69,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Chat Prompt Layout',
     children: [{ id: 'chat-prompt-layout-example', label: 'Chat Layout' }],
   },
+  { id: 'inspector', label: 'Inspector' },
   {
     id: 'dark-theme',
     label: 'Dark Theme',
@@ -103,43 +107,6 @@ function useSidebar() {
 function useSidebarVisible() {
   const { isOpen, isDesktop } = useSidebar()
   return isDesktop || isOpen
-}
-
-// ---------------------------------------------------------------------------
-// useActiveSection — IntersectionObserver scroll tracking
-// ---------------------------------------------------------------------------
-
-function useActiveSection(sectionIds: string[]): string | null {
-  const [activeId, setActiveId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const map = new Map<string, boolean>()
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          map.set(entry.target.id, entry.isIntersecting)
-        }
-        // Pick the first (topmost in DOM order) visible section
-        for (const id of sectionIds) {
-          if (map.get(id)) {
-            setActiveId(id)
-            return
-          }
-        }
-      },
-      { rootMargin: '-10% 0px -70% 0px', threshold: 0 },
-    )
-
-    for (const id of sectionIds) {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    }
-
-    return () => observer.disconnect()
-  }, [sectionIds])
-
-  return activeId
 }
 
 // ---------------------------------------------------------------------------

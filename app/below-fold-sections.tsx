@@ -49,10 +49,18 @@ import { FeaturesGrid } from './sections/features-grid'
 import { InspectorSection } from './sections/inspector-section'
 import { DarkThemePreview } from './sections/dark-theme-preview'
 import { ComparisonSection } from './sections/comparison-section'
+import { WhyPromptArea } from './sections/why-prompt-area'
+import { HowItWorks } from './sections/how-it-works'
 
 export default function BelowFoldSections() {
   return (
     <>
+      {/* Why Prompt Area? */}
+      <WhyPromptArea />
+
+      {/* How It Works */}
+      <HowItWorks />
+
       {/* Installation */}
       <InstallSection />
 
@@ -72,20 +80,6 @@ export default function BelowFoldSections() {
           .
         </p>
         <FeaturesGrid />
-      </div>
-
-      {/* Inspector */}
-      <div id="inspector" className="flex scroll-mt-16 flex-col gap-3">
-        <SectionHeading id="inspector" as="h2">
-          Inspector
-        </SectionHeading>
-        <p className="text-muted-foreground text-sm">
-          Inspect every event, segment, and API method in real time. Toggle <code>disabled</code>,{' '}
-          <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>,{' '}
-          <code>@</code>, <code>#</code>, <code>!</code>) and every callback log to the event panel.
-          Imperative handle methods are wired to buttons below.
-        </p>
-        <InspectorSection />
       </div>
 
       {/* Examples */}
@@ -374,6 +368,20 @@ export default function BelowFoldSections() {
             <ChatPromptLayoutExample />
           </ExampleShowcase>
         </div>
+      </div>
+
+      {/* Inspector */}
+      <div id="inspector" className="flex scroll-mt-16 flex-col gap-3">
+        <SectionHeading id="inspector" as="h2">
+          Inspector
+        </SectionHeading>
+        <p className="text-muted-foreground text-sm">
+          Inspect every event, segment, and API method in real time. Toggle <code>disabled</code>,{' '}
+          <code>markdown</code>, and <code>autoGrow</code>. All 4 trigger types (<code>/</code>,{' '}
+          <code>@</code>, <code>#</code>, <code>!</code>) and every callback log to the event panel.
+          Imperative handle methods are wired to buttons below.
+        </p>
+        <InspectorSection />
       </div>
 
       {/* Dark Theme */}
