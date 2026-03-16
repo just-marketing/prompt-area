@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Theme = 'light' | 'dark' | 'system'
@@ -70,14 +70,13 @@ export function useTheme() {
 const THEME_OPTIONS: { value: Theme; icon: typeof Sun; label: string }[] = [
   { value: 'light', icon: Sun, label: 'Light' },
   { value: 'dark', icon: Moon, label: 'Dark' },
-  { value: 'system', icon: Monitor, label: 'System' },
 ]
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()
 
   return (
-    <div className={cn('flex items-center gap-1', className)}>
+    <div className={cn('flex items-center gap-0.5', className)}>
       {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
         <button
           key={value}
@@ -86,7 +85,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           title={label}
           className={cn(
             'rounded-md p-2 transition-colors',
-            theme === value
+            theme === value || (theme === 'system' && value === getSystemTheme())
               ? 'text-foreground bg-accent'
               : 'text-muted-foreground hover:text-foreground',
           )}>
