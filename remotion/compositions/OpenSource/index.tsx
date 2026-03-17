@@ -1,5 +1,5 @@
 import React from 'react'
-import { AbsoluteFill } from 'remotion'
+import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion'
 import { TransitionSeries, springTiming } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { useFonts } from '../../design/fonts'
@@ -13,6 +13,27 @@ import { ContributorsScene } from './scenes/ContributorsScene'
 import { OutroScene } from './scenes/OutroScene'
 
 const TRANSITION_DURATION = 15
+
+const SceneWrap: React.FC<{
+  children: React.ReactNode
+  durationInFrames: number
+  noEntry?: boolean
+  noExit?: boolean
+}> = ({ children, durationInFrames, noEntry, noExit }) => {
+  const frame = useCurrentFrame()
+  const T = TRANSITION_DURATION
+
+  const entryOpacity = noEntry
+    ? 1
+    : interpolate(frame, [0, T], [0, 1], { extrapolateRight: 'clamp' })
+  const exitOpacity = noExit
+    ? 1
+    : interpolate(frame, [durationInFrames - T, durationInFrames], [1, 0], {
+        extrapolateRight: 'clamp',
+      })
+
+  return <AbsoluteFill style={{ opacity: entryOpacity * exitOpacity }}>{children}</AbsoluteFill>
+}
 
 const transition = (
   <TransitionSeries.Transition
@@ -41,37 +62,49 @@ export const OpenSource: React.FC = () => {
 
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={50}>
-          <IntroScene />
+          <SceneWrap durationInFrames={50} noEntry>
+            <IntroScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={100}>
-          <StatsScene />
+          <SceneWrap durationInFrames={100}>
+            <StatsScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={110}>
-          <InstallMethodsScene />
+          <SceneWrap durationInFrames={110}>
+            <InstallMethodsScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={110}>
-          <FrameworksScene />
+          <SceneWrap durationInFrames={110}>
+            <FrameworksScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={95}>
-          <ContributorsScene />
+          <SceneWrap durationInFrames={95}>
+            <ContributorsScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={60}>
-          <OutroScene />
+          <SceneWrap durationInFrames={60} noExit>
+            <OutroScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
       </TransitionSeries>
     </AbsoluteFill>

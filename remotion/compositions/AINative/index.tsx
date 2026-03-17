@@ -1,5 +1,5 @@
 import React from 'react'
-import { AbsoluteFill } from 'remotion'
+import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion'
 import { TransitionSeries, springTiming } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { useFonts } from '../../design/fonts'
@@ -13,6 +13,31 @@ import { ContextWindowScene } from './scenes/ContextWindowScene'
 import { OutroScene } from './scenes/OutroScene'
 
 const TRANSITION_DURATION = 15
+
+/**
+ * Wraps a scene to fade its content in/out independently of the
+ * TransitionSeries fade, preventing content overlap during transitions.
+ */
+const SceneWrap: React.FC<{
+  children: React.ReactNode
+  durationInFrames: number
+  noEntry?: boolean
+  noExit?: boolean
+}> = ({ children, durationInFrames, noEntry, noExit }) => {
+  const frame = useCurrentFrame()
+  const T = TRANSITION_DURATION
+
+  const entryOpacity = noEntry
+    ? 1
+    : interpolate(frame, [0, T], [0, 1], { extrapolateRight: 'clamp' })
+  const exitOpacity = noExit
+    ? 1
+    : interpolate(frame, [durationInFrames - T, durationInFrames], [1, 0], {
+        extrapolateRight: 'clamp',
+      })
+
+  return <AbsoluteFill style={{ opacity: entryOpacity * exitOpacity }}>{children}</AbsoluteFill>
+}
 
 const transition = (
   <TransitionSeries.Transition
@@ -46,37 +71,49 @@ export const AINative: React.FC = () => {
 
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={50}>
-          <IntroScene />
+          <SceneWrap durationInFrames={50} noEntry>
+            <IntroScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={110}>
-          <AgentSelectScene />
+          <SceneWrap durationInFrames={110}>
+            <AgentSelectScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={120}>
-          <StreamingScene />
+          <SceneWrap durationInFrames={120}>
+            <StreamingScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={105}>
-          <MultiAgentScene />
+          <SceneWrap durationInFrames={105}>
+            <MultiAgentScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={80}>
-          <ContextWindowScene />
+          <SceneWrap durationInFrames={80}>
+            <ContextWindowScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={60}>
-          <OutroScene />
+          <SceneWrap durationInFrames={60} noExit>
+            <OutroScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
       </TransitionSeries>
     </AbsoluteFill>

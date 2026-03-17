@@ -1,5 +1,5 @@
 import React from 'react'
-import { AbsoluteFill } from 'remotion'
+import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion'
 import { TransitionSeries, springTiming } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { useFonts } from '../../design/fonts'
@@ -13,6 +13,27 @@ import { LayoutsScene } from './scenes/LayoutsScene'
 import { OutroScene } from './scenes/OutroScene'
 
 const TRANSITION_DURATION = 15
+
+const SceneWrap: React.FC<{
+  children: React.ReactNode
+  durationInFrames: number
+  noEntry?: boolean
+  noExit?: boolean
+}> = ({ children, durationInFrames, noEntry, noExit }) => {
+  const frame = useCurrentFrame()
+  const T = TRANSITION_DURATION
+
+  const entryOpacity = noEntry
+    ? 1
+    : interpolate(frame, [0, T], [0, 1], { extrapolateRight: 'clamp' })
+  const exitOpacity = noExit
+    ? 1
+    : interpolate(frame, [durationInFrames - T, durationInFrames], [1, 0], {
+        extrapolateRight: 'clamp',
+      })
+
+  return <AbsoluteFill style={{ opacity: entryOpacity * exitOpacity }}>{children}</AbsoluteFill>
+}
 
 const transition = (
   <TransitionSeries.Transition
@@ -46,25 +67,33 @@ export const Customizable: React.FC = () => {
 
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={50}>
-          <IntroScene />
+          <SceneWrap durationInFrames={50} noEntry>
+            <IntroScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={105}>
-          <BrandThemeScene />
+          <SceneWrap durationInFrames={105}>
+            <BrandThemeScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={110}>
-          <CustomTriggersScene />
+          <SceneWrap durationInFrames={110}>
+            <CustomTriggersScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}
 
         <TransitionSeries.Sequence durationInFrames={105}>
-          <ActionBarScene />
+          <SceneWrap durationInFrames={105}>
+            <ActionBarScene />
+          </SceneWrap>
         </TransitionSeries.Sequence>
 
         {transition}

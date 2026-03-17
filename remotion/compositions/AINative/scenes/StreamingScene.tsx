@@ -20,14 +20,14 @@ export const StreamingScene: React.FC = () => {
   const { fps } = useVideoConfig()
 
   const cardProgress = spring({
-    frame: Math.max(0, frame - 15),
+    frame,
     fps,
     config: springs.entrance,
   })
 
   // Streaming speed: 1 char every 0.6 frames
   const totalChars = AI_RESPONSE.join('\n').length
-  const charsStreamed = Math.min(totalChars, Math.floor(Math.max(0, frame - 30) / 0.6))
+  const charsStreamed = Math.min(totalChars, Math.floor(Math.max(0, frame - 15) / 0.6))
 
   let charCount = 0
   const visibleLines: { text: string; full: boolean }[] = []
@@ -98,7 +98,7 @@ export const StreamingScene: React.FC = () => {
             width: 960,
             display: 'flex',
             justifyContent: 'flex-start',
-            opacity: frame >= 30 ? 1 : 0,
+            opacity: frame >= 15 ? 1 : 0,
           }}>
           <Card width={780} padding={28}>
             {/* AI avatar header */}
