@@ -18,10 +18,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "remotion:studio": "remotion studio remotion/index.ts --public-dir remotion/public",
-    "remotion:render:all": "pnpm remotion:render:v1 && pnpm remotion:render:v2 && pnpm remotion:render:v3",
+    "remotion:render:all": "pnpm remotion:render:v1 && pnpm remotion:render:v2 && pnpm remotion:render:v3 && pnpm remotion:render:v4 && pnpm remotion:render:v5 && pnpm remotion:render:v6",
     "remotion:render:v1": "remotion render remotion/index.ts SmartInput out/smart-input.mp4 --public-dir remotion/public",
     "remotion:render:v2": "remotion render remotion/index.ts RichText out/rich-text.mp4 --public-dir remotion/public",
-    "remotion:render:v3": "remotion render remotion/index.ts DevExperience out/dev-experience.mp4 --public-dir remotion/public"
+    "remotion:render:v3": "remotion render remotion/index.ts DevExperience out/dev-experience.mp4 --public-dir remotion/public",
+    "remotion:render:v4": "remotion render remotion/index.ts AINative out/ai-native.mp4 --public-dir remotion/public",
+    "remotion:render:v5": "remotion render remotion/index.ts Customizable out/customizable.mp4 --public-dir remotion/public",
+    "remotion:render:v6": "remotion render remotion/index.ts OpenSource out/open-source.mp4 --public-dir remotion/public"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
