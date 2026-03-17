@@ -36,7 +36,7 @@ export const ComposableScene: React.FC = () => {
   const sampleContent = (
     <div
       style={{
-        fontSize: 22,
+        fontSize: 30,
         lineHeight: 1.6,
         color: '#0f0f0f',
         fontFamily: 'Geist, sans-serif',
@@ -65,7 +65,7 @@ export const ComposableScene: React.FC = () => {
       {showVariant1 && (
         <FadeIn delay={0} distance={15}>
           <div style={{ position: 'relative' }}>
-            <Card width={820}>
+            <Card width={960}>
               {sampleContent}
               <div style={{ marginTop: 12 }}>
                 {/* Status bar */}
@@ -74,7 +74,7 @@ export const ComposableScene: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    fontSize: 13,
+                    fontSize: 18,
                     color: '#71717a',
                     fontFamily: 'Geist, sans-serif',
                     marginBottom: 8,
@@ -106,19 +106,19 @@ export const ComposableScene: React.FC = () => {
             transform: `translateX(${interpolate(transition2, [0, 1], [30, 0])}px)`,
           }}>
           <div style={{ position: 'relative' }}>
-            <Card width={600} padding={16} paddingX={20}>
+            <Card width={760} padding={22} paddingX={26}>
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 10,
                 }}>
                 <div style={{ flex: 1 }}>{sampleContent}</div>
                 {/* Inline send button */}
                 <div
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     borderRadius: 10,
                     backgroundColor: '#18181b',
                     display: 'flex',
@@ -157,20 +157,20 @@ export const ComposableScene: React.FC = () => {
             {/* Chat messages above */}
             <div
               style={{
-                width: 820,
+                width: 960,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 12,
+                gap: 16,
                 marginBottom: 16,
               }}>
               {/* AI message bubble */}
               <div
                 style={{
                   maxWidth: '70%',
-                  padding: '14px 18px',
+                  padding: '18px 24px',
                   borderRadius: '16px 16px 16px 4px',
                   backgroundColor: '#f5f5f5',
-                  fontSize: 18,
+                  fontSize: 26,
                   color: '#0f0f0f',
                   fontFamily: 'Geist, sans-serif',
                   lineHeight: 1.5,
@@ -180,7 +180,7 @@ export const ComposableScene: React.FC = () => {
             </div>
 
             {/* Prompt area at bottom */}
-            <Card width={820} padding={16} paddingX={20}>
+            <Card width={960} padding={22} paddingX={26}>
               <div style={{ marginBottom: 12 }}>{sampleContent}</div>
               <div
                 style={{

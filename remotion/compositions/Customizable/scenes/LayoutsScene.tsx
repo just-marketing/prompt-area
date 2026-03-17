@@ -54,7 +54,7 @@ export const LayoutsScene: React.FC = () => {
       <FadeIn delay={0} distance={15}>
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
@@ -65,7 +65,7 @@ export const LayoutsScene: React.FC = () => {
           Any layout, any style
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
           {LAYOUTS.map((layout, i) => {
             const progress = spring({
               frame: Math.max(0, frame - 5 - i * 15),
@@ -82,7 +82,7 @@ export const LayoutsScene: React.FC = () => {
                 }}>
                 <div
                   style={{
-                    fontSize: 13,
+                    fontSize: 18,
                     fontWeight: 600,
                     color: '#a1a1aa',
                     fontFamily: 'Geist Mono, monospace',
@@ -95,13 +95,13 @@ export const LayoutsScene: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    width: 700,
+                    width: 880,
                     ...layout.style,
                     fontFamily: 'Geist, sans-serif',
                   }}>
                   <div
                     style={{
-                      fontSize: 18,
+                      fontSize: 26,
                       color: '#71717a',
                       marginBottom: 10,
                     }}>
@@ -116,8 +116,8 @@ export const LayoutsScene: React.FC = () => {
                     <div
                       style={{
                         display: 'flex',
-                        gap: 6,
-                        fontSize: 16,
+                        gap: 8,
+                        fontSize: 22,
                         color: '#a1a1aa',
                       }}>
                       <span>@</span>
@@ -126,8 +126,8 @@ export const LayoutsScene: React.FC = () => {
                     </div>
                     <div
                       style={{
-                        width: 32,
-                        height: 32,
+                        width: 40,
+                        height: 40,
                         borderRadius: 8,
                         backgroundColor: '#18181b',
                         display: 'flex',

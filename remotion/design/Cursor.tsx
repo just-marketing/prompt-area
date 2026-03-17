@@ -13,7 +13,7 @@ interface CursorProps {
 export const Cursor: React.FC<CursorProps> = ({
   visible,
   color = '#0f0f0f',
-  height = 28,
+  height = 36,
   style,
 }) => {
   const frame = useCurrentFrame()

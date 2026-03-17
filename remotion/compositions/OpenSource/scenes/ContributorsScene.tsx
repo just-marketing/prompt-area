@@ -39,11 +39,11 @@ export const ContributorsScene: React.FC = () => {
       <FadeIn delay={0} distance={15}>
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
-            marginBottom: 28,
+            marginBottom: 32,
             textAlign: 'center',
             letterSpacing: '-0.5px',
           }}>
@@ -69,19 +69,19 @@ export const ContributorsScene: React.FC = () => {
               <div
                 key={i}
                 style={{
-                  width: 56,
-                  height: 56,
+                  width: 72,
+                  height: 72,
                   borderRadius: '50%',
                   backgroundColor: avatar.color,
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: avatar.initials.length > 2 ? 14 : 18,
+                  fontSize: avatar.initials.length > 2 ? 20 : 26,
                   fontWeight: 700,
                   fontFamily: 'Geist, sans-serif',
                   border: '3px solid #fafafa',
-                  marginLeft: i === 0 ? 0 : -12,
+                  marginLeft: i === 0 ? 0 : -16,
                   zIndex: AVATARS.length - i,
                   opacity: progress,
                   transform: `scale(${interpolate(progress, [0, 1], [0.5, 1])}) translate(${drift.x}px, ${drift.y}px)`,
@@ -97,8 +97,8 @@ export const ContributorsScene: React.FC = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: 12,
-            width: 600,
+            gap: 16,
+            width: 760,
           }}>
           {HIGHLIGHTS.map((item, i) => {
             const progress = spring({
@@ -114,8 +114,8 @@ export const ContributorsScene: React.FC = () => {
                   backgroundColor: '#ffffff',
                   borderRadius: 12,
                   border: '1px solid #e5e5e5',
-                  padding: '14px 18px',
-                  fontSize: 17,
+                  padding: '18px 24px',
+                  fontSize: 24,
                   fontFamily: 'Geist, sans-serif',
                   color: '#0f0f0f',
                   fontWeight: 500,

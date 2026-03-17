@@ -29,7 +29,7 @@ export const CustomTriggersScene: React.FC = () => {
       <FadeIn delay={0} distance={15}>
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
@@ -40,8 +40,8 @@ export const CustomTriggersScene: React.FC = () => {
           Define your own triggers
         </div>
 
-        <Card width={720} padding={20}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <Card width={900} padding={28}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {TRIGGERS.map((trigger, i) => {
               const progress = spring({
                 frame: Math.max(0, frame - 8 - i * 10),
@@ -56,7 +56,7 @@ export const CustomTriggersScene: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 16,
-                    padding: '10px 14px',
+                    padding: '12px 18px',
                     borderRadius: 10,
                     backgroundColor: frame >= 8 + i * 10 ? `${trigger.bg}66` : 'transparent',
                     opacity: progress,
@@ -66,15 +66,15 @@ export const CustomTriggersScene: React.FC = () => {
                   {/* Trigger character */}
                   <div
                     style={{
-                      width: 44,
-                      height: 44,
+                      width: 56,
+                      height: 56,
                       borderRadius: 10,
                       backgroundColor: trigger.bg,
                       color: trigger.color,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 22,
+                      fontSize: 30,
                       fontWeight: 700,
                       fontFamily: 'Geist Mono, monospace',
                       flexShrink: 0,
@@ -85,23 +85,23 @@ export const CustomTriggersScene: React.FC = () => {
                   <div style={{ flex: 1 }}>
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 26,
                         fontWeight: 600,
                         color: '#0f0f0f',
                       }}>
                       {trigger.label}
                     </div>
-                    <div style={{ fontSize: 14, color: '#71717a' }}>{trigger.desc}</div>
+                    <div style={{ fontSize: 20, color: '#71717a' }}>{trigger.desc}</div>
                   </div>
 
                   {/* Built-in badge for first 3 */}
                   {i < 3 && (
                     <div
                       style={{
-                        fontSize: 11,
+                        fontSize: 15,
                         fontWeight: 600,
                         color: '#71717a',
-                        padding: '3px 8px',
+                        padding: '4px 10px',
                         borderRadius: 6,
                         backgroundColor: '#f4f4f5',
                       }}>
@@ -111,10 +111,10 @@ export const CustomTriggersScene: React.FC = () => {
                   {i >= 3 && (
                     <div
                       style={{
-                        fontSize: 11,
+                        fontSize: 15,
                         fontWeight: 600,
                         color: trigger.color,
-                        padding: '3px 8px',
+                        padding: '4px 10px',
                         borderRadius: 6,
                         backgroundColor: trigger.bg,
                       }}>

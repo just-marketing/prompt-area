@@ -12,7 +12,7 @@ interface CardProps {
 
 export const Card: React.FC<CardProps> = ({
   theme = 'light',
-  width = 820,
+  width = 960,
   padding = spacing.cardPadding,
   paddingX = spacing.cardPaddingX,
   style,

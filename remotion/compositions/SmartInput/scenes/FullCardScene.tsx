@@ -23,13 +23,13 @@ export const FullCardScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={10}>
-        <Card width={820}>
+        <Card width={960}>
           {/* Full OG-image-style content */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 4,
+              gap: 6,
             }}>
             <div
               style={{
@@ -37,7 +37,7 @@ export const FullCardScene: React.FC = () => {
                 flexWrap: 'wrap',
                 alignItems: 'center',
                 gap: 6,
-                fontSize: 24,
+                fontSize: 32,
                 color: '#0f0f0f',
                 lineHeight: 1.6,
                 fontFamily: 'Geist, sans-serif',
@@ -74,9 +74,9 @@ export const FullCardScene: React.FC = () => {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 2,
+                gap: 6,
                 paddingLeft: 10,
-                fontSize: 24,
+                fontSize: 32,
                 color: '#0f0f0f',
                 lineHeight: 1.6,
                 marginTop: 4,

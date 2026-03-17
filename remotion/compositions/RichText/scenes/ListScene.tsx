@@ -64,11 +64,11 @@ export const ListScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           <div
             style={{
               minHeight: 140,
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',

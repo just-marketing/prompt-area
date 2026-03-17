@@ -29,7 +29,7 @@ export const ContextWindowScene: React.FC = () => {
         {/* Title */}
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
@@ -40,9 +40,9 @@ export const ContextWindowScene: React.FC = () => {
           Every segment becomes context
         </div>
 
-        <Card width={820} padding={24}>
+        <Card width={960} padding={32}>
           {/* Segment visualization */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {SEGMENTS.map((seg, i) => {
               const segProgress = spring({
                 frame: Math.max(0, frame - 10 - i * 12),
@@ -70,7 +70,7 @@ export const ContextWindowScene: React.FC = () => {
                   <div
                     style={{
                       flex: 1,
-                      padding: '12px 18px',
+                      padding: '16px 24px',
                       borderRadius: 10,
                       backgroundColor:
                         seg.type === 'chip' ? seg.bg : seg.type === 'file' ? '#fef3c7' : '#f4f4f5',
@@ -80,12 +80,12 @@ export const ContextWindowScene: React.FC = () => {
                           : seg.type === 'file'
                             ? '#92400e'
                             : '#0f0f0f',
-                      fontSize: 18,
+                      fontSize: 26,
                       fontWeight: 500,
                       fontFamily: 'Geist, sans-serif',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 8,
+                      gap: 10,
                     }}>
                     {seg.label}
                   </div>
@@ -110,7 +110,7 @@ export const ContextWindowScene: React.FC = () => {
                   {/* AI context label */}
                   <div
                     style={{
-                      fontSize: 13,
+                      fontSize: 18,
                       color: '#6366f1',
                       fontWeight: 600,
                       fontFamily: 'Geist Mono, monospace',

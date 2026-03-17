@@ -40,7 +40,7 @@ export const DarkModeScene: React.FC = () => {
         height: '100%',
         backgroundColor: bgColor,
         backgroundImage: `radial-gradient(circle, ${dotColor} 1px, transparent 1px)`,
-        backgroundSize: '24px 24px',
+        backgroundSize: '30px 30px',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -65,22 +65,22 @@ export const DarkModeScene: React.FC = () => {
         <FadeIn delay={0} distance={15}>
           <Card
             theme={theme}
-            width={820}
+            width={960}
             style={{
               backgroundColor: cardBg,
               borderColor: cardBorder,
             }}>
             <div
               style={{
-                fontSize: 24,
+                fontSize: 32,
                 lineHeight: 1.6,
                 color: textColor,
                 fontFamily: 'Geist, sans-serif',
-                marginBottom: 16,
+                marginBottom: 20,
                 display: 'flex',
                 flexWrap: 'wrap',
                 alignItems: 'center',
-                gap: 6,
+                gap: 8,
               }}>
               <Chip variant="command" label="/summarize" />
               <span>the campaign brief from</span>
@@ -107,16 +107,16 @@ export const DarkModeScene: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 12,
-            marginTop: 24,
+            gap: 16,
+            marginTop: 28,
             fontFamily: 'Geist, sans-serif',
-            fontSize: 16,
+            fontSize: 22,
             color: textColor,
           }}>
           {/* Sun icon */}
           <svg
-            width="20"
-            height="20"
+            width="26"
+            height="26"
             viewBox="0 0 24 24"
             fill="none"
             stroke={toggleProgress > 0.5 ? '#666' : '#f59e0b'}
@@ -137,22 +137,22 @@ export const DarkModeScene: React.FC = () => {
           {/* Toggle track */}
           <div
             style={{
-              width: 48,
-              height: 26,
-              borderRadius: 13,
+              width: 60,
+              height: 32,
+              borderRadius: 16,
               backgroundColor: toggleProgress > 0.5 ? '#6366f1' : '#e5e5e5',
               position: 'relative',
               transition: 'background-color 0.3s',
             }}>
             <div
               style={{
-                width: 20,
-                height: 20,
+                width: 26,
+                height: 26,
                 borderRadius: '50%',
                 backgroundColor: '#fff',
                 position: 'absolute',
                 top: 3,
-                left: interpolate(toggleProgress, [0, 1], [3, 25]),
+                left: interpolate(toggleProgress, [0, 1], [3, 31]),
                 boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
               }}
             />
@@ -160,8 +160,8 @@ export const DarkModeScene: React.FC = () => {
 
           {/* Moon icon */}
           <svg
-            width="20"
-            height="20"
+            width="26"
+            height="26"
             viewBox="0 0 24 24"
             fill="none"
             stroke={toggleProgress > 0.5 ? '#818cf8' : '#666'}

@@ -42,12 +42,12 @@ export const MentionScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           {/* Text area content */}
           <div
             style={{
               minHeight: 80,
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',
@@ -64,7 +64,7 @@ export const MentionScene: React.FC = () => {
 
             {/* Dropdown */}
             {showDropdown && (
-              <div style={{ position: 'absolute', top: 44, left: 0, zIndex: 10 }}>
+              <div style={{ position: 'absolute', top: 56, left: 0, zIndex: 10 }}>
                 <DropdownPopover
                   items={mentionItems}
                   highlightIndex={0}

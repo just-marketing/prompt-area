@@ -44,7 +44,7 @@ export const InstallScene: React.FC = () => {
         {/* Terminal card */}
         <div
           style={{
-            width: 820,
+            width: 960,
             backgroundColor: '#1e1e1e',
             borderRadius: 16,
             border: '1px solid #333',
@@ -56,30 +56,30 @@ export const InstallScene: React.FC = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
-              padding: '14px 20px',
+              gap: 10,
+              padding: '18px 26px',
               borderBottom: '1px solid #333',
             }}>
             <div
               style={{
-                width: 12,
-                height: 12,
+                width: 16,
+                height: 16,
                 borderRadius: '50%',
                 backgroundColor: '#ff5f57',
               }}
             />
             <div
               style={{
-                width: 12,
-                height: 12,
+                width: 16,
+                height: 16,
                 borderRadius: '50%',
                 backgroundColor: '#febc2e',
               }}
             />
             <div
               style={{
-                width: 12,
-                height: 12,
+                width: 16,
+                height: 16,
                 borderRadius: '50%',
                 backgroundColor: '#28c840',
               }}
@@ -87,7 +87,7 @@ export const InstallScene: React.FC = () => {
             <div
               style={{
                 marginLeft: 'auto',
-                fontSize: 13,
+                fontSize: 18,
                 color: '#666',
                 fontFamily: 'Geist Mono, monospace',
               }}>
@@ -98,9 +98,9 @@ export const InstallScene: React.FC = () => {
           {/* Terminal body */}
           <div
             style={{
-              padding: '24px 28px',
+              padding: '32px 36px',
               fontFamily: 'Geist Mono, monospace',
-              fontSize: 18,
+              fontSize: 26,
               lineHeight: 1.8,
             }}>
             {/* Prompt line */}
@@ -109,7 +109,7 @@ export const InstallScene: React.FC = () => {
               <span style={{ color: '#e0e0e0', marginLeft: 10 }}>
                 {COMMAND.slice(0, charsTyped)}
               </span>
-              {charsTyped < COMMAND.length && <Cursor color="#e0e0e0" height={20} />}
+              {charsTyped < COMMAND.length && <Cursor color="#e0e0e0" height={28} />}
             </div>
 
             {/* Installing line */}
@@ -144,7 +144,7 @@ export const InstallScene: React.FC = () => {
                   opacity: checkProgress,
                   transform: `translateY(${interpolate(checkProgress, [0, 1], [5, 0])}px)`,
                 }}>
-                <span style={{ color: '#28c840', fontSize: 20 }}>✓</span>
+                <span style={{ color: '#28c840', fontSize: 28 }}>✓</span>
                 <span style={{ color: '#28c840' }}>Done. Component added successfully.</span>
               </div>
             )}

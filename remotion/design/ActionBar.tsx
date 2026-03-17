@@ -33,7 +33,7 @@ function IconButton({ button, theme = 'light' }: { button: ActionButton; theme?:
         borderRadius: 8,
         border: `1px solid ${c.cardBorder}`,
         color: c.icon,
-        fontSize: 18,
+        fontSize: 26,
         fontFamily: 'Geist, sans-serif',
       }}>
       {button.icon || button.label}
@@ -44,8 +44,8 @@ function IconButton({ button, theme = 'light' }: { button: ActionButton; theme?:
 function MicIcon({ color }: { color: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke={color}
@@ -62,8 +62,8 @@ function MicIcon({ color }: { color: string }) {
 function SendIcon({ color }: { color: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke={color}
@@ -92,14 +92,14 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         ...style,
       }}>
       {/* Left icons */}
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         {leftButtons.map((btn, i) => (
           <IconButton key={i} button={btn} theme={theme} />
         ))}
       </div>
 
       {/* Right icons */}
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <div
           style={{
             display: 'flex',
@@ -109,7 +109,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
             height: spacing.iconSize,
             borderRadius: 8,
             border: `1px solid ${c.cardBorder}`,
-            fontSize: 14,
+            fontSize: 20,
             color: c.icon,
           }}>
           &lt;/&gt;

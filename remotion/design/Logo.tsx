@@ -66,11 +66,11 @@ export const Logo: React.FC<LogoProps> = ({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 14,
+          gap: 18,
         }}>
         <svg
-          width="46"
-          height="46"
+          width="60"
+          height="60"
           viewBox="0 0 24 24"
           fill="none"
           stroke={c.title}
@@ -101,7 +101,7 @@ export const Logo: React.FC<LogoProps> = ({
           style={{
             fontSize: typography.tagline.fontSize,
             color: c.tagline,
-            marginTop: 8,
+            marginTop: 12,
             opacity: taglineOpacity,
             transform: `translateY(${taglineY}px)`,
             fontFamily: 'Geist, sans-serif',

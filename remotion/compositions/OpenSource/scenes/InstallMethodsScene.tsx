@@ -44,7 +44,7 @@ export const InstallMethodsScene: React.FC = () => {
       <FadeIn delay={0} distance={15}>
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
@@ -55,7 +55,7 @@ export const InstallMethodsScene: React.FC = () => {
           Install in seconds
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {METHODS.map((method, i) => {
             const progress = spring({
               frame: Math.max(0, frame - 8 - i * 14),
@@ -74,13 +74,13 @@ export const InstallMethodsScene: React.FC = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 14,
                     marginBottom: 6,
                     marginLeft: 4,
                   }}>
                   <span
                     style={{
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: 600,
                       color: '#71717a',
                       fontFamily: 'Geist, sans-serif',
@@ -90,11 +90,11 @@ export const InstallMethodsScene: React.FC = () => {
                   {method.badge && (
                     <span
                       style={{
-                        fontSize: 11,
+                        fontSize: 15,
                         fontWeight: 600,
                         color: method.badgeColor,
                         backgroundColor: method.badgeBg,
-                        padding: '2px 8px',
+                        padding: '4px 10px',
                         borderRadius: 6,
                       }}>
                       {method.badge}
@@ -103,16 +103,16 @@ export const InstallMethodsScene: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    width: 700,
+                    width: 880,
                     backgroundColor: '#1e1e1e',
                     borderRadius: 12,
-                    padding: '16px 20px',
+                    padding: '22px 26px',
                     fontFamily: 'Geist Mono, monospace',
-                    fontSize: 17,
+                    fontSize: 24,
                     color: '#e0e0e0',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 14,
                   }}>
                   <span style={{ color: '#28c840' }}>$</span>
                   <span>{method.command}</span>

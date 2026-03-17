@@ -57,7 +57,7 @@ export const StreamingScene: React.FC = () => {
         {/* User message bubble */}
         <div
           style={{
-            width: 820,
+            width: 960,
             display: 'flex',
             justifyContent: 'flex-end',
             marginBottom: 16,
@@ -69,20 +69,20 @@ export const StreamingScene: React.FC = () => {
             style={{
               backgroundColor: '#18181b',
               color: '#fff',
-              padding: '14px 20px',
+              padding: '18px 26px',
               borderRadius: '16px 16px 4px 16px',
-              fontSize: 20,
+              fontSize: 28,
               fontFamily: 'Geist, sans-serif',
               maxWidth: '70%',
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 10,
             }}>
             <span
               style={{
                 backgroundColor: 'rgba(219,234,254,0.2)',
                 color: '#93c5fd',
-                padding: '2px 8px',
+                padding: '4px 10px',
                 borderRadius: 6,
                 fontWeight: 500,
               }}>
@@ -95,35 +95,35 @@ export const StreamingScene: React.FC = () => {
         {/* AI response bubble */}
         <div
           style={{
-            width: 820,
+            width: 960,
             display: 'flex',
             justifyContent: 'flex-start',
             opacity: frame >= 15 ? 1 : 0,
           }}>
-          <Card width={620} padding={20}>
+          <Card width={780} padding={28}>
             {/* AI avatar header */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 10,
-                marginBottom: 12,
+                gap: 14,
+                marginBottom: 16,
               }}>
               <div
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 36,
+                  height: 36,
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                <span style={{ fontSize: 14, color: '#fff' }}>AI</span>
+                <span style={{ fontSize: 20, color: '#fff' }}>AI</span>
               </div>
               <span
                 style={{
-                  fontSize: 15,
+                  fontSize: 22,
                   fontWeight: 600,
                   color: '#6366f1',
                   fontFamily: 'Geist, sans-serif',
@@ -133,7 +133,7 @@ export const StreamingScene: React.FC = () => {
               {isStreaming && (
                 <span
                   style={{
-                    fontSize: 12,
+                    fontSize: 16,
                     color: '#a1a1aa',
                     fontFamily: 'Geist, sans-serif',
                   }}>
@@ -145,7 +145,7 @@ export const StreamingScene: React.FC = () => {
             {/* Streamed text */}
             <div
               style={{
-                fontSize: 18,
+                fontSize: 26,
                 lineHeight: 1.7,
                 color: '#0f0f0f',
                 fontFamily: 'Geist, sans-serif',
@@ -159,7 +159,7 @@ export const StreamingScene: React.FC = () => {
                   }}>
                   {line.text}
                   {i === visibleLines.length - 1 && isStreaming && (
-                    <Cursor color="#6366f1" height={20} />
+                    <Cursor color="#6366f1" height={28} />
                   )}
                 </div>
               ))}

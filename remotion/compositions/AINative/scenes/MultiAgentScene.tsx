@@ -32,18 +32,18 @@ export const MultiAgentScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',
-              marginBottom: 16,
+              marginBottom: 20,
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
             }}>
             {frame >= chip1Frame && (
               <Chip variant="mention" label="@Strategist" enterFrame={chip1Frame} />
@@ -70,8 +70,8 @@ export const MultiAgentScene: React.FC = () => {
             <div
               style={{
                 display: 'flex',
-                gap: 8,
-                marginBottom: 16,
+                gap: 10,
+                marginBottom: 20,
                 flexWrap: 'wrap',
               }}>
               {[
@@ -88,11 +88,11 @@ export const MultiAgentScene: React.FC = () => {
                   <div
                     key={pill.label}
                     style={{
-                      padding: '6px 14px',
+                      padding: '8px 18px',
                       borderRadius: 20,
                       backgroundColor: pill.bg,
                       color: pill.color,
-                      fontSize: 14,
+                      fontSize: 20,
                       fontWeight: 600,
                       fontFamily: 'Geist, sans-serif',
                       opacity: pillProgress,
@@ -110,7 +110,7 @@ export const MultiAgentScene: React.FC = () => {
               height: 1,
               backgroundColor: '#f0f0f0',
               width: '100%',
-              marginBottom: 12,
+              marginBottom: 20,
             }}
           />
           <ActionBar />

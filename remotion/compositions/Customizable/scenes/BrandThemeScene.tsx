@@ -61,12 +61,12 @@ export const BrandThemeScene: React.FC = () => {
       {/* Brand label */}
       <div
         style={{
-          fontSize: 15,
+          fontSize: 22,
           fontWeight: 600,
           color: brand.accent,
           fontFamily: 'Geist Mono, monospace',
-          marginBottom: 16,
-          padding: '6px 16px',
+          marginBottom: 20,
+          padding: '8px 20px',
           borderRadius: 20,
           backgroundColor: brand.chipBg,
           opacity: switchProgress,
@@ -77,7 +77,7 @@ export const BrandThemeScene: React.FC = () => {
 
       <FadeIn delay={0} distance={15}>
         <Card
-          width={820}
+          width={960}
           style={{
             backgroundColor: brand.bg,
             borderColor: brand.border,
@@ -85,15 +85,15 @@ export const BrandThemeScene: React.FC = () => {
           }}>
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',
-              marginBottom: 16,
+              marginBottom: 20,
               display: 'flex',
               flexWrap: 'wrap',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
             }}>
             <span
               style={{
@@ -102,7 +102,7 @@ export const BrandThemeScene: React.FC = () => {
                 gap: 4,
                 backgroundColor: brand.chipBg,
                 color: brand.chipText,
-                padding: '4px 12px',
+                padding: '6px 16px',
                 borderRadius: 8,
                 fontWeight: 500,
               }}>
@@ -114,7 +114,7 @@ export const BrandThemeScene: React.FC = () => {
                 display: 'inline-flex',
                 backgroundColor: brand.chipBg,
                 color: brand.chipText,
-                padding: '4px 12px',
+                padding: '6px 16px',
                 borderRadius: 8,
                 fontWeight: 500,
               }}>
@@ -127,7 +127,7 @@ export const BrandThemeScene: React.FC = () => {
               height: 1,
               backgroundColor: brand.border,
               width: '100%',
-              marginBottom: 12,
+              marginBottom: 20,
             }}
           />
           <ActionBar />

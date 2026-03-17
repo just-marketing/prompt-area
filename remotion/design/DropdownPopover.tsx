@@ -28,7 +28,7 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
   visible,
   enterFrame = 0,
   theme = 'light',
-  width = 280,
+  width = 360,
   style,
 }) => {
   const frame = useCurrentFrame()
@@ -56,7 +56,7 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
         borderRadius: 12,
         border: `1px solid ${c.cardBorder}`,
         boxShadow: '0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.05)',
-        padding: 4,
+        padding: 6,
         opacity,
         transform: `translateY(${translateY}px)`,
         overflow: 'hidden',
@@ -70,8 +70,8 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              padding: '10px 14px',
+              gap: 14,
+              padding: '12px 18px',
               borderRadius: 8,
               backgroundColor: isHighlighted
                 ? theme === 'dark'
@@ -86,11 +86,11 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 28,
-                  height: 28,
+                  width: 36,
+                  height: 36,
                   borderRadius: 6,
                   backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                  fontSize: 14,
+                  fontSize: 20,
                   color: c.icon,
                 }}>
                 {item.icon}
@@ -99,7 +99,7 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <div
                 style={{
-                  fontSize: 15,
+                  fontSize: 22,
                   fontWeight: 500,
                   color: c.text,
                 }}>
@@ -108,7 +108,7 @@ export const DropdownPopover: React.FC<DropdownPopoverProps> = ({
               {item.description && (
                 <div
                   style={{
-                    fontSize: 13,
+                    fontSize: 18,
                     color: c.tagline,
                   }}>
                   {item.description}

@@ -29,8 +29,8 @@ export const StatsScene: React.FC = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: 20,
-            width: 720,
+            gap: 26,
+            width: 900,
           }}>
           {STATS.map((stat, i) => {
             const progress = spring({
@@ -46,17 +46,17 @@ export const StatsScene: React.FC = () => {
                   backgroundColor: '#ffffff',
                   borderRadius: 16,
                   border: '1px solid #e5e5e5',
-                  padding: '28px 24px',
+                  padding: '36px 32px',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
                   opacity: progress,
                   transform: `scale(${interpolate(progress, [0, 1], [0.85, 1])})`,
                   textAlign: 'center',
                   fontFamily: 'Geist, sans-serif',
                 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>{stat.icon}</div>
+                <div style={{ fontSize: 44, marginBottom: 8 }}>{stat.icon}</div>
                 <div
                   style={{
-                    fontSize: 40,
+                    fontSize: 54,
                     fontWeight: 800,
                     color: '#0f0f0f',
                     letterSpacing: '-1px',
@@ -66,7 +66,7 @@ export const StatsScene: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: 15,
+                    fontSize: 22,
                     color: '#71717a',
                     marginTop: 6,
                     fontWeight: 500,

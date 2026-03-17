@@ -31,12 +31,12 @@ export const FileAttachScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           {/* File attachment card */}
           <div
             style={{
               display: 'flex',
-              gap: 12,
+              gap: 16,
               marginBottom: 16,
               opacity: slideOpacity,
               transform: `translateX(${slideX}px)`,
@@ -44,8 +44,8 @@ export const FileAttachScene: React.FC = () => {
             {/* File icon */}
             <div
               style={{
-                width: 48,
-                height: 48,
+                width: 60,
+                height: 60,
                 borderRadius: 10,
                 backgroundColor: '#fef3c7',
                 display: 'flex',
@@ -78,17 +78,17 @@ export const FileAttachScene: React.FC = () => {
                 justifyContent: 'center',
                 fontFamily: 'Geist, sans-serif',
               }}>
-              <div style={{ fontSize: 16, color: '#0f0f0f', fontWeight: 500 }}>
+              <div style={{ fontSize: 22, color: '#0f0f0f', fontWeight: 500 }}>
                 Q4-2025-Report.pdf
               </div>
-              <div style={{ fontSize: 13, color: '#71717a' }}>2.4 MB • PDF Document</div>
+              <div style={{ fontSize: 18, color: '#71717a' }}>2.4 MB • PDF Document</div>
             </div>
           </div>
 
           {/* Text content */}
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',

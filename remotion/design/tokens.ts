@@ -38,44 +38,44 @@ export function themeColors(theme: Theme = 'light') {
   return colors[theme]
 }
 
-export const cardShadow = '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)'
+export const cardShadow = '0 12px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06)'
 
 export const spacing = {
-  cardPadding: 28,
-  cardPaddingX: 32,
-  cardRadius: 16,
-  chipRadius: 8,
-  iconSize: 38,
-  dotSize: 24,
+  cardPadding: 36,
+  cardPaddingX: 40,
+  cardRadius: 20,
+  chipRadius: 10,
+  iconSize: 48,
+  dotSize: 30,
 } as const
 
 export const typography = {
   title: {
-    fontSize: 52,
+    fontSize: 68,
     fontWeight: 700 as const,
     letterSpacing: '-1.5px',
   },
   tagline: {
-    fontSize: 28,
+    fontSize: 38,
     fontWeight: 400 as const,
   },
   body: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 400 as const,
     lineHeight: 1.6,
   },
   chip: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 500 as const,
     lineHeight: 1.6,
   },
   code: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 400 as const,
     lineHeight: 1.6,
   },
   url: {
-    fontSize: 32,
+    fontSize: 44,
     fontWeight: 600 as const,
     letterSpacing: '-0.5px',
   },

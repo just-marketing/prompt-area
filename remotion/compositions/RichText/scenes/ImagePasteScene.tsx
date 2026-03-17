@@ -44,13 +44,13 @@ export const ImagePasteScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           {/* Image strip above text */}
           {frame >= PASTE_FRAME && (
             <div
               style={{
                 display: 'flex',
-                gap: 8,
+                gap: 10,
                 marginBottom: 16,
                 opacity: interpolate(pasteProgress, [0, 1], [0, 1]),
                 transform: `translateY(${interpolate(pasteProgress, [0, 1], [-10, 0])}px)`,
@@ -58,8 +58,8 @@ export const ImagePasteScene: React.FC = () => {
               {/* Image thumbnail placeholder */}
               <div
                 style={{
-                  width: 120,
-                  height: 80,
+                  width: 160,
+                  height: 106,
                   borderRadius: 10,
                   overflow: 'hidden',
                   position: 'relative',
@@ -115,10 +115,10 @@ export const ImagePasteScene: React.FC = () => {
                   justifyContent: 'center',
                   fontFamily: 'Geist, sans-serif',
                 }}>
-                <div style={{ fontSize: 15, color: '#0f0f0f', fontWeight: 500 }}>
+                <div style={{ fontSize: 22, color: '#0f0f0f', fontWeight: 500 }}>
                   screenshot.png
                 </div>
-                <div style={{ fontSize: 13, color: '#71717a' }}>Pasted from clipboard</div>
+                <div style={{ fontSize: 18, color: '#71717a' }}>Pasted from clipboard</div>
               </div>
             </div>
           )}
@@ -126,7 +126,7 @@ export const ImagePasteScene: React.FC = () => {
           {/* Text content */}
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',

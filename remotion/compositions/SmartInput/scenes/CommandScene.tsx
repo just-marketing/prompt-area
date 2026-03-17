@@ -42,11 +42,11 @@ export const CommandScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           <div
             style={{
               minHeight: 80,
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',
@@ -63,7 +63,7 @@ export const CommandScene: React.FC = () => {
             {!showChip && <Cursor color="#0f0f0f" />}
             {showChip && <Chip variant="command" label="/summarize" enterFrame={SELECT_FRAME} />}
             {showDropdown && (
-              <div style={{ position: 'absolute', top: 44, left: 140, zIndex: 10 }}>
+              <div style={{ position: 'absolute', top: 56, left: 180, zIndex: 10 }}>
                 <DropdownPopover
                   items={commandItems}
                   highlightIndex={0}

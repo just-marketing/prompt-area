@@ -38,7 +38,7 @@ function getTranslate(direction: Direction, distance: number, progress: number):
 export const FadeIn: React.FC<FadeInProps> = ({
   delay = 0,
   direction = 'up',
-  distance = 20,
+  distance = 28,
   preset = 'entrance',
   scaleFrom,
   style,

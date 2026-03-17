@@ -35,7 +35,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         backgroundColor: theme === 'dark' ? '#1e1e1e' : '#f8f8f8',
         borderRadius: 12,
         border: `1px solid ${c.cardBorder}`,
-        padding: '20px 24px',
+        padding: '28px 32px',
         fontFamily: mono ? 'Geist Mono, monospace' : 'Geist, sans-serif',
         fontSize: typography.code.fontSize,
         lineHeight: typography.code.lineHeight,

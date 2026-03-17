@@ -51,16 +51,16 @@ export const AgentSelectScene: React.FC = () => {
         height: '100%',
       }}>
       <FadeIn delay={0} distance={15}>
-        <Card width={820}>
+        <Card width={960}>
           {/* Title label */}
           <div
             style={{
-              fontSize: 14,
+              fontSize: 20,
               fontWeight: 600,
               color: '#a1a1aa',
               textTransform: 'uppercase' as const,
-              letterSpacing: '1px',
-              marginBottom: 12,
+              letterSpacing: '1.2px',
+              marginBottom: 20,
               fontFamily: 'Geist, sans-serif',
             }}>
             Select an AI Agent
@@ -69,11 +69,11 @@ export const AgentSelectScene: React.FC = () => {
           {/* Input area */}
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               lineHeight: 1.6,
               color: '#0f0f0f',
               fontFamily: 'Geist, sans-serif',
-              marginBottom: 16,
+              marginBottom: 20,
               display: 'flex',
               alignItems: 'center',
               position: 'relative',
@@ -83,13 +83,13 @@ export const AgentSelectScene: React.FC = () => {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 8,
                   backgroundColor: '#dbeafe',
                   color: '#1d4ed8',
-                  padding: '4px 12px',
+                  padding: '6px 16px',
                   borderRadius: 8,
                   fontWeight: 500,
-                  fontSize: 24,
+                  fontSize: 32,
                   transform: `scale(${interpolate(chipProgress, [0, 1], [0.6, 1])})`,
                   opacity: chipProgress,
                 }}>
@@ -98,7 +98,7 @@ export const AgentSelectScene: React.FC = () => {
             ) : (
               <>
                 <span style={{ color: '#1d4ed8' }}>{TYPING.slice(0, charsTyped)}</span>
-                <Cursor color="#1d4ed8" height={28} />
+                <Cursor color="#1d4ed8" height={36} />
               </>
             )}
           </div>
@@ -124,22 +124,22 @@ export const AgentSelectScene: React.FC = () => {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
-                    padding: '14px 18px',
+                    gap: 16,
+                    padding: '18px 24px',
                     backgroundColor: i === highlightIdx ? '#f0f7ff' : 'transparent',
                     fontFamily: 'Geist, sans-serif',
                   }}>
-                  <span style={{ fontSize: 24 }}>{agent.emoji}</span>
+                  <span style={{ fontSize: 32 }}>{agent.emoji}</span>
                   <div>
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 26,
                         fontWeight: 600,
                         color: '#0f0f0f',
                       }}>
                       {agent.name}
                     </div>
-                    <div style={{ fontSize: 14, color: '#71717a' }}>{agent.desc}</div>
+                    <div style={{ fontSize: 20, color: '#71717a' }}>{agent.desc}</div>
                   </div>
                 </div>
               ))}
@@ -151,7 +151,7 @@ export const AgentSelectScene: React.FC = () => {
               height: 1,
               backgroundColor: '#f0f0f0',
               width: '100%',
-              marginBottom: 12,
+              marginBottom: 20,
             }}
           />
           <ActionBar />

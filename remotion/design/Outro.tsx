@@ -37,7 +37,7 @@ export const Outro: React.FC<OutroProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
         opacity,
         transform: `translateY(${y}px) scale(${scale})`,
         ...style,
@@ -54,7 +54,7 @@ export const Outro: React.FC<OutroProps> = ({
       </div>
       <div
         style={{
-          fontSize: 18,
+          fontSize: 24,
           color: c.tagline,
           fontFamily: 'Geist, sans-serif',
         }}>

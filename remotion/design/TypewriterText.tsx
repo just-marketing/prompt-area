@@ -77,7 +77,7 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
     <span
       style={{
         display: 'inline',
-        fontSize: 24,
+        fontSize: 32,
         lineHeight: 1.6,
         fontFamily: 'Geist, sans-serif',
         ...style,

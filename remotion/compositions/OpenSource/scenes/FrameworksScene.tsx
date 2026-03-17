@@ -29,11 +29,11 @@ export const FrameworksScene: React.FC = () => {
       <FadeIn delay={0} distance={15}>
         <div
           style={{
-            fontSize: 28,
+            fontSize: 38,
             fontWeight: 700,
             color: '#0f0f0f',
             fontFamily: 'Geist, sans-serif',
-            marginBottom: 8,
+            marginBottom: 10,
             textAlign: 'center',
             letterSpacing: '-0.5px',
           }}>
@@ -41,7 +41,7 @@ export const FrameworksScene: React.FC = () => {
         </div>
         <div
           style={{
-            fontSize: 18,
+            fontSize: 26,
             color: '#71717a',
             fontFamily: 'Geist, sans-serif',
             marginBottom: 32,
@@ -54,8 +54,8 @@ export const FrameworksScene: React.FC = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 1fr',
-            gap: 16,
-            width: 660,
+            gap: 20,
+            width: 840,
           }}>
           {FRAMEWORKS.map((fw, i) => {
             const progress = spring({
@@ -70,7 +70,7 @@ export const FrameworksScene: React.FC = () => {
                 style={{
                   backgroundColor: fw.bg,
                   borderRadius: 14,
-                  padding: '24px 16px',
+                  padding: '32px 22px',
                   textAlign: 'center',
                   fontFamily: 'Geist, sans-serif',
                   opacity: progress,
@@ -79,7 +79,7 @@ export const FrameworksScene: React.FC = () => {
                 }}>
                 <div
                   style={{
-                    fontSize: 22,
+                    fontSize: 30,
                     fontWeight: 700,
                     color: fw.color,
                     letterSpacing: '-0.3px',
@@ -98,7 +98,7 @@ export const FrameworksScene: React.FC = () => {
               marginTop: 24,
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 10,
               opacity: spring({
                 frame: Math.max(0, frame - 60),
                 fps,
@@ -107,15 +107,15 @@ export const FrameworksScene: React.FC = () => {
             }}>
             <div
               style={{
-                width: 28,
-                height: 28,
+                width: 36,
+                height: 36,
                 borderRadius: 6,
                 backgroundColor: '#3178c6',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 14,
+                fontSize: 20,
                 fontWeight: 700,
                 fontFamily: 'Geist, sans-serif',
               }}>
@@ -123,7 +123,7 @@ export const FrameworksScene: React.FC = () => {
             </div>
             <span
               style={{
-                fontSize: 16,
+                fontSize: 22,
                 color: '#71717a',
                 fontFamily: 'Geist, sans-serif',
                 fontWeight: 500,
