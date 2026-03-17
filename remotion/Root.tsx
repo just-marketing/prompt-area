@@ -7,6 +7,7 @@ import { DevExperience } from './compositions/DevExperience'
 import { AINative } from './compositions/AINative'
 import { Customizable } from './compositions/Customizable'
 import { OpenSource } from './compositions/OpenSource'
+import { PromoVideo } from './compositions/PromoVideo'
 
 const shared = {
   durationInFrames: VIDEO_DURATION_FRAMES,
@@ -14,6 +15,11 @@ const shared = {
   width: VIDEO_WIDTH,
   height: VIDEO_HEIGHT,
 }
+
+const PROMO_WIDTH = 1280
+const PROMO_HEIGHT = 720
+const PROMO_FPS = 30
+const PROMO_DURATION = 820
 
 export const Root: React.FC = () => {
   return (
@@ -24,6 +30,14 @@ export const Root: React.FC = () => {
       <Composition id="AINative" component={AINative} {...shared} />
       <Composition id="Customizable" component={Customizable} {...shared} />
       <Composition id="OpenSource" component={OpenSource} {...shared} />
+      <Composition
+        id="PromoVideo"
+        component={PromoVideo}
+        durationInFrames={PROMO_DURATION}
+        fps={PROMO_FPS}
+        width={PROMO_WIDTH}
+        height={PROMO_HEIGHT}
+      />
     </>
   )
 }

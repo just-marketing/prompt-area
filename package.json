@@ -24,7 +24,8 @@
     "remotion:render:v3": "remotion render remotion/index.ts DevExperience out/dev-experience.mp4 --public-dir remotion/public",
     "remotion:render:v4": "remotion render remotion/index.ts AINative out/ai-native.mp4 --public-dir remotion/public",
     "remotion:render:v5": "remotion render remotion/index.ts Customizable out/customizable.mp4 --public-dir remotion/public",
-    "remotion:render:v6": "remotion render remotion/index.ts OpenSource out/open-source.mp4 --public-dir remotion/public"
+    "remotion:render:v6": "remotion render remotion/index.ts OpenSource out/open-source.mp4 --public-dir remotion/public",
+    "remotion:render:v7": "remotion render remotion/index.ts PromoVideo out/promo-video.mp4 --public-dir remotion/public"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
