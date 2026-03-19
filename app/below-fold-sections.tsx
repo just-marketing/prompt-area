@@ -42,6 +42,8 @@ import {
   dxHelpersCode,
   RotatingPlaceholdersExample,
   rotatingPlaceholdersCode,
+  ClaudeCodeInputExample,
+  claudeCodeInputCode,
 } from './examples'
 import { SectionHeading } from './sections/section-heading'
 import { InstallSection } from './sections/install-block'
@@ -311,6 +313,30 @@ export default function BelowFoldSections() {
           </p>
           <ExampleShowcase code={statusBarBothCode}>
             <StatusBarBothExample />
+          </ExampleShowcase>
+        </div>
+      </div>
+
+      {/* Claude Code–style Input */}
+      <div className="flex flex-col gap-6">
+        <div id="claude-code-input" className="flex scroll-mt-16 flex-col gap-3">
+          <SectionHeading id="claude-code-input" as="h2">
+            Claude Code–Style
+          </SectionHeading>
+          <p className="text-muted-foreground">
+            A complete composition combining PromptArea, ActionBar, and StatusBar to replicate a
+            Claude Code–style chat input. Independently installable components composed together.
+          </p>
+        </div>
+
+        <div id="claude-code-input-demo" className="flex scroll-mt-16 flex-col gap-2">
+          <SectionHeading id="claude-code-input-demo">Demo</SectionHeading>
+          <p className="text-muted-foreground text-xs">
+            File chip above the input, a &ldquo;Plan mode&rdquo; toggle and model selector in the
+            action bar, and project/branch context in the status bar.
+          </p>
+          <ExampleShowcase code={claudeCodeInputCode}>
+            <ClaudeCodeInputExample />
           </ExampleShowcase>
         </div>
       </div>

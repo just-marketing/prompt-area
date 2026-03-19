@@ -23,3 +23,4 @@ export { CompactPromptAreaExample, compactPromptAreaCode } from './compact-promp
 export { ChatPromptLayoutExample, chatPromptLayoutCode } from './chat-prompt-layout'
 export { DxHelpersExample, dxHelpersCode } from './dx-helpers'
 export { RotatingPlaceholdersExample, rotatingPlaceholdersCode } from './rotating-placeholders'
+export { ClaudeCodeInputExample, claudeCodeInputCode } from './claude-code-input'
