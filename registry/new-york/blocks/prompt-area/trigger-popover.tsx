@@ -38,6 +38,9 @@ export function TriggerPopover({
   const { refs, floatingStyles } = useFloating({
     placement: 'bottom-start',
     strategy: 'fixed',
+    elements: {
+      reference: triggerRect ? { getBoundingClientRect: () => triggerRect } : undefined,
+    },
     middleware: [
       offset(4),
       flip({ padding: 8 }),
@@ -59,15 +62,6 @@ export function TriggerPopover({
     },
     [refs],
   )
-
-  // Set virtual reference from triggerRect
-  useEffect(() => {
-    if (triggerRect) {
-      refs.setReference({
-        getBoundingClientRect: () => triggerRect,
-      })
-    }
-  }, [triggerRect, refs])
 
   // Scroll selected item into view
   useEffect(() => {
