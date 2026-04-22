@@ -127,6 +127,21 @@ describe('getTextLengthInRange', () => {
     // 'hi ' (3) + '@Bob' (4) + ' there' (6) + br (1) = 14
     expect(getTextLengthInRange(range)).toBe(14)
   })
+
+  it('handles a partial range that ends mid-text (setEnd inside a text node)', () => {
+    // This is the path exercised by getCursorOffset and getSelectionOffsets —
+    // a range that selects from the editor start and ends inside a text node.
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('hi '))
+    const chip = makeChip('@', 'Bob') // 4 chars
+    editor.appendChild(chip)
+    const tail = document.createTextNode(' world')
+    editor.appendChild(tail)
+    const range = document.createRange()
+    range.selectNodeContents(editor)
+    range.setEnd(tail, 3) // 'hi ' (3) + '@Bob' (4) + ' wo' (3) = 10
+    expect(getTextLengthInRange(range)).toBe(10)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -253,6 +268,21 @@ describe('saveCursorPosition / restoreCursorPosition', () => {
     restoreCursorPosition(editor, { nodeIndex: 0, offset: 0 })
     // no throw = success
     expect(editor.childNodes.length).toBe(0)
+  })
+
+  it('places cursor after a non-text child when targetNode is not a text node', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('before'))
+    const chip = document.createElement('span')
+    chip.dataset.chipTrigger = '@'
+    chip.dataset.chipDisplay = 'Alice'
+    chip.textContent = '@Alice'
+    editor.appendChild(chip) // childNodes[1] — not a text node
+    restoreCursorPosition(editor, { nodeIndex: 1, offset: 0 })
+    const range = window.getSelection()?.getRangeAt(0)
+    // setStartAfter(chip) places the cursor right after the chip element.
+    expect(range?.startContainer).toBe(editor)
+    expect(range?.startOffset).toBe(2)
   })
 
   it('saves nodeIndex when selection is on the editor itself', () => {

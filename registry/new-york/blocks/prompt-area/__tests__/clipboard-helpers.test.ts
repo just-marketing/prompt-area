@@ -15,20 +15,21 @@ function makeFragment(): DocumentFragment {
   return document.createDocumentFragment()
 }
 
-function makeChipEl(
-  trigger: string,
-  display: string,
-  extras: Record<string, string> = {},
-): HTMLSpanElement {
+type ChipExtras = {
+  value?: string
+  chipAutoResolved?: 'true'
+  chipData?: string
+}
+
+function makeChipEl(trigger: string, display: string, extras: ChipExtras = {}): HTMLSpanElement {
   const chip = document.createElement('span')
   chip.dataset.chipTrigger = trigger
   chip.dataset.chipDisplay = display
   chip.dataset.chipValue = extras.value ?? display
+  if (extras.chipAutoResolved !== undefined) chip.dataset.chipAutoResolved = extras.chipAutoResolved
+  if (extras.chipData !== undefined) chip.dataset.chipData = extras.chipData
   chip.contentEditable = 'false'
   chip.textContent = trigger + display
-  for (const [k, v] of Object.entries(extras)) {
-    if (k !== 'value') chip.dataset[k] = v
-  }
   return chip
 }
 
@@ -283,6 +284,17 @@ describe('parseSegmentsFromClipboard', () => {
 
   it('returns null when an item is not an object', () => {
     expect(parseSegmentsFromClipboard(JSON.stringify(['plain string']))).toBeNull()
+  })
+
+  it('passes through arbitrary shapes in the chip `data` field untyped', () => {
+    // `data` is typed as `unknown` — JSON-serializable shapes survive round-trip
+    // without coercion. The helper does not validate `data` beyond JSON.parse.
+    const input = [
+      { type: 'chip', trigger: '@', value: 'v1', displayText: 'A', data: null },
+      { type: 'chip', trigger: '@', value: 'v2', displayText: 'B', data: [1, 2, 3] },
+      { type: 'chip', trigger: '@', value: 'v3', displayText: 'C', data: { nested: { ok: true } } },
+    ]
+    expect(parseSegmentsFromClipboard(JSON.stringify(input))).toEqual(input)
   })
 })
 
