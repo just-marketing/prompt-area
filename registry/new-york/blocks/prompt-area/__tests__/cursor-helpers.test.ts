@@ -220,12 +220,12 @@ describe('saveCursorPosition / restoreCursorPosition', () => {
     placeCursor(text, 3)
 
     const saved = saveCursorPosition(editor)
-    expect(saved).not.toBeNull()
+    if (!saved) throw new Error('saveCursorPosition returned null')
 
     // Move the cursor elsewhere
     placeCursor(text, 0)
 
-    restoreCursorPosition(editor, saved!)
+    restoreCursorPosition(editor, saved)
     const range = window.getSelection()?.getRangeAt(0)
     expect(range?.startContainer).toBe(text)
     expect(range?.startOffset).toBe(3)
@@ -323,16 +323,14 @@ describe('setCursorAtOffset', () => {
     expect(range?.startOffset).toBe(3)
   })
 
-  it('falls back to end of editor when offset is unreachable', () => {
+  it('positions cursor at the end of the text node when offset equals its length', () => {
     const editor = makeEditor()
-    editor.appendChild(document.createTextNode('hi'))
-    // When container has no offset-bearing children matching the fallback path,
-    // the helper falls back via `range.selectNodeContents(editor); collapse(false)`.
-    // Verify selection lands at or beyond the last child.
+    const text = document.createTextNode('hi')
+    editor.appendChild(text)
     setCursorAtOffset(editor, 2)
     const range = window.getSelection()?.getRangeAt(0)
-    // Either inside the text node at offset 2 (normal path) or at the editor's end
-    expect(range).toBeTruthy()
+    expect(range?.startContainer).toBe(text)
+    expect(range?.startOffset).toBe(2)
   })
 })
 
@@ -346,10 +344,10 @@ describe('createRangeAtOffset', () => {
     const text = document.createTextNode('hello')
     editor.appendChild(text)
     const range = createRangeAtOffset(editor, 2)
-    expect(range).not.toBeNull()
-    expect(range!.collapsed).toBe(true)
-    expect(range!.startContainer).toBe(text)
-    expect(range!.startOffset).toBe(2)
+    if (!range) throw new Error('createRangeAtOffset returned null')
+    expect(range.collapsed).toBe(true)
+    expect(range.startContainer).toBe(text)
+    expect(range.startOffset).toBe(2)
   })
 })
 
@@ -424,8 +422,9 @@ describe('cursor round-trip across DOM rewrite', () => {
     expect(before).toBe(6)
 
     // Simulate a render pass: replace the text node with new text of equal length
+    if (before === null) throw new Error('getCursorOffset returned null')
     editor.replaceChildren(document.createTextNode('HELLO world'))
-    setCursorAtOffset(editor, before!)
+    setCursorAtOffset(editor, before)
     expect(getCursorOffset(editor)).toBe(6)
   })
 })

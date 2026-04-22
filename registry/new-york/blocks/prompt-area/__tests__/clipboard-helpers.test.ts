@@ -189,6 +189,20 @@ describe('serializeFragmentToSegments', () => {
     fragment.appendChild(broken)
     expect(serializeFragmentToSegments(fragment)).toEqual([{ type: 'text', text: 'fallback' }])
   })
+
+  it('silently drops a chip element with trigger but missing chipValue', () => {
+    // isChipElement returns true (dataset.chipTrigger is set), but the
+    // `trigger && chipValue !== undefined && display` guard fails. The chip
+    // is dropped without falling back to text — exercises the guard's else path.
+    const fragment = makeFragment()
+    const incomplete = document.createElement('span')
+    incomplete.dataset.chipTrigger = '@'
+    incomplete.dataset.chipDisplay = 'Alice'
+    // intentionally no chipValue
+    incomplete.textContent = '@Alice'
+    fragment.appendChild(incomplete)
+    expect(serializeFragmentToSegments(fragment)).toEqual([])
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -217,6 +231,16 @@ describe('parseSegmentsFromClipboard', () => {
   it('parses a chip segment', () => {
     const input: Segment[] = [{ type: 'chip', trigger: '@', value: 'v1', displayText: 'Alice' }]
     expect(parseSegmentsFromClipboard(JSON.stringify(input))).toEqual(input)
+  })
+
+  it('omits the data key entirely when the input chip has no data field', () => {
+    const json = JSON.stringify([{ type: 'chip', trigger: '@', value: 'v1', displayText: 'Alice' }])
+    const parsed = parseSegmentsFromClipboard(json)
+    expect(parsed).not.toBeNull()
+    const chip = parsed?.[0]
+    expect(chip).toBeDefined()
+    expect(chip).not.toHaveProperty('data')
+    expect(chip).not.toHaveProperty('autoResolved')
   })
 
   it('preserves chip data field when provided', () => {
@@ -353,14 +377,11 @@ describe('insertSegmentsAtCursor', () => {
     const pasted: Segment[] = [{ type: 'text', text: '!' }]
     const result = insertSegmentsAtCursor(current, pasted, editor)
 
-    // The chip segment should be preserved, and the insertion should land
-    // between the chip and the trailing text.
-    expect(result.filter((s) => s.type === 'chip')).toHaveLength(1)
-    expect(result).toContainEqual({ type: 'chip', trigger: '@', value: 'bob', displayText: 'Bob' })
-    // The pasted "!" lands somewhere in the result
-    const plain = result
-      .map((s) => (s.type === 'text' ? s.text : s.trigger + s.displayText))
-      .join('')
-    expect(plain).toBe('a @Bob! c')
+    // Exact shape: text, chip, pasted-text-merged-with-trailing-text.
+    expect(result).toEqual([
+      { type: 'text', text: 'a ' },
+      { type: 'chip', trigger: '@', value: 'bob', displayText: 'Bob' },
+      { type: 'text', text: '! c' },
+    ])
   })
 })
