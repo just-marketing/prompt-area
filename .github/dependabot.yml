@@ -1,0 +1,117 @@
+version: 2
+
+updates:
+  # npm ecosystem (handles pnpm-lock.yaml as of mid-2024)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    # Group dependencies that must move together so a bump to one doesn't
+    # leave the rest stranded with mismatched peers. Majors are intentionally
+    # excluded from groups — they need individual review.
+    # Group order matters: first match wins, so list specific groups before
+    # the catch-all.
+    groups:
+      next:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+          - "@next/*"
+        update-types:
+          - "minor"
+          - "patch"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+        update-types:
+          - "minor"
+          - "patch"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "vite"
+          - "vitest"
+          - "@vitejs/*"
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "jest-axe"
+          - "@types/jest-axe"
+          - "jsdom"
+        update-types:
+          - "minor"
+          - "patch"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "tw-animate-css"
+          - "prettier-plugin-tailwindcss"
+        update-types:
+          - "minor"
+          - "patch"
+      types:
+        patterns:
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # lucide-react v1 dropped brand icons (Github) used in nav-sidebar.
+      # Lift once those icons are replaced or brand support returns.
+      - dependency-name: "lucide-react"
+        update-types: ["version-update:semver-major"]
+      # eslint v10 outpaces eslint-config-next's plugin peers
+      # (eslint-plugin-react / jsx-a11y / import). Lift when they catch up.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      # typescript v6 violates @typescript-eslint v8's peer (<6.0.0).
+      # Lift when @typescript-eslint releases a TS-6-compatible major.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions used in workflows under .github/workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      actions:
+        patterns:
+          - "*"
