@@ -43,7 +43,7 @@ const BRANCHES = ['cursor/prod-data-memoization-layer', 'main', 'release/2026-06
 
 // Shared class fragments, following the per-example ICON_BTN / MENU_ITEM naming convention.
 const TOOLBAR_PILL =
-  'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm transition-colors'
+  'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
 const ICON_BTN =
   'text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-full transition-colors'
 const TRAY_PILL =
@@ -265,7 +265,7 @@ export function CodexInputExample() {
                     type="button"
                     onClick={() => handleSubmit(segments)}
                     disabled={isEmpty}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:opacity-50"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed"
                     aria-label="Send message">
                     <ArrowUp className="size-4" />
                   </button>
@@ -276,7 +276,7 @@ export function CodexInputExample() {
         </div>
 
         {/* Background context tray — peeks out below the composer card */}
-        <div className="bg-muted/40 dark:bg-muted/20 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
+        <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
           <div className="flex flex-wrap items-center gap-0.5">
             <Menu<string>
               id="repo"
@@ -342,7 +342,7 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 
-const TOOLBAR_PILL = 'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm transition-colors'
+const TOOLBAR_PILL = 'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
 const ICON_BTN = 'text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-full transition-colors'
 const TRAY_PILL = 'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors'
 const MENU = 'bg-popover absolute z-20 flex flex-col rounded-xl border p-1 shadow-md'
@@ -428,7 +428,7 @@ function CodexInputExample() {
                 <button className={ICON_BTN} aria-label="Voice input"><Mic className="size-4" /></button>
                 <button
                   onClick={() => { promptRef.current?.clear(); setSegments([]) }}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full disabled:opacity-50"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
                   aria-label="Send">
                   <ArrowUp className="size-4" />
                 </button>
@@ -439,7 +439,7 @@ function CodexInputExample() {
       </div>
 
       {/* Background context tray — peeks out below the composer */}
-      <div className="bg-muted/40 dark:bg-muted/20 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
+      <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
         <div className="flex flex-wrap items-center gap-0.5">
           <button onClick={() => toggleMenu('repo')} className={TRAY_PILL}>
             <FolderGit2 className="size-3.5" /> acme-enterprise <ChevronDown className="size-3 opacity-60" />
