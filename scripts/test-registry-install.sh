@@ -29,6 +29,28 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Retry a network-dependent command (max 3 attempts, linear backoff). The fresh
+# install reaches external services — the npm registry, create-next-app, and
+# ui.shadcn.com during `shadcn init` — which occasionally drop the connection
+# mid-handshake. A transient TLS/socket failure shouldn't fail the whole job.
+retry() {
+  local max=3 n=1 status
+  while true; do
+    status=0
+    "$@" || status=$?
+    if (( status == 0 )); then
+      return 0
+    fi
+    if (( n >= max )); then
+      echo "   ✗ '$*' failed after ${max} attempts (exit ${status})." >&2
+      return "${status}"
+    fi
+    echo "   ⚠ '$*' failed (exit ${status}); retry ${n}/${max} in $((n * 5))s..." >&2
+    sleep $(( n * 5 ))
+    n=$(( n + 1 ))
+  done
+}
+
 # ── 1. Build the source app ──────────────────────────────────────
 echo "── Step 1: Building source app to verify it compiles cleanly..."
 cd "${REPO_ROOT}"
@@ -47,25 +69,30 @@ echo ""
 echo "── Step 3: Scaffolding fresh Next.js app..."
 cd "${TEST_DIR}"
 
-# Pipe newline to accept any interactive prompts (e.g. React Compiler)
-printf '\n' | npx --yes create-next-app@latest test-app \
-  --typescript \
-  --tailwind \
-  --eslint \
-  --app \
-  --src-dir \
-  --import-alias "@/*" \
-  --use-pnpm \
-  --no-turbopack \
-  --no-git \
-  2>&1 | tail -5
+# Pipe newline to accept any interactive prompts (e.g. React Compiler).
+# Wrapped in retry: create-next-app fetches packages over the network and can
+# hit transient socket drops; rm -rf keeps each attempt starting from a clean dir.
+scaffold_app() {
+  rm -rf test-app
+  printf '\n' | npx --yes create-next-app@latest test-app \
+    --typescript \
+    --tailwind \
+    --eslint \
+    --app \
+    --src-dir \
+    --import-alias "@/*" \
+    --use-pnpm \
+    --no-turbopack \
+    --no-git
+}
+retry scaffold_app
 cd test-app
 echo "   App created at ${TEST_DIR}/test-app"
 
 # ── 4. Init shadcn and install registry components ───────────────
 echo ""
 echo "── Step 4: Initializing shadcn..."
-pnpm dlx shadcn@latest init --yes --defaults 2>&1 | tail -5
+retry pnpm dlx shadcn@latest init --yes --defaults
 
 echo ""
 echo "── Step 5: Installing registry components..."
@@ -74,7 +101,7 @@ COMPONENTS=("prompt-area" "action-bar" "status-bar")
 
 for component in "${COMPONENTS[@]}"; do
   echo "   Installing ${component}..."
-  pnpm dlx shadcn@latest add "${REGISTRY_DIR}/${component}.json" --yes --overwrite 2>&1 | tail -3
+  retry pnpm dlx shadcn@latest add "${REGISTRY_DIR}/${component}.json" --yes --overwrite
   echo "   Done: ${component}"
 done
 
@@ -92,13 +119,13 @@ data['registryDependencies'] = []
 with open('${PATCHED_JSON}', 'w') as f:
     json.dump(data, f)
 "
-pnpm dlx shadcn@latest add "${PATCHED_JSON}" --yes --overwrite 2>&1 | tail -3
+retry pnpm dlx shadcn@latest add "${PATCHED_JSON}" --yes --overwrite
 echo "   Done: compact-prompt-area"
 
 # Install peer dependencies the components need
 echo ""
 echo "   Installing peer dependencies (lucide-react, framer-motion)..."
-pnpm add lucide-react framer-motion 2>&1 | tail -3
+retry pnpm add lucide-react framer-motion
 
 # ── 5. Verify installed files ────────────────────────────────────
 echo ""
