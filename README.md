@@ -284,7 +284,7 @@ registry/new-york/blocks/
 
 app/
 ├── page.tsx              # Landing page
-├── examples/             # 18 interactive demos
+├── examples/             # 20+ interactive demos
 └── sections/             # Landing page sections
 ```
 
