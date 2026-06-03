@@ -11,11 +11,15 @@ import {
   FolderGit2,
   Laptop,
   GitBranch,
+  type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
+import {
+  segmentsToPlainText,
+  isSegmentsEmpty,
+} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 
 // ---------------------------------------------------------------------------
@@ -37,7 +41,7 @@ const REPOS = ['team-gpt-enterprise', 'team-gpt-web', 'team-gpt-infra'] as const
 const ENVIRONMENTS = ['Work locally', 'Cloud sandbox', 'Staging'] as const
 const BRANCHES = ['cursor/prod-data-memoization-layer', 'main', 'release/2026-06'] as const
 
-// Shared class fragments (mirrors the repo's ICON_BTN / MENU_ITEM convention).
+// Shared class fragments, following the per-example ICON_BTN / MENU_ITEM naming convention.
 const TOOLBAR_PILL =
   'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm transition-colors'
 const ICON_BTN =
@@ -48,6 +52,95 @@ const MENU =
   'bg-popover absolute z-20 flex max-h-[240px] flex-col overflow-auto rounded-xl border p-1 shadow-md'
 const MENU_ITEM =
   'flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent'
+
+// One dropdown for every selector in the composer and tray. Collapsing the five
+// near-identical menus into a single component keeps the trigger markup, the
+// open/close wiring, and the selected-state styling in one place. The `toolbar`
+// and `tray` variants only differ in icon/chevron sizing and the trigger pill.
+const MENU_VARIANT = {
+  toolbar: {
+    pill: TOOLBAR_PILL,
+    triggerIcon: 'size-4',
+    chevron: 'size-3.5 opacity-60',
+    itemIcon: 'size-4 shrink-0',
+  },
+  tray: {
+    pill: TRAY_PILL,
+    triggerIcon: 'size-3.5 shrink-0',
+    chevron: 'size-3 shrink-0 opacity-60',
+    itemIcon: 'size-3.5 shrink-0',
+  },
+} as const
+
+function Menu<T>({
+  id,
+  openMenu,
+  setOpenMenu,
+  variant,
+  icon: Icon,
+  options,
+  selected,
+  getKey,
+  onSelect,
+  renderLabel,
+  menuClass,
+  wrapperClass,
+  title,
+}: {
+  id: string
+  openMenu: string | null
+  setOpenMenu: (next: string | null) => void
+  variant: keyof typeof MENU_VARIANT
+  icon: LucideIcon
+  options: readonly T[]
+  selected: T
+  getKey: (value: T) => string
+  onSelect: (value: T) => void
+  renderLabel: (value: T, inMenu: boolean) => React.ReactNode
+  menuClass: string
+  wrapperClass?: string
+  title?: string
+}) {
+  const v = MENU_VARIANT[variant]
+  const open = openMenu === id
+  return (
+    <div className={cn('relative', wrapperClass)}>
+      <button
+        type="button"
+        onClick={() => setOpenMenu(open ? null : id)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        title={title}
+        className={v.pill}>
+        <Icon className={v.triggerIcon} />
+        {renderLabel(selected, false)}
+        <ChevronDown className={v.chevron} />
+      </button>
+      {open && (
+        <div role="menu" className={cn(MENU, menuClass)}>
+          {options.map((option) => {
+            const active = getKey(option) === getKey(selected)
+            return (
+              <button
+                key={getKey(option)}
+                type="button"
+                role="menuitemradio"
+                aria-checked={active}
+                className={cn(MENU_ITEM, active && 'bg-accent')}
+                onClick={() => {
+                  onSelect(option)
+                  setOpenMenu(null)
+                }}>
+                <Icon className={v.itemIcon} />
+                {renderLabel(option, true)}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function CodexInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -64,12 +157,10 @@ export function CodexInputExample() {
   const rootRef = useRef<HTMLDivElement>(null)
   const promptRef = useRef<PromptAreaHandle>(null)
 
-  const isEmpty =
-    segments.length === 0 ||
-    (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
+  const isEmpty = isSegmentsEmpty(segments)
 
   // Close the open menu on outside click or Escape. One root ref wraps every
-  // dropdown; clicking a different trigger swaps menus via toggleMenu.
+  // dropdown; clicking a different trigger swaps menus.
   useEffect(() => {
     if (!openMenu) return
     const onDown = (e: MouseEvent) => {
@@ -85,10 +176,6 @@ export function CodexInputExample() {
       document.removeEventListener('keydown', onKey)
     }
   }, [openMenu])
-
-  const toggleMenu = useCallback((id: string) => {
-    setOpenMenu((cur) => (cur === id ? null : id))
-  }, [])
 
   const handleSubmit = useCallback((segs: Segment[]) => {
     const text = segmentsToPlainText(segs)
@@ -125,76 +212,45 @@ export function CodexInputExample() {
                     <Plus className="size-4" />
                   </button>
 
-                  {/* Permissions */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => toggleMenu('permissions')}
-                      aria-haspopup="menu"
-                      aria-expanded={openMenu === 'permissions'}
-                      className={TOOLBAR_PILL}>
-                      <Hand className="size-4" />
-                      {permission}
-                      <ChevronDown className="size-3.5 opacity-60" />
-                    </button>
-                    {openMenu === 'permissions' && (
-                      <div role="menu" className={cn(MENU, 'bottom-full left-0 mb-1.5 w-48')}>
-                        {PERMISSIONS.map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={p === permission}
-                            className={cn(MENU_ITEM, p === permission && 'bg-accent')}
-                            onClick={() => {
-                              setPermission(p)
-                              setOpenMenu(null)
-                            }}>
-                            <Hand className="size-4 shrink-0" />
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <Menu<Permission>
+                    id="permissions"
+                    openMenu={openMenu}
+                    setOpenMenu={setOpenMenu}
+                    variant="toolbar"
+                    icon={Hand}
+                    options={PERMISSIONS}
+                    selected={permission}
+                    getKey={(p) => p}
+                    onSelect={setPermission}
+                    renderLabel={(p) => p}
+                    menuClass="bottom-full left-0 mb-1.5 w-48"
+                  />
                 </div>
               }
               right={
                 <div className="flex items-center gap-0.5">
-                  {/* Reasoning-effort model selector */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => toggleMenu('model')}
-                      aria-haspopup="menu"
-                      aria-expanded={openMenu === 'model'}
-                      className={TOOLBAR_PILL}>
-                      <Zap className="size-4" />
-                      <span className="text-foreground font-semibold">{model.version}</span>
-                      {model.effort}
-                      <ChevronDown className="size-3.5 opacity-60" />
-                    </button>
-                    {openMenu === 'model' && (
-                      <div role="menu" className={cn(MENU, 'right-0 bottom-full mb-1.5 w-52')}>
-                        {MODELS.map((m) => (
-                          <button
-                            key={m.id}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={m.id === model.id}
-                            className={cn(MENU_ITEM, m.id === model.id && 'bg-accent')}
-                            onClick={() => {
-                              setModel(m)
-                              setOpenMenu(null)
-                            }}>
-                            <Zap className="size-4 shrink-0" />
-                            <span className="text-foreground font-semibold">{m.version}</span>
-                            <span className="text-muted-foreground">{m.effort}</span>
-                          </button>
-                        ))}
-                      </div>
+                  <Menu<Model>
+                    id="model"
+                    openMenu={openMenu}
+                    setOpenMenu={setOpenMenu}
+                    variant="toolbar"
+                    icon={Zap}
+                    options={MODELS}
+                    selected={model}
+                    getKey={(m) => m.id}
+                    onSelect={setModel}
+                    renderLabel={(m, inMenu) => (
+                      <>
+                        <span className="text-foreground font-semibold">{m.version}</span>
+                        {inMenu ? (
+                          <span className="text-muted-foreground">{m.effort}</span>
+                        ) : (
+                          m.effort
+                        )}
+                      </>
                     )}
-                  </div>
+                    menuClass="right-0 bottom-full mb-1.5 w-52"
+                  />
 
                   <button type="button" className={ICON_BTN} aria-label="Voice input">
                     <Mic className="size-4" />
@@ -217,105 +273,49 @@ export function CodexInputExample() {
         {/* Background context tray — peeks out below the composer card */}
         <div className="bg-muted/40 dark:bg-muted/20 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
           <div className="flex flex-wrap items-center gap-0.5">
-            {/* Repository */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => toggleMenu('repo')}
-                aria-haspopup="menu"
-                aria-expanded={openMenu === 'repo'}
-                className={TRAY_PILL}>
-                <FolderGit2 className="size-3.5 shrink-0" />
-                {repo}
-                <ChevronDown className="size-3 shrink-0 opacity-60" />
-              </button>
-              {openMenu === 'repo' && (
-                <div role="menu" className={cn(MENU, 'top-full left-0 mt-1.5 w-56')}>
-                  {REPOS.map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={r === repo}
-                      className={cn(MENU_ITEM, r === repo && 'bg-accent')}
-                      onClick={() => {
-                        setRepo(r)
-                        setOpenMenu(null)
-                      }}>
-                      <FolderGit2 className="size-3.5 shrink-0" />
-                      <span className="truncate">{r}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Menu<string>
+              id="repo"
+              openMenu={openMenu}
+              setOpenMenu={setOpenMenu}
+              variant="tray"
+              icon={FolderGit2}
+              options={REPOS}
+              selected={repo}
+              getKey={(r) => r}
+              onSelect={setRepo}
+              renderLabel={(r, inMenu) => (inMenu ? <span className="truncate">{r}</span> : r)}
+              menuClass="top-full left-0 mt-1.5 w-56"
+            />
 
-            {/* Environment */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => toggleMenu('environment')}
-                aria-haspopup="menu"
-                aria-expanded={openMenu === 'environment'}
-                className={TRAY_PILL}>
-                <Laptop className="size-3.5 shrink-0" />
-                {environment}
-                <ChevronDown className="size-3 shrink-0 opacity-60" />
-              </button>
-              {openMenu === 'environment' && (
-                <div role="menu" className={cn(MENU, 'top-full left-0 mt-1.5 w-48')}>
-                  {ENVIRONMENTS.map((env) => (
-                    <button
-                      key={env}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={env === environment}
-                      className={cn(MENU_ITEM, env === environment && 'bg-accent')}
-                      onClick={() => {
-                        setEnvironment(env)
-                        setOpenMenu(null)
-                      }}>
-                      <Laptop className="size-3.5 shrink-0" />
-                      {env}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Menu<string>
+              id="environment"
+              openMenu={openMenu}
+              setOpenMenu={setOpenMenu}
+              variant="tray"
+              icon={Laptop}
+              options={ENVIRONMENTS}
+              selected={environment}
+              getKey={(env) => env}
+              onSelect={setEnvironment}
+              renderLabel={(env) => env}
+              menuClass="top-full left-0 mt-1.5 w-48"
+            />
 
-            {/* Branch — truncated label */}
-            <div className="relative min-w-0">
-              <button
-                type="button"
-                onClick={() => toggleMenu('branch')}
-                aria-haspopup="menu"
-                aria-expanded={openMenu === 'branch'}
-                title={branch}
-                className={TRAY_PILL}>
-                <GitBranch className="size-3.5 shrink-0" />
-                <span className="truncate">{branch}</span>
-                <ChevronDown className="size-3 shrink-0 opacity-60" />
-              </button>
-              {openMenu === 'branch' && (
-                <div role="menu" className={cn(MENU, 'top-full left-0 mt-1.5 w-64')}>
-                  {BRANCHES.map((b) => (
-                    <button
-                      key={b}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={b === branch}
-                      className={cn(MENU_ITEM, b === branch && 'bg-accent')}
-                      onClick={() => {
-                        setBranch(b)
-                        setOpenMenu(null)
-                      }}>
-                      <GitBranch className="size-3.5 shrink-0" />
-                      <span className="truncate">{b}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Menu<string>
+              id="branch"
+              openMenu={openMenu}
+              setOpenMenu={setOpenMenu}
+              variant="tray"
+              icon={GitBranch}
+              options={BRANCHES}
+              selected={branch}
+              getKey={(b) => b}
+              onSelect={setBranch}
+              renderLabel={(b) => <span className="truncate">{b}</span>}
+              menuClass="top-full left-0 mt-1.5 w-64"
+              wrapperClass="min-w-0"
+              title={branch}
+            />
           </div>
         </div>
       </div>
