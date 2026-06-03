@@ -37,7 +37,7 @@ const MODELS = [
 ] as const
 type Model = (typeof MODELS)[number]
 
-const REPOS = ['team-gpt-enterprise', 'team-gpt-web', 'team-gpt-infra'] as const
+const REPOS = ['acme-enterprise', 'acme-web', 'acme-infra'] as const
 const ENVIRONMENTS = ['Work locally', 'Cloud sandbox', 'Staging'] as const
 const BRANCHES = ['cursor/prod-data-memoization-layer', 'main', 'release/2026-06'] as const
 
@@ -437,7 +437,7 @@ function CodexInputExample() {
       <div className="bg-muted/40 dark:bg-muted/20 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
         <div className="flex flex-wrap items-center gap-0.5">
           <button onClick={() => toggleMenu('repo')} className={TRAY_PILL}>
-            <FolderGit2 className="size-3.5" /> team-gpt-enterprise <ChevronDown className="size-3 opacity-60" />
+            <FolderGit2 className="size-3.5" /> acme-enterprise <ChevronDown className="size-3 opacity-60" />
           </button>
           <button onClick={() => toggleMenu('environment')} className={TRAY_PILL}>
             <Laptop className="size-3.5" /> Work locally <ChevronDown className="size-3 opacity-60" />
