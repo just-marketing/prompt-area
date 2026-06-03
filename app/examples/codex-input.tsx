@@ -192,7 +192,12 @@ export function CodexInputExample() {
         {/* Foreground composer card */}
         <div
           className="bg-card relative z-10 rounded-[28px] border shadow-sm"
-          style={{ '--prompt-area-surface': 'var(--card)' } as React.CSSProperties}>
+          style={
+            {
+              '--prompt-area-surface': 'var(--card)',
+              '--prompt-area-placeholder': 'oklch(0.7 0 0)',
+            } as React.CSSProperties
+          }>
           <div className="px-4 pt-4 pb-2">
             <PromptArea
               ref={promptRef}
@@ -201,7 +206,7 @@ export function CodexInputExample() {
               placeholder="Do anything"
               onSubmit={handleSubmit}
               autoGrow
-              minHeight={52}
+              minHeight={40}
               maxHeight={280}
             />
             <ActionBar
@@ -366,7 +371,7 @@ function CodexInputExample() {
       {/* Foreground composer */}
       <div
         className="bg-card relative z-10 rounded-[28px] border shadow-sm"
-        style={{ '--prompt-area-surface': 'var(--card)' } as React.CSSProperties}>
+        style={{ '--prompt-area-surface': 'var(--card)', '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
         <div className="px-4 pt-4 pb-2">
           <PromptArea
             ref={promptRef}
@@ -375,7 +380,7 @@ function CodexInputExample() {
             placeholder="Do anything"
             onSubmit={() => { promptRef.current?.clear(); setSegments([]) }}
             autoGrow
-            minHeight={52}
+            minHeight={40}
             maxHeight={280}
           />
           <ActionBar
