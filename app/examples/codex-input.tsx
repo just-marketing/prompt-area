@@ -198,7 +198,7 @@ export function CodexInputExample() {
               '--prompt-area-placeholder': 'oklch(0.7 0 0)',
             } as React.CSSProperties
           }>
-          <div className="px-4 pt-4 pb-2">
+          <div className="p-4">
             <PromptArea
               ref={promptRef}
               value={segments}
@@ -372,7 +372,7 @@ function CodexInputExample() {
       <div
         className="bg-card relative z-10 rounded-[28px] border shadow-sm"
         style={{ '--prompt-area-surface': 'var(--card)', '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
-        <div className="px-4 pt-4 pb-2">
+        <div className="p-4">
           <PromptArea
             ref={promptRef}
             value={segments}
