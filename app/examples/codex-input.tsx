@@ -191,7 +191,7 @@ export function CodexInputExample() {
       <div className="relative flex flex-col">
         {/* Foreground composer card */}
         <div
-          className="bg-card relative z-10 rounded-[28px] border shadow-sm"
+          className="bg-card relative z-10 rounded-[24px] border shadow-sm"
           style={
             {
               '--prompt-area-surface': 'var(--card)',
@@ -276,7 +276,7 @@ export function CodexInputExample() {
         </div>
 
         {/* Background context tray — peeks out below the composer card */}
-        <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
+        <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5">
           <div className="flex flex-wrap items-center gap-0.5">
             <Menu<string>
               id="repo"
@@ -370,7 +370,7 @@ function CodexInputExample() {
     <div className="relative flex flex-col" ref={rootRef}>
       {/* Foreground composer */}
       <div
-        className="bg-card relative z-10 rounded-[28px] border shadow-sm"
+        className="bg-card relative z-10 rounded-[24px] border shadow-sm"
         style={{ '--prompt-area-surface': 'var(--card)', '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
         <div className="px-2 pt-4 pb-2">
           <PromptArea
@@ -439,7 +439,7 @@ function CodexInputExample() {
       </div>
 
       {/* Background context tray — peeks out below the composer */}
-      <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[28px] border border-t-0 px-3 pt-7 pb-2.5">
+      <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5">
         <div className="flex flex-wrap items-center gap-0.5">
           <button onClick={() => toggleMenu('repo')} className={TRAY_PILL}>
             <FolderGit2 className="size-3.5" /> acme-enterprise <ChevronDown className="size-3 opacity-60" />
