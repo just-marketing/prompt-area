@@ -265,7 +265,7 @@ export function CodexInputExample() {
                     type="button"
                     onClick={() => handleSubmit(segments)}
                     disabled={isEmpty}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed dark:bg-[#5a5a5a] dark:text-white dark:hover:bg-[#646464]"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3]"
                     aria-label="Send message">
                     <ArrowUp className="size-4" />
                   </button>
@@ -428,7 +428,7 @@ function CodexInputExample() {
                 <button className={ICON_BTN} aria-label="Voice input"><Mic className="size-4" /></button>
                 <button
                   onClick={() => { promptRef.current?.clear(); setSegments([]) }}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-[#5a5a5a] dark:text-white dark:hover:bg-[#646464] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
                   aria-label="Send">
                   <ArrowUp className="size-4" />
                 </button>
