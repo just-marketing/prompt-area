@@ -333,7 +333,7 @@ export default async function OGImage() {
               <circle cx="13" cy="12" r="2" />
               <circle cx="20" cy="19" r="2" />
             </L>
-            <span>acme-enterprise</span>
+            <span>just-marketing/prompt-area</span>
             <ChevronDown s={16} />
           </div>
 
