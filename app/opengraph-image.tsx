@@ -180,7 +180,7 @@ export default async function OGImage() {
           display: 'flex',
           flexDirection: 'column',
           width: '920px',
-          backgroundColor: '#f6f6f6',
+          backgroundColor: '#ececec',
           borderRadius: '24px',
         }}>
         {/* Foreground composer card */}
