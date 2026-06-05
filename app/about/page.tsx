@@ -73,6 +73,19 @@ export default function AboutPage() {
           &mdash; a growing collection of end-to-end AI chat workflows for things like campaign
           analysis, brand voice guides, and channel ROI comparison.
         </p>
+        <p className="text-muted-foreground">
+          We build in the open, too.{' '}
+          <a
+            href="https://github.com/just-marketing/agency-skills"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline underline-offset-4">
+            Agency Skills
+          </a>{' '}
+          is a sibling open-source project &mdash; a library of Claude Code skills that give
+          marketing agencies repeatable, deliverable-oriented workflows for audits, strategy,
+          content, reporting, and operations.
+        </p>
       </div>
 
       <div className="flex flex-col gap-3">

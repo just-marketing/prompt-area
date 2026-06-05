@@ -51,6 +51,14 @@ react-mentions handles @mentions only. Prompt Area adds /commands, #tags, inline
 
 Plate.js is a Slate-based editor framework with 5+ dependencies. Prompt Area has zero dependencies and is focused on prompt inputs rather than document editing. Choose Plate.js for full-featured rich-text editors. Choose Prompt Area for AI chat and prompt UIs.
 
+## vs BlockNote
+
+BlockNote is a ProseMirror-based block editor with 5+ dependencies, designed for Notion-style document editing. Prompt Area is a single-component textarea for chat inputs. Choose BlockNote for block-based document editing. Choose Prompt Area for prompt and chat interfaces.
+
+## vs react-textarea-autosize
+
+react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area adds @mentions, /commands, #tags, inline markdown, file attachments, undo/redo, and structured data output. Choose react-textarea-autosize if you only need auto-resize. Choose Prompt Area for a full-featured chat input.
+
 ## About
 
 - [Homepage](https://prompt-area.com): Interactive demo, feature showcase, live inspector, and comparison matrix against alternatives like Tiptap, Lexical, and Plate.js
@@ -59,6 +67,7 @@ Plate.js is a Slate-based editor framework with 5+ dependencies. Prompt Area has
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
 - [Partners](https://prompt-area.com/partners): Integration partnerships and technology partner opportunities
 - [GitHub Repository](https://github.com/just-marketing/prompt-area): Source code, issue tracker, and contribution guidelines for the prompt-area component
+- [Agency Skills](https://github.com/just-marketing/agency-skills): Sibling open-source project by Juma — a library of Claude Code skills that give marketing agencies repeatable, deliverable-oriented workflows for audits, strategy, content, reporting, and operations
 - [shadcn Registry](https://ui.shadcn.com/docs/registry): Learn how shadcn registry distribution works for installing prompt-area into any Next.js or React project
 
 ## Installation
@@ -102,6 +111,8 @@ Plate.js is a Slate-based editor framework with 5+ dependencies. Prompt Area has
 - [Async Search](https://prompt-area.com/#example-async): Debounced async search with AbortController
 - [Markdown](https://prompt-area.com/#example-markdown): Inline bold, italic, URLs, and list formatting
 - [Copy & Paste](https://prompt-area.com/#example-copy-paste): Chip data preservation and trigger auto-resolution
+- [Image Attachments](https://prompt-area.com/#example-images): Paste screenshots with loading states, removal, and configurable placement
+- [File Attachments](https://prompt-area.com/#example-files): Attach files with type icons, metadata, and a collapsible "+N more" strip
 - [Claude Code–Style Input](https://prompt-area.com/#claude-code-input): Full composition of PromptArea, ActionBar, and StatusBar replicating a Claude Code–style chat input with plan mode and model selector
 - [Codex–Style Input](https://prompt-area.com/#codex-input): Stacked Codex-style composer with a permissions pill, reasoning-effort model selector, and a peeking repository/environment/branch context tray
 

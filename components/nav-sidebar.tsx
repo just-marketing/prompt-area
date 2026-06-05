@@ -14,7 +14,7 @@ import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight, Github, Star, TextCursorInput } from 'lucide-react'
+import { ArrowUpRight, ChevronRight, Github, Sparkles, Star, TextCursorInput } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -462,6 +462,19 @@ function NavSidebar() {
           <Github className="size-4 shrink-0" />
           <span className="flex-1">GitHub Repo</span>
           <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
+        </a>
+        <a
+          href="https://github.com/just-marketing/agency-skills"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Claude Code skills for marketing agencies — a sibling open-source project by Juma"
+          className={cn(
+            'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+            'text-muted-foreground hover:text-foreground',
+          )}>
+          <Sparkles className="size-4 shrink-0" />
+          <span className="flex-1">Agency Skills</span>
+          <ArrowUpRight className="size-3.5 opacity-60 transition-opacity group-hover:opacity-100" />
         </a>
         <PageLinksAndTheme />
       </div>
