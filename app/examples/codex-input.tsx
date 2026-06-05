@@ -43,11 +43,11 @@ const BRANCHES = ['cursor/prod-data-memoization-layer', 'main', 'release/2026-06
 
 // Shared class fragments, following the per-example ICON_BTN / MENU_ITEM naming convention.
 const TOOLBAR_PILL =
-  'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
+  'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
 const ICON_BTN =
-  'text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-full transition-colors'
+  'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex size-8 items-center justify-center rounded-full transition-colors'
 const TRAY_PILL =
-  'text-muted-foreground hover:bg-accent hover:text-foreground flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors'
+  'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors'
 const MENU =
   'bg-popover absolute z-20 flex max-h-[240px] flex-col overflow-auto rounded-xl border p-1 shadow-md'
 const MENU_ITEM =
@@ -191,7 +191,7 @@ export function CodexInputExample() {
       <div className="relative flex flex-col">
         {/* Foreground composer card */}
         <div
-          className="bg-card relative z-10 rounded-[24px] dark:bg-[#2d2d2d]"
+          className="bg-card relative z-10 rounded-[24px] border border-[#ececec] shadow-sm dark:border-0 dark:bg-[#2d2d2d] dark:shadow-none"
           style={
             {
               '--prompt-area-surface': 'var(--card)',
@@ -265,7 +265,7 @@ export function CodexInputExample() {
                     type="button"
                     onClick={() => handleSubmit(segments)}
                     disabled={isEmpty}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3]"
+                    className="flex size-8 items-center justify-center rounded-full bg-[#dadada] text-[#7a7a7a] transition-colors hover:bg-[#cfcfcf] disabled:cursor-not-allowed dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3]"
                     aria-label="Send message">
                     <ArrowUp className="size-4" />
                   </button>
@@ -276,7 +276,7 @@ export function CodexInputExample() {
         </div>
 
         {/* Background context tray — peeks out below the composer card */}
-        <div className="bg-muted -mt-5 rounded-b-[24px] px-1.5 pt-[27px] pb-[7px] dark:bg-[#1f1f1f]">
+        <div className="-mt-5 rounded-b-[24px] bg-[#f6f6f6] px-1.5 pt-[27px] pb-[7px] dark:bg-[#1f1f1f]">
           <div className="flex flex-wrap items-center gap-0.5">
             <Menu<string>
               id="repo"
@@ -316,9 +316,9 @@ export function CodexInputExample() {
               selected={branch}
               getKey={(b) => b}
               onSelect={setBranch}
-              renderLabel={(b) => <span className="truncate">{b}</span>}
+              renderLabel={(b) => <span className="min-w-0 truncate">{b}</span>}
               menuClass="top-full left-0 mt-1.5 w-64"
-              wrapperClass="min-w-0"
+              wrapperClass="min-w-0 max-w-[200px]"
               title={branch}
             />
           </div>
@@ -342,9 +342,9 @@ import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 
-const TOOLBAR_PILL = 'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
-const ICON_BTN = 'text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-full transition-colors'
-const TRAY_PILL = 'text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors'
+const TOOLBAR_PILL = 'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
+const ICON_BTN = 'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex size-8 items-center justify-center rounded-full transition-colors'
+const TRAY_PILL = 'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs transition-colors'
 const MENU = 'bg-popover absolute z-20 flex flex-col rounded-xl border p-1 shadow-md'
 const MENU_ITEM = 'flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm hover:bg-accent'
 
@@ -370,7 +370,7 @@ function CodexInputExample() {
     <div className="relative flex flex-col" ref={rootRef}>
       {/* Foreground composer */}
       <div
-        className="bg-card dark:bg-[#2d2d2d] relative z-10 rounded-[24px]"
+        className="bg-card dark:bg-[#2d2d2d] relative z-10 rounded-[24px] border border-[#ececec] shadow-sm dark:border-0 dark:shadow-none"
         style={{ '--prompt-area-surface': 'var(--card)', '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
         <div className="pt-[13.5px] pr-2 pb-2 pl-[13px]">
           <PromptArea
@@ -428,7 +428,7 @@ function CodexInputExample() {
                 <button className={ICON_BTN} aria-label="Voice input"><Mic className="size-4" /></button>
                 <button
                   onClick={() => { promptRef.current?.clear(); setSegments([]) }}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
+                  className="bg-[#dadada] text-[#7a7a7a] hover:bg-[#cfcfcf] dark:bg-[#969696] dark:text-[#2d2d2d] dark:hover:bg-[#a3a3a3] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
                   aria-label="Send">
                   <ArrowUp className="size-4" />
                 </button>
@@ -439,7 +439,7 @@ function CodexInputExample() {
       </div>
 
       {/* Background context tray — peeks out below the composer */}
-      <div className="bg-muted dark:bg-[#1f1f1f] -mt-5 rounded-b-[24px] px-1.5 pt-[27px] pb-[7px]">
+      <div className="bg-[#f6f6f6] dark:bg-[#1f1f1f] -mt-5 rounded-b-[24px] px-1.5 pt-[27px] pb-[7px]">
         <div className="flex flex-wrap items-center gap-0.5">
           <button onClick={() => toggleMenu('repo')} className={TRAY_PILL}>
             <FolderGit2 className="size-3.5" /> acme-enterprise <ChevronDown className="size-3 opacity-60" />
@@ -447,9 +447,9 @@ function CodexInputExample() {
           <button onClick={() => toggleMenu('environment')} className={TRAY_PILL}>
             <Laptop className="size-3.5" /> Work locally <ChevronDown className="size-3 opacity-60" />
           </button>
-          <button onClick={() => toggleMenu('branch')} className={cn(TRAY_PILL, 'min-w-0')} title="cursor/prod-data-memoization-layer">
+          <button onClick={() => toggleMenu('branch')} className={cn(TRAY_PILL, 'min-w-0 max-w-[200px]')} title="cursor/prod-data-memoization-layer">
             <GitBranch className="size-3.5 shrink-0" />
-            <span className="truncate">cursor/prod-data-memoization-layer</span>
+            <span className="min-w-0 truncate">cursor/prod-data-memoization-layer</span>
             <ChevronDown className="size-3 shrink-0 opacity-60" />
           </button>
         </div>
