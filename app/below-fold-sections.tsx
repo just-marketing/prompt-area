@@ -44,6 +44,8 @@ import {
   rotatingPlaceholdersCode,
   ClaudeCodeInputExample,
   claudeCodeInputCode,
+  CodexInputExample,
+  codexInputCode,
 } from './examples'
 import { SectionHeading } from './sections/section-heading'
 import { InstallSection } from './sections/install-block'
@@ -337,6 +339,33 @@ export default function BelowFoldSections() {
           </p>
           <ExampleShowcase code={claudeCodeInputCode}>
             <ClaudeCodeInputExample />
+          </ExampleShowcase>
+        </div>
+      </div>
+
+      {/* Codex–style Input */}
+      <div className="flex flex-col gap-6">
+        <div id="codex-input" className="flex scroll-mt-16 flex-col gap-3">
+          <SectionHeading id="codex-input" as="h2">
+            Codex–Style
+          </SectionHeading>
+          <p className="text-muted-foreground">
+            A stacked composer that mirrors an OpenAI Codex–style cloud-agent input: a large rounded
+            card with a permissions menu and reasoning-effort model selector, layered over a context
+            tray of repository, environment, and branch selectors. Built by composing PromptArea and
+            ActionBar.
+          </p>
+        </div>
+
+        <div id="codex-input-demo" className="flex scroll-mt-16 flex-col gap-2">
+          <SectionHeading id="codex-input-demo">Demo</SectionHeading>
+          <p className="text-muted-foreground text-xs">
+            A &ldquo;Do anything&rdquo; prompt with a permissions pill and a lightning model
+            selector in the toolbar, plus a peeking context tray with repository, environment, and
+            branch dropdowns.
+          </p>
+          <ExampleShowcase code={codexInputCode}>
+            <CodexInputExample />
           </ExampleShowcase>
         </div>
       </div>

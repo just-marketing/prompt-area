@@ -75,6 +75,11 @@ const NAV_ITEMS: NavItem[] = [
     children: [{ id: 'claude-code-input-demo', label: 'Demo' }],
   },
   {
+    id: 'codex-input',
+    label: 'Codex–Style',
+    children: [{ id: 'codex-input-demo', label: 'Demo' }],
+  },
+  {
     id: 'compact-prompt-area',
     label: 'Compact Prompt Area',
     children: [{ id: 'compact-prompt-area-demo', label: 'Demo' }],

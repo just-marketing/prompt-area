@@ -768,6 +768,18 @@ function ChatPromptLayoutExample() {
 }
 ```
 
+### Codex-Style Input
+
+A showcase composition (not a separately installable block) that replicates an OpenAI Codex–style cloud-agent composer. Built by composing `PromptArea` (with `autoGrow`) and `ActionBar`:
+
+- A large rounded composer card (`bg-card`, `rounded-[28px]`) holding a "Do anything" prompt and a bottom toolbar.
+- Toolbar: a `+` button and a permissions menu on the left; a reasoning-effort model selector (e.g. "5.5 · Extra High"), a microphone, and a circular send button on the right.
+- A stacked "context tray" that peeks out below the card with repository, environment, and branch dropdowns.
+- A single `openMenu` state drives all five dropdowns with one outside-click / Escape handler.
+- Fully theme-aware (light/dark) via CSS variables; no extra dependencies.
+
+See the live demo at https://prompt-area.com/#codex-input
+
 ## Rotating Placeholder
 
 When `placeholder` is passed as a `string[]`, the placeholder animates between items:

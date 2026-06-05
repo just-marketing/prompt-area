@@ -102,6 +102,8 @@ Plate.js is a Slate-based editor framework with 5+ dependencies. Prompt Area has
 - [Async Search](https://prompt-area.com/#example-async): Debounced async search with AbortController
 - [Markdown](https://prompt-area.com/#example-markdown): Inline bold, italic, URLs, and list formatting
 - [Copy & Paste](https://prompt-area.com/#example-copy-paste): Chip data preservation and trigger auto-resolution
+- [Claude Code–Style Input](https://prompt-area.com/#claude-code-input): Full composition of PromptArea, ActionBar, and StatusBar replicating a Claude Code–style chat input with plan mode and model selector
+- [Codex–Style Input](https://prompt-area.com/#codex-input): Stacked Codex-style composer with a permissions pill, reasoning-effort model selector, and a peeking repository/environment/branch context tray
 
 ## Companion Components
 
