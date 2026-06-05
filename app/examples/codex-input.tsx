@@ -191,7 +191,7 @@ export function CodexInputExample() {
       <div className="relative flex flex-col">
         {/* Foreground composer card */}
         <div
-          className="bg-card relative z-10 rounded-[24px] border shadow-sm"
+          className="bg-card relative z-10 rounded-[24px] border shadow-sm dark:bg-[#2a2a2a]"
           style={
             {
               '--prompt-area-surface': 'var(--card)',
@@ -265,7 +265,7 @@ export function CodexInputExample() {
                     type="button"
                     onClick={() => handleSubmit(segments)}
                     disabled={isEmpty}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed dark:bg-[#5a5a5a] dark:text-white dark:hover:bg-[#646464]"
                     aria-label="Send message">
                     <ArrowUp className="size-4" />
                   </button>
@@ -276,7 +276,7 @@ export function CodexInputExample() {
         </div>
 
         {/* Background context tray — peeks out below the composer card */}
-        <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5">
+        <div className="bg-muted -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5 dark:bg-[#242424]">
           <div className="flex flex-wrap items-center gap-0.5">
             <Menu<string>
               id="repo"
@@ -370,7 +370,7 @@ function CodexInputExample() {
     <div className="relative flex flex-col" ref={rootRef}>
       {/* Foreground composer */}
       <div
-        className="bg-card relative z-10 rounded-[24px] border shadow-sm"
+        className="bg-card dark:bg-[#2a2a2a] relative z-10 rounded-[24px] border shadow-sm"
         style={{ '--prompt-area-surface': 'var(--card)', '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
         <div className="p-2">
           <PromptArea
@@ -428,7 +428,7 @@ function CodexInputExample() {
                 <button className={ICON_BTN} aria-label="Voice input"><Mic className="size-4" /></button>
                 <button
                   onClick={() => { promptRef.current?.clear(); setSegments([]) }}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-[#5a5a5a] dark:text-white dark:hover:bg-[#646464] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
                   aria-label="Send">
                   <ArrowUp className="size-4" />
                 </button>
@@ -439,7 +439,7 @@ function CodexInputExample() {
       </div>
 
       {/* Background context tray — peeks out below the composer */}
-      <div className="bg-muted dark:bg-muted/40 -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5">
+      <div className="bg-muted dark:bg-[#242424] -mt-5 rounded-b-[24px] border border-t-0 px-3 pt-7 pb-2.5">
         <div className="flex flex-wrap items-center gap-0.5">
           <button onClick={() => toggleMenu('repo')} className={TRAY_PILL}>
             <FolderGit2 className="size-3.5" /> acme-enterprise <ChevronDown className="size-3 opacity-60" />
