@@ -288,6 +288,10 @@ app/
 └── sections/             # Landing page sections
 ```
 
+## Related Projects
+
+- [Agency Skills](https://github.com/just-marketing/agency-skills) — A sibling open-source project by Juma: a library of Claude Code skills that give marketing agencies repeatable, deliverable-oriented workflows for audits, strategy, content, reporting, and operations.
+
 ## License
 
 MIT

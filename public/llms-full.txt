@@ -77,6 +77,7 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
 - [Partners](https://prompt-area.com/partners): Integration partnerships and technology partner opportunities
 - [GitHub](https://github.com/just-marketing/prompt-area): Source code, issue tracker, and contribution guidelines
+- [Agency Skills](https://github.com/just-marketing/agency-skills): Sibling open-source project by Juma — a library of Claude Code skills for marketing agencies (audits, strategy, content, reporting, and operations)
 
 ## Installation
 
@@ -1111,4 +1112,5 @@ When you install `prompt-area`, the following modules are available:
 - Press: https://prompt-area.com/press
 - Partners: https://prompt-area.com/partners
 - GitHub: https://github.com/just-marketing/prompt-area
+- Agency Skills (sibling project): https://github.com/just-marketing/agency-skills
 - shadcn Registry: https://ui.shadcn.com/docs/registry

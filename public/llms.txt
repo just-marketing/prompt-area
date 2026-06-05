@@ -67,6 +67,7 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
 - [Partners](https://prompt-area.com/partners): Integration partnerships and technology partner opportunities
 - [GitHub Repository](https://github.com/just-marketing/prompt-area): Source code, issue tracker, and contribution guidelines for the prompt-area component
+- [Agency Skills](https://github.com/just-marketing/agency-skills): Sibling open-source project by Juma — a library of Claude Code skills that give marketing agencies repeatable, deliverable-oriented workflows for audits, strategy, content, reporting, and operations
 - [shadcn Registry](https://ui.shadcn.com/docs/registry): Learn how shadcn registry distribution works for installing prompt-area into any Next.js or React project
 
 ## Installation

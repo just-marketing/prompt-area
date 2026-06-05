@@ -500,6 +500,17 @@ export default function BelowFoldSections() {
             llms-full.txt
           </a>
         </div>
+        <p className="mt-3">
+          A sibling open-source project by Juma:{' '}
+          <a
+            href="https://github.com/just-marketing/agency-skills"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground underline underline-offset-4 transition-colors">
+            Agency Skills
+          </a>{' '}
+          &mdash; Claude Code skills for marketing agencies.
+        </p>
       </footer>
     </>
   )
