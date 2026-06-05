@@ -352,7 +352,7 @@ export default async function OGImage() {
               <circle cx="18" cy="6" r="3" />
               <circle cx="6" cy="18" r="3" />
             </L>
-            <span>cursor/prod-data-memoization-layer</span>
+            <span>main</span>
             <ChevronDown s={16} />
           </div>
         </div>
