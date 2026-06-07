@@ -1,30 +1,16 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import {
-  Plus,
-  ArrowUp,
-  ChevronDown,
-  GitBranch,
-  Cloud,
-  LayoutList,
-  File,
-  X,
-} from 'lucide-react'
+import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
 import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type {
-  Segment,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 
 type AttachedFile = { id: string; name: string }
 
-const INITIAL_FILES: AttachedFile[] = [
-  { id: 'img-1', name: 'image.png' },
-]
+const INITIAL_FILES: AttachedFile[] = [{ id: 'img-1', name: 'image.png' }]
 
 const INITIAL_SEGMENTS: Segment[] = [
   {
@@ -33,7 +19,7 @@ const INITIAL_SEGMENTS: Segment[] = [
   },
 ]
 
-const MODELS = ['Opus 4.6', 'Sonnet 4.6', 'Haiku 4.5'] as const
+const MODELS = ['Opus 4.8', 'Sonnet 4.6', 'Haiku 4.5'] as const
 
 export function ClaudeCodeInputExample() {
   const [segments, setSegments] = useState<Segment[]>(INITIAL_SEGMENTS)
@@ -49,17 +35,14 @@ export function ClaudeCodeInputExample() {
     segments.length === 0 ||
     (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
 
-  const handleSubmit = useCallback(
-    (segs: Segment[]) => {
-      const text = segmentsToPlainText(segs)
-      if (!text.trim()) return
-      setSubmitted(text)
-      promptRef.current?.clear()
-      setSegments([])
-      setFiles([])
-    },
-    [],
-  )
+  const handleSubmit = useCallback((segs: Segment[]) => {
+    const text = segmentsToPlainText(segs)
+    if (!text.trim()) return
+    setSubmitted(text)
+    promptRef.current?.clear()
+    setSegments([])
+    setFiles([])
+  }, [])
 
   return (
     <div className="flex flex-col gap-2">
@@ -135,7 +118,7 @@ export function ClaudeCodeInputExample() {
                         <button
                           key={model}
                           type="button"
-                          className={`flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm hover:bg-accent ${
+                          className={`hover:bg-accent flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm ${
                             model === selectedModel ? 'bg-accent' : ''
                           }`}
                           onClick={() => {
@@ -215,7 +198,7 @@ type AttachedFile = { id: string; name: string }
 function ClaudeCodeInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
   const [files, setFiles] = useState<AttachedFile[]>([{ id: 'img-1', name: 'image.png' }])
-  const [selectedModel, setSelectedModel] = useState('Opus 4.6')
+  const [selectedModel, setSelectedModel] = useState('Opus 4.8')
   const [planMode, setPlanMode] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
 

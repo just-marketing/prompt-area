@@ -15,8 +15,8 @@ describe('StatusBar', () => {
   })
 
   it('renders right slot content', () => {
-    render(<StatusBar right={<span>Opus 4.6</span>} />)
-    expect(screen.getByText('Opus 4.6')).toBeInTheDocument()
+    render(<StatusBar right={<span>Opus 4.8</span>} />)
+    expect(screen.getByText('Opus 4.8')).toBeInTheDocument()
   })
 
   it('renders both slots simultaneously', () => {
