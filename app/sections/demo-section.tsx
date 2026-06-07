@@ -91,8 +91,8 @@ const DEMO_FILES: PromptAreaFile[] = [
 ]
 
 const MODELS = [
-  { id: 'opus', label: 'Opus 4.6', icon: '/claude-icon.svg', invertInDark: false },
-  { id: 'gpt', label: 'GPT 5.4', icon: '/openai-icon.svg', invertInDark: true },
+  { id: 'opus', label: 'Opus 4.8', icon: '/claude-icon.svg', invertInDark: false },
+  { id: 'gpt', label: 'GPT 5.5', icon: '/openai-icon.svg', invertInDark: true },
 ] as const
 
 const ICON_BTN = 'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -162,7 +162,7 @@ export function DemoSection() {
   return (
     <div className="flex flex-col gap-2">
       <div
-        className="rounded-xl border shadow-sm dark:bg-card dark:shadow-md dark:shadow-black/20"
+        className="dark:bg-card rounded-xl border shadow-sm dark:shadow-md dark:shadow-black/20"
         style={{ '--prompt-area-surface': 'var(--card)' } as React.CSSProperties}>
         <div className="p-4">
           <PromptArea
