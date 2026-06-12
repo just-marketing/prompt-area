@@ -97,7 +97,7 @@ retry pnpm dlx shadcn@latest init --yes --defaults
 echo ""
 echo "── Step 5: Installing registry components..."
 
-COMPONENTS=("prompt-area" "action-bar" "status-bar")
+COMPONENTS=("prompt-area" "action-bar" "status-bar" "chat-prompt-layout")
 
 for component in "${COMPONENTS[@]}"; do
   echo "   Installing ${component}..."
@@ -137,6 +137,9 @@ EXPECTED_FILES=(
   "src/components/use-prompt-area.ts"
   "src/components/use-prompt-area-events.ts"
   "src/components/prompt-area-engine.ts"
+  "src/components/prompt-area-list-ops.ts"
+  "src/components/cursor-helpers.ts"
+  "src/components/clipboard-helpers.ts"
   "src/components/dom-helpers.ts"
   "src/components/use-trigger-search.ts"
   "src/components/types.ts"
@@ -150,6 +153,8 @@ EXPECTED_FILES=(
   "src/components/action-bar.tsx"
   "src/components/status-bar.tsx"
   "src/components/compact-prompt-area.tsx"
+  "src/components/chat-prompt-layout.tsx"
+  "src/components/use-scroll-observer.ts"
 )
 
 for file in "${EXPECTED_FILES[@]}"; do
@@ -175,7 +180,7 @@ python3 << MERGETYPES
 import json, os, re
 
 registry_dir = "${REGISTRY_DIR}"
-components = ["prompt-area", "action-bar", "status-bar", "compact-prompt-area"]
+components = ["prompt-area", "action-bar", "status-bar", "compact-prompt-area", "chat-prompt-layout"]
 merged = []
 
 for comp in components:
@@ -242,6 +247,7 @@ import type { Segment } from "@/components/types"
 import { ActionBar } from "@/components/action-bar"
 import { StatusBar } from "@/components/status-bar"
 import { CompactPromptArea } from "@/components/compact-prompt-area"
+import { ChatPromptLayout } from "@/components/chat-prompt-layout"
 
 export default function SmokeTest() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -274,6 +280,16 @@ export default function SmokeTest() {
           placeholder="Compact input..."
           onSubmit={() => setCompactSegments([])}
         />
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-lg font-semibold">ChatPromptLayout</h2>
+        <ChatPromptLayout
+          className="h-[320px] rounded-lg border"
+          prompt={<div className="border-t p-2">Prompt slot</div>}
+        >
+          <div className="p-4">Messages area</div>
+        </ChatPromptLayout>
       </section>
     </div>
   )

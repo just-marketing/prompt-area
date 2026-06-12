@@ -38,13 +38,15 @@ export function CommandsExample() {
 }
 
 export const commandsCode = `import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment } from '@/components/types'
 
 const COMMANDS = [
   { value: 'deep-research', label: 'deep-research', description: 'Research a topic in depth' },
   { value: 'summarize', label: 'summarize', description: 'Summarize the conversation' },
   { value: 'create-slides', label: 'create-slides', description: 'Generate a slide deck' },
+  { value: 'draft-email', label: 'draft-email', description: 'Compose a sales email' },
+  { value: 'analyze', label: 'analyze', description: 'Break down key metrics' },
 ]
 
 function CommandsExample() {

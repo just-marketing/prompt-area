@@ -56,8 +56,8 @@ export function AsyncSearchExample() {
 }
 
 export const asyncSearchCode = `import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment } from '@/components/types'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -88,8 +88,10 @@ function AsyncSearchExample() {
                 reject(new DOMException('Aborted', 'AbortError'))
               })
             })
-            return USERS.filter((u) =>
-              u.label.toLowerCase().includes(query.toLowerCase()),
+            return USERS.filter(
+              (u) =>
+                u.label.toLowerCase().includes(query.toLowerCase()) ||
+                u.description.toLowerCase().includes(query.toLowerCase()),
             )
           },
           onSearchError: (err) => console.error('Search failed:', err),

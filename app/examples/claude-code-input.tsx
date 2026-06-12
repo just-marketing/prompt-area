@@ -188,10 +188,10 @@ export function ClaudeCodeInputExample() {
 
 export const claudeCodeInputCode = `import { useCallback, useRef, useState } from 'react'
 import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import { StatusBar } from '@/components/status-bar'
+import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type AttachedFile = { id: string; name: string }
 

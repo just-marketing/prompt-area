@@ -22,8 +22,8 @@ export function BasicExample() {
 }
 
 export const basicCode = `import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment } from '@/components/types'
 
 function BasicExample() {
   const [segments, setSegments] = useState<Segment[]>([])

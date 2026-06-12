@@ -85,8 +85,8 @@ export function ImageAttachmentsExample() {
 }
 
 export const imageAttachmentsCode = `import { useState, useCallback } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, PromptAreaImage } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment, PromptAreaImage } from '@/components/types'
 
 function ImageAttachmentsExample() {
   const [segments, setSegments] = useState<Segment[]>([])

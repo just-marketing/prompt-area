@@ -232,9 +232,9 @@ export function ActionBarFullExample() {
 
 export const actionBarFullCode = `import { useCallback, useRef, useState } from 'react'
 import { PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import type { Segment, TriggerConfig, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
 
 const triggers: TriggerConfig[] = [
   { char: '@', position: 'any', mode: 'dropdown', onSearch: (q) => USERS.filter(...) },
@@ -255,6 +255,13 @@ function ActionBarFullExample() {
     promptRef.current?.clear()
     setSegments([])
   }, [isEmpty])
+
+  const insertTrigger = useCallback((char: string) => {
+    promptRef.current?.focus()
+    requestAnimationFrame(() => {
+      document.execCommand('insertText', false, char)
+    })
+  }, [])
 
   return (
     <div className="rounded-lg border p-4">

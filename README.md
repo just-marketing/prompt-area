@@ -132,37 +132,49 @@ How Prompt Area stacks up against popular alternatives:
 - **Copy/paste** — Preserves chip data internally, auto-resolves triggers on external paste
 - **IME support** — Proper composition handling for CJK input
 - **Auto-grow** — Expands on focus, shrinks on blur
+- **File & image attachments** — Paste screenshots or attach files with thumbnails, loading states, and remove buttons
+- **Rotating placeholders** — Pass a `string[]` placeholder to animate between texts
 - **Keyboard shortcuts** — Bold, italic, submit, dismiss, and more
 - **Imperative API** — `focus()`, `blur()`, `insertChip()`, `getPlainText()`, `clear()`
+- **DX helpers** — `usePromptAreaState()` hook, trigger presets, and segment helpers
 
 ## API Reference
 
 ### `PromptAreaProps`
 
-| Prop           | Type                            | Default        | Description                                 |
-| -------------- | ------------------------------- | -------------- | ------------------------------------------- |
-| `value`        | `Segment[]`                     | required       | Controlled segment array                    |
-| `onChange`     | `(segments: Segment[]) => void` | required       | Called on content changes                   |
-| `triggers`     | `TriggerConfig[]`               | `[]`           | Trigger character configurations            |
-| `placeholder`  | `string`                        | —              | Placeholder text when empty                 |
-| `className`    | `string`                        | —              | CSS class for the container                 |
-| `disabled`     | `boolean`                       | `false`        | Disable the input                           |
-| `markdown`     | `boolean`                       | —              | Enable inline markdown rendering            |
-| `onSubmit`     | `(segments: Segment[]) => void` | —              | Called on Enter (without Shift)             |
-| `onEscape`     | `() => void`                    | —              | Called on Escape                            |
-| `onChipClick`  | `(chip: ChipSegment) => void`   | —              | Called when a chip is clicked               |
-| `onChipAdd`    | `(chip: ChipSegment) => void`   | —              | Called when a chip is added                 |
-| `onChipDelete` | `(chip: ChipSegment) => void`   | —              | Called when a chip is deleted               |
-| `onLinkClick`  | `(url: string) => void`         | —              | Called on Cmd/Ctrl+Click on a URL           |
-| `onPaste`      | `(data) => void`                | —              | Called after paste with segments and source |
-| `onUndo`       | `(segments: Segment[]) => void` | —              | Called after undo                           |
-| `onRedo`       | `(segments: Segment[]) => void` | —              | Called after redo                           |
-| `minHeight`    | `number`                        | `80`           | Minimum height in pixels                    |
-| `maxHeight`    | `number`                        | —              | Maximum height in pixels                    |
-| `autoFocus`    | `boolean`                       | `false`        | Auto-focus on mount                         |
-| `autoGrow`     | `boolean`                       | `false`        | Expand on focus, shrink on blur             |
-| `aria-label`   | `string`                        | `'Text input'` | Accessible label                            |
-| `data-test-id` | `string`                        | —              | Test ID for e2e testing                     |
+| Prop            | Type                               | Default        | Description                                                  |
+| --------------- | ---------------------------------- | -------------- | ------------------------------------------------------------ |
+| `value`         | `Segment[]`                        | required       | Controlled segment array                                     |
+| `onChange`      | `(segments: Segment[]) => void`    | required       | Called on content changes                                    |
+| `triggers`      | `TriggerConfig[]`                  | `[]`           | Trigger character configurations                             |
+| `placeholder`   | `string \| string[]`               | —              | Placeholder text when empty; an array animates between items |
+| `className`     | `string`                           | —              | CSS class for the container                                  |
+| `disabled`      | `boolean`                          | `false`        | Disable the input                                            |
+| `markdown`      | `boolean`                          | —              | Enable inline markdown rendering                             |
+| `onSubmit`      | `(segments: Segment[]) => void`    | —              | Called on Enter (without Shift)                              |
+| `onEscape`      | `() => void`                       | —              | Called on Escape                                             |
+| `onChipClick`   | `(chip: ChipSegment) => void`      | —              | Called when a chip is clicked                                |
+| `onChipAdd`     | `(chip: ChipSegment) => void`      | —              | Called when a chip is added                                  |
+| `onChipDelete`  | `(chip: ChipSegment) => void`      | —              | Called when a chip is deleted                                |
+| `onLinkClick`   | `(url: string) => void`            | —              | Called on Cmd/Ctrl+Click on a URL                            |
+| `onPaste`       | `(data) => void`                   | —              | Called after paste with segments and source                  |
+| `onUndo`        | `(segments: Segment[]) => void`    | —              | Called after undo                                            |
+| `onRedo`        | `(segments: Segment[]) => void`    | —              | Called after redo                                            |
+| `minHeight`     | `number`                           | `80`           | Minimum height in pixels                                     |
+| `maxHeight`     | `number`                           | —              | Maximum height in pixels                                     |
+| `autoFocus`     | `boolean`                          | `false`        | Auto-focus on mount                                          |
+| `autoGrow`      | `boolean`                          | `false`        | Expand on focus, shrink on blur                              |
+| `aria-label`    | `string`                           | `'Text input'` | Accessible label                                             |
+| `data-test-id`  | `string`                           | —              | Test ID for e2e testing                                      |
+| `images`        | `PromptAreaImage[]`                | —              | Image attachments to display                                 |
+| `imagePosition` | `'above' \| 'below'`               | `'above'`      | Image strip placement relative to the text                   |
+| `onImagePaste`  | `(file: File) => void`             | —              | Called when an image is pasted                               |
+| `onImageRemove` | `(image: PromptAreaImage) => void` | —              | Called when an image's remove button is clicked              |
+| `onImageClick`  | `(image: PromptAreaImage) => void` | —              | Called when an image thumbnail is clicked                    |
+| `files`         | `PromptAreaFile[]`                 | —              | File attachments to display                                  |
+| `filePosition`  | `'above' \| 'below'`               | `'above'`      | File strip placement relative to the text                    |
+| `onFileRemove`  | `(file: PromptAreaFile) => void`   | —              | Called when a file's remove button is clicked                |
+| `onFileClick`   | `(file: PromptAreaFile) => void`   | —              | Called when a file attachment is clicked                     |
 
 ### `PromptAreaHandle` (ref)
 
@@ -180,18 +192,21 @@ ref.current.clear()          // Clear all content and undo history
 
 ### `TriggerConfig`
 
-| Field                | Type                                     | Description                                   |
-| -------------------- | ---------------------------------------- | --------------------------------------------- |
-| `char`               | `string`                                 | Trigger character (e.g., `'@'`, `'/'`, `'#'`) |
-| `position`           | `'start' \| 'any'`                       | Where the trigger is valid                    |
-| `mode`               | `'dropdown' \| 'callback'`               | Show dropdown or fire callback                |
-| `onSearch`           | `(query: string) => TriggerSuggestion[]` | Fetch suggestions (dropdown mode)             |
-| `onSelect`           | `(suggestion) => string \| void`         | Customize chip display text                   |
-| `onActivate`         | `(context) => void`                      | Handler for callback mode                     |
-| `resolveOnSpace`     | `boolean`                                | Auto-resolve on space (e.g., `#tag`)          |
-| `chipStyle`          | `'pill' \| 'inline'`                     | Visual style for chips                        |
-| `chipClassName`      | `string`                                 | CSS class for chips                           |
-| `accessibilityLabel` | `string`                                 | ARIA label for the trigger                    |
+| Field                | Type                                                                         | Description                                                                            |
+| -------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `char`               | `string`                                                                     | Trigger character (e.g., `'@'`, `'/'`, `'#'`)                                          |
+| `position`           | `'start' \| 'any'`                                                           | Where the trigger is valid                                                             |
+| `mode`               | `'dropdown' \| 'callback'`                                                   | Show dropdown or fire callback                                                         |
+| `onSearch`           | `(query, { signal }) => TriggerSuggestion[] \| Promise<TriggerSuggestion[]>` | Fetch suggestions (dropdown mode); `signal` aborts superseded searches                 |
+| `onSelect`           | `(suggestion) => string \| void`                                             | Customize chip display text                                                            |
+| `onActivate`         | `(context) => void`                                                          | Handler for callback mode                                                              |
+| `resolveOnSpace`     | `boolean`                                                                    | Auto-resolve on space (e.g., `#tag`)                                                   |
+| `chipStyle`          | `'pill' \| 'inline'`                                                         | Visual style for chips                                                                 |
+| `chipClassName`      | `string`                                                                     | CSS class for chips                                                                    |
+| `accessibilityLabel` | `string`                                                                     | ARIA label for the trigger                                                             |
+| `searchDebounceMs`   | `number`                                                                     | Debounce before `onSearch` (default `0`; first empty-query search is always immediate) |
+| `onSearchError`      | `(error: unknown) => void`                                                   | Called when `onSearch` rejects (non-abort errors)                                      |
+| `emptyMessage`       | `string`                                                                     | Dropdown message for empty results (popover hides if unset)                            |
 
 ### `Segment`
 
@@ -209,6 +224,39 @@ type ChipSegment = {
   autoResolved?: boolean
 }
 ```
+
+## DX Helpers
+
+`usePromptAreaState()` wires up the segment state, ref, and derived values, and trigger presets replace hand-written configs:
+
+```tsx
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/components/trigger-presets'
+import { getChipsByTrigger } from '@/components/segment-helpers'
+
+function ChatInput() {
+  const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
+  const mentions = getChipsByTrigger(bind.value, '@')
+
+  return (
+    <PromptArea
+      {...bind}
+      triggers={[
+        mentionTrigger({ onSearch: searchUsers }),
+        commandTrigger({ onSearch: searchCommands }),
+        hashtagTrigger(),
+      ]}
+      onSubmit={() => {
+        sendMessage(plainText, mentions)
+        clear()
+      }}
+    />
+  )
+}
+```
+
+Also available: `callbackTrigger()` for callback-mode triggers, and segment helpers — `text()`, `chip()`, `isSegmentsEmpty()`, `hasChips()`, `getChips()`, `segmentsToPlainText()`, `plainTextToSegments()`. See [llms-full.txt](https://prompt-area.com/llms-full.txt) for the complete reference.
 
 ## Chip Customization
 
@@ -271,15 +319,21 @@ registry/new-york/blocks/
 │   ├── prompt-area.tsx       # Main component + rendering
 │   ├── types.ts              # All type definitions
 │   ├── prompt-area-engine.ts # contentEditable engine
+│   ├── prompt-area-list-ops.ts # List auto-formatting operations
 │   ├── use-prompt-area.ts    # State management hook
 │   ├── use-prompt-area-events.ts # Event handlers
+│   ├── use-prompt-area-state.ts # Zero-config state hook
 │   ├── use-trigger-search.ts # Trigger/search logic
 │   ├── trigger-popover.tsx   # Dropdown popover
+│   ├── trigger-presets.ts    # Pre-built trigger configs
 │   ├── dom-helpers.ts        # DOM utilities
+│   ├── cursor-helpers.ts     # Cursor/selection utilities
+│   ├── clipboard-helpers.ts  # Chip-preserving copy/paste
 │   ├── segment-helpers.ts    # Segment manipulation
 │   └── __tests__/            # Unit tests
 ├── action-bar/           # Toolbar component
 ├── status-bar/           # Status display component
+├── compact-prompt-area/  # Pill-shaped collapsible variant
 └── chat-prompt-layout/   # Chat UI layout component
 
 app/

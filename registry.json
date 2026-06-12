@@ -134,6 +134,28 @@
           "type": "registry:component"
         }
       ]
+    },
+    {
+      "name": "chat-prompt-layout",
+      "type": "registry:component",
+      "title": "Chat Prompt Layout",
+      "description": "A full-height chat layout with a scrollable messages area, a bottom-anchored prompt slot, and contextual scroll-to-top/bottom buttons.",
+      "dependencies": ["framer-motion"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/chat-prompt-layout/use-scroll-observer.ts",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/new-york/blocks/chat-prompt-layout/types.ts",
+          "type": "registry:component"
+        }
+      ]
     }
   ]
 }

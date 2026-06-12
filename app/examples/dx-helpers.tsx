@@ -69,10 +69,10 @@ export function DxHelpersExample() {
   )
 }
 
-export const dxHelpersCode = `import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
-import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/registry/new-york/blocks/prompt-area/trigger-presets'
-import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+export const dxHelpersCode = `import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/components/trigger-presets'
+import { getChipsByTrigger } from '@/components/segment-helpers'
 
 function ChatInput() {
   const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
