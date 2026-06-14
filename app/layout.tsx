@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import localFont from 'next/font/local'
 import './globals.css'
 import { SidebarLayout } from '@/components/nav-sidebar'
+import { SiteFooter } from '@/components/site-footer'
 import { Analytics } from '@/components/analytics'
 
 const geistSans = localFont({
@@ -22,12 +23,19 @@ const SITE_URL = 'https://prompt-area.com'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Prompt Area — Rich Textarea with Tags, Mentions & AI Prompts',
+    default: 'Prompt Area — shadcn Chat Input for React with @Mentions & /Commands',
     template: '%s | Prompt Area',
   },
   description:
-    'A production-grade React textarea component with @mentions, /commands, #tags, inline markdown, and file attachments. Built as a shadcn registry component for AI and LLM chat interfaces. Zero extra dependencies.',
+    'The shadcn AI chat input for React: a zero-dependency textarea with @mentions, /commands, #tags, inline markdown, and file attachments. Install from the shadcn registry — a modern react-mentions alternative for LLM chat interfaces.',
   keywords: [
+    'shadcn chat input',
+    'shadcn AI input',
+    'AI chat textarea react',
+    'react prompt input component',
+    'react slash commands input',
+    'react-mentions alternative',
+    'react mentions component',
     'textarea with tags',
     'textarea with prompts',
     'prompt textarea component',
@@ -51,15 +59,15 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: 'Prompt Area',
-    title: 'Prompt Area — Rich Textarea with Tags, Mentions & AI Prompts',
+    title: 'Prompt Area — shadcn Chat Input for React with @Mentions & /Commands',
     description:
-      'React textarea with @mentions, /commands, #tags, inline markdown, and file attachments. Install via shadcn registry. Zero extra dependencies.',
+      'The shadcn AI chat input for React: a zero-dependency textarea with @mentions, /commands, #tags, inline markdown, and file attachments. Install from the shadcn registry.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Prompt Area — Textarea with Tags, Mentions & Prompts',
+    title: 'Prompt Area — shadcn Chat Input for React',
     description:
-      'React textarea with @mentions, /commands, #tags, inline markdown. shadcn registry component for AI chat interfaces.',
+      'Zero-dependency React textarea with @mentions, /commands, #tags & file attachments. A modern react-mentions alternative for AI chat interfaces.',
   },
   alternates: {
     canonical: SITE_URL,
@@ -206,7 +214,10 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Suspense>
-          <SidebarLayout>{children}</SidebarLayout>
+          <SidebarLayout>
+            {children}
+            <SiteFooter />
+          </SidebarLayout>
         </Suspense>
         <Analytics />
       </body>

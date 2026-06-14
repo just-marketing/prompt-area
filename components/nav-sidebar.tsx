@@ -14,9 +14,9 @@ import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowUpRight, ChevronRight, Github, Sparkles, Star, TextCursorInput } from 'lucide-react'
+import { ChevronRight, TextCursorInput } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { SiteHeader } from '@/components/site-header'
 
 // ---------------------------------------------------------------------------
 // Nav config
@@ -322,37 +322,6 @@ function ActiveIndicator({
 }
 
 // ---------------------------------------------------------------------------
-// PageLinks — static page navigation links
-// ---------------------------------------------------------------------------
-
-const PAGE_LINKS = [
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
-] as const
-
-function PageLinksAndTheme() {
-  const pathname = usePathname()
-
-  return (
-    <div className="flex items-center gap-0.5 px-1 py-1">
-      {PAGE_LINKS.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          className={cn(
-            'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
-            'hover:text-foreground',
-            pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
-          )}>
-          {link.label}
-        </a>
-      ))}
-      <ThemeToggle className="ml-auto" />
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // NavSidebar — the panel
 // ---------------------------------------------------------------------------
 
@@ -449,35 +418,6 @@ function NavSidebar() {
           ),
         )}
       </nav>
-
-      <div className="border-sidebar-border flex flex-col gap-2 border-t px-4 py-3">
-        <a
-          href="https://github.com/just-marketing/prompt-area"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            'group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-            'bg-accent/50 text-foreground hover:bg-accent',
-          )}>
-          <Github className="size-4 shrink-0" />
-          <span className="flex-1">GitHub Repo</span>
-          <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
-        </a>
-        <a
-          href="https://github.com/just-marketing/agency-skills"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Claude Code skills for marketing agencies — a sibling open-source project by Juma"
-          className={cn(
-            'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-            'text-muted-foreground hover:text-foreground',
-          )}>
-          <Sparkles className="size-4 shrink-0" />
-          <span className="flex-1">Agency Skills</span>
-          <ArrowUpRight className="size-3.5 opacity-60 transition-opacity group-hover:opacity-100" />
-        </a>
-        <PageLinksAndTheme />
-      </div>
     </aside>
   )
 }
@@ -620,6 +560,7 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
 
       {/* Main content */}
       <main role="main" className="min-h-screen overflow-x-hidden lg:ml-[280px]">
+        <SiteHeader />
         {children}
       </main>
     </SidebarContext.Provider>
