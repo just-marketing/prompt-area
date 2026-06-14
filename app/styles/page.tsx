@@ -1,0 +1,131 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ExampleShowcase } from '@/components/example-showcase'
+import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
+import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
+
+const SITE_URL = 'https://prompt-area.com'
+
+export const metadata: Metadata = {
+  title: 'Styles — Claude Code & Codex Agent Inputs',
+  description:
+    'Ready-made agent-input styles built with Prompt Area: a Claude Code–style composer and an OpenAI Codex–style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
+  alternates: { canonical: `${SITE_URL}/styles` },
+  openGraph: {
+    type: 'website',
+    url: `${SITE_URL}/styles`,
+    title: 'Styles — Claude Code & Codex Agent Inputs',
+    description:
+      'Ready-made agent-input styles built with Prompt Area — Claude Code and OpenAI Codex composers you can drop into your app.',
+  },
+}
+
+export default function StylesPage() {
+  return (
+    <div className="mx-auto flex max-w-3xl flex-col gap-12 px-4 py-16">
+      <Link
+        href="/"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors">
+        <ArrowLeft className="size-3.5" />
+        Back to Prompt Area
+      </Link>
+
+      <header className="flex flex-col gap-3">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Styles</h1>
+        <p className="text-muted-foreground text-base leading-relaxed">
+          Ready-made agent-input styles, assembled from Prompt Area and its companions. Each is a
+          real, copy-paste composition modeled on the agent UIs you already know — toggle Preview
+          and Code on any example.
+        </p>
+      </header>
+
+      {/* Claude Code */}
+      <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            A Claude Code–style composer: a file chip above the input, a Plan-mode toggle and model
+            selector in the action bar, and project/branch context in the status bar.
+          </p>
+        </div>
+        <ExampleShowcase code={claudeCodeInputCode}>
+          <ClaudeCodeInputExample />
+        </ExampleShowcase>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Composed from{' '}
+          <Link
+            href="/docs/components/prompt-area"
+            className="text-foreground font-medium underline underline-offset-4">
+            Prompt Area
+          </Link>
+          ,{' '}
+          <Link
+            href="/docs/components/action-bar"
+            className="text-foreground font-medium underline underline-offset-4">
+            Action Bar
+          </Link>
+          , and{' '}
+          <Link
+            href="/docs/components/status-bar"
+            className="text-foreground font-medium underline underline-offset-4">
+            Status Bar
+          </Link>
+          .
+        </p>
+      </section>
+
+      {/* Codex */}
+      <section id="codex" className="flex scroll-mt-20 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            An OpenAI Codex–style cloud-agent composer: a rounded card with a permissions menu and
+            reasoning-effort model selector, layered over a peeking repository/environment/branch
+            context tray.
+          </p>
+        </div>
+        <ExampleShowcase code={codexInputCode}>
+          <CodexInputExample />
+        </ExampleShowcase>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Composed from{' '}
+          <Link
+            href="/docs/components/prompt-area"
+            className="text-foreground font-medium underline underline-offset-4">
+            Prompt Area
+          </Link>{' '}
+          and{' '}
+          <Link
+            href="/docs/components/action-bar"
+            className="text-foreground font-medium underline underline-offset-4">
+            Action Bar
+          </Link>
+          .
+        </p>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-muted/30 flex flex-col gap-3 rounded-xl border p-6">
+        <h2 className="text-lg font-semibold">Build your own</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Every style is just Prompt Area plus companions. Start from the docs to compose your own
+          agent input.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/docs"
+            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90">
+            Read the docs
+            <ArrowRight className="size-3.5" />
+          </Link>
+          <Link
+            href="/docs/components/prompt-area"
+            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+            Components
+          </Link>
+        </div>
+      </section>
+    </div>
+  )
+}

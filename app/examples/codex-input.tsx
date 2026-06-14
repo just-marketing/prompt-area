@@ -20,7 +20,12 @@ import {
   segmentsToPlainText,
   isSegmentsEmpty,
 } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import type {
+  Segment,
+  PromptAreaHandle,
+  TriggerConfig,
+  PromptAreaFile,
+} from '@/registry/new-york/blocks/prompt-area/types'
 
 // ---------------------------------------------------------------------------
 // Option data (representative placeholders)
@@ -142,8 +147,21 @@ function Menu<T>({
   )
 }
 
-export function CodexInputExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
+export function CodexInputExample({
+  initialSegments = [],
+  initialFiles = [],
+  triggers,
+  markdown = false,
+  minHeight = 40,
+}: {
+  initialSegments?: Segment[]
+  initialFiles?: PromptAreaFile[]
+  triggers?: TriggerConfig[]
+  markdown?: boolean
+  minHeight?: number
+} = {}) {
+  const [segments, setSegments] = useState<Segment[]>(initialSegments)
+  const [files, setFiles] = useState<PromptAreaFile[]>(initialFiles)
   const [submitted, setSubmitted] = useState('')
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
@@ -183,6 +201,7 @@ export function CodexInputExample() {
     setSubmitted(text)
     promptRef.current?.clear()
     setSegments([])
+    setFiles([])
   }, [])
 
   return (
@@ -191,23 +210,23 @@ export function CodexInputExample() {
       <div className="relative flex flex-col">
         {/* Foreground composer card */}
         <div
-          className="bg-card relative z-10 rounded-[24px] border border-[#ececec] shadow-sm dark:border-0 dark:bg-[#2d2d2d] dark:shadow-none"
-          style={
-            {
-              '--prompt-area-surface': 'var(--card)',
-              '--prompt-area-placeholder': 'oklch(0.7 0 0)',
-            } as React.CSSProperties
-          }>
+          className="bg-card relative z-10 rounded-[24px] border border-[#ececec] shadow-sm [--prompt-area-surface:var(--card)] dark:border-0 dark:bg-[#2d2d2d] dark:shadow-none dark:[--prompt-area-surface:#2d2d2d]"
+          style={{ '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
           <div className="pt-[13.5px] pr-2 pb-2 pl-[13px]">
             <PromptArea
               ref={promptRef}
               value={segments}
               onChange={setSegments}
+              triggers={triggers}
               placeholder="Do anything"
               onSubmit={handleSubmit}
+              markdown={markdown}
               autoGrow
-              minHeight={40}
+              minHeight={minHeight}
               maxHeight={280}
+              files={files}
+              filePosition="above"
+              onFileRemove={(f) => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
             />
             <ActionBar
               className="pt-2"
