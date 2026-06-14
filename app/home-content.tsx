@@ -5,10 +5,67 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FeaturesGrid } from './sections/features-grid'
+import { USERS, COMMANDS, TAGS } from './sections/mock-data'
+import type {
+  Segment,
+  TriggerConfig,
+  PromptAreaFile,
+} from '@/registry/new-york/blocks/prompt-area/types'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
 )
+
+// Seed the hero composer with a realistic prompt so it shows off mentions,
+// commands, tags, markdown, and a file attachment — fully interactive.
+const HERO_SEGMENTS: Segment[] = [
+  { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
+  { type: 'text', text: ' the brief from ' },
+  { type: 'chip', trigger: '@', value: 'strategist', displayText: 'Strategist' },
+  { type: 'text', text: ' and ' },
+  { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
+  { type: 'text', text: ', tag anything ' },
+  { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+  { type: 'text', text: ', and return **key messages** with *action items*.' },
+]
+
+const HERO_TRIGGERS: TriggerConfig[] = [
+  {
+    char: '@',
+    position: 'any',
+    mode: 'dropdown',
+    chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    accessibilityLabel: 'mention',
+    onSearch: (q) => USERS.filter((u) => u.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '/',
+    position: 'start',
+    mode: 'dropdown',
+    chipStyle: 'inline',
+    chipClassName: 'text-violet-700 dark:text-violet-400',
+    accessibilityLabel: 'command',
+    onSearch: (q) => COMMANDS.filter((c) => c.label.toLowerCase().includes(q.toLowerCase())),
+  },
+  {
+    char: '#',
+    position: 'any',
+    mode: 'dropdown',
+    resolveOnSpace: true,
+    chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    accessibilityLabel: 'tag',
+    onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
+  },
+]
+
+const HERO_FILES: PromptAreaFile[] = [
+  {
+    id: 'hero-file-1',
+    name: 'Q4-2025-campaign-brief.pdf',
+    size: 3_420_000,
+    type: 'application/pdf',
+  },
+]
 
 const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
 
@@ -93,9 +150,15 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Live demo — Codex-style composer */}
+      {/* Live demo — Codex-style composer seeded with real content */}
       <section id="demo" className="mx-auto w-full max-w-2xl scroll-mt-20 px-4 pb-16">
-        <CodexInputExample />
+        <CodexInputExample
+          initialSegments={HERO_SEGMENTS}
+          triggers={HERO_TRIGGERS}
+          initialFiles={HERO_FILES}
+          markdown
+          minHeight={76}
+        />
       </section>
 
       {/* Features */}

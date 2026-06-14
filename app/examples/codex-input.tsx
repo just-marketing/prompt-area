@@ -20,7 +20,12 @@ import {
   segmentsToPlainText,
   isSegmentsEmpty,
 } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import type {
+  Segment,
+  PromptAreaHandle,
+  TriggerConfig,
+  PromptAreaFile,
+} from '@/registry/new-york/blocks/prompt-area/types'
 
 // ---------------------------------------------------------------------------
 // Option data (representative placeholders)
@@ -142,8 +147,21 @@ function Menu<T>({
   )
 }
 
-export function CodexInputExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
+export function CodexInputExample({
+  initialSegments = [],
+  initialFiles = [],
+  triggers,
+  markdown = false,
+  minHeight = 40,
+}: {
+  initialSegments?: Segment[]
+  initialFiles?: PromptAreaFile[]
+  triggers?: TriggerConfig[]
+  markdown?: boolean
+  minHeight?: number
+} = {}) {
+  const [segments, setSegments] = useState<Segment[]>(initialSegments)
+  const [files, setFiles] = useState<PromptAreaFile[]>(initialFiles)
   const [submitted, setSubmitted] = useState('')
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
@@ -183,6 +201,7 @@ export function CodexInputExample() {
     setSubmitted(text)
     promptRef.current?.clear()
     setSegments([])
+    setFiles([])
   }, [])
 
   return (
@@ -203,11 +222,16 @@ export function CodexInputExample() {
               ref={promptRef}
               value={segments}
               onChange={setSegments}
+              triggers={triggers}
               placeholder="Do anything"
               onSubmit={handleSubmit}
+              markdown={markdown}
               autoGrow
-              minHeight={40}
+              minHeight={minHeight}
               maxHeight={280}
+              files={files}
+              filePosition="above"
+              onFileRemove={(f) => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
             />
             <ActionBar
               className="pt-2"
