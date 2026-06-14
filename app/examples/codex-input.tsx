@@ -210,13 +210,8 @@ export function CodexInputExample({
       <div className="relative flex flex-col">
         {/* Foreground composer card */}
         <div
-          className="bg-card relative z-10 rounded-[24px] border border-[#ececec] shadow-sm dark:border-0 dark:bg-[#2d2d2d] dark:shadow-none"
-          style={
-            {
-              '--prompt-area-surface': 'var(--card)',
-              '--prompt-area-placeholder': 'oklch(0.7 0 0)',
-            } as React.CSSProperties
-          }>
+          className="bg-card relative z-10 rounded-[24px] border border-[#ececec] shadow-sm [--prompt-area-surface:var(--card)] dark:border-0 dark:bg-[#2d2d2d] dark:shadow-none dark:[--prompt-area-surface:#2d2d2d]"
+          style={{ '--prompt-area-placeholder': 'oklch(0.7 0 0)' } as React.CSSProperties}>
           <div className="pt-[13.5px] pr-2 pb-2 pl-[13px]">
             <PromptArea
               ref={promptRef}

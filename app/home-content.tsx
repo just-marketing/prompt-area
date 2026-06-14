@@ -16,6 +16,10 @@ const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
 )
 
+const ClaudeCodeInputExample = dynamic(() =>
+  import('./examples/claude-code-input').then((m) => ({ default: m.ClaudeCodeInputExample })),
+)
+
 // Seed the hero composer with a realistic prompt so it shows off mentions,
 // commands, tags, markdown, and a file attachment — fully interactive.
 const HERO_SEGMENTS: Segment[] = [
@@ -198,8 +202,37 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Comparison teaser */}
+      {/* Built-in styles */}
       <section className="bg-muted/20 border-y">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-16">
+          <div className="flex flex-col gap-2 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight">Built-in agent styles</h2>
+            <p className="text-muted-foreground">
+              Real, copy-paste compositions modeled on the agent UIs you already know.
+            </p>
+          </div>
+          <div className="mx-auto w-full max-w-2xl">
+            <ClaudeCodeInputExample />
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/docs/examples/claude-code-style"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              Claude Code style
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
+              href="/docs/examples/codex-style"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              Codex style
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison teaser */}
+      <section className="border-y">
         <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">A modern alternative</h2>
           <p className="text-muted-foreground max-w-2xl">

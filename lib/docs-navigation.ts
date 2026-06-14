@@ -39,8 +39,14 @@ export const docsNavigation: NavSection[] = [
       { title: 'Triggers', href: '/docs/examples/triggers' },
       { title: 'Formatting', href: '/docs/examples/formatting' },
       { title: 'Attachments', href: '/docs/examples/attachments' },
-      { title: 'Agent Inputs', href: '/docs/examples/agent-inputs' },
       { title: 'DX Helpers', href: '/docs/examples/dx-helpers' },
+    ],
+  },
+  {
+    title: 'Styles',
+    items: [
+      { title: 'Claude Code', href: '/docs/examples/claude-code-style' },
+      { title: 'Codex', href: '/docs/examples/codex-style' },
     ],
   },
   {
