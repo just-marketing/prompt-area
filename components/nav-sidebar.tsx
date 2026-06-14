@@ -344,20 +344,22 @@ function PageLinksAndTheme() {
   const pathname = usePathname()
 
   return (
-    <div className="flex items-center gap-0.5 px-1 py-1">
-      {PAGE_LINKS.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          className={cn(
-            'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
-            'hover:text-foreground',
-            pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
-          )}>
-          {link.label}
-        </a>
-      ))}
-      <ThemeToggle className="ml-auto" />
+    <div className="flex items-start justify-between gap-2 px-1 py-1">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-0.5 gap-y-0.5">
+        {PAGE_LINKS.map((link) => (
+          <a
+            key={link.href}
+            href={link.href}
+            className={cn(
+              'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
+              'hover:text-foreground',
+              pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
+            )}>
+            {link.label}
+          </a>
+        ))}
+      </div>
+      <ThemeToggle className="shrink-0" />
     </div>
   )
 }
