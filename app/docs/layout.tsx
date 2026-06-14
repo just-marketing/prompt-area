@@ -18,7 +18,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
         {/* Center — article content */}
         <div className="min-w-0 flex-1 pb-12 lg:max-w-2xl">
-          <div className="mb-6 flex justify-end">
+          <div className="mb-6 hidden justify-end sm:flex">
             <CopyPageButton />
           </div>
           <article className="flex flex-col gap-5">{children}</article>
