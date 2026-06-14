@@ -12,9 +12,51 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/docs/installation` },
 }
 
+// HowTo structured data for the install flow — eligible for rich results and
+// commonly surfaced verbatim in AI answers and voice assistants.
+function howToSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'Install Prompt Area in a React project',
+    description:
+      'Add the Prompt Area React component to a Tailwind + shadcn/ui project from the shadcn registry with a single command. Zero extra dependencies.',
+    totalTime: 'PT2M',
+    tool: [
+      { '@type': 'HowToTool', name: 'shadcn CLI' },
+      { '@type': 'HowToTool', name: 'npx' },
+    ],
+    supply: [{ '@type': 'HowToSupply', name: 'A React project using Tailwind CSS and shadcn/ui' }],
+    step: [
+      {
+        '@type': 'HowToStep',
+        name: 'Prerequisites',
+        text: 'Use a React project with Tailwind CSS and shadcn/ui. If shadcn is not set up yet, run npx shadcn@latest init first.',
+        url: `${SITE_URL}/docs/installation#prerequisites`,
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Install the component',
+        text: 'Run npx shadcn@latest add https://prompt-area.com/r/prompt-area.json to copy the PromptArea component, its types, the usePromptAreaState hook, trigger presets, and segment helpers into your project.',
+        url: `${SITE_URL}/docs/installation#install`,
+      },
+      {
+        '@type': 'HowToStep',
+        name: 'Add companion components',
+        text: 'Optionally install Action Bar, Status Bar, Compact Prompt Area, or Chat Prompt Layout from the same registry to compose a full chat input.',
+        url: `${SITE_URL}/docs/installation#companion-components`,
+      },
+    ],
+  }
+}
+
 export default function InstallationPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema()) }}
+      />
       <h1 className="text-3xl font-bold tracking-tight">Installation</h1>
       <DocsLead>
         Prompt Area installs through the shadcn registry. One command copies the component, its
