@@ -24,7 +24,28 @@ export const docsNavigation: NavSection[] = [
   },
   {
     title: 'Components',
-    items: [{ title: 'Prompt Area', href: '/docs/components/prompt-area' }],
+    items: [
+      { title: 'Prompt Area', href: '/docs/components/prompt-area' },
+      { title: 'Action Bar', href: '/docs/components/action-bar' },
+      { title: 'Status Bar', href: '/docs/components/status-bar' },
+      { title: 'Compact Prompt Area', href: '/docs/components/compact-prompt-area' },
+      { title: 'Chat Prompt Layout', href: '/docs/components/chat-prompt-layout' },
+    ],
+  },
+  {
+    title: 'Examples',
+    items: [
+      { title: 'Overview', href: '/docs/examples' },
+      { title: 'Triggers', href: '/docs/examples/triggers' },
+      { title: 'Formatting', href: '/docs/examples/formatting' },
+      { title: 'Attachments', href: '/docs/examples/attachments' },
+      { title: 'Agent Inputs', href: '/docs/examples/agent-inputs' },
+      { title: 'DX Helpers', href: '/docs/examples/dx-helpers' },
+    ],
+  },
+  {
+    title: 'Tools',
+    items: [{ title: 'Inspector', href: '/docs/inspector' }],
   },
   {
     title: 'API Reference',
@@ -32,10 +53,6 @@ export const docsNavigation: NavSection[] = [
       { title: 'PromptArea Props', href: '/docs/api/prompt-area' },
       { title: 'Hooks & Helpers', href: '/docs/api/hooks' },
     ],
-  },
-  {
-    title: 'Examples',
-    items: [{ title: 'Browse Examples', href: '/#examples' }],
   },
   {
     title: 'More',

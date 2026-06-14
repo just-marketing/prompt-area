@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { DocsLead, DocsP, DocsH2, DocsH3, DocsUl } from '@/components/docs/docs-primitives'
+import { DocsExample } from '@/components/docs/docs-example'
+import { BasicExample, basicCode } from '@/app/examples'
 
 const SITE_URL = 'https://prompt-area.com'
 
@@ -40,6 +42,14 @@ const { bind } = usePromptAreaState()
 
 <PromptArea {...bind} placeholder="Type a message…" autoGrow />`}
       />
+
+      <DocsExample
+        id="live-demo"
+        title="Live demo"
+        description="A plain input with Enter to submit — toggle to the Code tab to see the source."
+        code={basicCode}>
+        <BasicExample />
+      </DocsExample>
 
       <DocsH2 id="segments">Segments</DocsH2>
       <DocsP>
