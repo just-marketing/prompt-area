@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import HomeContent from './home-content'
 
 export const metadata: Metadata = {
-  title: 'Prompt Area — Textarea with Tags, Mentions & Commands for React',
+  title: 'Prompt Area — shadcn Chat Input for React with @Mentions & /Commands',
   description:
-    'An open-source React textarea component with @mentions, /commands, #tags, inline markdown, undo/redo, file attachments, and dark mode. Install via shadcn registry: npx shadcn@latest add.',
+    'The shadcn AI chat input for React: a zero-dependency textarea with @mentions, /commands, #tags, inline markdown, and file attachments. Install from the shadcn registry — a modern react-mentions alternative for LLM chat interfaces.',
   alternates: {
     canonical: 'https://prompt-area.com',
   },

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { COMPARISONS, SITE_URL } from '../vs/comparisons'
+import { ComparisonSection } from '../sections/comparison-section'
 
 export const metadata: Metadata = {
   title: 'Compare Prompt Area vs Tiptap, Lexical, Plate.js & react-mentions',
@@ -50,15 +51,14 @@ export default function ComparePage() {
         ))}
       </div>
 
-      <p className="text-muted-foreground text-sm leading-relaxed">
-        Want the full feature matrix across every library?{' '}
-        <Link
-          href="/#comparison"
-          className="text-foreground font-medium underline underline-offset-4">
-          See the comparison table on the homepage
-        </Link>
-        .
-      </p>
+      <section className="flex flex-col gap-4">
+        <h2 className="text-xl font-semibold">Feature matrix</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          How Prompt Area stacks up against every alternative across the features that matter for a
+          chat or prompt input.
+        </p>
+        <ComparisonSection />
+      </section>
     </div>
   )
 }

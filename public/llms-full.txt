@@ -791,7 +791,7 @@ A showcase composition (not a separately installable block) that replicates an O
 - A single `openMenu` state drives all five dropdowns with one outside-click / Escape handler.
 - Fully theme-aware (light/dark) via CSS variables; no extra dependencies.
 
-See the live demo at https://prompt-area.com/#codex-input
+See the live demo at https://prompt-area.com/docs/examples/codex-style
 
 ## Rotating Placeholder
 
