@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { COMPARISONS } from './vs/comparisons'
 import { POSTS } from './blog/posts'
+import { docsPageOrder } from '@/lib/docs-navigation'
 
 const SITE_URL = 'https://prompt-area.com'
 
@@ -9,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/docs`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
     {
       url: `${SITE_URL}/for-ai-apps`,
       lastModified: now,
@@ -37,5 +39,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }))
 
-  return [...staticPages, ...comparisonPages, ...blogPages]
+  // Skip /docs itself (already in staticPages) to avoid a duplicate entry.
+  const docsPages: MetadataRoute.Sitemap = docsPageOrder
+    .filter((item) => item.href !== '/docs')
+    .map((item) => ({
+      url: `${SITE_URL}${item.href}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }))
+
+  return [...staticPages, ...comparisonPages, ...blogPages, ...docsPages]
 }

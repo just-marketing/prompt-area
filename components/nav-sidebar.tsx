@@ -541,25 +541,34 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
     [isOpen, isDesktop, toggle, close],
   )
 
+  // The /docs section provides its own grouped sidebar, so the homepage
+  // section navigator is suppressed there (and the main column goes full-width).
+  const pathname = usePathname()
+  const isDocs = pathname.startsWith('/docs')
+
   return (
     <SidebarContext.Provider value={ctx}>
-      <SidebarToggle />
+      {!isDocs && <SidebarToggle />}
 
-      <NavSidebar />
+      {!isDocs && <NavSidebar />}
 
       {/* Backdrop — mobile only */}
-      <div
-        className={cn(
-          'fixed inset-0 z-30 bg-black/20 backdrop-blur-sm lg:hidden',
-          'transition-opacity duration-300',
-          isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-        )}
-        onClick={close}
-        aria-hidden
-      />
+      {!isDocs && (
+        <div
+          className={cn(
+            'fixed inset-0 z-30 bg-black/20 backdrop-blur-sm lg:hidden',
+            'transition-opacity duration-300',
+            isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+          )}
+          onClick={close}
+          aria-hidden
+        />
+      )}
 
       {/* Main content */}
-      <main role="main" className="min-h-screen overflow-x-hidden lg:ml-[280px]">
+      <main
+        role="main"
+        className={cn('min-h-screen overflow-x-hidden', !isDocs && 'lg:ml-[280px]')}>
         <SiteHeader />
         {children}
       </main>

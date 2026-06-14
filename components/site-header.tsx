@@ -11,6 +11,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 // the fixed mobile sidebar toggle (which is only shown below `lg`).
 
 const NAV_LINKS = [
+  { href: '/docs', label: 'Docs' },
   { href: '/compare', label: 'Compare' },
   { href: '/blog', label: 'Blog' },
   { href: '/for-ai-apps', label: 'For AI Apps' },
