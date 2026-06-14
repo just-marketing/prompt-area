@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import localFont from 'next/font/local'
 import './globals.css'
 import { SidebarLayout } from '@/components/nav-sidebar'
+import { SiteFooter } from '@/components/site-footer'
 import { Analytics } from '@/components/analytics'
 
 const geistSans = localFont({
@@ -213,7 +214,10 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Suspense>
-          <SidebarLayout>{children}</SidebarLayout>
+          <SidebarLayout>
+            {children}
+            <SiteFooter />
+          </SidebarLayout>
         </Suspense>
         <Analytics />
       </body>

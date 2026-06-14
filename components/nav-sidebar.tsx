@@ -14,15 +14,7 @@ import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import {
-  ArrowUpRight,
-  Bot,
-  ChevronRight,
-  Github,
-  Sparkles,
-  Star,
-  TextCursorInput,
-} from 'lucide-react'
+import { ChevronRight, Github, Star, TextCursorInput } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -330,41 +322,6 @@ function ActiveIndicator({
 }
 
 // ---------------------------------------------------------------------------
-// PageLinks — static page navigation links
-// ---------------------------------------------------------------------------
-
-const PAGE_LINKS = [
-  { href: '/compare', label: 'Compare' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
-] as const
-
-function PageLinksAndTheme() {
-  const pathname = usePathname()
-
-  return (
-    <div className="flex items-start justify-between gap-2 px-1 py-1">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-0.5 gap-y-0.5">
-        {PAGE_LINKS.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            className={cn(
-              'rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
-              'hover:text-foreground',
-              pathname === link.href ? 'text-foreground font-medium' : 'text-muted-foreground',
-            )}>
-            {link.label}
-          </a>
-        ))}
-      </div>
-      <ThemeToggle className="shrink-0" />
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // NavSidebar — the panel
 // ---------------------------------------------------------------------------
 
@@ -475,30 +432,10 @@ function NavSidebar() {
           <span className="flex-1">GitHub Repo</span>
           <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
         </a>
-        <a
-          href="https://github.com/just-marketing/agency-skills"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Claude Code skills for marketing agencies — a sibling open-source project by Juma"
-          className={cn(
-            'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-            'text-muted-foreground hover:text-foreground',
-          )}>
-          <Sparkles className="size-4 shrink-0" />
-          <span className="flex-1">Agency Skills</span>
-          <ArrowUpRight className="size-3.5 opacity-60 transition-opacity group-hover:opacity-100" />
-        </a>
-        <Link
-          href="/for-ai-apps"
-          title="The React chat input built for AI and LLM apps"
-          className={cn(
-            'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-            'text-muted-foreground hover:text-foreground',
-          )}>
-          <Bot className="size-4 shrink-0" />
-          <span className="flex-1">For AI Apps</span>
-        </Link>
-        <PageLinksAndTheme />
+        <div className="flex items-center justify-between px-2 pt-1">
+          <span className="text-muted-foreground text-xs">Theme</span>
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   )

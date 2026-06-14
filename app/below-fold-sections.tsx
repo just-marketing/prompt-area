@@ -472,46 +472,6 @@ export default function BelowFoldSections() {
         </p>
         <ComparisonSection />
       </div>
-
-      {/* Footer */}
-      <footer className="border-border text-muted-foreground border-t pt-6 text-center text-xs">
-        <div className="flex items-center justify-center gap-3">
-          <a
-            href="/about"
-            className="hover:text-foreground underline underline-offset-4 transition-colors">
-            About
-          </a>
-          <span aria-hidden="true">&middot;</span>
-          <a
-            href="/contact"
-            className="hover:text-foreground underline underline-offset-4 transition-colors">
-            Contact
-          </a>
-          <span aria-hidden="true">&middot;</span>
-          <a
-            href="/llms.txt"
-            className="hover:text-foreground underline underline-offset-4 transition-colors">
-            llms.txt
-          </a>
-          <span aria-hidden="true">&middot;</span>
-          <a
-            href="/llms-full.txt"
-            className="hover:text-foreground underline underline-offset-4 transition-colors">
-            llms-full.txt
-          </a>
-        </div>
-        <p className="mt-3">
-          A sibling open-source project by Juma:{' '}
-          <a
-            href="https://github.com/just-marketing/agency-skills"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground underline underline-offset-4 transition-colors">
-            Agency Skills
-          </a>{' '}
-          &mdash; Claude Code skills for marketing agencies.
-        </p>
-      </footer>
     </>
   )
 }
