@@ -14,9 +14,9 @@ import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight, Github, Star, TextCursorInput } from 'lucide-react'
+import { ChevronRight, TextCursorInput } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { SiteHeader } from '@/components/site-header'
 
 // ---------------------------------------------------------------------------
 // Nav config
@@ -418,25 +418,6 @@ function NavSidebar() {
           ),
         )}
       </nav>
-
-      <div className="border-sidebar-border flex flex-col gap-2 border-t px-4 py-3">
-        <a
-          href="https://github.com/just-marketing/prompt-area"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            'group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-            'bg-accent/50 text-foreground hover:bg-accent',
-          )}>
-          <Github className="size-4 shrink-0" />
-          <span className="flex-1">GitHub Repo</span>
-          <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
-        </a>
-        <div className="flex items-center justify-between px-2 pt-1">
-          <span className="text-muted-foreground text-xs">Theme</span>
-          <ThemeToggle />
-        </div>
-      </div>
     </aside>
   )
 }
@@ -579,6 +560,7 @@ export function SidebarLayout({ children }: { children: ReactNode }) {
 
       {/* Main content */}
       <main role="main" className="min-h-screen overflow-x-hidden lg:ml-[280px]">
+        <SiteHeader />
         {children}
       </main>
     </SidebarContext.Provider>
