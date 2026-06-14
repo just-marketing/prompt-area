@@ -41,7 +41,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest-axe": "^3.5.9",
     "@types/node": "^25.9.2",
-    "@types/react": "19.2.16",
+    "@types/react": "19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "@vitest/coverage-v8": "^4.1.8",
@@ -61,7 +61,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.16",
+      "@types/react": "19.2.17",
       "undici": ">=7.24.0 <8",
       "flatted": ">=3.4.2",
       "hono": ">=4.12.15",
