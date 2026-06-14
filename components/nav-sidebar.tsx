@@ -14,7 +14,15 @@ import { useActiveSection } from '@/hooks/use-active-section'
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowUpRight, ChevronRight, Github, Sparkles, Star, TextCursorInput } from 'lucide-react'
+import {
+  ArrowUpRight,
+  Bot,
+  ChevronRight,
+  Github,
+  Sparkles,
+  Star,
+  TextCursorInput,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -326,6 +334,8 @@ function ActiveIndicator({
 // ---------------------------------------------------------------------------
 
 const PAGE_LINKS = [
+  { href: '/compare', label: 'Compare' },
+  { href: '/blog', label: 'Blog' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ] as const
@@ -476,6 +486,16 @@ function NavSidebar() {
           <span className="flex-1">Agency Skills</span>
           <ArrowUpRight className="size-3.5 opacity-60 transition-opacity group-hover:opacity-100" />
         </a>
+        <Link
+          href="/for-ai-apps"
+          title="The React chat input built for AI and LLM apps"
+          className={cn(
+            'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+            'text-muted-foreground hover:text-foreground',
+          )}>
+          <Bot className="size-4 shrink-0" />
+          <span className="flex-1">For AI Apps</span>
+        </Link>
         <PageLinksAndTheme />
       </div>
     </aside>
