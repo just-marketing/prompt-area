@@ -12,7 +12,7 @@ export type Block =
   | { type: 'p'; text: string }
   | { type: 'h2'; text: string }
   | { type: 'h3'; text: string }
-  | { type: 'code'; code: string }
+  | { type: 'code'; code: string; lang?: 'tsx' | 'bash' }
   | { type: 'ul'; items: string[] }
   | { type: 'ol'; items: string[] }
   | { type: 'callout'; text: string }
@@ -84,7 +84,7 @@ export const POSTS: Post[] = [
         type: 'p',
         text: 'Prompt Area installs through the shadcn registry. One command copies the component, its types, helpers, and the segment engine into your project:',
       },
-      { type: 'code', code: INSTALL },
+      { type: 'code', code: INSTALL, lang: 'bash' },
       {
         type: 'p',
         text: 'Because it is a registry component, the source lives in your repo. There are no extra runtime dependencies beyond React.',
@@ -269,7 +269,7 @@ await runChat({
         text: 'react-mentions gives you a markup string you parse afterward. Prompt Area gives you typed segments. Instead of regexing "@[Name](id)" out of a string, you read chips directly. That single change removes a whole class of brittle parsing code.',
       },
       { type: 'h2', text: 'Step 1 — Install Prompt Area' },
-      { type: 'code', code: INSTALL },
+      { type: 'code', code: INSTALL, lang: 'bash' },
       { type: 'h2', text: 'Step 2 — Replace MentionsInput' },
       {
         type: 'p',
@@ -399,7 +399,7 @@ const mentioned = getChipsByTrigger(bind.value, '@').map((c) => c.value)`,
         text: 'This tutorial adds a / command menu to a React input using Prompt Area. You get start-of-line detection (so a / mid-sentence does not trigger the menu) and structured output, with zero extra dependencies.',
       },
       { type: 'h2', text: 'Step 1 — Install' },
-      { type: 'code', code: INSTALL },
+      { type: 'code', code: INSTALL, lang: 'bash' },
       { type: 'h2', text: 'Step 2 — Define your commands' },
       {
         type: 'p',

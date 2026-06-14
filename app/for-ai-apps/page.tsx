@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowUpRight, Bot, Boxes, Code2, Plug, ShieldCheck, Zap } from 'lucide-react'
+import { CodeBlock } from '@/components/code-block'
 
 const SITE_URL = 'https://prompt-area.com'
 const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
@@ -155,8 +156,8 @@ export default function ForAiAppsPage() {
           Install the component, read the message and any structured chips, and send them to your
           provider. The input does not care which model or framework you use.
         </p>
-        <pre className="bg-muted/50 overflow-x-auto rounded-lg border p-4 text-xs leading-relaxed">
-          <code className="font-mono">{`const { bind, plainText } = usePromptAreaState()
+        <CodeBlock
+          code={`const { bind, plainText } = usePromptAreaState()
 const mentions = getChipsByTrigger(bind.value, '@').map((c) => c.value)
 const command = getChipsByTrigger(bind.value, '/')[0]?.value
 
@@ -164,8 +165,8 @@ await streamChat({
   messages: [{ role: 'user', content: plainText }],
   context: mentions,
   command,
-})`}</code>
-        </pre>
+})`}
+        />
         <code className="bg-background text-foreground overflow-x-auto rounded-md border px-3 py-2 font-mono text-xs">
           {INSTALL_CMD}
         </code>

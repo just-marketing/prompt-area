@@ -1,4 +1,5 @@
 import type { Block } from './posts'
+import { CodeBlock } from '@/components/code-block'
 
 // Renders the typed content blocks of a blog post. Server component — no
 // interactivity, just clean semantic HTML for readers and crawlers.
@@ -50,13 +51,7 @@ export function PostContent({ blocks }: { blocks: Block[] }) {
               </ol>
             )
           case 'code':
-            return (
-              <pre
-                key={i}
-                className="bg-muted/50 overflow-x-auto rounded-lg border p-4 text-xs leading-relaxed">
-                <code className="font-mono">{block.code}</code>
-              </pre>
-            )
+            return <CodeBlock key={i} code={block.code} lang={block.lang} />
           case 'callout':
             return (
               <p
