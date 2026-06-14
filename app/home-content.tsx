@@ -1,68 +1,178 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { WhatIsPromptArea } from './sections/what-is-prompt-area'
+import Link from 'next/link'
+import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { FeaturesGrid } from './sections/features-grid'
 
 const DemoSection = dynamic(() =>
   import('./sections/demo-section').then((m) => ({ default: m.DemoSection })),
 )
 
-const BelowFoldSections = dynamic(() => import('./below-fold-sections'))
+const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
+
+const COMPONENTS = [
+  { href: '/docs/components/prompt-area', title: 'Prompt Area', desc: 'The core rich-text input.' },
+  {
+    href: '/docs/components/action-bar',
+    title: 'Action Bar',
+    desc: 'Toolbar with attach, mic, send.',
+  },
+  { href: '/docs/components/status-bar', title: 'Status Bar', desc: 'Contextual info bar.' },
+  {
+    href: '/docs/components/compact-prompt-area',
+    title: 'Compact Prompt Area',
+    desc: 'Pill-shaped expanding input.',
+  },
+  {
+    href: '/docs/components/chat-prompt-layout',
+    title: 'Chat Prompt Layout',
+    desc: 'Full-height chat layout.',
+  },
+  { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
+]
+
+function InstallCommand() {
+  const [copied, setCopied] = useState(false)
+  const copy = useCallback(() => {
+    navigator.clipboard?.writeText(INSTALL_CMD).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }, [])
+
+  return (
+    <button
+      onClick={copy}
+      className="group bg-muted/50 hover:bg-muted flex w-full max-w-xl items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
+      <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
+      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
+        {INSTALL_CMD}
+      </code>
+      {copied ? (
+        <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
+      ) : (
+        <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
+      )}
+    </button>
+  )
+}
 
 export default function HomeContent() {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-16">
+    <div className="flex flex-col">
       {/* Hero */}
-      <div id="hero" className="flex scroll-mt-16 flex-col gap-4 border-b pb-8">
-        <h1 className="text-4xl font-bold tracking-tight">Prompt Area</h1>
-        <p className="text-muted-foreground text-lg">
-          A production-grade rich text input for AI chat interfaces
+      <section className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 pt-16 pb-12 text-center sm:pt-24">
+        <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+          shadcn registry · zero dependencies
+        </span>
+        <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
+          The shadcn chat input for React
+        </h1>
+        <p className="text-muted-foreground max-w-2xl text-lg text-balance">
+          A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags, inline
+          markdown, and file attachments in one contentEditable component.
         </p>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          A contentEditable textarea with @mentions, /commands, #tags, inline markdown, file
-          attachments, undo/redo, and dark mode. Built as a{' '}
-          <a
-            href="https://ui.shadcn.com/docs/registry"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-foreground font-medium underline underline-offset-4">
-            shadcn registry
-          </a>{' '}
-          component &mdash; install with one command, zero extra dependencies.
-        </p>
-        <div className="flex items-center gap-3 pt-2">
-          <a
-            href="#installation"
-            onClick={(e) => {
-              e.preventDefault()
-              const el = document.getElementById('installation')
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                history.replaceState(null, '', '#installation')
-              }
-            }}
-            className="bg-foreground text-background hover:bg-foreground/90 rounded-md px-4 py-2 text-sm font-medium transition-colors">
-            Quick Start
-          </a>
+        <InstallCommand />
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+          <Link
+            href="/docs"
+            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
+            Get started
+            <ArrowRight className="size-4" />
+          </Link>
           <a
             href="https://github.com/just-marketing/prompt-area"
             target="_blank"
             rel="noopener noreferrer"
-            className="border-input hover:bg-accent rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-            GitHub
+            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+            Star on GitHub
+            <ArrowUpRight className="size-3.5" />
           </a>
         </div>
-      </div>
+      </section>
 
-      {/* What is Prompt Area? */}
-      <WhatIsPromptArea />
-
-      {/* Demo */}
-      <div id="demo" className="scroll-mt-16">
+      {/* Live demo */}
+      <section id="demo" className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-16">
         <DemoSection />
-      </div>
+      </section>
 
-      <BelowFoldSections />
+      {/* Features */}
+      <section className="bg-muted/20 border-y">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-16">
+          <div className="flex flex-col gap-2 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight">Everything in one input</h2>
+            <p className="text-muted-foreground">
+              One component replaces five libraries — no ProseMirror, Slate, or Lexical.
+            </p>
+          </div>
+          <FeaturesGrid />
+        </div>
+      </section>
+
+      {/* Components */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-16">
+        <div className="mb-8 flex flex-col gap-2 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight">Components &amp; layouts</h2>
+          <p className="text-muted-foreground">
+            Compose the input with companions to build full chat experiences.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {COMPONENTS.map((c) => (
+            <Link
+              key={c.href}
+              href={c.href}
+              className="group hover:bg-accent/40 flex items-start justify-between gap-3 rounded-lg border p-5 transition-colors">
+              <span className="flex flex-col gap-1">
+                <span className="text-sm font-semibold">{c.title}</span>
+                <span className="text-muted-foreground text-sm leading-relaxed">{c.desc}</span>
+              </span>
+              <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Comparison teaser */}
+      <section className="bg-muted/20 border-y">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight">A modern alternative</h2>
+          <p className="text-muted-foreground max-w-2xl">
+            Lighter than Tiptap, Lexical, or Plate for chat inputs — and a drop-in upgrade from
+            react-mentions. See the honest, side-by-side breakdowns.
+          </p>
+          <Link
+            href="/compare"
+            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+            Compare alternatives
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-20 text-center">
+        <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
+        <p className="text-muted-foreground max-w-xl">
+          Install from the shadcn registry and own the source. Zero extra dependencies.
+        </p>
+        <InstallCommand />
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/docs"
+            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
+            Read the docs
+            <ArrowRight className="size-4" />
+          </Link>
+          <Link
+            href="/docs/quick-start"
+            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+            Quick start
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }

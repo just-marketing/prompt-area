@@ -1,0 +1,635 @@
+// ===========================================================================
+// Prompt Area — Product Hunt slide generator (REFERENCE COPY)
+// ---------------------------------------------------------------------------
+// Renders the gallery slides as REAL components on branded 1280x720 canvases.
+// Removed from the app after export to keep the repo clean.
+//
+// To regenerate the launch images:
+//   1. Restore this file to:  app/launch-slides/page.tsx
+//   2. Recreate the dev-only writer route  app/api/save-slide/route.ts  that
+//      accepts { name, dataUrl } and writes campaign/producthunt/assets/<name>.png
+//   3. pnpm dev  ->  open http://localhost:3000/launch-slides  (wait ~3-4s so
+//      markdown decoration settles AND the .dark class is stripped on mount)
+//   4. In the browser console:
+//        const h=await import("https://esm.sh/html-to-image@1.11.13");
+//        document.querySelectorAll(".prompt-area-md-marker").forEach(m=>{m.style.fontSize="0";m.style.opacity="0"});
+//        document.querySelectorAll("[contenteditable] .font-bold").forEach(b=>b.style.fontWeight="700");
+//        document.querySelectorAll("[contenteditable] .italic").forEach(i=>i.style.fontStyle="italic");
+//        for (const el of document.querySelectorAll("[data-slide]")) {
+//          if (el.id==="thumb"){el.style.cssText+=";position:fixed;left:0;top:0;margin:0;z-index:100000"}
+//          const d=await h.toPng(el,{width:el.offsetWidth,height:el.offsetHeight,pixelRatio:2,cacheBust:true});
+//          await fetch("/api/save-slide",{method:"POST",headers:{"content-type":"application/json"},
+//            body:JSON.stringify({name:el.id,dataUrl:d})});
+//        }
+//   5. Rebuild video/gif:  see commands in README.md
+//
+// Notes:
+//  - Logo mark: lucide TextCursorInput (https://lucide.dev/icons/text-cursor-input)
+//  - The page strips html.dark on mount so Tailwind `dark:` chip variants only
+//    apply inside the slide-8 `.dark` wrapper (true light-vs-dark contrast).
+// ===========================================================================
+
+'use client'
+
+import { useEffect, useState } from 'react'
+import {
+  ArrowUp,
+  Plus,
+  AtSign,
+  SquareSlash,
+  Hash,
+  GitBranch,
+  Cloud,
+  ChevronDown,
+  Sparkles,
+  FileText,
+  Image as ImageIcon,
+  Check,
+  Globe,
+  Map,
+} from 'lucide-react'
+import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
+import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
+import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
+import type {
+  Segment,
+  PromptAreaFile,
+  TriggerConfig,
+} from '@/registry/new-york/blocks/prompt-area/types'
+
+const TRIGGERS: TriggerConfig[] = [
+  {
+    char: '@',
+    position: 'any',
+    mode: 'dropdown',
+    chipClassName: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    onSearch: () => [],
+  },
+  {
+    char: '/',
+    position: 'start',
+    mode: 'dropdown',
+    chipStyle: 'inline',
+    chipClassName: 'text-violet-700 dark:text-violet-400',
+    onSearch: () => [],
+  },
+  {
+    char: '#',
+    position: 'any',
+    mode: 'callback',
+    resolveOnSpace: true,
+    chipClassName: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+  },
+]
+
+/* ---------------------------------- data --------------------------------- */
+
+const HERO_SEGMENTS: Segment[] = [
+  { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
+  { type: 'text', text: ' the campaign brief from ' },
+  { type: 'chip', trigger: '@', value: 'strategist', displayText: 'Strategist' },
+  { type: 'text', text: ' and ' },
+  { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
+  { type: 'text', text: '. Tag anything marked ' },
+  { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+  {
+    type: 'text',
+    text: ' and format the output as:\n- **Key messages** for the target audience\n- *Action items* assigned to each agent\n- Open questions for follow-up',
+  },
+]
+
+const MARKDOWN_SEGMENTS: Segment[] = [
+  {
+    type: 'text',
+    text: 'Rewrite this as **launch copy**, keep it *punchy*, and return:\n- A ***bold headline***\n- Three bullet benefits\n- One call to action',
+  },
+]
+
+const HERO_FILES: PromptAreaFile[] = [
+  { id: 'f1', name: 'Q4-2025-financials.pdf', size: 3_300_000, type: 'application/pdf' },
+]
+
+const ATTACH_FILES: PromptAreaFile[] = [
+  { id: 'a1', name: 'brand-guidelines.pdf', size: 2_458_000, type: 'application/pdf' },
+  { id: 'a2', name: 'hero-shot.png', size: 980_000, type: 'image/png' },
+  { id: 'a3', name: 'audience-export.csv', size: 847_200, type: 'text/csv' },
+]
+
+/* -------------------------------- primitives ------------------------------ */
+
+function Slide({
+  id,
+  children,
+  dark = false,
+}: {
+  id: string
+  children: React.ReactNode
+  dark?: boolean
+}) {
+  return (
+    <section
+      id={id}
+      data-slide
+      className={dark ? 'dark' : ''}
+      style={{
+        width: 1280,
+        height: 720,
+        overflow: 'hidden',
+        position: 'relative',
+        background: dark
+          ? 'radial-gradient(120% 120% at 0% 0%, #1b1b1f 0%, #0a0a0b 60%)'
+          : 'radial-gradient(120% 120% at 0% 0%, #ffffff 0%, #f4f4f6 100%)',
+        color: dark ? '#fafafa' : '#0a0a0b',
+        marginBottom: 48,
+        fontFeatureSettings: '"cv11", "ss01"',
+      }}>
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: dark
+            ? 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)'
+            : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.035) 1px, transparent 0)',
+          backgroundSize: '26px 26px',
+          maskImage: 'radial-gradient(120% 90% at 50% 0%, black 30%, transparent 90%)',
+        }}
+      />
+      <div style={{ position: 'relative', height: '100%', padding: 72 }}>{children}</div>
+    </section>
+  )
+}
+
+function Wordmark({ dark = false }: { dark?: boolean }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className="flex size-7 items-center justify-center rounded-md"
+        style={{ background: dark ? '#fafafa' : '#0a0a0b' }}>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={dark ? '#0a0a0b' : '#fafafa'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6" /><path d="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7" /><path d="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1" /><path d="M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1" /><path d="M9 6v12" />
+        </svg>
+      </div>
+      <span className="text-[19px] font-bold tracking-tight">Prompt Area</span>
+    </div>
+  )
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12.5px] font-semibold"
+      style={{ background: 'rgba(99,102,241,0.12)', color: '#4f46e5' }}>
+      <Sparkles className="size-3.5" />
+      {children}
+    </div>
+  )
+}
+
+function H({ children }: { children: React.ReactNode }) {
+  return (
+    <h1 className="text-[46px] leading-[1.05] font-bold tracking-[-0.02em]">{children}</h1>
+  )
+}
+
+function Sub({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <p className="max-w-[560px] text-[19px] leading-snug" style={{ color: dark ? '#a1a1aa' : '#52525b' }}>
+      {children}
+    </p>
+  )
+}
+
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`bg-background rounded-2xl border ${className}`}
+      style={{ boxShadow: '0 30px 60px -25px rgba(0,0,0,0.28), 0 8px 20px -12px rgba(0,0,0,0.18)' }}>
+      {children}
+    </div>
+  )
+}
+
+/* A non-interactive prompt card matching the product's composer look. */
+function ComposerCard({
+  segments,
+  files,
+  markdown,
+  footer,
+}: {
+  segments: Segment[]
+  files?: PromptAreaFile[]
+  markdown?: boolean
+  footer?: 'status' | 'none'
+}) {
+  const [segs, setSegs] = useState<Segment[]>(segments)
+  return (
+    <Card>
+      <div className="p-5 pb-2.5">
+        <PromptArea
+          value={segs}
+          onChange={setSegs}
+          triggers={TRIGGERS}
+          files={files}
+          filePosition="above"
+          markdown={markdown}
+          minHeight={92}
+          placeholder=""
+        />
+        <ActionBar
+          className="pt-1.5"
+          left={
+            <div className="text-muted-foreground flex items-center gap-2.5">
+              <Plus className="size-5" />
+              <AtSign className="size-[18px]" />
+              <SquareSlash className="size-[18px]" />
+              <Hash className="size-[18px]" />
+            </div>
+          }
+          right={
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground inline-flex items-center gap-1 text-xs font-medium">
+                <Sparkles className="size-3.5" /> Opus 4.8 <ChevronDown className="size-3" />
+              </span>
+              <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full">
+                <ArrowUp className="size-4" />
+              </span>
+            </div>
+          }
+        />
+      </div>
+      {footer === 'status' && (
+        <StatusBar
+          className="text-muted-foreground rounded-b-2xl border-t px-5 py-2.5 text-xs"
+          left={
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1"><GitBranch className="size-3" /> main</span>
+              <span className="inline-flex items-center gap-1"><Map className="size-3" /> Plan</span>
+              <span className="inline-flex items-center gap-1"><Globe className="size-3" /> WebSearch</span>
+            </div>
+          }
+          right={<span className="inline-flex items-center gap-1"><Cloud className="size-3" /> Default</span>}
+        />
+      )}
+    </Card>
+  )
+}
+
+function Chip({ trigger, label, color }: { trigger: string; label: string; color: string }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-[32px] leading-none font-semibold"
+      style={{ background: `${color}1f`, color }}>
+      {trigger}
+      {label}
+    </span>
+  )
+}
+
+/* --------------------------------- slides -------------------------------- */
+
+const LIGHT_TOKENS = `
+.pa-slides-root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  color-scheme: light;
+}
+.pa-slides-root .dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 20%);
+  --ring: oklch(0.556 0 0);
+  color-scheme: dark;
+}
+nextjs-portal,
+[data-next-badge-root],
+[data-nextjs-toast],
+#__next-build-watcher { display: none !important; }
+`
+
+export default function LaunchSlidesPage() {
+  const [ready, setReady] = useState(true)
+  useEffect(() => {
+    try { localStorage.setItem('theme', 'light') } catch {}
+    document.documentElement.classList.remove('dark')
+    setReady(true)
+  }, [])
+  if (!ready) return null
+
+  return (
+    <div
+      className="pa-slides-root"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        overflow: 'auto',
+        background: '#0e0e10',
+        paddingTop: 1,
+      }}>
+      <style>{LIGHT_TOKENS}</style>
+      <div style={{ width: 1270, margin: '0 auto' }}>
+      {/* 1 — HERO */}
+      <Slide id="slide-1">
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between">
+            <Wordmark />
+            <span className="text-muted-foreground text-[13px] font-medium">prompt-area.com</span>
+          </div>
+          <div className="mt-9 flex flex-col gap-4">
+            <Eyebrow>Open source · shadcn registry · 0 dependencies</Eyebrow>
+            <H>
+              One textarea for AI chat.
+              <br />
+              Mentions, commands, markdown, files.
+            </H>
+          </div>
+          <div className="mt-7">
+            <ComposerCard segments={HERO_SEGMENTS} files={HERO_FILES} markdown footer="status" />
+          </div>
+        </div>
+      </Slide>
+
+      {/* 2 — TRIGGERS */}
+      <Slide id="slide-2">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Type a character. Get a chip.</H>
+            <Sub>
+              <code className="rounded bg-black/5 px-1.5 py-0.5 text-[16px] font-semibold">@</code> mentions,{' '}
+              <code className="rounded bg-black/5 px-1.5 py-0.5 text-[16px] font-semibold">/</code> commands,{' '}
+              <code className="rounded bg-black/5 px-1.5 py-0.5 text-[16px] font-semibold">#</code> tags — or any
+              trigger you define. Resolved chips become immutable, typed segments.
+            </Sub>
+          </div>
+          <div className="mt-7 grid grid-cols-[1.3fr_1fr] items-start gap-5">
+            <ComposerCard
+              segments={[
+                { type: 'chip', trigger: '/', value: 'review', displayText: 'review' },
+                { type: 'text', text: ' the PR from ' },
+                { type: 'chip', trigger: '@', value: 'alex', displayText: 'Alex' },
+                { type: 'text', text: ' and label it ' },
+                { type: 'chip', trigger: '#', value: 'urgent', displayText: 'urgent' },
+              ]}
+            />
+            <Card className="flex flex-col gap-1 p-2">
+              <div className="text-muted-foreground px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wide uppercase">
+                @ mention
+              </div>
+              {[
+                ['Strategist', 'Campaign planning'],
+                ['Copywriter', 'Ad copy & content'],
+                ['Analyst', 'Performance insights'],
+              ].map(([n, d], i) => (
+                <div
+                  key={n}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 ${i === 0 ? 'bg-accent' : ''}`}>
+                  <span className="bg-primary/10 text-primary flex size-7 items-center justify-center rounded-full text-xs font-semibold">
+                    {n[0]}
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-[14px] font-medium">{n}</span>
+                    <span className="text-muted-foreground text-[12px]">{d}</span>
+                  </span>
+                </div>
+              ))}
+            </Card>
+          </div>
+        </div>
+      </Slide>
+
+      {/* 3 — MARKDOWN */}
+      <Slide id="slide-3">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Inline markdown, live as you type.</H>
+            <Sub>
+              <b>**bold**</b>, <i>*italic*</i> and lists render in place — no preview pane, no editor
+              framework. Submit clean, typed segments to your API.
+            </Sub>
+          </div>
+          <div className="mt-8">
+            <ComposerCard segments={MARKDOWN_SEGMENTS} markdown />
+          </div>
+        </div>
+      </Slide>
+
+      {/* 4 — ATTACHMENTS */}
+      <Slide id="slide-4">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Files & images, built in.</H>
+            <Sub>
+              Attach PDFs, CSVs, and images right in the composer. Collapsible chips, removable,
+              click-to-open — no extra upload widget required.
+            </Sub>
+          </div>
+          <div className="mt-8">
+            <ComposerCard
+              segments={[{ type: 'text', text: 'Use the brand guidelines and audience data to draft the launch post.' }]}
+              files={ATTACH_FILES}
+            />
+          </div>
+          <div className="text-muted-foreground mt-5 flex items-center gap-6 text-[14px]">
+            <span className="inline-flex items-center gap-2"><FileText className="size-4" /> PDF · CSV · JSON</span>
+            <span className="inline-flex items-center gap-2"><ImageIcon className="size-4" /> Image previews</span>
+            <span className="inline-flex items-center gap-2"><Check className="size-4" /> Removable & clickable</span>
+          </div>
+        </div>
+      </Slide>
+
+      {/* 5 — DROP-IN REPLICAS */}
+      <Slide id="slide-5">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Recreate the inputs you already love.</H>
+            <Sub>
+              The same primitives behind Claude Code, Codex, ChatGPT and Slack composers — yours to
+              shape with Action Bar and Status Bar companions.
+            </Sub>
+          </div>
+          <div className="mt-8 flex flex-col gap-5">
+            <ComposerCard
+              segments={[{ type: 'text', text: "Let's replicate the spacing and general UI/UX of this input." }]}
+              footer="status"
+            />
+            <ComposerCard
+              segments={[
+                { type: 'chip', trigger: '@', value: 'repo', displayText: 'repo' },
+                { type: 'text', text: ' explain how the auth middleware works' },
+              ]}
+            />
+          </div>
+        </div>
+      </Slide>
+
+      {/* 6 — INSTALL / ZERO DEPS */}
+      <Slide id="slide-6" dark>
+        <div className="flex h-full flex-col">
+          <Wordmark dark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Install in one command. Own the code.</H>
+            <Sub dark>
+              Ships as source through the shadcn registry — it lives in your repo, fully editable,
+              with zero runtime dependencies added to your bundle.
+            </Sub>
+          </div>
+          <div
+            className="mt-8 flex items-center gap-3 rounded-xl border px-5 py-4 font-mono text-[17px]"
+            style={{ background: '#141417', borderColor: '#27272a' }}>
+            <span style={{ color: '#6ee7b7' }}>$</span>
+            <span style={{ color: '#e4e4e7' }}>
+              npx shadcn@latest add{' '}
+              <span style={{ color: '#a5b4fc' }}>https://prompt-area.com/r/prompt-area.json</span>
+            </span>
+          </div>
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            {[
+              ['0', 'extra dependencies'],
+              ['1', 'component, fully yours'],
+              ['MIT', 'open source license'],
+            ].map(([big, small]) => (
+              <div
+                key={small}
+                className="rounded-xl border px-5 py-5"
+                style={{ background: '#141417', borderColor: '#27272a' }}>
+                <div className="text-[34px] font-bold tracking-tight">{big}</div>
+                <div style={{ color: '#a1a1aa' }} className="text-[14px]">{small}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Slide>
+
+      {/* 7 — WHY / COMPARISON */}
+      <Slide id="slide-7">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>One component instead of five.</H>
+            <Sub>
+              Stop stitching together a mention library, a command palette, a tag input, a markdown
+              editor and an upload widget. Prompt Area is all of it, with a single typed API.
+            </Sub>
+          </div>
+          <div className="mt-8 grid grid-cols-2 gap-5">
+            <Card className="p-6">
+              <div className="text-muted-foreground text-[13px] font-semibold tracking-wide uppercase">
+                The usual way
+              </div>
+              <div className="mt-4 flex flex-col gap-2.5 text-[15px]">
+                {['react-mentions', 'cmdk palette', 'tag input lib', 'TipTap / Lexical', 'upload widget'].map((x) => (
+                  <div key={x} className="flex items-center gap-2.5" style={{ color: '#71717a' }}>
+                    <span className="flex size-5 items-center justify-center rounded-full" style={{ background: '#fee2e2', color: '#dc2626' }}>×</span>
+                    {x}
+                  </div>
+                ))}
+                <div className="text-muted-foreground mt-1 text-[13px]">5+ dependencies · 5 APIs</div>
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="text-primary text-[13px] font-semibold tracking-wide uppercase">Prompt Area</div>
+              <div className="mt-4 flex flex-col gap-2.5 text-[15px]">
+                {['@ mentions', '/ commands', '# tags', 'inline markdown', 'files & images', 'undo / redo · IME · a11y'].map((x) => (
+                  <div key={x} className="flex items-center gap-2.5">
+                    <span className="bg-primary/10 text-primary flex size-5 items-center justify-center rounded-full"><Check className="size-3" /></span>
+                    {x}
+                  </div>
+                ))}
+                <div className="text-primary mt-1 text-[13px] font-medium">0 dependencies · 1 API</div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </Slide>
+
+      {/* 8 — DARK MODE / A11Y */}
+      <Slide id="slide-8">
+        <div className="flex h-full flex-col">
+          <Wordmark />
+          <div className="mt-7 flex flex-col gap-3">
+            <H>Dark mode & accessibility, by default.</H>
+            <Sub>
+              Theme-aware via your shadcn tokens, full keyboard control, ARIA roles, and proper IME
+              (CJK) composition — production-grade out of the box.
+            </Sub>
+          </div>
+          <div className="mt-8 grid grid-cols-2 gap-5">
+            <div>
+              <div className="text-muted-foreground mb-2 text-[13px] font-medium">Light</div>
+              <ComposerCard segments={[{ type: 'chip', trigger: '@', value: 'team', displayText: 'team' }, { type: 'text', text: ' ship it 🚀' }]} />
+            </div>
+            <div className="dark">
+              <div className="mb-2 text-[13px] font-medium" style={{ color: '#a1a1aa' }}>Dark</div>
+              <ComposerCard segments={[{ type: 'chip', trigger: '@', value: 'team', displayText: 'team' }, { type: 'text', text: ' ship it 🚀' }]} />
+            </div>
+          </div>
+        </div>
+      </Slide>
+
+      {/* THUMBNAIL — square 600x600 */}
+      <section
+        id="thumb"
+        data-slide
+        style={{
+          width: 600,
+          height: 600,
+          margin: '0 auto 48px',
+          background: 'radial-gradient(120% 120% at 30% 10%, #ffffff 0%, #eef0f4 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 28,
+        }}>
+        <div className="flex size-[120px] items-center justify-center rounded-[28px]" style={{ background: '#0a0a0b' }}>
+          <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#fafafa" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6" /><path d="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7" /><path d="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1" /><path d="M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1" /><path d="M9 6v12" />
+          </svg>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-[34px] font-bold tracking-tight" style={{ color: '#0a0a0b' }}>Prompt Area</div>
+          <div className="flex items-center gap-3 text-[17px] font-medium">
+            <Chip trigger="@" label="" color="#2563eb" />
+            <Chip trigger="/" label="" color="#7c3aed" />
+            <Chip trigger="#" label="" color="#059669" />
+          </div>
+        </div>
+      </section>
+      </div>
+    </div>
+  )
+}

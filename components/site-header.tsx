@@ -24,7 +24,7 @@ export function SiteHeader() {
 
   return (
     <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 border-b backdrop-blur">
-      <div className="flex h-14 items-center justify-between gap-4 px-4 pl-16 lg:px-6">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 lg:px-6">
         <nav aria-label="Site" className="flex items-center gap-0.5 overflow-x-auto">
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`)

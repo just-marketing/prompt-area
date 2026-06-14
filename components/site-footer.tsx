@@ -11,8 +11,8 @@ const LINK_GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Product',
     links: [
+      { href: '/docs', label: 'Docs' },
       { href: '/#demo', label: 'Demo' },
-      { href: '/#examples', label: 'Examples' },
       { href: '/compare', label: 'Comparison' },
       { href: '/for-ai-apps', label: 'For AI Apps' },
     ],
@@ -20,10 +20,10 @@ const LINK_GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Resources',
     links: [
+      { href: '/docs/installation', label: 'Installation' },
+      { href: '/docs/examples', label: 'Examples' },
       { href: '/blog', label: 'Blog' },
-      { href: '/#installation', label: 'Installation' },
       { href: '/llms.txt', label: 'llms.txt' },
-      { href: '/llms-full.txt', label: 'llms-full.txt' },
     ],
   },
   {

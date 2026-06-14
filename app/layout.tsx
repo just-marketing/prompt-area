@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import localFont from 'next/font/local'
 import './globals.css'
-import { SidebarLayout } from '@/components/nav-sidebar'
+import { AppShell } from '@/components/app-shell'
 import { SiteFooter } from '@/components/site-footer'
 import { Analytics } from '@/components/analytics'
 
@@ -214,10 +214,10 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Suspense>
-          <SidebarLayout>
+          <AppShell>
             {children}
             <SiteFooter />
-          </SidebarLayout>
+          </AppShell>
         </Suspense>
         <Analytics />
       </body>
