@@ -130,8 +130,8 @@ Add the following CSS classes to your `globals.css` after `@layer base`:
 'use client'
 
 import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment } from '@/components/types'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -323,10 +323,10 @@ type PromptAreaFile = {
 Pre-built trigger configuration factories for common patterns. Import from `trigger-presets` (installed with prompt-area).
 
 ```tsx
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
-import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/registry/new-york/blocks/prompt-area/trigger-presets'
-import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/components/trigger-presets'
+import { getChipsByTrigger } from '@/components/segment-helpers'
 
 function ChatInput() {
   const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
@@ -382,7 +382,7 @@ import {
   text, chip,
   isSegmentsEmpty, hasChips, getChips, getChipsByTrigger,
   segmentsToPlainText, plainTextToSegments,
-} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+} from '@/components/segment-helpers'
 ```
 
 ### Factories
@@ -422,10 +422,10 @@ getChipsByTrigger(greeting, '@') // [{ type: 'chip', trigger: '@', value: 'u1', 
 A convenience hook that wires up all boilerplate state for PromptArea. Manages `useState<Segment[]>`, `useRef<PromptAreaHandle>`, and derived values.
 
 ```tsx
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
-import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/registry/new-york/blocks/prompt-area/trigger-presets'
-import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { mentionTrigger, commandTrigger, hashtagTrigger } from '@/components/trigger-presets'
+import { getChipsByTrigger } from '@/components/segment-helpers'
 
 function ChatInput() {
   const { bind, plainText, isEmpty, chips, clear, focus } = usePromptAreaState()
@@ -574,9 +574,9 @@ npx shadcn@latest add https://prompt-area.com/r/status-bar.json
 ```tsx
 import { useState } from 'react'
 import { GitBranch, ChevronDown } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { StatusBar } from '@/components/status-bar'
+import type { Segment } from '@/components/types'
 
 function StatusBarAboveExample() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -646,8 +646,8 @@ Accepts all core PromptArea props (`value`, `onChange`, `triggers`, `placeholder
 ```tsx
 import { useCallback, useRef, useState } from 'react'
 import { Mic } from 'lucide-react'
-import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
-import type { Segment, TriggerConfig, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { CompactPromptArea } from '@/components/compact-prompt-area'
+import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
 
 const triggers: TriggerConfig[] = [
   { char: '@', position: 'any', mode: 'dropdown', onSearch: (q) => USERS.filter(...) },
@@ -714,11 +714,11 @@ Scroll buttons appear/hide with hysteresis to prevent flicker:
 ```tsx
 import { useCallback, useRef, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { ChatPromptLayout } from '@/registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import { ChatPromptLayout } from '@/components/chat-prompt-layout'
+import { segmentsToPlainText } from '@/components/prompt-area-engine'
+import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type Message = { id: number; role: 'user' | 'assistant'; content: string }
 
@@ -804,8 +804,8 @@ When `placeholder` is passed as a `string[]`, the placeholder animates between i
 
 ```tsx
 import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment } from '@/components/types'
 
 function RotatingPlaceholdersExample() {
   const [segments, setSegments] = useState<Segment[]>([])

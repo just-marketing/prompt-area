@@ -83,8 +83,9 @@ export function CompactPromptAreaExample() {
 
 export const compactPromptAreaCode = `import { useCallback, useRef, useState } from 'react'
 import { Mic } from 'lucide-react'
-import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
-import type { Segment, TriggerConfig, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { CompactPromptArea } from '@/components/compact-prompt-area'
+import { segmentsToPlainText } from '@/components/prompt-area-engine'
+import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
 
 const triggers: TriggerConfig[] = [
   { char: '@', position: 'any', mode: 'dropdown', onSearch: (q) => USERS.filter(...) },
@@ -96,6 +97,9 @@ function CompactPromptAreaExample() {
   const promptRef = useRef<PromptAreaHandle>(null)
 
   const handleSubmit = useCallback((segs: Segment[]) => {
+    const text = segmentsToPlainText(segs)
+    if (!text.trim()) return
+    sendMessage(text)
     promptRef.current?.clear()
     setSegments([])
   }, [])

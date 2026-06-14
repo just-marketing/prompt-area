@@ -126,9 +126,9 @@ export function StatusBarBothExample() {
 
 export const statusBarAboveCode = `import { useState } from 'react'
 import { GitBranch, ChevronDown } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { StatusBar } from '@/components/status-bar'
+import type { Segment } from '@/components/types'
 
 function StatusBarAboveExample() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -164,9 +164,9 @@ function StatusBarAboveExample() {
 
 export const statusBarBelowCode = `import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { StatusBar } from '@/components/status-bar'
+import type { Segment } from '@/components/types'
 
 function StatusBarBelowExample() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -183,7 +183,12 @@ function StatusBarBelowExample() {
       </div>
       <StatusBar
         className="border-t"
-        left={<span className="text-muted-foreground">{"+ </> Auto accept edits"}</span>}
+        left={
+          <div className="flex items-center gap-1.5">
+            <span className="text-muted-foreground">+</span>
+            <span className="text-muted-foreground">&lt;/&gt; Auto accept edits</span>
+          </div>
+        }
         right={
           <button className="text-muted-foreground flex items-center gap-1">
             Opus 4.8 <ChevronDown className="size-3" />
@@ -196,10 +201,10 @@ function StatusBarBelowExample() {
 
 export const statusBarBothCode = `import { useState } from 'react'
 import { GitBranch, ChevronDown } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import { StatusBar } from '@/components/status-bar'
+import type { Segment } from '@/components/types'
 
 function StatusBarBothExample() {
   const [segments, setSegments] = useState<Segment[]>([])
@@ -210,7 +215,7 @@ function StatusBarBothExample() {
         left={
           <div className="flex items-center gap-1.5">
             <span className="bg-muted rounded px-1.5 py-0.5 font-medium">prompt-area</span>
-            <GitBranch className="size-3" />
+            <GitBranch className="text-muted-foreground size-3" />
             <span className="text-muted-foreground">main</span>
           </div>
         }
@@ -229,7 +234,7 @@ function StatusBarBothExample() {
           minHeight={48}
         />
         <ActionBar
-          left={<span className="text-muted-foreground text-xs">{"+ </> Auto accept edits"}</span>}
+          left={<span className="text-muted-foreground text-xs">+ &lt;/&gt; Auto accept edits</span>}
           right={
             <button className="text-muted-foreground flex items-center gap-1 text-xs">
               Opus 4.8 <ChevronDown className="size-3" />

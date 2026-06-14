@@ -132,11 +132,11 @@ export function ChatPromptLayoutExample() {
 
 export const chatPromptLayoutCode = `import { useCallback, useRef, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { ChatPromptLayout } from '@/registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import { ChatPromptLayout } from '@/components/chat-prompt-layout'
+import { segmentsToPlainText } from '@/components/prompt-area-engine'
+import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type Message = { id: number; role: 'user' | 'assistant'; content: string }
 
@@ -169,6 +169,8 @@ function ChatPromptLayoutExample() {
               placeholder="Type a message..."
               onSubmit={handleSubmit}
               autoGrow
+              minHeight={48}
+              maxHeight={200}
             />
             <ActionBar
               right={

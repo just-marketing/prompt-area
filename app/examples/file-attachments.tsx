@@ -84,8 +84,8 @@ export function FileAttachmentsExample() {
 }
 
 export const fileAttachmentsCode = `import { useState, useCallback } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, PromptAreaFile } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment, PromptAreaFile } from '@/components/types'
 
 const SAMPLE_FILES: PromptAreaFile[] = [
   { id: 'file-1', name: 'quarterly-report.pdf', size: 2_458_000, type: 'application/pdf' },

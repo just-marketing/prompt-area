@@ -338,9 +338,9 @@ export function CodexInputExample() {
 export const codexInputCode = `import { useCallback, useEffect, useRef, useState } from 'react'
 import { Plus, Hand, Zap, Mic, ArrowUp, ChevronDown, FolderGit2, Laptop, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import type { Segment, PromptAreaHandle } from '@/components/types'
 
 const TOOLBAR_PILL = 'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] transition-colors'
 const ICON_BTN = 'text-[#8f9091] hover:bg-accent hover:text-foreground dark:text-muted-foreground flex size-8 items-center justify-center rounded-full transition-colors'

@@ -56,9 +56,9 @@ export function ActionBarMinimalExample() {
 
 export const actionBarMinimalCode = `import { useCallback, useRef, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import { ActionBar } from '@/components/action-bar'
+import type { Segment, PromptAreaHandle } from '@/components/types'
 
 function ActionBarMinimalExample() {
   const [segments, setSegments] = useState<Segment[]>([])

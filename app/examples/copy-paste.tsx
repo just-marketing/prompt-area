@@ -76,8 +76,8 @@ export function CopyPasteExample() {
 }
 
 export const copyPasteCode = `import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea } from '@/components/prompt-area'
+import type { Segment, TriggerConfig } from '@/components/types'
 
 const TRIGGERS: TriggerConfig[] = [
   {
@@ -99,7 +99,7 @@ const TRIGGERS: TriggerConfig[] = [
 
 function CopyPasteExample() {
   const [sourceSegments, setSourceSegments] = useState<Segment[]>([
-    { type: 'text', text: 'Hello ' },
+    { type: 'text', text: 'Hey ' },
     { type: 'chip', trigger: '@', value: 'copywriter', displayText: 'Copywriter' },
     { type: 'text', text: ' please review the ' },
     { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
@@ -109,24 +109,28 @@ function CopyPasteExample() {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div className="flex flex-col gap-1">
-        <div className="text-xs">Source (select & copy)</div>
-        <PromptArea
-          value={sourceSegments}
-          onChange={setSourceSegments}
-          triggers={TRIGGERS}
-          placeholder="Type here..."
-          minHeight={60}
-        />
+        <div className="text-muted-foreground text-xs">Source (select & copy)</div>
+        <div className="rounded-lg border p-4">
+          <PromptArea
+            value={sourceSegments}
+            onChange={setSourceSegments}
+            triggers={TRIGGERS}
+            placeholder="Type here..."
+            minHeight={60}
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-1">
-        <div className="text-xs">Target (paste here)</div>
-        <PromptArea
-          value={targetSegments}
-          onChange={setTargetSegments}
-          triggers={TRIGGERS}
-          placeholder="Paste content here..."
-          minHeight={60}
-        />
+        <div className="text-muted-foreground text-xs">Target (paste here)</div>
+        <div className="rounded-lg border p-4">
+          <PromptArea
+            value={targetSegments}
+            onChange={setTargetSegments}
+            triggers={TRIGGERS}
+            placeholder="Paste content here..."
+            minHeight={60}
+          />
+        </div>
       </div>
     </div>
   )
