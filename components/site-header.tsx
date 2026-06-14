@@ -12,6 +12,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 
 const NAV_LINKS = [
   { href: '/docs', label: 'Docs' },
+  { href: '/styles', label: 'Styles' },
   { href: '/compare', label: 'Compare' },
   { href: '/blog', label: 'Blog' },
   { href: '/for-ai-apps', label: 'For AI Apps' },

@@ -12,7 +12,7 @@ const LINK_GROUPS: { title: string; links: FooterLink[] }[] = [
     title: 'Product',
     links: [
       { href: '/docs', label: 'Docs' },
-      { href: '/#demo', label: 'Demo' },
+      { href: '/styles', label: 'Styles' },
       { href: '/compare', label: 'Comparison' },
       { href: '/for-ai-apps', label: 'For AI Apps' },
     ],

@@ -34,14 +34,9 @@ const EXAMPLES = [
     description: 'usePromptAreaState, trigger presets, and segment helpers.',
   },
   {
-    href: '/docs/examples/claude-code-style',
-    title: 'Claude Code Style',
-    description: 'A full Claude Code–style composer built by composition.',
-  },
-  {
-    href: '/docs/examples/codex-style',
-    title: 'Codex Style',
-    description: 'An OpenAI Codex–style composer with a context tray.',
+    href: '/styles',
+    title: 'Agent Styles',
+    description: 'Claude Code– and Codex-style composers on the dedicated Styles page.',
   },
 ]
 

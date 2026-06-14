@@ -216,13 +216,13 @@ export default function HomeContent() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/docs/examples/claude-code-style"
+              href="/styles#claude-code"
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
               Claude Code style
               <ArrowRight className="size-3.5" />
             </Link>
             <Link
-              href="/docs/examples/codex-style"
+              href="/styles#codex"
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
               Codex style
               <ArrowRight className="size-3.5" />

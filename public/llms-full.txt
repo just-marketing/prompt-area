@@ -71,7 +71,9 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 
 ## Website
 
-- [Homepage](https://prompt-area.com): Interactive demo, feature showcase, live inspector, examples, and comparison matrix
+- [Homepage](https://prompt-area.com): Live interactive demo, feature highlights, and links into the docs, styles, and comparison pages
+- [Docs](https://prompt-area.com/docs): Full documentation — installation, quick start, components, examples, and API reference
+- [Styles](https://prompt-area.com/styles): Ready-made agent-input styles — Claude Code and OpenAI Codex composers built with Prompt Area
 - [About](https://prompt-area.com/about): Project information, team, and open source details
 - [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
@@ -791,7 +793,7 @@ A showcase composition (not a separately installable block) that replicates an O
 - A single `openMenu` state drives all five dropdowns with one outside-click / Escape handler.
 - Fully theme-aware (light/dark) via CSS variables; no extra dependencies.
 
-See the live demo at https://prompt-area.com/docs/examples/codex-style
+See the live demo at https://prompt-area.com/styles#codex
 
 ## Rotating Placeholder
 

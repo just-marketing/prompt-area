@@ -88,7 +88,8 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 ## About
 
 - [Homepage](https://prompt-area.com): Live interactive demo, feature highlights, built-in agent styles, and links into the docs, examples, and comparison pages
-- [Docs](https://prompt-area.com/docs): Full documentation — installation, quick start, components, examples, agent styles, and API reference
+- [Docs](https://prompt-area.com/docs): Full documentation — installation, quick start, components, examples, and API reference
+- [Styles](https://prompt-area.com/styles): Ready-made agent-input styles — Claude Code and OpenAI Codex composers built with Prompt Area
 - [About](https://prompt-area.com/about): Project information, team, and open source details
 - [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
@@ -140,8 +141,8 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 - [Copy & Paste](https://prompt-area.com/docs/examples/attachments): Chip data preservation and trigger auto-resolution
 - [Image Attachments](https://prompt-area.com/docs/examples/attachments): Paste screenshots with loading states, removal, and configurable placement
 - [File Attachments](https://prompt-area.com/docs/examples/attachments): Attach files with type icons, metadata, and a collapsible "+N more" strip
-- [Claude Code–Style Input](https://prompt-area.com/docs/examples/claude-code-style): Full composition of PromptArea, ActionBar, and StatusBar replicating a Claude Code–style chat input with plan mode and model selector
-- [Codex–Style Input](https://prompt-area.com/docs/examples/codex-style): Stacked Codex-style composer with a permissions pill, reasoning-effort model selector, and a peeking repository/environment/branch context tray
+- [Claude Code–Style Input](https://prompt-area.com/styles#claude-code): Full composition of PromptArea, ActionBar, and StatusBar replicating a Claude Code–style chat input with plan mode and model selector
+- [Codex–Style Input](https://prompt-area.com/styles#codex): Stacked Codex-style composer with a permissions pill, reasoning-effort model selector, and a peeking repository/environment/branch context tray
 
 ## Companion Components
 

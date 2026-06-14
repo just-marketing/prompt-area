@@ -43,13 +43,6 @@ export const docsNavigation: NavSection[] = [
     ],
   },
   {
-    title: 'Styles',
-    items: [
-      { title: 'Claude Code', href: '/docs/examples/claude-code-style' },
-      { title: 'Codex', href: '/docs/examples/codex-style' },
-    ],
-  },
-  {
     title: 'Tools',
     items: [{ title: 'Inspector', href: '/docs/inspector' }],
   },
@@ -63,6 +56,7 @@ export const docsNavigation: NavSection[] = [
   {
     title: 'More',
     items: [
+      { title: 'Styles', href: '/styles' },
       { title: 'Compare', href: '/compare' },
       { title: 'Blog', href: '/blog' },
       { title: 'For AI Apps', href: '/for-ai-apps' },
