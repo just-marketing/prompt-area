@@ -6,8 +6,8 @@ import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FeaturesGrid } from './sections/features-grid'
 
-const DemoSection = dynamic(() =>
-  import('./sections/demo-section').then((m) => ({ default: m.DemoSection })),
+const CodexInputExample = dynamic(() =>
+  import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
 )
 
 const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
@@ -93,9 +93,9 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Live demo */}
-      <section id="demo" className="mx-auto w-full max-w-3xl scroll-mt-20 px-4 pb-16">
-        <DemoSection />
+      {/* Live demo — Codex-style composer */}
+      <section id="demo" className="mx-auto w-full max-w-2xl scroll-mt-20 px-4 pb-16">
+        <CodexInputExample />
       </section>
 
       {/* Features */}
