@@ -15,12 +15,9 @@ import {
 } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import type { Segment, TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -80,11 +77,9 @@ const ACTION_BAR_TRIGGERS: TriggerConfig[] = [
 ]
 
 export function ActionBarFullExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
+  const { segments, setSegments, submitted, promptRef, submit, reset } = useSubmittablePrompt()
   const [markdownEnabled, setMarkdownEnabled] = useState(false)
-  const [submitted, setSubmitted] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
-  const promptRef = useRef<PromptAreaHandle>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isEmpty = isSegmentsEmpty(segments)
@@ -100,19 +95,17 @@ export function ActionBarFullExample() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
 
-  const handleSubmit = useCallback(() => {
-    if (isSegmentsEmpty(segments)) return
-    setSubmitted(segmentsToPlainText(segments))
-    promptRef.current?.clear()
-    setSegments([])
-  }, [segments])
+  const handleSubmit = useCallback(() => submit(segments), [submit, segments])
 
-  const insertTrigger = useCallback((char: string) => {
-    promptRef.current?.focus()
-    requestAnimationFrame(() => {
-      document.execCommand('insertText', false, char)
-    })
-  }, [])
+  const insertTrigger = useCallback(
+    (char: string) => {
+      promptRef.current?.focus()
+      requestAnimationFrame(() => {
+        document.execCommand('insertText', false, char)
+      })
+    },
+    [promptRef],
+  )
 
   return (
     <div className="flex flex-col gap-2">
@@ -220,18 +213,13 @@ export function ActionBarFullExample() {
           }
         />
       </div>
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
 
 export const actionBarFullCode = `import { useCallback, useRef, useState } from 'react'
-import { PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type } from 'lucide-react'
+import { PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type, RotateCcw } from 'lucide-react'
 import { PromptArea } from '@/components/prompt-area'
 import { ActionBar } from '@/components/action-bar'
 import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
@@ -244,6 +232,8 @@ const triggers: TriggerConfig[] = [
 
 function ActionBarFullExample() {
   const [segments, setSegments] = useState<Segment[]>([])
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<Segment[] | null>(null)
   const [markdownEnabled, setMarkdownEnabled] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
 
@@ -252,9 +242,15 @@ function ActionBarFullExample() {
 
   const handleSubmit = useCallback(() => {
     if (isEmpty) return
+    setSubmitted(segments)
     promptRef.current?.clear()
     setSegments([])
-  }, [isEmpty])
+  }, [isEmpty, segments])
+  const reset = () => {
+    if (submitted) setSegments(submitted)
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   const insertTrigger = useCallback((char: string) => {
     promptRef.current?.focus()
@@ -298,6 +294,14 @@ function ActionBarFullExample() {
           </>
         }
       />
+      {submitted && (
+        <div className="bg-muted/50 mt-2 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs" aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
     </div>
   )
 }`

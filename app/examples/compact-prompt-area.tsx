@@ -1,14 +1,10 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
 import { Mic } from 'lucide-react'
 import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import type { TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -43,17 +39,7 @@ const MIC_BUTTON_CLASS =
   'flex items-center justify-center rounded-full size-8 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors'
 
 export function CompactPromptAreaExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
-  const [submitted, setSubmitted] = useState('')
-  const promptRef = useRef<PromptAreaHandle>(null)
-
-  const handleSubmit = useCallback((segs: Segment[]) => {
-    const text = segmentsToPlainText(segs)
-    if (!text.trim()) return
-    setSubmitted(text)
-    promptRef.current?.clear()
-    setSegments([])
-  }, [])
+  const { segments, setSegments, submitted, promptRef, submit, reset } = useSubmittablePrompt()
 
   return (
     <div className="flex flex-col gap-2">
@@ -63,7 +49,7 @@ export function CompactPromptAreaExample() {
         onChange={setSegments}
         triggers={TRIGGERS}
         placeholder="Ask anything..."
-        onSubmit={handleSubmit}
+        onSubmit={submit}
         onPlusClick={() => alert('Plus clicked')}
         beforeSubmitSlot={
           <button type="button" className={MIC_BUTTON_CLASS} aria-label="Voice input">
@@ -71,18 +57,13 @@ export function CompactPromptAreaExample() {
           </button>
         }
       />
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
 
 export const compactPromptAreaCode = `import { useCallback, useRef, useState } from 'react'
-import { Mic } from 'lucide-react'
+import { Mic, RotateCcw } from 'lucide-react'
 import { CompactPromptArea } from '@/components/compact-prompt-area'
 import { segmentsToPlainText } from '@/components/prompt-area-engine'
 import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
@@ -94,30 +75,48 @@ const triggers: TriggerConfig[] = [
 
 function CompactPromptAreaExample() {
   const [segments, setSegments] = useState<Segment[]>([])
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<Segment[] | null>(null)
   const promptRef = useRef<PromptAreaHandle>(null)
 
   const handleSubmit = useCallback((segs: Segment[]) => {
     const text = segmentsToPlainText(segs)
     if (!text.trim()) return
     sendMessage(text)
+    setSubmitted(segs)
     promptRef.current?.clear()
     setSegments([])
   }, [])
+  const reset = () => {
+    if (submitted) setSegments(submitted)
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   return (
-    <CompactPromptArea
-      ref={promptRef}
-      value={segments}
-      onChange={setSegments}
-      triggers={triggers}
-      placeholder="Ask anything..."
-      onSubmit={handleSubmit}
-      onPlusClick={() => console.log('Plus clicked')}
-      beforeSubmitSlot={
-        <button aria-label="Voice input">
-          <Mic className="size-4" />
-        </button>
-      }
-    />
+    <div className="flex flex-col gap-2">
+      <CompactPromptArea
+        ref={promptRef}
+        value={segments}
+        onChange={setSegments}
+        triggers={triggers}
+        placeholder="Ask anything..."
+        onSubmit={handleSubmit}
+        onPlusClick={() => console.log('Plus clicked')}
+        beforeSubmitSlot={
+          <button aria-label="Voice input">
+            <Mic className="size-4" />
+          </button>
+        }
+      />
+      {submitted && (
+        <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs" aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
+    </div>
   )
 }`

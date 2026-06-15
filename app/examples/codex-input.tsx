@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Plus,
   Hand,
@@ -16,16 +16,14 @@ import {
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import {
-  segmentsToPlainText,
-  isSegmentsEmpty,
-} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+import { isSegmentsEmpty } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 import type {
   Segment,
-  PromptAreaHandle,
   TriggerConfig,
   PromptAreaFile,
 } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 // ---------------------------------------------------------------------------
 // Option data (representative placeholders)
@@ -160,9 +158,8 @@ export function CodexInputExample({
   markdown?: boolean
   minHeight?: number
 } = {}) {
-  const [segments, setSegments] = useState<Segment[]>(initialSegments)
-  const [files, setFiles] = useState<PromptAreaFile[]>(initialFiles)
-  const [submitted, setSubmitted] = useState('')
+  const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
+    useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles })
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
   const [model, setModel] = useState<Model>(MODELS[0])
@@ -173,7 +170,6 @@ export function CodexInputExample({
   // Single source of truth for which dropdown is open — only one at a time.
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  const promptRef = useRef<PromptAreaHandle>(null)
 
   const isEmpty = isSegmentsEmpty(segments)
 
@@ -195,15 +191,6 @@ export function CodexInputExample({
     }
   }, [openMenu])
 
-  const handleSubmit = useCallback((segs: Segment[]) => {
-    const text = segmentsToPlainText(segs)
-    if (!text.trim()) return
-    setSubmitted(text)
-    promptRef.current?.clear()
-    setSegments([])
-    setFiles([])
-  }, [])
-
   return (
     <div className="flex flex-col gap-2" ref={rootRef}>
       {/* Stacked composer + context tray */}
@@ -219,7 +206,7 @@ export function CodexInputExample({
               onChange={setSegments}
               triggers={triggers}
               placeholder="Do anything"
-              onSubmit={handleSubmit}
+              onSubmit={submit}
               markdown={markdown}
               autoGrow
               minHeight={minHeight}
@@ -282,7 +269,7 @@ export function CodexInputExample({
 
                   <button
                     type="button"
-                    onClick={() => handleSubmit(segments)}
+                    onClick={() => submit(segments)}
                     disabled={isEmpty}
                     className="flex size-8 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:bg-[#dadada] disabled:text-[#7a7a7a] dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-[#969696] dark:disabled:text-[#2d2d2d]"
                     aria-label="Send message">
@@ -344,18 +331,13 @@ export function CodexInputExample({
         </div>
       </div>
 
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
 
 export const codexInputCode = `import { useCallback, useEffect, useRef, useState } from 'react'
-import { Plus, Hand, Zap, Mic, ArrowUp, ChevronDown, FolderGit2, Laptop, GitBranch } from 'lucide-react'
+import { Plus, Hand, Zap, Mic, ArrowUp, ChevronDown, FolderGit2, Laptop, GitBranch, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/components/prompt-area'
 import { ActionBar } from '@/components/action-bar'
@@ -369,11 +351,25 @@ const MENU_ITEM = 'flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-le
 
 function CodexInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<Segment[] | null>(null)
   const [model, setModel] = useState({ version: '5.5', effort: 'Extra High' })
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const promptRef = useRef<PromptAreaHandle>(null)
   const toggleMenu = (id: string) => setOpenMenu((cur) => (cur === id ? null : id))
+
+  const submit = (segs: Segment[]) => {
+    if (!segs.length) return
+    setSubmitted(segs)
+    promptRef.current?.clear()
+    setSegments([])
+  }
+  const reset = () => {
+    if (submitted) setSegments(submitted)
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   // Close the open menu on outside click — one root ref covers every dropdown.
   useEffect(() => {
@@ -397,7 +393,7 @@ function CodexInputExample() {
             value={segments}
             onChange={setSegments}
             placeholder="Do anything"
-            onSubmit={() => { promptRef.current?.clear(); setSegments([]) }}
+            onSubmit={submit}
             autoGrow
             minHeight={40}
             maxHeight={280}
@@ -446,7 +442,7 @@ function CodexInputExample() {
                 </div>
                 <button className={ICON_BTN} aria-label="Voice input"><Mic className="size-4" /></button>
                 <button
-                  onClick={() => { promptRef.current?.clear(); setSegments([]) }}
+                  onClick={() => submit(segments)}
                   className="bg-black text-white hover:bg-[#1a1a1a] disabled:bg-[#dadada] disabled:text-[#7a7a7a] dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-[#969696] dark:disabled:text-[#2d2d2d] flex size-8 items-center justify-center rounded-full disabled:cursor-not-allowed"
                   aria-label="Send">
                   <ArrowUp className="size-4" />
@@ -473,6 +469,18 @@ function CodexInputExample() {
           </button>
         </div>
       </div>
+
+      {submitted && (
+        <div className="bg-muted/50 mt-2 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button
+            onClick={reset}
+            className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
+            aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
     </div>
   )
 }`

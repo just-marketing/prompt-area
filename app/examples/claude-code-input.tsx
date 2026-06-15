@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
 import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 type AttachedFile = { id: string; name: string }
 
@@ -22,27 +23,19 @@ const INITIAL_SEGMENTS: Segment[] = [
 const MODELS = ['Opus 4.8', 'Sonnet 4.6', 'Haiku 4.5'] as const
 
 export function ClaudeCodeInputExample() {
-  const [segments, setSegments] = useState<Segment[]>(INITIAL_SEGMENTS)
-  const [files, setFiles] = useState<AttachedFile[]>(INITIAL_FILES)
-  const [submitted, setSubmitted] = useState('')
+  const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
+    useSubmittablePrompt<AttachedFile>({
+      initialSegments: INITIAL_SEGMENTS,
+      initialFiles: INITIAL_FILES,
+    })
   const [selectedModel, setSelectedModel] = useState<string>(MODELS[0])
   const [modelMenuOpen, setModelMenuOpen] = useState(false)
   const [planMode, setPlanMode] = useState(false)
-  const promptRef = useRef<PromptAreaHandle>(null)
   const modelMenuRef = useRef<HTMLDivElement>(null)
 
   const isEmpty =
     segments.length === 0 ||
     (segments.length === 1 && segments[0].type === 'text' && segments[0].text === '')
-
-  const handleSubmit = useCallback((segs: Segment[]) => {
-    const text = segmentsToPlainText(segs)
-    if (!text.trim()) return
-    setSubmitted(text)
-    promptRef.current?.clear()
-    setSegments([])
-    setFiles([])
-  }, [])
 
   return (
     <div className="flex flex-col gap-2">
@@ -73,7 +66,7 @@ export function ClaudeCodeInputExample() {
             value={segments}
             onChange={setSegments}
             placeholder="Ask anything..."
-            onSubmit={handleSubmit}
+            onSubmit={submit}
             autoGrow
             minHeight={48}
             maxHeight={280}
@@ -135,7 +128,7 @@ export function ClaudeCodeInputExample() {
                 {/* Submit button */}
                 <button
                   type="button"
-                  onClick={() => handleSubmit(segments)}
+                  onClick={() => submit(segments)}
                   disabled={isEmpty}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 flex size-8 items-center justify-center rounded-full transition-colors disabled:opacity-50"
                   aria-label="Send message">
@@ -176,31 +169,42 @@ export function ClaudeCodeInputExample() {
         />
       </div>
 
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
 
 export const claudeCodeInputCode = `import { useCallback, useRef, useState } from 'react'
-import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
+import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X, RotateCcw } from 'lucide-react'
 import { PromptArea } from '@/components/prompt-area'
 import { ActionBar } from '@/components/action-bar'
 import { StatusBar } from '@/components/status-bar'
 import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type AttachedFile = { id: string; name: string }
+const INITIAL_FILES: AttachedFile[] = [{ id: 'img-1', name: 'image.png' }]
 
 function ClaudeCodeInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
-  const [files, setFiles] = useState<AttachedFile[]>([{ id: 'img-1', name: 'image.png' }])
+  const [files, setFiles] = useState<AttachedFile[]>(INITIAL_FILES)
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<{ segments: Segment[]; files: AttachedFile[] } | null>(null)
   const [selectedModel, setSelectedModel] = useState('Opus 4.8')
   const [planMode, setPlanMode] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
+
+  const submit = (segs: Segment[]) => {
+    if (!segs.length) return
+    setSubmitted({ segments: segs, files })
+    promptRef.current?.clear()
+    setSegments([])
+    setFiles([])
+  }
+  const reset = () => {
+    if (submitted) { setSegments(submitted.segments); setFiles(submitted.files) }
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   return (
     <div className="rounded-xl border">
@@ -224,7 +228,7 @@ function ClaudeCodeInputExample() {
           value={segments}
           onChange={setSegments}
           placeholder="Ask anything..."
-          onSubmit={(segs) => { promptRef.current?.clear(); setSegments([]); setFiles([]) }}
+          onSubmit={submit}
           autoGrow
           minHeight={48}
           maxHeight={280}
@@ -248,7 +252,7 @@ function ClaudeCodeInputExample() {
               <button className="text-muted-foreground text-xs">
                 {selectedModel} <ChevronDown className="size-3" />
               </button>
-              <button className="bg-primary text-primary-foreground size-8 rounded-full">
+              <button onClick={() => submit(segments)} className="bg-primary text-primary-foreground size-8 rounded-full">
                 <ArrowUp className="size-4" />
               </button>
             </div>
@@ -270,6 +274,14 @@ function ClaudeCodeInputExample() {
           </button>
         }
       />
+      {submitted && (
+        <div className="bg-muted/50 m-2 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs" aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
     </div>
   )
 }`
