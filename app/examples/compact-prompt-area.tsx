@@ -1,14 +1,10 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
 import { Mic } from 'lucide-react'
 import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import type { TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -43,17 +39,7 @@ const MIC_BUTTON_CLASS =
   'flex items-center justify-center rounded-full size-8 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors'
 
 export function CompactPromptAreaExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
-  const [submitted, setSubmitted] = useState('')
-  const promptRef = useRef<PromptAreaHandle>(null)
-
-  const handleSubmit = useCallback((segs: Segment[]) => {
-    const text = segmentsToPlainText(segs)
-    if (!text.trim()) return
-    setSubmitted(text)
-    promptRef.current?.clear()
-    setSegments([])
-  }, [])
+  const { segments, setSegments, submitted, promptRef, submit, reset } = useSubmittablePrompt()
 
   return (
     <div className="flex flex-col gap-2">
@@ -63,7 +49,7 @@ export function CompactPromptAreaExample() {
         onChange={setSegments}
         triggers={TRIGGERS}
         placeholder="Ask anything..."
-        onSubmit={handleSubmit}
+        onSubmit={submit}
         onPlusClick={() => alert('Plus clicked')}
         beforeSubmitSlot={
           <button type="button" className={MIC_BUTTON_CLASS} aria-label="Voice input">
@@ -71,12 +57,7 @@ export function CompactPromptAreaExample() {
           </button>
         }
       />
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
