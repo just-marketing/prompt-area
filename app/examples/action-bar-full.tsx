@@ -12,16 +12,12 @@ import {
   Type,
   Upload,
   Image as ImageIcon,
-  RotateCcw,
 } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import type { Segment, TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -81,11 +77,9 @@ const ACTION_BAR_TRIGGERS: TriggerConfig[] = [
 ]
 
 export function ActionBarFullExample() {
-  const [segments, setSegments] = useState<Segment[]>([])
+  const { segments, setSegments, submitted, promptRef, submit, reset } = useSubmittablePrompt()
   const [markdownEnabled, setMarkdownEnabled] = useState(false)
-  const [submitted, setSubmitted] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
-  const promptRef = useRef<PromptAreaHandle>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isEmpty = isSegmentsEmpty(segments)
@@ -101,19 +95,17 @@ export function ActionBarFullExample() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
 
-  const handleSubmit = useCallback(() => {
-    if (isSegmentsEmpty(segments)) return
-    setSubmitted(segmentsToPlainText(segments))
-    promptRef.current?.clear()
-    setSegments([])
-  }, [segments])
+  const handleSubmit = useCallback(() => submit(segments), [submit, segments])
 
-  const insertTrigger = useCallback((char: string) => {
-    promptRef.current?.focus()
-    requestAnimationFrame(() => {
-      document.execCommand('insertText', false, char)
-    })
-  }, [])
+  const insertTrigger = useCallback(
+    (char: string) => {
+      promptRef.current?.focus()
+      requestAnimationFrame(() => {
+        document.execCommand('insertText', false, char)
+      })
+    },
+    [promptRef],
+  )
 
   return (
     <div className="flex flex-col gap-2">
@@ -221,25 +213,7 @@ export function ActionBarFullExample() {
           }
         />
       </div>
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <div className="text-muted-foreground text-xs font-medium">Submitted:</div>
-            <button
-              type="button"
-              onClick={() => {
-                setSubmitted('')
-                promptRef.current?.focus()
-              }}
-              className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors"
-              aria-label="Reset">
-              <RotateCcw className="size-3.5" />
-              Reset
-            </button>
-          </div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }

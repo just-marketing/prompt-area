@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Plus,
   Hand,
@@ -11,22 +11,19 @@ import {
   FolderGit2,
   Laptop,
   GitBranch,
-  RotateCcw,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import {
-  segmentsToPlainText,
-  isSegmentsEmpty,
-} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+import { isSegmentsEmpty } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
 import type {
   Segment,
-  PromptAreaHandle,
   TriggerConfig,
   PromptAreaFile,
 } from '@/registry/new-york/blocks/prompt-area/types'
+import { useSubmittablePrompt } from './use-submittable-prompt'
+import { SubmittedPreview } from './submitted-preview'
 
 // ---------------------------------------------------------------------------
 // Option data (representative placeholders)
@@ -161,9 +158,8 @@ export function CodexInputExample({
   markdown?: boolean
   minHeight?: number
 } = {}) {
-  const [segments, setSegments] = useState<Segment[]>(initialSegments)
-  const [files, setFiles] = useState<PromptAreaFile[]>(initialFiles)
-  const [submitted, setSubmitted] = useState('')
+  const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
+    useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles })
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
   const [model, setModel] = useState<Model>(MODELS[0])
@@ -174,7 +170,6 @@ export function CodexInputExample({
   // Single source of truth for which dropdown is open — only one at a time.
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  const promptRef = useRef<PromptAreaHandle>(null)
 
   const isEmpty = isSegmentsEmpty(segments)
 
@@ -196,15 +191,6 @@ export function CodexInputExample({
     }
   }, [openMenu])
 
-  const handleSubmit = useCallback((segs: Segment[]) => {
-    const text = segmentsToPlainText(segs)
-    if (!text.trim()) return
-    setSubmitted(text)
-    promptRef.current?.clear()
-    setSegments([])
-    setFiles([])
-  }, [])
-
   return (
     <div className="flex flex-col gap-2" ref={rootRef}>
       {/* Stacked composer + context tray */}
@@ -220,7 +206,7 @@ export function CodexInputExample({
               onChange={setSegments}
               triggers={triggers}
               placeholder="Do anything"
-              onSubmit={handleSubmit}
+              onSubmit={submit}
               markdown={markdown}
               autoGrow
               minHeight={minHeight}
@@ -283,7 +269,7 @@ export function CodexInputExample({
 
                   <button
                     type="button"
-                    onClick={() => handleSubmit(segments)}
+                    onClick={() => submit(segments)}
                     disabled={isEmpty}
                     className="flex size-8 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:bg-[#dadada] disabled:text-[#7a7a7a] dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-[#969696] dark:disabled:text-[#2d2d2d]"
                     aria-label="Send message">
@@ -345,25 +331,7 @@ export function CodexInputExample({
         </div>
       </div>
 
-      {submitted && (
-        <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <div className="text-muted-foreground text-xs font-medium">Submitted:</div>
-            <button
-              type="button"
-              onClick={() => {
-                setSubmitted('')
-                promptRef.current?.focus()
-              }}
-              className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors"
-              aria-label="Reset">
-              <RotateCcw className="size-3.5" />
-              Reset
-            </button>
-          </div>
-          <div className="text-sm">{submitted}</div>
-        </div>
-      )}
+      <SubmittedPreview text={submitted?.text} onReset={reset} />
     </div>
   )
 }
