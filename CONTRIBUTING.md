@@ -14,7 +14,7 @@ pnpm dev              # Start dev server (Next.js + Turbopack)
 ## Making Changes
 
 1. Fork the repository and create a branch from `main`
-2. Make your changes in the `registry/new-york/blocks/` directory for component code
+2. Make your changes in `packages/prompt-area/src/` for component code (this is the single source of truth for both the npm package and the shadcn registry)
 3. Add or update tests in `__tests__/` directories alongside the code you changed
 4. Run the checks below before submitting
 
@@ -26,7 +26,9 @@ Before submitting a pull request, make sure all checks pass:
 pnpm lint             # Lint with ESLint
 pnpm typecheck        # Type-check with TypeScript
 pnpm test             # Run tests with Vitest
-pnpm build            # Verify production build
+pnpm build            # Verify production build (docs site)
+pnpm package:build    # Verify the npm package builds
+pnpm package:check    # Validate package exports & types
 ```
 
 A pre-commit hook (via Lefthook) will automatically lint and format staged files.
@@ -54,15 +56,17 @@ A pre-commit hook (via Lefthook) will automatically lint and format staged files
 ## Project Structure
 
 ```
-registry/new-york/blocks/
-├── prompt-area/          # Core component (this is what gets distributed)
-├── action-bar/           # Toolbar component
-├── status-bar/           # Status display component
-└── chat-prompt-layout/   # Chat UI layout component
+packages/prompt-area/src/  # The distributed source (npm package + shadcn registry)
+├── prompt-area/             # Core component
+├── action-bar/              # Toolbar component
+├── status-bar/              # Status display component
+├── compact-prompt-area/     # Pill-shaped collapsible variant
+├── chat-prompt-layout/      # Chat UI layout component
+└── helpers/                 # Server-safe re-exports
 
 app/
-├── page.tsx              # Landing page
-└── examples/             # Interactive demos
+├── page.tsx                 # Landing page
+└── examples/                # Interactive demos
 ```
 
 ## License

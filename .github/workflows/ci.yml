@@ -81,3 +81,22 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Test registry installation in fresh Next.js app
         run: ./scripts/test-registry-install.sh
+
+  package:
+    name: NPM Package
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Type-check package
+        run: pnpm --filter prompt-area typecheck
+      - name: Build package
+        run: pnpm --filter prompt-area build
+      - name: Validate exports & types
+        run: pnpm --filter prompt-area lint:exports
