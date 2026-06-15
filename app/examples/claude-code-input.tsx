@@ -175,20 +175,36 @@ export function ClaudeCodeInputExample() {
 }
 
 export const claudeCodeInputCode = `import { useCallback, useRef, useState } from 'react'
-import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
+import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X, RotateCcw } from 'lucide-react'
 import { PromptArea } from '@/components/prompt-area'
 import { ActionBar } from '@/components/action-bar'
 import { StatusBar } from '@/components/status-bar'
 import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type AttachedFile = { id: string; name: string }
+const INITIAL_FILES: AttachedFile[] = [{ id: 'img-1', name: 'image.png' }]
 
 function ClaudeCodeInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
-  const [files, setFiles] = useState<AttachedFile[]>([{ id: 'img-1', name: 'image.png' }])
+  const [files, setFiles] = useState<AttachedFile[]>(INITIAL_FILES)
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<{ segments: Segment[]; files: AttachedFile[] } | null>(null)
   const [selectedModel, setSelectedModel] = useState('Opus 4.8')
   const [planMode, setPlanMode] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
+
+  const submit = (segs: Segment[]) => {
+    if (!segs.length) return
+    setSubmitted({ segments: segs, files })
+    promptRef.current?.clear()
+    setSegments([])
+    setFiles([])
+  }
+  const reset = () => {
+    if (submitted) { setSegments(submitted.segments); setFiles(submitted.files) }
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   return (
     <div className="rounded-xl border">
@@ -212,7 +228,7 @@ function ClaudeCodeInputExample() {
           value={segments}
           onChange={setSegments}
           placeholder="Ask anything..."
-          onSubmit={(segs) => { promptRef.current?.clear(); setSegments([]); setFiles([]) }}
+          onSubmit={submit}
           autoGrow
           minHeight={48}
           maxHeight={280}
@@ -236,7 +252,7 @@ function ClaudeCodeInputExample() {
               <button className="text-muted-foreground text-xs">
                 {selectedModel} <ChevronDown className="size-3" />
               </button>
-              <button className="bg-primary text-primary-foreground size-8 rounded-full">
+              <button onClick={() => submit(segments)} className="bg-primary text-primary-foreground size-8 rounded-full">
                 <ArrowUp className="size-4" />
               </button>
             </div>
@@ -258,6 +274,14 @@ function ClaudeCodeInputExample() {
           </button>
         }
       />
+      {submitted && (
+        <div className="bg-muted/50 m-2 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs" aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
     </div>
   )
 }`
