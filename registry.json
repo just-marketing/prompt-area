@@ -11,75 +11,75 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "registry/new-york/blocks/prompt-area/prompt-area.tsx",
+          "path": "packages/prompt-area/src/prompt-area/prompt-area.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/trigger-popover.tsx",
+          "path": "packages/prompt-area/src/prompt-area/trigger-popover.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/use-prompt-area.ts",
+          "path": "packages/prompt-area/src/prompt-area/use-prompt-area.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/use-prompt-area-events.ts",
+          "path": "packages/prompt-area/src/prompt-area/use-prompt-area-events.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/prompt-area-engine.ts",
+          "path": "packages/prompt-area/src/prompt-area/prompt-area-engine.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/prompt-area-list-ops.ts",
+          "path": "packages/prompt-area/src/prompt-area/prompt-area-list-ops.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/cursor-helpers.ts",
+          "path": "packages/prompt-area/src/prompt-area/cursor-helpers.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/clipboard-helpers.ts",
+          "path": "packages/prompt-area/src/prompt-area/clipboard-helpers.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/dom-helpers.ts",
+          "path": "packages/prompt-area/src/prompt-area/dom-helpers.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/use-trigger-search.ts",
+          "path": "packages/prompt-area/src/prompt-area/use-trigger-search.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/types.ts",
+          "path": "packages/prompt-area/src/prompt-area/types.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/animated-placeholder.tsx",
+          "path": "packages/prompt-area/src/prompt-area/animated-placeholder.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/image-strip.tsx",
+          "path": "packages/prompt-area/src/prompt-area/image-strip.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/file-strip.tsx",
+          "path": "packages/prompt-area/src/prompt-area/file-strip.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/remove-button.tsx",
+          "path": "packages/prompt-area/src/prompt-area/remove-button.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/segment-helpers.ts",
+          "path": "packages/prompt-area/src/prompt-area/segment-helpers.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/trigger-presets.ts",
+          "path": "packages/prompt-area/src/prompt-area/trigger-presets.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/prompt-area/use-prompt-area-state.ts",
+          "path": "packages/prompt-area/src/prompt-area/use-prompt-area-state.ts",
           "type": "registry:component"
         }
       ]
@@ -92,11 +92,11 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "registry/new-york/blocks/action-bar/action-bar.tsx",
+          "path": "packages/prompt-area/src/action-bar/action-bar.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/action-bar/types.ts",
+          "path": "packages/prompt-area/src/action-bar/types.ts",
           "type": "registry:component"
         }
       ]
@@ -109,11 +109,11 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "registry/new-york/blocks/status-bar/status-bar.tsx",
+          "path": "packages/prompt-area/src/status-bar/status-bar.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/status-bar/types.ts",
+          "path": "packages/prompt-area/src/status-bar/types.ts",
           "type": "registry:component"
         }
       ]
@@ -126,11 +126,11 @@
       "registryDependencies": ["prompt-area"],
       "files": [
         {
-          "path": "registry/new-york/blocks/compact-prompt-area/compact-prompt-area.tsx",
+          "path": "packages/prompt-area/src/compact-prompt-area/compact-prompt-area.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/compact-prompt-area/types.ts",
+          "path": "packages/prompt-area/src/compact-prompt-area/types.ts",
           "type": "registry:component"
         }
       ]
@@ -144,15 +144,15 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout.tsx",
+          "path": "packages/prompt-area/src/chat-prompt-layout/chat-prompt-layout.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/chat-prompt-layout/use-scroll-observer.ts",
+          "path": "packages/prompt-area/src/chat-prompt-layout/use-scroll-observer.ts",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/blocks/chat-prompt-layout/types.ts",
+          "path": "packages/prompt-area/src/chat-prompt-layout/types.ts",
           "type": "registry:component"
         }
       ]

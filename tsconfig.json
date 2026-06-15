@@ -19,6 +19,7 @@
       }
     ],
     "paths": {
+      "@/registry/new-york/blocks/*": ["./packages/prompt-area/src/*"],
       "@/*": ["./*"]
     }
   },
