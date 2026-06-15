@@ -108,6 +108,10 @@ The components are client components and carry a `'use client'` boundary, so you
 - **Peer:** `react`, `react-dom` (>= 18)
 - **Runtime:** `clsx`, `tailwind-merge`, `lucide-react`, `framer-motion`
 
+In a shadcn/Tailwind project, `clsx`, `tailwind-merge`, and `lucide-react` are
+already part of your setup, so `framer-motion` is the only genuinely new
+dependency. No editor framework (ProseMirror, Slate, Lexical) is pulled in.
+
 ESM-only. Requires Node 18+ / a modern bundler (Next.js, Vite, etc.).
 
 ## License

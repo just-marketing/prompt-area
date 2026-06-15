@@ -209,7 +209,7 @@ const FEATURES: ComparisonFeature[] = [
   },
   {
     name: 'Bundle Approach',
-    promptArea: 'shadcn registry',
+    promptArea: 'npm + shadcn registry',
     values: {
       'react-mentions': 'npm package',
       tiptap: 'npm package',

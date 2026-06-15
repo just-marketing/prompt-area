@@ -8,7 +8,7 @@ A production-grade `contentEditable` rich text input. Install it **two ways from
 
 Most rich text editors are full document editors shoehorned into chat inputs. Prompt Area is purpose-built for **prompt-style inputs** — think ChatGPT, Linear, Slack composer boxes — where you need mentions, slash commands, markdown, and chips without pulling in a heavyweight editor framework.
 
-- **Dependency-light** — only `clsx`, `tailwind-merge`, `lucide-react`, and `framer-motion`
+- **Zero extra dependencies** — no ProseMirror, Slate, or Lexical; just React + your stack
 - **Two distribution models** — `npm install` for a versioned package, or shadcn to own the source
 - **Tiny surface area** — one component, one hook, done
 
