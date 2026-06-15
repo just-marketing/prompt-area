@@ -1,0 +1,22 @@
+/**
+ * Build input for the prebuilt, self-contained stylesheet.
+ *
+ * Compiled by the Tailwind CLI into `dist/styles.css`, which consumers
+ * import once (`import 'prompt-area/styles.css'`) with no Tailwind setup
+ * required. Tailwind's global preflight reset is intentionally omitted so
+ * importing this file does not restyle the rest of your app.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+
+@import './styles/theme.css';
+@import './styles/tokens.css';
+@import './styles/components.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Scan the component source so only the utilities actually used are emitted. */
+@source './**/*.{ts,tsx}';
