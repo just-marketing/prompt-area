@@ -12,6 +12,7 @@ import {
   Type,
   Upload,
   Image as ImageIcon,
+  RotateCcw,
 } from 'lucide-react'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
@@ -222,7 +223,20 @@ export function ActionBarFullExample() {
       </div>
       {submitted && (
         <div className="bg-muted/50 rounded-lg border p-3">
-          <div className="text-muted-foreground mb-1 text-xs font-medium">Submitted:</div>
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <div className="text-muted-foreground text-xs font-medium">Submitted:</div>
+            <button
+              type="button"
+              onClick={() => {
+                setSubmitted('')
+                promptRef.current?.focus()
+              }}
+              className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors"
+              aria-label="Reset">
+              <RotateCcw className="size-3.5" />
+              Reset
+            </button>
+          </div>
           <div className="text-sm">{submitted}</div>
         </div>
       )}
