@@ -219,7 +219,7 @@ export function ActionBarFullExample() {
 }
 
 export const actionBarFullCode = `import { useCallback, useRef, useState } from 'react'
-import { PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type } from 'lucide-react'
+import { PlusCircle, AtSign, SquareSlash, Hash, Mic, ArrowUp, Code, Type, RotateCcw } from 'lucide-react'
 import { PromptArea } from '@/components/prompt-area'
 import { ActionBar } from '@/components/action-bar'
 import type { Segment, TriggerConfig, PromptAreaHandle } from '@/components/types'
@@ -232,6 +232,8 @@ const triggers: TriggerConfig[] = [
 
 function ActionBarFullExample() {
   const [segments, setSegments] = useState<Segment[]>([])
+  // Snapshot of the last submission so Reset can restore it for another send.
+  const [submitted, setSubmitted] = useState<Segment[] | null>(null)
   const [markdownEnabled, setMarkdownEnabled] = useState(false)
   const promptRef = useRef<PromptAreaHandle>(null)
 
@@ -240,9 +242,15 @@ function ActionBarFullExample() {
 
   const handleSubmit = useCallback(() => {
     if (isEmpty) return
+    setSubmitted(segments)
     promptRef.current?.clear()
     setSegments([])
-  }, [isEmpty])
+  }, [isEmpty, segments])
+  const reset = () => {
+    if (submitted) setSegments(submitted)
+    setSubmitted(null)
+    promptRef.current?.focus()
+  }
 
   const insertTrigger = useCallback((char: string) => {
     promptRef.current?.focus()
@@ -286,6 +294,14 @@ function ActionBarFullExample() {
           </>
         }
       />
+      {submitted && (
+        <div className="bg-muted/50 mt-2 flex items-center justify-between rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">Submitted — clear to send again.</span>
+          <button onClick={reset} className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs" aria-label="Reset">
+            <RotateCcw className="size-3.5" /> Reset
+          </button>
+        </div>
+      )}
     </div>
   )
 }`
