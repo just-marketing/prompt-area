@@ -2,28 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import { AnimatedPlaceholder } from '../animated-placeholder'
 
-// Mock framer-motion to avoid animation complexities in tests
-vi.mock('framer-motion', () => ({
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  motion: {
-    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
-      <div data-testid="motion-div" {...filterDOMProps(props)}>
-        {children}
-      </div>
-    ),
-  },
-}))
-
-// Filter out non-DOM props to avoid React warnings
-function filterDOMProps(props: Record<string, unknown>) {
-  const domProps: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(props)) {
-    if (['initial', 'animate', 'exit', 'transition'].includes(key)) continue
-    domProps[key] = value
-  }
-  return domProps
-}
-
 describe('AnimatedPlaceholder', () => {
   beforeEach(() => {
     vi.useFakeTimers()

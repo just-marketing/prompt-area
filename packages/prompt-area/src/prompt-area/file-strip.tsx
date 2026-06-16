@@ -2,9 +2,70 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { File, FileText, FileSpreadsheet, FileCode, Image as ImageIcon } from 'lucide-react'
 import { RemoveButton } from './remove-button'
 import type { PromptAreaFile } from './types'
+
+type IconProps = { className?: string }
+
+/** Shared SVG wrapper matching the lucide icon defaults (no dependency). */
+function Svg({ className, children }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}>
+      {children}
+    </svg>
+  )
+}
+
+const FileBody = (
+  <>
+    <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+    <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  </>
+)
+
+const File = ({ className }: IconProps) => <Svg className={className}>{FileBody}</Svg>
+const FileText = ({ className }: IconProps) => (
+  <Svg className={className}>
+    {FileBody}
+    <path d="M10 9H8" />
+    <path d="M16 13H8" />
+    <path d="M16 17H8" />
+  </Svg>
+)
+const FileSpreadsheet = ({ className }: IconProps) => (
+  <Svg className={className}>
+    {FileBody}
+    <path d="M8 13h2" />
+    <path d="M14 13h2" />
+    <path d="M8 17h2" />
+    <path d="M14 17h2" />
+  </Svg>
+)
+const FileCode = ({ className }: IconProps) => (
+  <Svg className={className}>
+    {FileBody}
+    <path d="M10 12.5 8 15l2 2.5" />
+    <path d="m14 12.5 2 2.5-2 2.5" />
+  </Svg>
+)
+const ImageIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+    <circle cx="9" cy="9" r="2" />
+    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+  </Svg>
+)
 
 type FileStripProps = {
   files: PromptAreaFile[]

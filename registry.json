@@ -140,7 +140,6 @@
       "type": "registry:component",
       "title": "Chat Prompt Layout",
       "description": "A full-height chat layout with a scrollable messages area, a bottom-anchored prompt slot, and contextual scroll-to-top/bottom buttons.",
-      "dependencies": ["framer-motion"],
       "registryDependencies": [],
       "files": [
         {

@@ -106,11 +106,12 @@ The components are client components and carry a `'use client'` boundary, so you
 ## Dependencies
 
 - **Peer:** `react`, `react-dom` (>= 18)
-- **Runtime:** `clsx`, `tailwind-merge`, `lucide-react`, `framer-motion`
+- **Runtime:** `clsx`, `tailwind-merge` — the two `cn` helpers, both already
+  present in any shadcn/Tailwind project.
 
-In a shadcn/Tailwind project, `clsx`, `tailwind-merge`, and `lucide-react` are
-already part of your setup, so `framer-motion` is the only genuinely new
-dependency. No editor framework (ProseMirror, Slate, Lexical) is pulled in.
+No animation library and no icon library: animations use CSS (`tw-animate-css`
+utilities) and icons are inline SVGs. No editor framework (ProseMirror, Slate,
+Lexical) either.
 
 ESM-only. Requires Node 18+ / a modern bundler (Next.js, Vite, etc.).
 
