@@ -1,13 +1,13 @@
 'use client'
 
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-state'
 import {
+  PromptArea,
+  usePromptAreaState,
   mentionTrigger,
   commandTrigger,
   hashtagTrigger,
-} from '@/registry/new-york/blocks/prompt-area/trigger-presets'
-import { getChipsByTrigger } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
+  getChipsByTrigger,
+} from 'prompt-area'
 
 const AGENTS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },

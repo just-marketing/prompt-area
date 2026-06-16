@@ -1,0 +1,77 @@
+/**
+ * Prompt Area component styles.
+ *
+ * These are the hand-authored styles the components depend on (chips, the
+ * tap ripple, markdown markers, and stable selectors for the bars). They
+ * live in the `components` layer so consumer utilities win over them.
+ */
+@layer components {
+  .prompt-area-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: baseline;
+    margin: 0 1px;
+    background-color: var(--secondary);
+    color: var(--foreground);
+    transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prompt-area-chip:hover {
+    background-color: color-mix(in srgb, var(--secondary) 80%, var(--foreground) 20%);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .prompt-area-chip:active {
+    transform: scale(0.93);
+    background-color: color-mix(in srgb, var(--secondary) 70%, var(--foreground) 30%);
+    box-shadow: 0 0 0 transparent;
+    transition: background-color 0.05s ease, transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.05s ease;
+  }
+
+  @keyframes prompt-area-chip-ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .prompt-area-chip-ripple {
+    position: absolute;
+    border-radius: 50%;
+    width: 100%;
+    aspect-ratio: 1;
+    background: color-mix(in srgb, var(--foreground) 15%, transparent);
+    pointer-events: none;
+    animation: prompt-area-chip-ripple 0.45s ease-out forwards;
+  }
+  .prompt-area-md-marker {
+    font-size: 0;
+    display: inline;
+  }
+  .prompt-area-chip--inline {
+    padding: 0;
+    border-radius: 0;
+    margin: 0;
+    font-weight: 700;
+  }
+  .action-bar {
+    /* Base styles for action-bar; Tailwind utilities handle the layout.
+       This class exists as a stable selector for consumer overrides. */
+  }
+  .status-bar {
+    /* Base styles for status-bar; Tailwind utilities handle the layout.
+       This class exists as a stable selector for consumer overrides. */
+  }
+}

@@ -1,6 +1,6 @@
 # Prompt Area
 
-A production-grade `contentEditable` rich text input — distributed as a [shadcn registry](https://ui.shadcn.com/docs/registry) component. Zero extra dependencies. Just React + your existing shadcn/tailwind setup.
+A production-grade `contentEditable` rich text input. Install it **two ways from the same source**: an [npm package](https://www.npmjs.com/package/prompt-area) (`npm install prompt-area`) or a [shadcn registry](https://ui.shadcn.com/docs/registry) component you copy into your repo. Dependency-light either way.
 
 ![Prompt Area](public/opengraph-image.png)
 
@@ -8,11 +8,29 @@ A production-grade `contentEditable` rich text input — distributed as a [shadc
 
 Most rich text editors are full document editors shoehorned into chat inputs. Prompt Area is purpose-built for **prompt-style inputs** — think ChatGPT, Linear, Slack composer boxes — where you need mentions, slash commands, markdown, and chips without pulling in a heavyweight editor framework.
 
-- **No extra dependencies** — ships as source via shadcn, not an npm black box
-- **Own your code** — lives in your repo, fully customizable
+- **Zero extra dependencies** — no ProseMirror, Slate, or Lexical; just React + your stack
+- **Two distribution models** — `npm install` for a versioned package, or shadcn to own the source
 - **Tiny surface area** — one component, one hook, done
 
 ## Install
+
+### npm package
+
+```bash
+npm install prompt-area
+```
+
+```tsx
+'use client'
+import { PromptArea } from 'prompt-area'
+import 'prompt-area/styles.css'
+```
+
+The package ships a prebuilt, self-contained `styles.css` (no Tailwind required) plus an optional `prompt-area/tailwind.css` preset for token-level theming. See [`packages/prompt-area/README.md`](packages/prompt-area/README.md) for the full guide.
+
+### shadcn registry
+
+Prefer to own the source? Copy it into your project:
 
 ```bash
 npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
@@ -104,22 +122,22 @@ How Prompt Area stacks up against popular alternatives:
 
 > **Legend:** :white_check_mark: Full support :large_orange_diamond: Partial :x: None
 
-| Feature                      |    Prompt Area     |     react-mentions     |         Tiptap         |        Lexical         |        Plate.js        |       BlockNote        |       BlockSuite       | react-textarea-autosize |
-| ---------------------------- | :----------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :---------------------: |
-| @Mentions / Tagging          | :white_check_mark: |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
-| Slash Commands               | :white_check_mark: |          :x:           |   :white_check_mark:   |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
-| Auto-grow on Focus           | :white_check_mark: |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:    |
-| Inline Markdown              | :white_check_mark: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
-| Undo / Redo                  | :white_check_mark: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
-| File & Image Attachments     | :white_check_mark: |          :x:           | :large_orange_diamond: |          :x:           | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
-| Dark Mode                    | :white_check_mark: |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |           :x:           |
-| Accessibility (ARIA)         | :white_check_mark: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
-| IME Support (CJK)            | :white_check_mark: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
-| Copy/Paste Chip Preservation | :white_check_mark: |          :x:           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
-| Action Bar / Toolbar         | :white_check_mark: |          :x:           | :large_orange_diamond: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
-| Zero-config State Hook       | :white_check_mark: |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |          :x:           |           :x:           |
-| Bundle Approach              |  shadcn registry   |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |       npm package       |
-| Extra Dependencies           |       **0**        |           0            |           3+           |           2+           |           5+           |           5+           |           5+           |            0            |
+| Feature                      |      Prompt Area      |     react-mentions     |         Tiptap         |        Lexical         |        Plate.js        |       BlockNote        |       BlockSuite       | react-textarea-autosize |
+| ---------------------------- | :-------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: | :---------------------: |
+| @Mentions / Tagging          |  :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
+| Slash Commands               |  :white_check_mark:   |          :x:           |   :white_check_mark:   |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Auto-grow on Focus           |  :white_check_mark:   |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:    |
+| Inline Markdown              |  :white_check_mark:   |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |           :x:           |
+| Undo / Redo                  |  :white_check_mark:   |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| File & Image Attachments     |  :white_check_mark:   |          :x:           | :large_orange_diamond: |          :x:           | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Dark Mode                    |  :white_check_mark:   |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: |           :x:           |
+| Accessibility (ARIA)         |  :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
+| IME Support (CJK)            |  :white_check_mark:   | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:    |
+| Copy/Paste Chip Preservation |  :white_check_mark:   |          :x:           | :large_orange_diamond: | :large_orange_diamond: | :large_orange_diamond: |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Action Bar / Toolbar         |  :white_check_mark:   |          :x:           | :large_orange_diamond: |          :x:           |   :white_check_mark:   |   :white_check_mark:   |   :white_check_mark:   |           :x:           |
+| Zero-config State Hook       |  :white_check_mark:   |          :x:           |          :x:           |          :x:           |          :x:           |   :white_check_mark:   |          :x:           |           :x:           |
+| Bundle Approach              | npm + shadcn registry |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |      npm package       |       npm package       |
+| Extra Dependencies           |         **0**         |           0            |           3+           |           2+           |           5+           |           5+           |           5+           |            0            |
 
 ## Features
 
@@ -299,47 +317,59 @@ const triggers: TriggerConfig[] = [
 
 ## Development
 
+This is a pnpm workspace: the `prompt-area` npm package lives in `packages/prompt-area`, and the docs/demo site (the repo root) consumes it.
+
 ```bash
-pnpm install          # Install dependencies (pnpm required)
-pnpm dev              # Start dev server (Next.js + Turbopack)
-pnpm test             # Run tests (Vitest)
-pnpm test:watch       # Run tests in watch mode
-pnpm lint             # Lint with ESLint
-pnpm typecheck        # Type-check with tsc
-pnpm format           # Format with Prettier
-pnpm build            # Production build
-pnpm registry:build   # Build shadcn registry JSON
+pnpm install            # Install dependencies (pnpm required)
+pnpm dev                # Start the docs site (Next.js + Turbopack)
+pnpm test               # Run tests (Vitest)
+pnpm lint               # Lint with ESLint
+pnpm typecheck          # Type-check the docs site
+pnpm build              # Production build of the docs site
+pnpm registry:build     # Build shadcn registry JSON
+
+pnpm package:build      # Build the npm package (ESM + .d.ts + CSS)
+pnpm package:typecheck  # Type-check the package
+pnpm package:check      # Validate package exports & types (publint + attw)
 ```
 
 ### Project Structure
 
 ```
-registry/new-york/blocks/
-├── prompt-area/          # Core component
-│   ├── prompt-area.tsx       # Main component + rendering
-│   ├── types.ts              # All type definitions
-│   ├── prompt-area-engine.ts # contentEditable engine
-│   ├── prompt-area-list-ops.ts # List auto-formatting operations
-│   ├── use-prompt-area.ts    # State management hook
-│   ├── use-prompt-area-events.ts # Event handlers
-│   ├── use-prompt-area-state.ts # Zero-config state hook
-│   ├── use-trigger-search.ts # Trigger/search logic
-│   ├── trigger-popover.tsx   # Dropdown popover
-│   ├── trigger-presets.ts    # Pre-built trigger configs
-│   ├── dom-helpers.ts        # DOM utilities
-│   ├── cursor-helpers.ts     # Cursor/selection utilities
-│   ├── clipboard-helpers.ts  # Chip-preserving copy/paste
-│   ├── segment-helpers.ts    # Segment manipulation
-│   └── __tests__/            # Unit tests
-├── action-bar/           # Toolbar component
-├── status-bar/           # Status display component
-├── compact-prompt-area/  # Pill-shaped collapsible variant
-└── chat-prompt-layout/   # Chat UI layout component
+packages/prompt-area/        # The npm package (single source of truth)
+├── src/
+│   ├── prompt-area/             # Core component
+│   │   ├── prompt-area.tsx          # Main component + rendering
+│   │   ├── types.ts                 # All type definitions
+│   │   ├── prompt-area-engine.ts    # contentEditable engine
+│   │   ├── prompt-area-list-ops.ts  # List auto-formatting operations
+│   │   ├── use-prompt-area.ts        # State management hook
+│   │   ├── use-prompt-area-events.ts # Event handlers
+│   │   ├── use-prompt-area-state.ts  # Zero-config state hook
+│   │   ├── use-trigger-search.ts     # Trigger/search logic
+│   │   ├── trigger-popover.tsx       # Dropdown popover
+│   │   ├── trigger-presets.ts        # Pre-built trigger configs
+│   │   ├── dom-helpers.ts            # DOM utilities
+│   │   ├── cursor-helpers.ts         # Cursor/selection utilities
+│   │   ├── clipboard-helpers.ts      # Chip-preserving copy/paste
+│   │   ├── segment-helpers.ts        # Segment manipulation
+│   │   └── __tests__/                # Unit tests
+│   ├── action-bar/             # Toolbar component
+│   ├── status-bar/             # Status display component
+│   ├── compact-prompt-area/    # Pill-shaped collapsible variant
+│   ├── chat-prompt-layout/     # Chat UI layout component
+│   ├── helpers/                # Server-safe re-exports
+│   ├── styles/                 # Tokens, theme mappings, component CSS
+│   └── index.ts                # Public barrel
+├── tsup.config.ts              # Library build (ESM + .d.ts)
+└── package.json                # exports map, peer deps
 
-app/
-├── page.tsx              # Landing page
-├── examples/             # 20+ interactive demos
-└── sections/             # Landing page sections
+app/                            # Docs + demo site (Next.js)
+├── page.tsx                    # Landing page
+├── examples/                   # 20+ interactive demos
+└── sections/                   # Landing page sections
+
+registry.json                   # shadcn registry, built from packages/prompt-area/src
 ```
 
 ## Related Projects

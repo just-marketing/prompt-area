@@ -1,13 +1,46 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowDown, ArrowUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ChatPromptLayoutProps } from './types'
 import { useScrollObserver } from './use-scroll-observer'
 
 const NAV_BUTTON_CLASS =
-  'pointer-events-auto rounded-full border bg-background p-2 shadow-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors'
+  'pointer-events-auto rounded-full border bg-background p-2 shadow-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors animate-in fade-in-0 zoom-in-95 duration-150'
+
+type IconProps = { className?: string }
+
+/** Shared SVG wrapper matching the lucide icon defaults (no dependency). */
+function Svg({ className, children }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}>
+      {children}
+    </svg>
+  )
+}
+
+const ArrowUp = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="m5 12 7-7 7 7" />
+    <path d="M12 19V5" />
+  </Svg>
+)
+const ArrowDown = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="M12 5v14" />
+    <path d="m19 12-7 7-7-7" />
+  </Svg>
+)
 
 /**
  * ChatPromptLayout - A full-height chat layout with scrollable messages
@@ -54,38 +87,24 @@ export function ChatPromptLayout({
         {children}
 
         <div className="pointer-events-none sticky bottom-4 flex justify-end gap-2 px-4 pb-2">
-          <AnimatePresence>
-            {showGoToTop && (
-              <motion.button
-                key="go-to-top"
-                type="button"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.15 }}
-                onClick={scrollToTop}
-                className={NAV_BUTTON_CLASS}
-                aria-label="Scroll to top">
-                <ArrowUp className="size-4" />
-              </motion.button>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            {showGoToBottom && (
-              <motion.button
-                key="go-to-bottom"
-                type="button"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.15 }}
-                onClick={scrollToBottom}
-                className={NAV_BUTTON_CLASS}
-                aria-label="Scroll to bottom">
-                <ArrowDown className="size-4" />
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {showGoToTop && (
+            <button
+              type="button"
+              onClick={scrollToTop}
+              className={NAV_BUTTON_CLASS}
+              aria-label="Scroll to top">
+              <ArrowUp className="size-4" />
+            </button>
+          )}
+          {showGoToBottom && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className={NAV_BUTTON_CLASS}
+              aria-label="Scroll to bottom">
+              <ArrowDown className="size-4" />
+            </button>
+          )}
         </div>
       </div>
 

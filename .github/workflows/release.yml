@@ -1,0 +1,50 @@
+name: Release
+
+# Publishes the `prompt-area` npm package when a GitHub Release is published,
+# using npm "trusted publishing" (OIDC) — no NPM_TOKEN required, provenance is
+# attached automatically.
+#
+# ONE-TIME SETUP (required before the first OIDC release):
+# On npmjs.com → the prompt-area package → Settings → Trusted Publisher, add:
+#   - Publisher:  GitHub Actions
+#   - Repository: just-marketing/prompt-area
+#   - Workflow:   release.yml
+# Until that is configured, this workflow cannot authenticate to npm.
+#
+# To cut a release: bump packages/prompt-area/package.json "version", then
+# publish a GitHub Release — this workflow does the rest.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # required for npm OIDC trusted publishing
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - name: Build package
+        run: pnpm --filter prompt-area build
+      - name: Validate exports & types
+        run: pnpm --filter prompt-area lint:exports
+      # OIDC trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+      - name: Publish (OIDC trusted publishing, provenance automatic)
+        run: npm publish --access public
+        working-directory: packages/prompt-area

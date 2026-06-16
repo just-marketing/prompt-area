@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules
 package-lock.json
 /.pnp
 .pnp.*
@@ -42,3 +42,6 @@ next-env.d.ts
 
 # registry build output (generated at deploy time)
 public/r/
+
+# npm package build output
+packages/*/dist/

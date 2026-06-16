@@ -1,13 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 
 type AnimatedPlaceholderProps = {
   texts: string[]
   interval?: number
 }
 
+/**
+ * Cross-fading placeholder that rotates through `texts`.
+ *
+ * Each text is keyed so React remounts it on change, replaying the
+ * `tw-animate-css` enter animation (slide down + fade in). No animation
+ * library is required.
+ */
 export function AnimatedPlaceholder({ texts, interval = 3000 }: AnimatedPlaceholderProps) {
   const [index, setIndex] = useState(0)
 
@@ -26,16 +32,11 @@ export function AnimatedPlaceholder({ texts, interval = 3000 }: AnimatedPlacehol
       className="pointer-events-none absolute top-0 left-0 overflow-hidden text-sm leading-relaxed select-none"
       style={{ color: 'var(--prompt-area-placeholder, var(--muted-foreground))' }}
       aria-hidden="true">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={texts[index]}
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 20, opacity: 0 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}>
-          {texts[index]}
-        </motion.div>
-      </AnimatePresence>
+      <div
+        key={index}
+        className="animate-in fade-in-0 slide-in-from-top-4 duration-300 ease-in-out">
+        {texts[index]}
+      </div>
     </div>
   )
 }

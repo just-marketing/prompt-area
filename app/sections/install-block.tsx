@@ -93,12 +93,33 @@ export function InstallSection() {
         Installation
       </SectionHeading>
       <p className="text-muted-foreground text-sm">
-        Install individual components via the shadcn CLI, or use the AI agent prompt to set
-        everything up in one go.
+        Install as an npm package, add individual components via the shadcn CLI, or use the AI agent
+        prompt to set everything up in one go.
       </p>
 
-      {/* Component install commands as tabs */}
-      <ComponentInstallTabs />
+      {/* npm package */}
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">npm package</span>
+        <div className="bg-muted flex items-center justify-between gap-2 rounded-md px-3 py-2 font-mono text-sm">
+          <span className="min-w-0 truncate">npm install prompt-area</span>
+          <CopyButton text="npm install prompt-area" />
+        </div>
+        <p className="text-muted-foreground text-xs">
+          Then{' '}
+          <code className="bg-muted rounded px-1 py-0.5 font-mono">
+            {`import { PromptArea } from 'prompt-area'`}
+          </code>{' '}
+          and{' '}
+          <code className="bg-muted rounded px-1 py-0.5 font-mono">{`import 'prompt-area/styles.css'`}</code>{' '}
+          — works with zero Tailwind config.
+        </p>
+      </div>
+
+      {/* shadcn registry — component install commands as tabs */}
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">shadcn registry</span>
+        <ComponentInstallTabs />
+      </div>
 
       {/* AI Agent Prompt */}
       <div className="flex flex-col gap-2 pt-2">

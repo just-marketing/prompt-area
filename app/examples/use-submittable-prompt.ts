@@ -4,8 +4,9 @@ import { useCallback, useRef, useState } from 'react'
 import {
   segmentsToPlainText,
   isSegmentsEmpty,
-} from '@/registry/new-york/blocks/prompt-area/segment-helpers'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+  type Segment,
+  type PromptAreaHandle,
+} from 'prompt-area'
 
 // Snapshot kept around after submit so Reset can restore the exact input.
 type Submission<F> = { text: string; segments: Segment[]; files: F[] }

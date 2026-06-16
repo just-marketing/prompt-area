@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, type Segment, type TriggerConfig } from 'prompt-area'
 import { USERS } from './mock-data'
 
 export function DarkThemePreview() {

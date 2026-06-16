@@ -20,15 +20,15 @@ import {
   X,
   FileText,
 } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-  PromptAreaFile,
-} from '@/registry/new-york/blocks/prompt-area/types'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
+import {
+  PromptArea,
+  ActionBar,
+  StatusBar,
+  type Segment,
+  type TriggerConfig,
+  type PromptAreaHandle,
+  type PromptAreaFile,
+} from 'prompt-area'
 import { USERS, COMMANDS, TAGS } from './mock-data'
 
 type SubmissionData = {

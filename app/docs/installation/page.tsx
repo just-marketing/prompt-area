@@ -8,7 +8,7 @@ const SITE_URL = 'https://prompt-area.com'
 export const metadata: Metadata = {
   title: 'Installation',
   description:
-    'Install Prompt Area from the shadcn registry with a single command. Zero extra dependencies — just React and your existing Tailwind/shadcn setup.',
+    'Install Prompt Area as an npm package (npm install prompt-area) or from the shadcn registry with a single command. Zero extra dependencies — just React and your existing Tailwind/shadcn setup.',
   alternates: { canonical: `${SITE_URL}/docs/installation` },
 }
 
@@ -20,23 +20,24 @@ function howToSchema() {
     '@type': 'HowTo',
     name: 'Install Prompt Area in a React project',
     description:
-      'Add the Prompt Area React component to a Tailwind + shadcn/ui project from the shadcn registry with a single command. Zero extra dependencies.',
+      'Add the Prompt Area React component to your project as an npm package or from the shadcn registry. Zero extra dependencies.',
     totalTime: 'PT2M',
     tool: [
+      { '@type': 'HowToTool', name: 'npm' },
       { '@type': 'HowToTool', name: 'shadcn CLI' },
       { '@type': 'HowToTool', name: 'npx' },
     ],
-    supply: [{ '@type': 'HowToSupply', name: 'A React project using Tailwind CSS and shadcn/ui' }],
+    supply: [{ '@type': 'HowToSupply', name: 'A React project (Next.js, Vite, or similar)' }],
     step: [
       {
         '@type': 'HowToStep',
-        name: 'Prerequisites',
-        text: 'Use a React project with Tailwind CSS and shadcn/ui. If shadcn is not set up yet, run npx shadcn@latest init first.',
-        url: `${SITE_URL}/docs/installation#prerequisites`,
+        name: 'Install as an npm package',
+        text: "Run npm install prompt-area, then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css'. No Tailwind setup required.",
+        url: `${SITE_URL}/docs/installation#npm`,
       },
       {
         '@type': 'HowToStep',
-        name: 'Install the component',
+        name: 'Or install from the shadcn registry',
         text: 'Run npx shadcn@latest add https://prompt-area.com/r/prompt-area.json to copy the PromptArea component, its types, the usePromptAreaState hook, trigger presets, and segment helpers into your project.',
         url: `${SITE_URL}/docs/installation#install`,
       },
@@ -59,20 +60,44 @@ export default function InstallationPage() {
       />
       <h1 className="text-3xl font-bold tracking-tight">Installation</h1>
       <DocsLead>
-        Prompt Area installs through the shadcn registry. One command copies the component, its
-        types, helpers, and the segment engine into your project.
+        Prompt Area installs two ways from the same source: as an npm package, or through the shadcn
+        registry. Use npm for a versioned dependency; use shadcn to copy the source into your
+        project and own it.
       </DocsLead>
 
-      <DocsH2 id="prerequisites">Prerequisites</DocsH2>
+      <DocsH2 id="npm">Install as an npm package</DocsH2>
+      <CodeBlock lang="bash" code="npm install prompt-area" />
       <DocsP>
-        A React project using Tailwind CSS and shadcn/ui. If you do not have shadcn set up yet, run{' '}
+        Import the component and the prebuilt stylesheet. The stylesheet is self-contained, so no
+        Tailwind setup is required:
+      </DocsP>
+      <CodeBlock
+        lang="tsx"
+        code={`'use client'
+import { PromptArea } from 'prompt-area'
+import 'prompt-area/styles.css'`}
+      />
+      <DocsP>
+        Everything is exported from the package — components, the{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">usePromptAreaState</code>{' '}
+        hook, trigger presets, segment helpers, and types. If you run Tailwind yourself, import{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+          prompt-area/tailwind.css
+        </code>{' '}
+        instead for token-level theming.
+      </DocsP>
+
+      <DocsH2 id="prerequisites">Prerequisites for the shadcn registry</DocsH2>
+      <DocsP>
+        The shadcn route expects a React project using Tailwind CSS and shadcn/ui. If you do not
+        have shadcn set up yet, run{' '}
         <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
           npx shadcn@latest init
         </code>{' '}
         first.
       </DocsP>
 
-      <DocsH2 id="install">Install the component</DocsH2>
+      <DocsH2 id="install">Install from the shadcn registry</DocsH2>
       <CodeBlock
         lang="bash"
         code="npx shadcn@latest add https://prompt-area.com/r/prompt-area.json"

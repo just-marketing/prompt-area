@@ -2,10 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Plus, ArrowUp, ChevronDown, GitBranch, Cloud, LayoutList, File, X } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, ActionBar, StatusBar, type Segment } from 'prompt-area'
 import { useSubmittablePrompt } from './use-submittable-prompt'
 import { SubmittedPreview } from './submitted-preview'
 

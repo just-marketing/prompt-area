@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { PlusCircle, AtSign, ArrowUp } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, ActionBar, type Segment } from 'prompt-area'
 
 export function ActionBarDisabledExample() {
   const [segments] = useState<Segment[]>([{ type: 'text', text: 'This input is disabled...' }])

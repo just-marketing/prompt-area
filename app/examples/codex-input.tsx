@@ -14,14 +14,14 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { isSegmentsEmpty } from '@/registry/new-york/blocks/prompt-area/segment-helpers'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaFile,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import {
+  PromptArea,
+  ActionBar,
+  isSegmentsEmpty,
+  type Segment,
+  type TriggerConfig,
+  type PromptAreaFile,
+} from 'prompt-area'
 import { useSubmittablePrompt } from './use-submittable-prompt'
 import { SubmittedPreview } from './submitted-preview'
 
