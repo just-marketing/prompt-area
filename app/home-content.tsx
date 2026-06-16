@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { useCallback, useState } from 'react'
+import { CodeTabs } from '@/components/code-tabs'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -95,10 +96,8 @@ const COMPONENTS = [
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
 ]
 
-function InstallCommand() {
-  const [method, setMethod] = useState<InstallMethod>('npm')
+function CopyCommand({ cmd }: { cmd: string }) {
   const [copied, setCopied] = useState(false)
-  const cmd = INSTALL_CMDS[method]
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(cmd).then(() => {
       setCopied(true)
@@ -107,40 +106,32 @@ function InstallCommand() {
   }, [cmd])
 
   return (
-    <div className="flex w-full max-w-xl flex-col gap-2">
-      <div
-        className="flex items-center gap-1 self-start"
-        role="tablist"
-        aria-label="Install method">
-        {(Object.keys(INSTALL_CMDS) as InstallMethod[]).map((m) => (
-          <button
-            key={m}
-            type="button"
-            role="tab"
-            aria-selected={method === m}
-            onClick={() => setMethod(m)}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              method === m
-                ? 'bg-foreground text-background'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}>
-            {m}
-          </button>
-        ))}
-      </div>
-      <button
-        onClick={copy}
-        className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
-        <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
-        <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
-          {cmd}
-        </code>
-        {copied ? (
-          <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
-        ) : (
-          <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
-        )}
-      </button>
+    <button
+      onClick={copy}
+      className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
+      <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
+      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
+        {cmd}
+      </code>
+      {copied ? (
+        <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
+      ) : (
+        <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
+      )}
+    </button>
+  )
+}
+
+function InstallCommand() {
+  return (
+    <div className="w-full max-w-xl">
+      <CodeTabs
+        label="Install method"
+        tabs={(Object.keys(INSTALL_CMDS) as InstallMethod[]).map((m) => ({
+          label: m,
+          content: <CopyCommand cmd={INSTALL_CMDS[m]} />,
+        }))}
+      />
     </div>
   )
 }

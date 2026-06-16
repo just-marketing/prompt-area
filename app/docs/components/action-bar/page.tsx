@@ -31,7 +31,7 @@ export default function ActionBarPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <InstallTabs exportName="ActionBar" block="action-bar" shadcnPath="action-bar/action-bar" />
+      <InstallTabs exportName="ActionBar" block="action-bar" />
 
       <DocsH2 id="examples">Examples</DocsH2>
       <DocsExample

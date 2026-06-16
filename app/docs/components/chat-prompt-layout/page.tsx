@@ -23,11 +23,7 @@ export default function ChatPromptLayoutPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <InstallTabs
-        exportName="ChatPromptLayout"
-        block="chat-prompt-layout"
-        shadcnPath="chat-prompt-layout/chat-prompt-layout"
-      />
+      <InstallTabs exportName="ChatPromptLayout" block="chat-prompt-layout" />
 
       <DocsH2 id="example">Example</DocsH2>
       <DocsExample

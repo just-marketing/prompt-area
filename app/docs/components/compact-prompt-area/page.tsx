@@ -23,11 +23,7 @@ export default function CompactPromptAreaPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <InstallTabs
-        exportName="CompactPromptArea"
-        block="compact-prompt-area"
-        shadcnPath="compact-prompt-area/compact-prompt-area"
-      />
+      <InstallTabs exportName="CompactPromptArea" block="compact-prompt-area" />
 
       <DocsH2 id="example">Example</DocsH2>
       <DocsExample

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
-import { CodeTabs } from '@/components/docs/code-tabs'
+import { CodeTabs } from '@/components/code-tabs'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -31,7 +31,7 @@ export default function QuickStartPage() {
         component:
       </DocsP>
       <CodeTabs
-        label="Install method"
+        label="Import style"
         tabs={[
           {
             label: 'npm',
@@ -70,8 +70,8 @@ export function ChatInput() {
               <CodeBlock
                 code={`'use client'
 
-import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
 
 export function ChatInput() {
   const { bind, plainText, isEmpty, clear } = usePromptAreaState()
@@ -116,7 +116,7 @@ export function ChatInput() {
         code={`import {
   mentionTrigger,
   commandTrigger,
-} from '@/components/prompt-area/trigger-presets'
+} from '@/components/trigger-presets'
 
 const USERS = [
   { value: 'ana', label: 'Ana', description: 'Designer' },
@@ -145,7 +145,7 @@ const search = (items) => (q) =>
         and send exactly what your prompt needs:
       </DocsP>
       <CodeBlock
-        code={`import { getChipsByTrigger } from '@/components/prompt-area/segment-helpers'
+        code={`import { getChipsByTrigger } from '@/components/segment-helpers'
 
 const mentions = getChipsByTrigger(bind.value, '@').map((c) => c.value)
 const command = getChipsByTrigger(bind.value, '/')[0]?.value

@@ -128,7 +128,7 @@ export default function HooksApiPage() {
         ]}
       />
       <CodeBlock
-        code={`import { getChipsByTrigger } from '@/components/prompt-area/segment-helpers'
+        code={`import { getChipsByTrigger } from '@/components/segment-helpers'
 
 const mentions = getChipsByTrigger(bind.value, '@').map((c) => c.value)`}
       />

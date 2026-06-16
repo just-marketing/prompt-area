@@ -30,7 +30,7 @@ export default function StatusBarPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <InstallTabs exportName="StatusBar" block="status-bar" shadcnPath="status-bar/status-bar" />
+      <InstallTabs exportName="StatusBar" block="status-bar" />
 
       <DocsH2 id="examples">Examples</DocsH2>
       <DocsExample

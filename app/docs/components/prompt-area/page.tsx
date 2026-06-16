@@ -26,11 +26,7 @@ export default function PromptAreaComponentPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <InstallTabs
-        exportName="PromptArea"
-        block="prompt-area"
-        shadcnPath="prompt-area/prompt-area"
-      />
+      <InstallTabs exportName="PromptArea" block="prompt-area" />
 
       <DocsH2 id="basic-usage">Basic usage</DocsH2>
       <DocsP>
@@ -43,8 +39,8 @@ export default function PromptAreaComponentPage() {
         hook handles that for you.
       </DocsP>
       <CodeBlock
-        code={`import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
+        code={`import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
 
 const { bind } = usePromptAreaState()
 

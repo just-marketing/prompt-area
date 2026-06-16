@@ -1,5 +1,5 @@
 import { CodeBlock } from '@/components/code-block'
-import { CodeTabs } from './code-tabs'
+import { CodeTabs } from '@/components/code-tabs'
 
 /**
  * Dual install + import for a single block, shown as npm / shadcn tabs.
@@ -13,14 +13,14 @@ import { CodeTabs } from './code-tabs'
 export function InstallTabs({
   exportName,
   block,
-  shadcnPath,
 }: {
   /** Named export(s) to import, e.g. `PromptArea` or `PromptArea, ActionBar`. */
   exportName: string
-  /** Registry file name (without extension), e.g. `prompt-area`. */
+  /**
+   * Registry file name (without extension), e.g. `prompt-area`. shadcn copies
+   * each file flat into `@/components`, so this is also the shadcn import path.
+   */
   block: string
-  /** Path under the shadcn `@/components` alias, e.g. `prompt-area/prompt-area`. */
-  shadcnPath: string
 }) {
   const npmTab = (
     <>
@@ -34,7 +34,7 @@ export function InstallTabs({
         lang="bash"
         code={`npx shadcn@latest add https://prompt-area.com/r/${block}.json`}
       />
-      <CodeBlock lang="tsx" code={`import { ${exportName} } from '@/components/${shadcnPath}'`} />
+      <CodeBlock lang="tsx" code={`import { ${exportName} } from '@/components/${block}'`} />
     </>
   )
 
