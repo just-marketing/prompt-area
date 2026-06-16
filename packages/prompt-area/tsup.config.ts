@@ -27,7 +27,10 @@ const shared = {
   format: ['esm'],
   dts: true,
   treeshake: true,
-  sourcemap: true,
+  minify: true,
+  // No source maps in the published package — they more than doubled the
+  // tarball (~273kB of .map files) and aren't needed by consumers.
+  sourcemap: false,
   clean: false,
   external: ['react', 'react-dom', 'react/jsx-runtime'],
 } satisfies Options

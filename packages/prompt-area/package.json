@@ -78,7 +78,13 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "tailwindcss": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   },
   "dependencies": {
     "clsx": "^2.1.1",
