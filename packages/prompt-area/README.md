@@ -1,5 +1,9 @@
 # prompt-area
 
+[![npm version](https://img.shields.io/npm/v/prompt-area.svg)](https://www.npmjs.com/package/prompt-area)
+[![npm downloads](https://img.shields.io/npm/dm/prompt-area.svg)](https://www.npmjs.com/package/prompt-area)
+[![license](https://img.shields.io/npm/l/prompt-area.svg)](https://github.com/just-marketing/prompt-area/blob/main/LICENSE)
+
 An opinionated, dependency-light React rich-text **prompt input** — trigger-based chips (`@mentions`, `/commands`, `#tags`), inline markdown, undo/redo, file & image attachments, and a complete chat-input layout.
 
 Ships **two ways** from the same source:
