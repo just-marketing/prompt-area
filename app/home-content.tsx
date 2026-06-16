@@ -67,7 +67,12 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
-const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
+const INSTALL_CMDS = {
+  npm: 'npm install prompt-area',
+  shadcn: 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json',
+} as const
+
+type InstallMethod = keyof typeof INSTALL_CMDS
 
 const COMPONENTS = [
   { href: '/docs/components/prompt-area', title: 'Prompt Area', desc: 'The core rich-text input.' },
@@ -91,28 +96,52 @@ const COMPONENTS = [
 ]
 
 function InstallCommand() {
+  const [method, setMethod] = useState<InstallMethod>('npm')
   const [copied, setCopied] = useState(false)
+  const cmd = INSTALL_CMDS[method]
   const copy = useCallback(() => {
-    navigator.clipboard?.writeText(INSTALL_CMD).then(() => {
+    navigator.clipboard?.writeText(cmd).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     })
-  }, [])
+  }, [cmd])
 
   return (
-    <button
-      onClick={copy}
-      className="group bg-muted/50 hover:bg-muted flex w-full max-w-xl items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
-      <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
-      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
-        {INSTALL_CMD}
-      </code>
-      {copied ? (
-        <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
-      ) : (
-        <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
-      )}
-    </button>
+    <div className="flex w-full max-w-xl flex-col gap-2">
+      <div
+        className="flex items-center gap-1 self-start"
+        role="tablist"
+        aria-label="Install method">
+        {(Object.keys(INSTALL_CMDS) as InstallMethod[]).map((m) => (
+          <button
+            key={m}
+            type="button"
+            role="tab"
+            aria-selected={method === m}
+            onClick={() => setMethod(m)}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              method === m
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}>
+            {m}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={copy}
+        className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
+        <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
+        <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
+          {cmd}
+        </code>
+        {copied ? (
+          <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
+        ) : (
+          <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
+        )}
+      </button>
+    </div>
   )
 }
 
@@ -122,7 +151,7 @@ export default function HomeContent() {
       {/* Hero */}
       <section className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 pt-16 pb-12 text-center sm:pt-24">
         <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-          shadcn registry · zero dependencies
+          npm + shadcn · zero dependencies
         </span>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
           The shadcn chat input for React
@@ -248,7 +277,7 @@ export default function HomeContent() {
       <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-20 text-center">
         <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
         <p className="text-muted-foreground max-w-xl">
-          Install from the shadcn registry and own the source. Zero extra dependencies.
+          Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
         </p>
         <InstallCommand />
         <div className="flex flex-wrap items-center justify-center gap-3">
