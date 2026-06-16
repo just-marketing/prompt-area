@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { DocsLead, DocsP, DocsH2, DocsH3, DocsUl } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import { BasicExample, basicCode } from '@/app/examples'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -24,6 +25,9 @@ export default function PromptAreaComponentPage() {
         handle.
       </DocsLead>
 
+      <DocsH2 id="install">Install</DocsH2>
+      <InstallTabs exportName="PromptArea" block="prompt-area" />
+
       <DocsH2 id="basic-usage">Basic usage</DocsH2>
       <DocsP>
         PromptArea is a controlled component: you own an array of{' '}
@@ -35,8 +39,8 @@ export default function PromptAreaComponentPage() {
         hook handles that for you.
       </DocsP>
       <CodeBlock
-        code={`import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
+        code={`import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
 
 const { bind } = usePromptAreaState()
 

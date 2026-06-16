@@ -98,8 +98,8 @@ export const POSTS: Post[] = [
         type: 'code',
         code: `'use client'
 
-import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
 
 export function ChatInput() {
   const { bind, plainText, isEmpty, clear } = usePromptAreaState()
@@ -127,7 +127,7 @@ export function ChatInput() {
       },
       {
         type: 'code',
-        code: `import { mentionTrigger } from '@/components/prompt-area/trigger-presets'
+        code: `import { mentionTrigger } from '@/components/trigger-presets'
 
 const AGENTS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },
@@ -150,7 +150,7 @@ const searchAgents = (q: string) =>
       },
       {
         type: 'code',
-        code: `import { commandTrigger } from '@/components/prompt-area/trigger-presets'
+        code: `import { commandTrigger } from '@/components/trigger-presets'
 
 const COMMANDS = [
   { value: 'summarize', label: 'summarize', description: 'Summarize the thread' },
@@ -175,7 +175,7 @@ const searchCommands = (q: string) =>
       },
       {
         type: 'code',
-        code: `import { getChipsByTrigger } from '@/components/prompt-area/segment-helpers'
+        code: `import { getChipsByTrigger } from '@/components/segment-helpers'
 
 const mentions = getChipsByTrigger(bind.value, '@')
 const commands = getChipsByTrigger(bind.value, '/')
@@ -289,9 +289,9 @@ await runChat({
       {
         type: 'code',
         code: `// After — Prompt Area
-import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
-import { mentionTrigger } from '@/components/prompt-area/trigger-presets'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { mentionTrigger } from '@/components/trigger-presets'
 
 const { bind } = usePromptAreaState()
 const searchUsers = (q: string) =>
@@ -315,7 +315,7 @@ const searchUsers = (q: string) =>
       },
       {
         type: 'code',
-        code: `import { getChipsByTrigger } from '@/components/prompt-area/segment-helpers'
+        code: `import { getChipsByTrigger } from '@/components/segment-helpers'
 
 const mentioned = getChipsByTrigger(bind.value, '@').map((c) => c.value)`,
       },
@@ -326,7 +326,7 @@ const mentioned = getChipsByTrigger(bind.value, '@').map((c) => c.value)`,
       },
       {
         type: 'code',
-        code: `import { commandTrigger, hashtagTrigger } from '@/components/prompt-area/trigger-presets'
+        code: `import { commandTrigger, hashtagTrigger } from '@/components/trigger-presets'
 
 <PromptArea
   {...bind}
@@ -425,9 +425,9 @@ const searchCommands = (q: string) =>
         type: 'code',
         code: `'use client'
 
-import { PromptArea } from '@/components/prompt-area/prompt-area'
-import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
-import { commandTrigger } from '@/components/prompt-area/trigger-presets'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { commandTrigger } from '@/components/trigger-presets'
 
 export function CommandInput() {
   const { bind } = usePromptAreaState()
@@ -448,7 +448,7 @@ export function CommandInput() {
       },
       {
         type: 'code',
-        code: `import { getChipsByTrigger } from '@/components/prompt-area/segment-helpers'
+        code: `import { getChipsByTrigger } from '@/components/segment-helpers'
 
 function handleSubmit() {
   const command = getChipsByTrigger(bind.value, '/')[0]?.value

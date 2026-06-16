@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { useCallback, useState } from 'react'
+import { CodeTabs } from '@/components/code-tabs'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -67,7 +68,12 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
-const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
+const INSTALL_CMDS = {
+  npm: 'npm install prompt-area',
+  shadcn: 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json',
+} as const
+
+type InstallMethod = keyof typeof INSTALL_CMDS
 
 const COMPONENTS = [
   { href: '/docs/components/prompt-area', title: 'Prompt Area', desc: 'The core rich-text input.' },
@@ -90,22 +96,22 @@ const COMPONENTS = [
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
 ]
 
-function InstallCommand() {
+function CopyCommand({ cmd }: { cmd: string }) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
-    navigator.clipboard?.writeText(INSTALL_CMD).then(() => {
+    navigator.clipboard?.writeText(cmd).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     })
-  }, [])
+  }, [cmd])
 
   return (
     <button
       onClick={copy}
-      className="group bg-muted/50 hover:bg-muted flex w-full max-w-xl items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
+      className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
       <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
       <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
-        {INSTALL_CMD}
+        {cmd}
       </code>
       {copied ? (
         <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
@@ -116,13 +122,27 @@ function InstallCommand() {
   )
 }
 
+function InstallCommand() {
+  return (
+    <div className="w-full max-w-xl">
+      <CodeTabs
+        label="Install method"
+        tabs={(Object.keys(INSTALL_CMDS) as InstallMethod[]).map((m) => ({
+          label: m,
+          content: <CopyCommand cmd={INSTALL_CMDS[m]} />,
+        }))}
+      />
+    </div>
+  )
+}
+
 export default function HomeContent() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
       <section className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 pt-16 pb-12 text-center sm:pt-24">
         <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-          shadcn registry · zero dependencies
+          npm + shadcn · zero dependencies
         </span>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
           The shadcn chat input for React
@@ -248,7 +268,7 @@ export default function HomeContent() {
       <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-20 text-center">
         <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
         <p className="text-muted-foreground max-w-xl">
-          Install from the shadcn registry and own the source. Zero extra dependencies.
+          Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
         </p>
         <InstallCommand />
         <div className="flex flex-wrap items-center justify-center gap-3">

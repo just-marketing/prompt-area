@@ -1,6 +1,6 @@
 {
   "name": "prompt-area",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An opinionated, dependency-light React rich-text prompt input with trigger-based chips (@mentions, /commands, #tags), inline markdown, undo/redo, file & image attachments, and a complete chat-input layout. Ships as an npm package or a shadcn registry.",
   "keywords": [
     "react",
@@ -29,7 +29,8 @@
     "**/*.css"
   ],
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -78,7 +79,17 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "tailwindcss": ">=4",
+    "tw-animate-css": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    },
+    "tw-animate-css": {
+      "optional": true
+    }
   },
   "dependencies": {
     "clsx": "^2.1.1",

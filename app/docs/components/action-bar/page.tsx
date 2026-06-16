@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import { CodeBlock } from '@/components/code-block'
 import { DocsLead, DocsH2 } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import {
   ActionBarFullExample,
   actionBarFullCode,
@@ -31,10 +31,7 @@ export default function ActionBarPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <CodeBlock
-        lang="bash"
-        code="npx shadcn@latest add https://prompt-area.com/r/action-bar.json"
-      />
+      <InstallTabs exportName="ActionBar" block="action-bar" />
 
       <DocsH2 id="examples">Examples</DocsH2>
       <DocsExample

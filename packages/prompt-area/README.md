@@ -110,6 +110,9 @@ The components are client components and carry a `'use client'` boundary, so you
 ## Dependencies
 
 - **Peer:** `react`, `react-dom` (>= 18)
+- **Optional peer:** `tailwindcss` (>= 4) and `tw-animate-css` — only needed if
+  you use the `prompt-area/tailwind.css` preset. The prebuilt
+  `prompt-area/styles.css` needs neither.
 - **Runtime:** `clsx`, `tailwind-merge` — the two `cn` helpers, both already
   present in any shadcn/Tailwind project.
 

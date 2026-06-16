@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { CodeBlock } from '@/components/code-block'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import { DocsLead, DocsH2 } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
 import {
@@ -30,10 +30,7 @@ export default function StatusBarPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <CodeBlock
-        lang="bash"
-        code="npx shadcn@latest add https://prompt-area.com/r/status-bar.json"
-      />
+      <InstallTabs exportName="StatusBar" block="status-bar" />
 
       <DocsH2 id="examples">Examples</DocsH2>
       <DocsExample
