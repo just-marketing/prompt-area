@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, type Segment } from 'prompt-area'
 
 const USERS = [
   { value: 'copywriter', label: 'Copywriter', description: 'Ad copy & content' },

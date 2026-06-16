@@ -1,8 +1,7 @@
 'use client'
 
 import { Mic } from 'lucide-react'
-import { CompactPromptArea } from '@/registry/new-york/blocks/compact-prompt-area/compact-prompt-area'
-import type { TriggerConfig } from '@/registry/new-york/blocks/prompt-area/types'
+import { CompactPromptArea, type TriggerConfig } from 'prompt-area'
 import { useSubmittablePrompt } from './use-submittable-prompt'
 import { SubmittedPreview } from './submitted-preview'
 

@@ -14,6 +14,12 @@ export default defineConfig({
     // package; this keeps existing '@/registry/new-york/blocks/*' imports
     // (app + tests) pointing at the package source.
     alias: [
+      // Dogfood the package: the docs app imports 'prompt-area' (the public
+      // barrel) and resolves to source, so no build step is needed in dev/CI.
+      {
+        find: /^prompt-area$/,
+        replacement: path.resolve(__dirname, 'packages/prompt-area/src/index.ts'),
+      },
       {
         find: /^@\/registry\/new-york\/blocks\/(.*)$/,
         replacement: path.resolve(__dirname, 'packages/prompt-area/src/$1'),

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, PromptAreaImage } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, type Segment, type PromptAreaImage } from 'prompt-area'
 
 const SAMPLE_IMAGES: PromptAreaImage[] = [
   {

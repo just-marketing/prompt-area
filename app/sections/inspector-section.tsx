@@ -1,12 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaHandle,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, type Segment, type TriggerConfig, type PromptAreaHandle } from 'prompt-area'
 import { USERS, COMMANDS, TAGS } from './mock-data'
 
 export function InspectorSection() {

@@ -6,11 +6,7 @@ import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
-import type {
-  Segment,
-  TriggerConfig,
-  PromptAreaFile,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),

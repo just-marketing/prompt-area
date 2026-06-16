@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import type { Segment, PromptAreaFile } from '@/registry/new-york/blocks/prompt-area/types'
+import { PromptArea, type Segment, type PromptAreaFile } from 'prompt-area'
 
 const SAMPLE_FILES: PromptAreaFile[] = [
   { id: 'file-1', name: 'quarterly-report.pdf', size: 2_458_000, type: 'application/pdf' },

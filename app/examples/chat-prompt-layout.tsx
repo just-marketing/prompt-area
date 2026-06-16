@@ -2,11 +2,14 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { ChatPromptLayout } from '@/registry/new-york/blocks/chat-prompt-layout/chat-prompt-layout'
-import { segmentsToPlainText } from '@/registry/new-york/blocks/prompt-area/prompt-area-engine'
-import type { Segment, PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
+import {
+  PromptArea,
+  ActionBar,
+  ChatPromptLayout,
+  segmentsToPlainText,
+  type Segment,
+  type PromptAreaHandle,
+} from 'prompt-area'
 
 type Message = { id: number; role: 'user' | 'assistant'; content: string }
 
