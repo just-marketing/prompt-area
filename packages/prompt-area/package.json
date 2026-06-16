@@ -73,6 +73,9 @@
     "lint:exports": "publint && attw --pack . --profile esm-only --exclude-entrypoints styles.css tailwind.css",
     "prepublishOnly": "pnpm run build"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"

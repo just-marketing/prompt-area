@@ -706,7 +706,7 @@ A full-height chat layout with scrollable messages and a bottom-anchored prompt 
 npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json
 ```
 
-**Note**: This component uses `framer-motion` for scroll button animations.
+**Note**: Scroll button animations use CSS (`tw-animate-css` utilities) — no animation library required.
 
 #### ChatPromptLayout Props
 
@@ -723,7 +723,7 @@ npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json
 Scroll buttons appear/hide with hysteresis to prevent flicker:
 - **"Go to top"** appears when scrolled > 300px from top, hides when < 100px from top
 - **"Go to bottom"** appears when scrolled > 300px from bottom, hides when < 100px from bottom
-- Buttons use `smooth` scrolling and `framer-motion` enter/exit animations
+- Buttons use `smooth` scrolling and CSS enter animations (`tw-animate-css`)
 
 #### ChatPromptLayout Example
 
@@ -814,7 +814,7 @@ See the live demo at https://prompt-area.com/styles#codex
 When `placeholder` is passed as a `string[]`, the placeholder animates between items:
 
 - Rotates through the array on a 3-second interval
-- Uses `framer-motion` for slide-up/slide-down transitions (300ms, easeInOut)
+- Uses a CSS slide-and-fade transition (`tw-animate-css`, 300ms) — no animation library
 - Hidden from screen readers (`aria-hidden="true"`)
 - Automatically stops cycling when only one string is provided
 
@@ -1071,7 +1071,7 @@ On every input event, the editor DOM is normalized:
 | `action-bar`         | `npx shadcn@latest add https://prompt-area.com/r/action-bar.json`  | React + shadcn/tailwind |
 | `status-bar`         | `npx shadcn@latest add https://prompt-area.com/r/status-bar.json`  | React + shadcn/tailwind |
 | `compact-prompt-area`| `npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json` | prompt-area |
-| `chat-prompt-layout` | `npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json`  | framer-motion |
+| `chat-prompt-layout` | `npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json`  | React + shadcn/tailwind |
 
 ### Exported Modules
 
