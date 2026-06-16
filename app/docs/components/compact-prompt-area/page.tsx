@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { CodeBlock } from '@/components/code-block'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import { DocsLead, DocsH2 } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
 import { CompactPromptAreaExample, compactPromptAreaCode } from '@/app/examples'
@@ -23,9 +23,10 @@ export default function CompactPromptAreaPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <CodeBlock
-        lang="bash"
-        code="npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json"
+      <InstallTabs
+        exportName="CompactPromptArea"
+        block="compact-prompt-area"
+        shadcnPath="compact-prompt-area/compact-prompt-area"
       />
 
       <DocsH2 id="example">Example</DocsH2>

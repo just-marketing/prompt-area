@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import { CodeBlock } from '@/components/code-block'
 import { DocsLead, DocsH2 } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import { ChatPromptLayoutExample, chatPromptLayoutCode } from '@/app/examples'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -23,9 +23,10 @@ export default function ChatPromptLayoutPage() {
       </DocsLead>
 
       <DocsH2 id="install">Install</DocsH2>
-      <CodeBlock
-        lang="bash"
-        code="npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json"
+      <InstallTabs
+        exportName="ChatPromptLayout"
+        block="chat-prompt-layout"
+        shadcnPath="chat-prompt-layout/chat-prompt-layout"
       />
 
       <DocsH2 id="example">Example</DocsH2>

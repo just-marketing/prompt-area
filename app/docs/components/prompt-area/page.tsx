@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { DocsLead, DocsP, DocsH2, DocsH3, DocsUl } from '@/components/docs/docs-primitives'
 import { DocsExample } from '@/components/docs/docs-example'
+import { InstallTabs } from '@/components/docs/install-tabs'
 import { BasicExample, basicCode } from '@/app/examples'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -23,6 +24,13 @@ export default function PromptAreaComponentPage() {
         chip segments, with triggers, inline markdown, attachments, undo/redo, and an imperative
         handle.
       </DocsLead>
+
+      <DocsH2 id="install">Install</DocsH2>
+      <InstallTabs
+        exportName="PromptArea"
+        block="prompt-area"
+        shadcnPath="prompt-area/prompt-area"
+      />
 
       <DocsH2 id="basic-usage">Basic usage</DocsH2>
       <DocsP>

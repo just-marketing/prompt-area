@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
+import { CodeTabs } from '@/components/docs/code-tabs'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -29,8 +30,45 @@ export default function QuickStartPage() {
         <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">bind</code> onto the
         component:
       </DocsP>
-      <CodeBlock
-        code={`'use client'
+      <CodeTabs
+        label="Install method"
+        tabs={[
+          {
+            label: 'npm',
+            content: (
+              <CodeBlock
+                code={`'use client'
+
+import { PromptArea, usePromptAreaState } from 'prompt-area'
+import 'prompt-area/styles.css'
+
+export function ChatInput() {
+  const { bind, plainText, isEmpty, clear } = usePromptAreaState()
+
+  function handleSubmit() {
+    if (isEmpty) return
+    sendToModel(plainText)
+    clear()
+  }
+
+  return (
+    <PromptArea
+      {...bind}
+      placeholder="Ask anything…"
+      onSubmit={handleSubmit}
+      autoGrow
+      minHeight={48}
+    />
+  )
+}`}
+              />
+            ),
+          },
+          {
+            label: 'shadcn',
+            content: (
+              <CodeBlock
+                code={`'use client'
 
 import { PromptArea } from '@/components/prompt-area/prompt-area'
 import { usePromptAreaState } from '@/components/prompt-area/use-prompt-area-state'
@@ -54,7 +92,19 @@ export function ChatInput() {
     />
   )
 }`}
+              />
+            ),
+          },
+        ]}
       />
+      <DocsP>
+        The two differ only in imports: the npm package re-exports everything from{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">prompt-area</code> (and
+        ships a stylesheet), while shadcn copies the source into{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">@/components</code>. The
+        snippets below use the shadcn paths — for npm, import the same names from{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">prompt-area</code>.
+      </DocsP>
 
       <DocsH2 id="add-triggers">Add mentions and commands</DocsH2>
       <DocsP>
