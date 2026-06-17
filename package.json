@@ -23,6 +23,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
     "@radix-ui/react-slot": "^1.3.0",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",

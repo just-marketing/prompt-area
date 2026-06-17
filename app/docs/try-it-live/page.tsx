@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DocsLead, DocsP, DocsH2 } from '@/components/docs/docs-primitives'
-import { OpenInStackBlitz, STACKBLITZ_EMBED_URL } from '@/components/open-in-stackblitz'
+import { LiveExample } from '@/components/live-example'
 
 const SITE_URL = 'https://prompt-area.com'
 const SOURCE_URL = 'https://github.com/just-marketing/prompt-area/tree/main/examples/basic'
@@ -9,8 +11,18 @@ const SOURCE_URL = 'https://github.com/just-marketing/prompt-area/tree/main/exam
 export const metadata: Metadata = {
   title: 'Try it Live',
   description:
-    'Boot a full Vite + React app using prompt-area in StackBlitz — no local setup. Edit the code and see @mentions, /commands, and #tags update live.',
+    'Run a Vite + React app using prompt-area right in your browser — no setup. Edit the code and see @mentions, /commands, and #tags update live.',
   alternates: { canonical: `${SITE_URL}/docs/try-it-live` },
+}
+
+// Read the example sources at build time so the live editor stays in sync with
+// the real `examples/basic` app — single source of truth, no duplicated code.
+const exampleDir = join(process.cwd(), 'examples/basic/src')
+const read = (file: string) => readFileSync(join(exampleDir, file), 'utf8')
+const exampleFiles: Record<string, string> = {
+  '/src/App.tsx': read('App.tsx'),
+  '/src/main.tsx': read('main.tsx'),
+  '/src/styles.css': read('styles.css'),
 }
 
 export default function TryItLivePage() {
@@ -28,31 +40,24 @@ export default function TryItLivePage() {
         entirely in your browser.
       </DocsLead>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <OpenInStackBlitz />
+      <DocsH2 id="live-editor">Live editor</DocsH2>
+      <DocsP>
+        Edit <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">src/App.tsx</code> and
+        the preview updates live. The first run installs dependencies, so give it a few seconds.
+      </DocsP>
+      <LiveExample files={exampleFiles} />
+
+      <DocsP>
+        This is the real{' '}
         <a
           href={SOURCE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground text-sm font-medium underline underline-offset-4 transition-colors">
-          View the source
-        </a>
-      </div>
-
-      <DocsH2 id="live-editor">Live editor</DocsH2>
-      <DocsP>
-        Edit <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">src/App.tsx</code> on
-        the left and the preview updates on the right. The first load installs dependencies, so give
-        it a few seconds.
+          className="text-foreground font-medium underline underline-offset-4">
+          <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">examples/basic</code>
+        </a>{' '}
+        app, installed from npm and running in your browser — no account or clone required.
       </DocsP>
-      <iframe
-        title="Prompt Area — live example on StackBlitz"
-        src={STACKBLITZ_EMBED_URL}
-        loading="lazy"
-        className="h-[600px] w-full overflow-hidden rounded-lg border"
-        allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-        sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-      />
 
       <DocsH2 id="run-locally">Run it locally</DocsH2>
       <DocsP>

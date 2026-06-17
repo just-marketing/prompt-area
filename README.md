@@ -2,7 +2,7 @@
 
 A production-grade `contentEditable` rich text input. Install it **two ways from the same source**: an [npm package](https://www.npmjs.com/package/prompt-area) (`npm install prompt-area`) or a [shadcn registry](https://ui.shadcn.com/docs/registry) component you copy into your repo. Dependency-light either way.
 
-**Try it live:** [open the example in StackBlitz](https://stackblitz.com/github/just-marketing/prompt-area/tree/main/examples/basic?file=src%2FApp.tsx) — a full Vite + React app you can edit in the browser ([source](examples/basic)).
+**Try it live:** [run the example in your browser](https://prompt-area.com/docs/try-it-live) — a full Vite + React app, no setup ([source](examples/basic)).
 
 ![Prompt Area](public/opengraph-image.png)
 
