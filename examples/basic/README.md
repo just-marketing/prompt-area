@@ -4,9 +4,9 @@ A minimal **Vite + React + TypeScript** app that installs [`prompt-area`](https:
 
 ## Try it live
 
-[**Open in CodeSandbox →**](https://codesandbox.io/s/github/just-marketing/prompt-area/tree/main/examples/basic)
+[**Run it in your browser →**](https://prompt-area.com/docs/try-it-live)
 
-CodeSandbox boots this folder straight from GitHub — `npm install` and the Vite dev server run in your browser, no local setup required.
+The docs site runs this exact app inline (real Vite + npm, in-browser) — no account, no clone, no local setup.
 
 ## Run locally
 
