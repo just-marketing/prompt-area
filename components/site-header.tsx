@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Github, Menu, TextCursorInput, X } from 'lucide-react'
+import { Menu, TextCursorInput, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GithubIcon } from '@/components/github-icon'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 // Sticky global header: brand on the left, site nav, and the GitHub repo link
@@ -70,7 +71,7 @@ export function SiteHeader() {
             aria-label="GitHub repository"
             title="GitHub repository"
             className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-md p-2 transition-colors">
-            <Github className="size-4" />
+            <GithubIcon className="size-4" />
           </a>
           <ThemeToggle />
           <button
