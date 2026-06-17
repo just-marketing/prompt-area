@@ -17,12 +17,16 @@ export const metadata: Metadata = {
 
 // Read the example sources at build time so the live editor stays in sync with
 // the real `examples/basic` app — single source of truth, no duplicated code.
-const exampleDir = join(process.cwd(), 'examples/basic/src')
-const read = (file: string) => readFileSync(join(exampleDir, file), 'utf8')
+// We override the Sandpack vite-react-ts template's `index.html` so Vite uses
+// the example's own `/src/main.tsx` entry (the template otherwise boots its own
+// root-level `/App.tsx`).
+const exampleRoot = join(process.cwd(), 'examples/basic')
+const read = (file: string) => readFileSync(join(exampleRoot, file), 'utf8')
 const exampleFiles: Record<string, string> = {
-  '/src/App.tsx': read('App.tsx'),
-  '/src/main.tsx': read('main.tsx'),
-  '/src/styles.css': read('styles.css'),
+  '/index.html': read('index.html'),
+  '/src/main.tsx': read('src/main.tsx'),
+  '/src/App.tsx': read('src/App.tsx'),
+  '/src/styles.css': read('src/styles.css'),
 }
 
 export default function TryItLivePage() {

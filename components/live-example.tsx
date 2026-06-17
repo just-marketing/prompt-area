@@ -17,6 +17,7 @@ type LiveSandpackProps = {
   files: Record<string, string>
   options: {
     activeFile: string
+    visibleFiles: string[]
     editorHeight: number
     showLineNumbers: boolean
     showTabs: boolean
@@ -47,6 +48,7 @@ export function LiveExample({ files }: { files: Record<string, string> }) {
       files={files}
       options={{
         activeFile: '/src/App.tsx',
+        visibleFiles: ['/src/App.tsx', '/src/main.tsx', '/src/styles.css'],
         editorHeight: 560,
         showLineNumbers: true,
         showTabs: true,
