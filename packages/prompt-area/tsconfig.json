@@ -12,7 +12,9 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "baseUrl": ".",
+    // tsup's .d.ts bundler still injects a `baseUrl` when `paths` is present;
+    // silence TS 6's deprecation error until TS 7 (real tsc passes without it).
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/lib/utils": ["./src/lib/cn.ts"],
       "@/registry/new-york/blocks/*": ["./src/*"]

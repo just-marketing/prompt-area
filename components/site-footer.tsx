@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { ArrowUpRight, Github, Star, TextCursorInput } from 'lucide-react'
+import { ArrowUpRight, Star, TextCursorInput } from 'lucide-react'
+import { GithubIcon } from '@/components/github-icon'
 
 // Sitewide footer. Renders at the end of every page's content (below the
 // sidebar's main column). This is the home for discovery/navigation links so
@@ -81,7 +82,7 @@ export function SiteFooter() {
               target="_blank"
               rel="noopener noreferrer"
               className="bg-accent/50 text-foreground hover:bg-accent group inline-flex w-fit items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors">
-              <Github className="size-4 shrink-0" />
+              <GithubIcon className="size-4 shrink-0" />
               Star on GitHub
               <Star className="text-muted-foreground size-3.5 transition-colors group-hover:text-yellow-500" />
             </a>
