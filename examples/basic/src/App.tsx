@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { PromptArea, segmentsToPlainText, type Segment, type TriggerConfig } from 'prompt-area'
+import {
+  PromptArea,
+  segmentsToPlainText,
+  text,
+  chip,
+  type Segment,
+  type TriggerConfig,
+} from 'prompt-area'
 
 const USERS = [
   { value: 'ada', label: 'Ada Lovelace', description: 'Mathematician' },
@@ -30,7 +37,12 @@ const triggers: TriggerConfig[] = [
 ]
 
 export function App() {
-  const [value, setValue] = useState<Segment[]>([])
+  // Seeded with a chip so the example shows a resolved @mention on load.
+  const [value, setValue] = useState<Segment[]>([
+    text('Hey '),
+    chip({ trigger: '@', value: 'ada', displayText: 'Ada Lovelace' }),
+    text(' — can you take a look?'),
+  ])
   const [submitted, setSubmitted] = useState<string | null>(null)
 
   return (
@@ -43,18 +55,20 @@ export function App() {
         </p>
       </header>
 
-      <PromptArea
-        value={value}
-        onChange={setValue}
-        triggers={triggers}
-        placeholder="Message… try @ada, /summarize, #bug"
-        minHeight={56}
-        autoGrow
-        onSubmit={(segments) => {
-          setSubmitted(segmentsToPlainText(segments))
-          setValue([])
-        }}
-      />
+      <div className="composer">
+        <PromptArea
+          value={value}
+          onChange={setValue}
+          triggers={triggers}
+          placeholder="Message… try @ada, /summarize, #bug"
+          minHeight={56}
+          autoGrow
+          onSubmit={(segments) => {
+            setSubmitted(segmentsToPlainText(segments))
+            setValue([])
+          }}
+        />
+      </div>
 
       {submitted !== null && (
         <section className="result">

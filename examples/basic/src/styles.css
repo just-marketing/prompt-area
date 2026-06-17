@@ -50,6 +50,19 @@ kbd {
   background: #fafafa;
 }
 
+.composer {
+  border: 1px solid #e4e4e7;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.composer:focus-within {
+  border-color: #a1a1aa;
+  box-shadow: 0 0 0 3px rgba(161, 161, 170, 0.15);
+}
+
 .result {
   display: flex;
   flex-direction: column;
