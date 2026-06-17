@@ -33,6 +33,21 @@ pnpm package:check    # Validate package exports & types
 
 A pre-commit hook (via Lefthook) will automatically lint and format staged files.
 
+## Releasing
+
+The npm version is driven by the GitHub release tag — they stay in sync
+automatically. To cut a release:
+
+```bash
+pnpm release 0.4.0          # creates the v0.4.0 GitHub release
+pnpm release 0.4.0 --dry-run  # preview without creating anything
+```
+
+This creates a `v0.4.0` GitHub Release, which triggers
+[`release.yml`](.github/workflows/release.yml) to publish `prompt-area@0.4.0`
+to npm and commit the version back to `main`. A one-time `NPM_TOKEN` repo
+secret (an npm Automation token) is required for the publish to authenticate.
+
 ## Code Style
 
 - Code is formatted with Prettier — run `pnpm format` to auto-fix
