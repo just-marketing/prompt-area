@@ -3,6 +3,19 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.3.2
+
+### Fixed
+
+- **Installs cleanly alongside Tailwind v3 (or no Tailwind).** `tailwindcss` and
+  `tw-animate-css` are no longer declared as (optional) peer dependencies — they
+  are build-time tools, and an optional peer still triggers an npm `ERESOLVE`
+  conflict when the consumer has a non-matching version (e.g. Tailwind v3)
+  installed. The prebuilt `prompt-area/styles.css` is self-contained and works
+  with any stack; the optional `prompt-area/tailwind.css` preset still requires
+  Tailwind v4 in your own project (documented, not version-gated). No API or
+  runtime changes.
+
 ## 0.3.1
 
 ### Changed
