@@ -13,6 +13,18 @@ project adheres to [Semantic Versioning](https://semver.org/).
   ~33 kB (unpacked ~134 kB → ~117 kB), and the core `PromptArea` import is
   ~14 kB gzipped. No API changes.
 
+## 0.3.0
+
+First npm publish since `0.1.0`. `0.1.1` was tagged but never published, so
+its packaging changes (listed below) reached npm as part of this release. No
+`0.2.0` was ever released — the version jumped straight from `0.1.1` to `0.3.0`.
+
+### Changed
+
+- Install docs now show `pnpm` / `npm` / `yarn` side by side and clarify that
+  `react` and `react-dom` are peer dependencies. No functional or API changes
+  versus `0.1.1`.
+
 ## 0.1.1
 
 ### Changed
