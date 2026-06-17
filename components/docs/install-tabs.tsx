@@ -1,14 +1,9 @@
 import { CodeBlock } from '@/components/code-block'
-import { CodeTabs } from '@/components/code-tabs'
+import { PackageManagerTabs } from '@/components/package-manager-tabs'
 
 /**
- * Dual install + import for a single block, shown as npm / shadcn tabs.
- *
- * - npm: one `npm install prompt-area` and import from the package barrel.
- * - shadcn: `npx shadcn add <block>.json` and import from the copied source.
- *
- * Renders both Shiki-highlighted variants on the server; CodeTabs toggles
- * which is visible.
+ * Dual install for a single block: the npm package and the shadcn registry,
+ * each with pnpm / npm / yarn tabs (pnpm default) and the matching import.
  */
 export function InstallTabs({
   exportName,
@@ -22,29 +17,18 @@ export function InstallTabs({
    */
   block: string
 }) {
-  const npmTab = (
-    <>
-      <CodeBlock lang="bash" code={`npm install prompt-area`} />
-      <CodeBlock lang="tsx" code={`import { ${exportName} } from 'prompt-area'`} />
-    </>
-  )
-  const shadcnTab = (
-    <>
-      <CodeBlock
-        lang="bash"
-        code={`npx shadcn@latest add https://prompt-area.com/r/${block}.json`}
-      />
-      <CodeBlock lang="tsx" code={`import { ${exportName} } from '@/components/${block}'`} />
-    </>
-  )
-
   return (
-    <CodeTabs
-      label="Install method"
-      tabs={[
-        { label: 'npm', content: npmTab },
-        { label: 'shadcn', content: shadcnTab },
-      ]}
-    />
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">npm package</span>
+        <PackageManagerTabs add="prompt-area" />
+        <CodeBlock lang="tsx" code={`import { ${exportName} } from 'prompt-area'`} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">shadcn registry</span>
+        <PackageManagerTabs dlx={`shadcn@latest add https://prompt-area.com/r/${block}.json`} />
+        <CodeBlock lang="tsx" code={`import { ${exportName} } from '@/components/${block}'`} />
+      </div>
+    </div>
   )
 }

@@ -65,8 +65,8 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 - Author: Juma.ai (formerly Team-GPT)
 - Repository: https://github.com/just-marketing/prompt-area
 - Website: https://prompt-area.com
-- Install (npm): npm install prompt-area
-- Install (shadcn): npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+- Install (npm package): pnpm add prompt-area (also npm install / yarn add)
+- Install (shadcn): pnpm dlx shadcn@latest add https://prompt-area.com/r/prompt-area.json (also npx)
 - Stack: React, TypeScript, contentEditable, Tailwind CSS
 - Companion components: Action Bar, Status Bar, Compact Prompt Area, Chat Prompt Layout
 
@@ -87,7 +87,8 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 As an npm package (works with zero Tailwind config):
 
 ```bash
-npm install prompt-area
+pnpm add prompt-area
+# or: npm install prompt-area  /  yarn add prompt-area
 ```
 
 ```tsx
@@ -98,7 +99,8 @@ import 'prompt-area/styles.css'
 Or from the shadcn registry (copy the source into your project):
 
 ```bash
-npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+pnpm dlx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+# or: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
 ### Install with AI Coding Agents

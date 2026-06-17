@@ -2,9 +2,8 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
-import { useCallback, useState } from 'react'
-import { CodeTabs } from '@/components/code-tabs'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { PackageManagerTabs } from '@/components/package-manager-tabs'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -68,13 +67,6 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
-const INSTALL_CMDS = {
-  npm: 'npm install prompt-area',
-  shadcn: 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json',
-} as const
-
-type InstallMethod = keyof typeof INSTALL_CMDS
-
 const COMPONENTS = [
   { href: '/docs/components/prompt-area', title: 'Prompt Area', desc: 'The core rich-text input.' },
   {
@@ -96,46 +88,6 @@ const COMPONENTS = [
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
 ]
 
-function CopyCommand({ cmd }: { cmd: string }) {
-  const [copied, setCopied] = useState(false)
-  const copy = useCallback(() => {
-    navigator.clipboard?.writeText(cmd).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
-  }, [cmd])
-
-  return (
-    <button
-      onClick={copy}
-      className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors">
-      <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
-      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
-        {cmd}
-      </code>
-      {copied ? (
-        <Check className="size-4 shrink-0 text-green-600 dark:text-green-400" />
-      ) : (
-        <Copy className="text-muted-foreground group-hover:text-foreground size-4 shrink-0 transition-colors" />
-      )}
-    </button>
-  )
-}
-
-function InstallCommand() {
-  return (
-    <div className="w-full max-w-xl">
-      <CodeTabs
-        label="Install method"
-        tabs={(Object.keys(INSTALL_CMDS) as InstallMethod[]).map((m) => ({
-          label: m,
-          content: <CopyCommand cmd={INSTALL_CMDS[m]} />,
-        }))}
-      />
-    </div>
-  )
-}
-
 export default function HomeContent() {
   return (
     <div className="flex flex-col">
@@ -151,7 +103,9 @@ export default function HomeContent() {
           A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags, inline
           markdown, and file attachments in one contentEditable component.
         </p>
-        <InstallCommand />
+        <div className="w-full max-w-xl">
+          <PackageManagerTabs add="prompt-area" />
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Link
             href="/docs"
@@ -270,7 +224,9 @@ export default function HomeContent() {
         <p className="text-muted-foreground max-w-xl">
           Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
         </p>
-        <InstallCommand />
+        <div className="w-full max-w-xl">
+          <PackageManagerTabs add="prompt-area" />
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/docs"
