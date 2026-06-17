@@ -45,3 +45,6 @@ public/r/
 
 # npm package build output
 packages/*/dist/
+
+# example app build output
+examples/*/dist/

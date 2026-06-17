@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { CodeTabs } from '@/components/code-tabs'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
+import { OpenInCodeSandbox } from '@/components/open-in-codesandbox'
 
 const SITE_URL = 'https://prompt-area.com'
 
@@ -21,6 +22,15 @@ export default function QuickStartPage() {
         Build a working chat input in a few steps — state, mentions, commands, and structured output
         you can send straight to a model.
       </DocsLead>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <OpenInCodeSandbox />
+        <Link
+          href="/docs/try-it-live"
+          className="text-muted-foreground hover:text-foreground text-sm font-medium underline underline-offset-4 transition-colors">
+          Try it live in the browser
+        </Link>
+      </div>
 
       <DocsH2 id="render-with-state">Render with state</DocsH2>
       <DocsP>
