@@ -11,6 +11,8 @@ Ships **two ways** from the same source:
 - **npm package** (this package) — `npm install prompt-area`, import the component and a stylesheet. Versioned, opinionated, batteries-included.
 - **[shadcn registry](https://prompt-area.com)** — `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` to copy the source into your project and own it.
 
+**Try it live:** [open the example in CodeSandbox](https://codesandbox.io/s/github/just-marketing/prompt-area/tree/main/examples/basic) — a full Vite + React app, no setup. ([source](https://github.com/just-marketing/prompt-area/tree/main/examples/basic))
+
 ## Install
 
 ```bash
