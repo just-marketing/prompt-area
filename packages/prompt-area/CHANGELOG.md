@@ -3,7 +3,7 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.3.1
 
 ### Changed
 
