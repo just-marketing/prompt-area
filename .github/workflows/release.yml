@@ -1,28 +1,39 @@
 name: Release
 
-# Publishes the `prompt-area` npm package when a GitHub Release is published,
-# using npm "trusted publishing" (OIDC) — no NPM_TOKEN required, provenance is
-# attached automatically.
+# Publishes packages/prompt-area to npm, keeping the GitHub release tag, the
+# npm version, and packages/prompt-area/package.json in lockstep.
 #
-# ONE-TIME SETUP (required before the first OIDC release):
-# On npmjs.com → the prompt-area package → Settings → Trusted Publisher, add:
-#   - Publisher:  GitHub Actions
-#   - Repository: just-marketing/prompt-area
-#   - Workflow:   release.yml
-# Until that is configured, this workflow cannot authenticate to npm.
+# The release TAG is the source of truth for the version:
+#   tag v0.3.0 (or 0.3.0)  ->  publishes prompt-area@0.3.0
+# After publishing, the bumped version is committed back to main so the repo
+# always reflects what is on npm.
 #
-# To cut a release: bump packages/prompt-area/package.json "version", then
-# publish a GitHub Release — this workflow does the rest.
+# ── ONE-TIME AUTH SETUP (required) ─────────────────────────────────────────
+# Add an npm "Automation" access token as the NPM_TOKEN repository secret
+# (Settings → Secrets and variables → Actions → New repository secret).
+# Automation tokens bypass 2FA, which is required for CI publishing.
+# (Alternatively configure an npm Trusted Publisher / OIDC for this repo +
+# workflow; npm >= 11.5.1 then authenticates via id-token and NPM_TOKEN is
+# ignored.)
+#
+# ── HOW TO RELEASE ─────────────────────────────────────────────────────────
+# Publish a GitHub Release with a semver tag (e.g. v0.3.0) — this runs.
+# Or trigger manually: Actions → Release → Run workflow → enter a version.
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, e.g. 0.3.0 (defaults to the release tag)'
+        required: false
 
 permissions:
-  contents: read
-  id-token: write # required for npm OIDC trusted publishing
+  contents: write # commit the version bump back to main
+  id-token: write # npm OIDC trusted publishing (used only if configured)
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
@@ -30,21 +41,65 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
+
+      - name: Resolve version
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          RAW="${INPUT_VERSION:-$RELEASE_TAG}"
+          VER="${RAW#v}"                                       # drop a leading v
+          if [[ "$VER" =~ ^[0-9]+\.[0-9]+$ ]]; then VER="${VER}.0"; fi   # 0.3 -> 0.3.0
+          if ! [[ "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-].+)?$ ]]; then
+            echo "::error::'$RAW' is not a semver version. Tag releases like v0.3.0."
+            exit 1
+          fi
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Releasing prompt-area@$VER"
+
       - run: pnpm install --frozen-lockfile
-      - name: Build package
-        run: pnpm --filter prompt-area build
-      - name: Validate exports & types
-        run: pnpm --filter prompt-area lint:exports
-      # OIDC trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.
-      - name: Update npm for OIDC support
+
+      - name: Set package version from the tag
+        run: npm version "${{ steps.v.outputs.version }}" --no-git-tag-version --allow-same-version
+        working-directory: packages/prompt-area
+
+      - name: Build and validate
+        run: |
+          pnpm --filter prompt-area build
+          pnpm --filter prompt-area lint:exports
+
+      - name: Update npm (OIDC trusted publishing needs >= 11.5.1)
         run: npm install -g npm@latest
-      - name: Publish (OIDC trusted publishing, provenance automatic)
+
+      - name: Publish to npm
         run: npm publish --access public
         working-directory: packages/prompt-area
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Sync version back to main
+        run: |
+          if git diff --quiet -- packages/prompt-area/package.json; then
+            echo "package.json already at this version — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/prompt-area/package.json
+          git commit -m "chore(release): prompt-area@${{ steps.v.outputs.version }} [skip ci]"
+          # Re-sync with main in case it moved while we built, then push.
+          git pull --rebase origin main
+          git push origin HEAD:main
