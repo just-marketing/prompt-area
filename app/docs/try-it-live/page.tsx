@@ -20,10 +20,21 @@ export const metadata: Metadata = {
 // We override the Sandpack vite-react-ts template's `index.html` so Vite uses
 // the example's own `/src/main.tsx` entry (the template otherwise boots its own
 // root-level `/App.tsx`).
+const PROMPT_AREA_VERSION = '0.3.2'
+// Sandpack's in-browser bundler doesn't reliably process the `prompt-area/styles.css`
+// import (it resolves through the package `exports` map), so we also load the
+// published stylesheet via a <link>. `examples/basic` itself keeps the canonical
+// `import 'prompt-area/styles.css'` for real-world local use.
+const PROMPT_AREA_CSS = `https://cdn.jsdelivr.net/npm/prompt-area@${PROMPT_AREA_VERSION}/dist/styles.css`
+
 const exampleRoot = join(process.cwd(), 'examples/basic')
 const read = (file: string) => readFileSync(join(exampleRoot, file), 'utf8')
+const indexHtml = read('index.html').replace(
+  '</head>',
+  `    <link rel="stylesheet" href="${PROMPT_AREA_CSS}" />\n  </head>`,
+)
 const exampleFiles: Record<string, string> = {
-  '/index.html': read('index.html'),
+  '/index.html': indexHtml,
   '/src/main.tsx': read('src/main.tsx'),
   '/src/App.tsx': read('src/App.tsx'),
   '/src/styles.css': read('src/styles.css'),
@@ -49,7 +60,7 @@ export default function TryItLivePage() {
         Edit <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">src/App.tsx</code> and
         the preview updates live. The first run installs dependencies, so give it a few seconds.
       </DocsP>
-      <LiveExample files={exampleFiles} />
+      <LiveExample files={exampleFiles} dependencies={{ 'prompt-area': PROMPT_AREA_VERSION }} />
 
       <DocsP>
         This is the real{' '}

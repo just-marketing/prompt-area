@@ -39,12 +39,18 @@ const Sandpack = dynamic(
   },
 )
 
-export function LiveExample({ files }: { files: Record<string, string> }) {
+export function LiveExample({
+  files,
+  dependencies,
+}: {
+  files: Record<string, string>
+  dependencies: Record<string, string>
+}) {
   return (
     <Sandpack
       template="vite-react-ts"
       theme="dark"
-      customSetup={{ dependencies: { 'prompt-area': 'latest' } }}
+      customSetup={{ dependencies }}
       files={files}
       options={{
         activeFile: '/src/App.tsx',
