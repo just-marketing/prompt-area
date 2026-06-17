@@ -18,7 +18,9 @@ import { stdin, stdout, argv, exit } from 'node:process'
 const REPO = 'just-marketing/prompt-area'
 
 function sh(file, args, opts = {}) {
-  return execFileSync(file, args, { encoding: 'utf8', ...opts }).trim()
+  // With { stdio: 'inherit' } execFileSync returns null — guard before trimming.
+  const out = execFileSync(file, args, { encoding: 'utf8', ...opts })
+  return out == null ? '' : String(out).trim()
 }
 function fail(msg) {
   console.error(`\n✖ ${msg}\n`)
