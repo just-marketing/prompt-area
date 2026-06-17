@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DocsLead, DocsP, DocsH2 } from '@/components/docs/docs-primitives'
-import { OpenInCodeSandbox, CODESANDBOX_EMBED_URL } from '@/components/open-in-codesandbox'
+import { OpenInStackBlitz, STACKBLITZ_EMBED_URL } from '@/components/open-in-stackblitz'
 
 const SITE_URL = 'https://prompt-area.com'
 const SOURCE_URL = 'https://github.com/just-marketing/prompt-area/tree/main/examples/basic'
@@ -9,7 +9,7 @@ const SOURCE_URL = 'https://github.com/just-marketing/prompt-area/tree/main/exam
 export const metadata: Metadata = {
   title: 'Try it Live',
   description:
-    'Boot a full Vite + React app using prompt-area in CodeSandbox — no local setup. Edit the code and see @mentions, /commands, and #tags update live.',
+    'Boot a full Vite + React app using prompt-area in StackBlitz — no local setup. Edit the code and see @mentions, /commands, and #tags update live.',
   alternates: { canonical: `${SITE_URL}/docs/try-it-live` },
 }
 
@@ -29,7 +29,7 @@ export default function TryItLivePage() {
       </DocsLead>
 
       <div className="flex flex-wrap items-center gap-3">
-        <OpenInCodeSandbox />
+        <OpenInStackBlitz />
         <a
           href={SOURCE_URL}
           target="_blank"
@@ -46,8 +46,8 @@ export default function TryItLivePage() {
         it a few seconds.
       </DocsP>
       <iframe
-        title="Prompt Area — live example on CodeSandbox"
-        src={CODESANDBOX_EMBED_URL}
+        title="Prompt Area — live example on StackBlitz"
+        src={STACKBLITZ_EMBED_URL}
         loading="lazy"
         className="h-[600px] w-full overflow-hidden rounded-lg border"
         allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"

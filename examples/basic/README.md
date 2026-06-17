@@ -4,9 +4,9 @@ A minimal **Vite + React + TypeScript** app that installs [`prompt-area`](https:
 
 ## Try it live
 
-[**Open in CodeSandbox →**](https://codesandbox.io/s/github/just-marketing/prompt-area/tree/main/examples/basic)
+[**Open in StackBlitz →**](https://stackblitz.com/github/just-marketing/prompt-area/tree/main/examples/basic?file=src%2FApp.tsx)
 
-CodeSandbox boots this folder straight from GitHub — `npm install` and the Vite dev server run in your browser, no local setup required.
+StackBlitz boots this folder straight from GitHub — `npm install` and the Vite dev server run in your browser (no sign-in, no local setup).
 
 ## Run locally
 

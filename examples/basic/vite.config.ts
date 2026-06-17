@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Minimal Vite + React setup so CodeSandbox (and a local `npm run dev`) can boot
+// Minimal Vite + React setup so StackBlitz (and a local `npm run dev`) can boot
 // the example straight from this folder.
 export default defineConfig({
   plugins: [react()],

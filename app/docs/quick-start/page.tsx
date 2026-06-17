@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { CodeTabs } from '@/components/code-tabs'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
-import { OpenInCodeSandbox } from '@/components/open-in-codesandbox'
+import { OpenInStackBlitz } from '@/components/open-in-stackblitz'
 
 const SITE_URL = 'https://prompt-area.com'
 
@@ -24,7 +24,7 @@ export default function QuickStartPage() {
       </DocsLead>
 
       <div className="flex flex-wrap items-center gap-3">
-        <OpenInCodeSandbox />
+        <OpenInStackBlitz />
         <Link
           href="/docs/try-it-live"
           className="text-muted-foreground hover:text-foreground text-sm font-medium underline underline-offset-4 transition-colors">
