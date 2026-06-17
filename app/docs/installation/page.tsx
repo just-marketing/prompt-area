@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
+import { PackageManagerTabs } from '@/components/package-manager-tabs'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -32,13 +33,13 @@ function howToSchema() {
       {
         '@type': 'HowToStep',
         name: 'Install as an npm package',
-        text: "Run npm install prompt-area, then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css'. No Tailwind setup required.",
+        text: "Run pnpm add prompt-area (or npm install prompt-area / yarn add prompt-area), then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css'. No Tailwind setup required.",
         url: `${SITE_URL}/docs/installation#npm`,
       },
       {
         '@type': 'HowToStep',
         name: 'Or install from the shadcn registry',
-        text: 'Run npx shadcn@latest add https://prompt-area.com/r/prompt-area.json to copy the PromptArea component, its types, the usePromptAreaState hook, trigger presets, and segment helpers into your project.',
+        text: 'Run pnpm dlx shadcn@latest add https://prompt-area.com/r/prompt-area.json (or npx shadcn@latest add ...) to copy the PromptArea component, its types, the usePromptAreaState hook, trigger presets, and segment helpers into your project.',
         url: `${SITE_URL}/docs/installation#install`,
       },
       {
@@ -66,7 +67,7 @@ export default function InstallationPage() {
       </DocsLead>
 
       <DocsH2 id="npm">Install as an npm package</DocsH2>
-      <CodeBlock lang="bash" code="npm install prompt-area" />
+      <PackageManagerTabs add="prompt-area" />
       <DocsP>
         Import the component and the prebuilt stylesheet. The stylesheet is self-contained, so no
         Tailwind setup is required:
@@ -98,10 +99,7 @@ import 'prompt-area/styles.css'`}
       </DocsP>
 
       <DocsH2 id="install">Install from the shadcn registry</DocsH2>
-      <CodeBlock
-        lang="bash"
-        code="npx shadcn@latest add https://prompt-area.com/r/prompt-area.json"
-      />
+      <PackageManagerTabs dlx="shadcn@latest add https://prompt-area.com/r/prompt-area.json" />
       <DocsP>
         This adds the{' '}
         <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">PromptArea</code> component

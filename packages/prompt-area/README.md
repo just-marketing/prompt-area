@@ -14,10 +14,11 @@ Ships **two ways** from the same source:
 ## Install
 
 ```bash
-npm install prompt-area
-# peer deps (most React apps already have these)
-npm install react react-dom
+pnpm add prompt-area
+# or: npm install prompt-area  ·  yarn add prompt-area
 ```
+
+`react` and `react-dom` are peer dependencies (most React apps already have them).
 
 ## Quick start
 
