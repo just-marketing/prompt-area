@@ -4,20 +4,21 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { ExampleShowcase } from '@/components/example-showcase'
 import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
 import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
+import { ChatGptInputExample, chatgptInputCode } from '@/app/examples/chatgpt-input'
 
 const SITE_URL = 'https://prompt-area.com'
 
 export const metadata: Metadata = {
-  title: 'Styles — Claude Code & Codex Agent Inputs',
+  title: 'Styles — ChatGPT, Claude Code & Codex Agent Inputs',
   description:
-    'Ready-made agent-input styles built with Prompt Area: a Claude Code–style composer and an OpenAI Codex–style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
+    'Ready-made agent-input styles built with Prompt Area: a ChatGPT-style composer, a Claude Code–style composer, and an OpenAI Codex–style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
   alternates: { canonical: `${SITE_URL}/styles` },
   openGraph: {
     type: 'website',
     url: `${SITE_URL}/styles`,
-    title: 'Styles — Claude Code & Codex Agent Inputs',
+    title: 'Styles — ChatGPT, Claude Code & Codex Agent Inputs',
     description:
-      'Ready-made agent-input styles built with Prompt Area — Claude Code and OpenAI Codex composers you can drop into your app.',
+      'Ready-made agent-input styles built with Prompt Area — ChatGPT, Claude Code, and OpenAI Codex composers you can drop into your app.',
   },
 }
 
@@ -39,6 +40,30 @@ export default function StylesPage() {
           and Code on any example.
         </p>
       </header>
+
+      {/* ChatGPT */}
+      <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            A ChatGPT-style composer: a single-line rounded pill with the controls inline — a model
+            selector that opens a menu above, a dictation button, and the blue voice affordance that
+            swaps to a send arrow once there&apos;s text.
+          </p>
+        </div>
+        <ExampleShowcase code={chatgptInputCode}>
+          <ChatGptInputExample />
+        </ExampleShowcase>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Composed from{' '}
+          <Link
+            href="/docs/components/prompt-area"
+            className="text-foreground font-medium underline underline-offset-4">
+            Prompt Area
+          </Link>{' '}
+          alone — the controls live inline around the input.
+        </p>
+      </section>
 
       {/* Claude Code */}
       <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
