@@ -148,9 +148,36 @@ function UsageRing({ pct }: { pct: number }) {
 }
 
 // The reasoning-effort control: a discrete Faster↔Smarter slider, mirroring
-// Claude Code's popover. Clicking a tick sets the level.
+// Claude Code's popover. Click anywhere on the track or drag the handle — it
+// snaps to the nearest level — and arrow keys nudge it for keyboard users.
 function EffortSlider({ value, onChange }: { value: Effort; onChange: (next: Effort) => void }) {
   const idx = EFFORTS.indexOf(value)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [dragging, setDragging] = useState(false)
+  const pct = (idx / (EFFORTS.length - 1)) * 100
+
+  // Map a pointer x to the nearest step and commit it if it changed.
+  const setFromClientX = (clientX: number) => {
+    const el = trackRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    const next = Math.round(ratio * (EFFORTS.length - 1))
+    if (next !== idx) onChange(EFFORTS[next])
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    let next = idx
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = Math.max(0, idx - 1)
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp')
+      next = Math.min(EFFORTS.length - 1, idx + 1)
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = EFFORTS.length - 1
+    else return
+    e.preventDefault()
+    if (next !== idx) onChange(EFFORTS[next])
+  }
+
   return (
     <div className="w-[232px] p-2">
       <div className="mb-2 flex items-center justify-between text-[14px] text-[#1f1e1d] dark:text-[#f5f4ee]">
@@ -163,30 +190,49 @@ function EffortSlider({ value, onChange }: { value: Effort; onChange: (next: Eff
         <span>Faster</span>
         <span>Smarter</span>
       </div>
-      <div className="relative mx-1 h-4">
-        <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-black/12 dark:bg-white/15" />
+      {/* Hit area is taller than the track so the handle is easy to grab. */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-label="Effort"
+        aria-valuemin={0}
+        aria-valuemax={EFFORTS.length - 1}
+        aria-valuenow={idx}
+        aria-valuetext={value}
+        onKeyDown={onKeyDown}
+        onPointerDown={(e) => {
+          e.preventDefault()
+          e.currentTarget.setPointerCapture(e.pointerId)
+          setDragging(true)
+          setFromClientX(e.clientX)
+        }}
+        onPointerMove={(e) => dragging && setFromClientX(e.clientX)}
+        onPointerUp={(e) => {
+          setDragging(false)
+          e.currentTarget.releasePointerCapture(e.pointerId)
+        }}
+        className="relative mx-1 flex h-5 cursor-pointer touch-none items-center outline-none">
         <div
-          className="absolute top-1/2 left-0 h-[3px] -translate-y-1/2 rounded-full"
-          style={{ width: `${(idx / (EFFORTS.length - 1)) * 100}%`, background: ACCENT }}
-        />
-        <div className="absolute inset-0 flex items-center justify-between">
+          ref={trackRef}
+          className="relative h-[3px] w-full rounded-full bg-black/12 dark:bg-white/15">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ width: `${pct}%`, background: ACCENT }}
+          />
           {EFFORTS.map((e, i) => (
-            <button
+            <span
               key={e}
-              type="button"
-              aria-label={e}
-              onClick={() => onChange(e)}
-              className="grid size-4 place-items-center">
-              {i === idx ? (
-                <span
-                  className="size-4 rounded-full border-2 bg-white shadow-sm dark:bg-[#30302e]"
-                  style={{ borderColor: ACCENT }}
-                />
-              ) : (
-                <span className="size-2 rounded-full bg-black/25 dark:bg-white/30" />
-              )}
-            </button>
+              className="absolute top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/30 dark:bg-white/30"
+              style={{ left: `${(i / (EFFORTS.length - 1)) * 100}%` }}
+            />
           ))}
+          <span
+            className={cn(
+              'absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white shadow-sm transition-transform dark:bg-[#30302e]',
+              dragging && 'scale-110',
+            )}
+            style={{ left: `${pct}%`, borderColor: ACCENT }}
+          />
         </div>
       </div>
     </div>
@@ -592,9 +638,31 @@ function UsageRing({ pct }: { pct: number }) {
   )
 }
 
-// Reasoning-effort control: a discrete Faster↔Smarter slider.
+// Reasoning-effort control: a discrete Faster↔Smarter slider. Click anywhere on
+// the track or drag the handle (snaps to the nearest level); arrows nudge it.
 function EffortSlider({ value, onChange }: { value: (typeof EFFORTS)[number]; onChange: (n: (typeof EFFORTS)[number]) => void }) {
   const idx = EFFORTS.indexOf(value)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [dragging, setDragging] = useState(false)
+  const pct = (idx / (EFFORTS.length - 1)) * 100
+
+  const setFromClientX = (clientX: number) => {
+    const el = trackRef.current
+    if (!el) return
+    const ratio = Math.max(0, Math.min(1, (clientX - el.getBoundingClientRect().left) / el.clientWidth))
+    const next = Math.round(ratio * (EFFORTS.length - 1))
+    if (next !== idx) onChange(EFFORTS[next])
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    let next = idx
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = Math.max(0, idx - 1)
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = Math.min(EFFORTS.length - 1, idx + 1)
+    else return
+    e.preventDefault()
+    if (next !== idx) onChange(EFFORTS[next])
+  }
+
   return (
     <div className="w-[232px] p-2">
       <div className="mb-2 flex items-center justify-between text-[14px]">
@@ -602,17 +670,20 @@ function EffortSlider({ value, onChange }: { value: (typeof EFFORTS)[number]; on
         <HelpCircle className={cn('size-3.5', MUTED)} />
       </div>
       <div className={cn('mb-2 flex justify-between text-[12px]', MUTED)}><span>Faster</span><span>Smarter</span></div>
-      <div className="relative mx-1 h-4">
-        <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-black/12 dark:bg-white/15" />
-        <div className="absolute top-1/2 left-0 h-[3px] -translate-y-1/2 rounded-full" style={{ width: \`\${(idx / (EFFORTS.length - 1)) * 100}%\`, background: ACCENT }} />
-        <div className="absolute inset-0 flex items-center justify-between">
+      <div
+        role="slider" tabIndex={0} aria-label="Effort"
+        aria-valuemin={0} aria-valuemax={EFFORTS.length - 1} aria-valuenow={idx} aria-valuetext={value}
+        onKeyDown={onKeyDown}
+        onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); setDragging(true); setFromClientX(e.clientX) }}
+        onPointerMove={(e) => dragging && setFromClientX(e.clientX)}
+        onPointerUp={(e) => { setDragging(false); e.currentTarget.releasePointerCapture(e.pointerId) }}
+        className="relative mx-1 flex h-5 cursor-pointer touch-none items-center outline-none">
+        <div ref={trackRef} className="relative h-[3px] w-full rounded-full bg-black/12 dark:bg-white/15">
+          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: \`\${pct}%\`, background: ACCENT }} />
           {EFFORTS.map((e, i) => (
-            <button key={e} aria-label={e} onClick={() => onChange(e)} className="grid size-4 place-items-center">
-              {i === idx
-                ? <span className="size-4 rounded-full border-2 bg-white dark:bg-[#30302e]" style={{ borderColor: ACCENT }} />
-                : <span className="size-2 rounded-full bg-black/25 dark:bg-white/30" />}
-            </button>
+            <span key={e} className="absolute top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/30 dark:bg-white/30" style={{ left: \`\${(i / (EFFORTS.length - 1)) * 100}%\` }} />
           ))}
+          <span className={cn('absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white shadow-sm transition-transform dark:bg-[#30302e]', dragging && 'scale-110')} style={{ left: \`\${pct}%\`, borderColor: ACCENT }} />
         </div>
       </div>
     </div>
