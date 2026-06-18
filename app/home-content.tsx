@@ -186,6 +186,12 @@ export default function HomeContent() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
+              href="/styles#chatgpt"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              ChatGPT style
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
               href="/styles#claude-code"
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
               Claude Code style
