@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
-import { PackageManagerTabs } from '@/components/package-manager-tabs'
+import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -104,7 +104,7 @@ export default function HomeContent() {
           markdown, and file attachments in one contentEditable component.
         </p>
         <div className="w-full max-w-xl">
-          <PackageManagerTabs add="prompt-area" />
+          <InstallMethodTabs />
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Link
@@ -243,7 +243,7 @@ export default function HomeContent() {
           Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
         </p>
         <div className="w-full max-w-xl">
-          <PackageManagerTabs add="prompt-area" />
+          <InstallMethodTabs />
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
