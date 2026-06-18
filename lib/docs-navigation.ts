@@ -41,6 +41,7 @@ export const docsNavigation: NavSection[] = [
       { title: 'Formatting', href: '/docs/examples/formatting' },
       { title: 'Attachments', href: '/docs/examples/attachments' },
       { title: 'DX Helpers', href: '/docs/examples/dx-helpers' },
+      { title: 'Vercel AI SDK', href: '/docs/examples/vercel-ai-sdk' },
     ],
   },
   {
