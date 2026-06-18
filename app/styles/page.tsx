@@ -97,8 +97,9 @@ export default function StylesPage() {
         <div className="flex flex-col gap-1.5">
           <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
           <p className="text-muted-foreground leading-relaxed">
-            A Claude Code–style composer: a file chip above the input, a Plan-mode toggle and model
-            selector in the action bar, and project/branch context in the status bar.
+            A Claude Code–style composer: environment and repository context above the input, an
+            inline return-to-send arrow, and a control bar with a permission-mode menu, dictation,
+            model and reasoning-effort selectors, and a plan-usage meter.
           </p>
         </div>
         <ExampleShowcase code={claudeCodeInputCode}>
