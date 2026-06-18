@@ -209,6 +209,12 @@ export default function HomeContent() {
               Codex style
               <ArrowRight className="size-3.5" />
             </Link>
+            <Link
+              href="/styles#perplexity"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              Perplexity style
+              <ArrowRight className="size-3.5" />
+            </Link>
           </div>
         </div>
       </section>
