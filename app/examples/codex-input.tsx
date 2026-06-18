@@ -216,7 +216,7 @@ export function CodexInputExample({
               onFileRemove={(f) => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
             />
             <ActionBar
-              className="pt-2"
+              className="flex-wrap gap-y-2 pt-2"
               left={
                 <div className="flex items-center gap-0.5">
                   <button type="button" className={ICON_BTN} aria-label="Add attachment">
@@ -399,7 +399,7 @@ function CodexInputExample() {
             maxHeight={280}
           />
           <ActionBar
-            className="pt-2"
+            className="flex-wrap gap-y-2 pt-2"
             left={
               <div className="flex items-center gap-0.5">
                 <button className={ICON_BTN} aria-label="Add"><Plus className="size-4" /></button>

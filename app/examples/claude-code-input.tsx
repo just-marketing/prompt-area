@@ -398,7 +398,7 @@ export function ClaudeCodeInputExample({
 
       {/* Control bar: permission + dictation on the left, model + effort + usage on the right */}
       <ActionBar
-        className="px-1 pt-0"
+        className="flex-wrap gap-y-1 px-1 pt-0"
         left={
           <div className="flex items-center gap-0.5">
             <Popover
@@ -777,7 +777,7 @@ function ClaudeCodeInputExample() {
       </div>
 
       {/* Control bar */}
-      <ActionBar className="px-1 pt-0"
+      <ActionBar className="flex-wrap gap-y-1 px-1 pt-0"
         left={
           <div className="flex items-center gap-0.5">
             <Popover id="permission" openMenu={openMenu} setOpenMenu={setOpenMenu} panelClass="bottom-full left-0 mb-1.5 w-[208px]"
