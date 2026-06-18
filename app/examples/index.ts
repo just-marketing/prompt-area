@@ -23,6 +23,7 @@ export { CompactPromptAreaExample, compactPromptAreaCode } from './compact-promp
 export { ChatPromptLayoutExample, chatPromptLayoutCode } from './chat-prompt-layout'
 export { DxHelpersExample, dxHelpersCode } from './dx-helpers'
 export { RotatingPlaceholdersExample, rotatingPlaceholdersCode } from './rotating-placeholders'
+export { ClaudeInputExample, claudeInputCode } from './claude-input'
 export { ClaudeCodeInputExample, claudeCodeInputCode } from './claude-code-input'
 export { CodexInputExample, codexInputCode } from './codex-input'
 export { ChatGptInputExample, chatgptInputCode } from './chatgpt-input'

@@ -192,6 +192,12 @@ export default function HomeContent() {
               <ArrowRight className="size-3.5" />
             </Link>
             <Link
+              href="/styles#claude"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              Claude style
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
               href="/styles#claude-code"
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
               Claude Code style
