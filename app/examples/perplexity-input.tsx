@@ -236,7 +236,15 @@ function AddMenu({
               <ChevronRight className="size-4 shrink-0 text-[#9a9a94] dark:text-[#76786f]" />
             </button>
             {subOpen && (
-              <div role="menu" className={cn(MENU, 'top-0 left-full ml-1.5 w-[268px]')}>
+              <div
+                role="menu"
+                className={cn(
+                  MENU,
+                  // Mobile: stack below the row (a side flyout would run off-screen).
+                  'top-full left-0 mt-1.5 w-full',
+                  // ≥sm: the desktop side flyout, with room to the right.
+                  'sm:top-0 sm:left-full sm:mt-0 sm:ml-1.5 sm:w-[268px]',
+                )}>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
@@ -385,7 +393,7 @@ export function PerplexityInputExample({
           </div>
 
           {/* Controls: add + mode toggle on the left, model + voice cluster right */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
             <div className="flex items-center gap-2">
               <AddMenu
                 open={openMenu === 'add'}
@@ -426,7 +434,7 @@ export function PerplexityInputExample({
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-1">
               <ModelMenu
                 open={openMenu === 'model'}
                 setOpen={(next) => setOpenMenu(next ? 'model' : null)}
@@ -615,7 +623,7 @@ function PerplexityInputExample() {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
             <div className="flex items-center gap-2">
               {/* "+" add menu with a Connectors fly-out */}
               <div className="relative">
@@ -633,7 +641,7 @@ function PerplexityInputExample() {
                         <ChevronRight className="size-4 text-[#9a9a94] dark:text-[#76786f]" />
                       </button>
                       {subOpen && (
-                        <div role="menu" className={cn(MENU, 'top-0 left-full ml-1.5 w-[268px]')}>
+                        <div role="menu" className={cn(MENU, 'top-full left-0 mt-1.5 w-full sm:top-0 sm:left-full sm:mt-0 sm:ml-1.5 sm:w-[268px]')}>
                           <button className={UPSELL} onClick={() => setOpenMenu(null)}>
                             Upgrade to connect more sources
                             <ArrowRight className="size-4" style={{ color: SUPER }} />
@@ -684,7 +692,7 @@ function PerplexityInputExample() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-1">
               {/* Model / Orchestrator picker — gated list, switches with the mode */}
               <div className="relative -mr-1">
                 <button onClick={() => setOpenMenu(openMenu === 'model' ? null : 'model')} className={PILL}>

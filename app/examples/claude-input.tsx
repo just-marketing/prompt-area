@@ -69,7 +69,7 @@ const SEND = '#d97757'
 const ICON_BTN =
   'flex size-8 shrink-0 items-center justify-center rounded-lg text-[#5a5851] transition-colors hover:bg-black/[0.06] dark:text-[#c2c0b8] dark:hover:bg-white/[0.08]'
 const MENU =
-  'absolute right-0 top-full z-30 mt-2 flex w-[320px] flex-col rounded-2xl border border-black/[0.08] bg-white p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#30302e] dark:shadow-[0_12px_36px_rgba(0,0,0,0.55)]'
+  'absolute right-0 top-full z-30 mt-2 flex w-[320px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-black/[0.08] bg-white p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#30302e] dark:shadow-[0_12px_36px_rgba(0,0,0,0.55)]'
 const ROW =
   'flex w-full items-center rounded-xl px-3 py-2 text-left transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
 
@@ -390,7 +390,7 @@ const ACCENT = '#2c7fff' // selected-model check
 const SEND = '#d97757'   // coral send affordance
 
 const ICON_BTN = 'flex size-8 shrink-0 items-center justify-center rounded-lg text-[#5a5851] transition-colors hover:bg-black/[0.06] dark:text-[#c2c0b8] dark:hover:bg-white/[0.08]'
-const MENU = 'absolute right-0 top-full z-30 mt-2 flex w-[320px] flex-col rounded-2xl border border-black/[0.08] bg-white p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#30302e]'
+const MENU = 'absolute right-0 top-full z-30 mt-2 flex w-[320px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-black/[0.08] bg-white p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#30302e]'
 const ROW = 'flex w-full items-center rounded-xl px-3 py-2 text-left transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
 
 function ClaudeInputExample() {
