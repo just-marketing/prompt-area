@@ -28,3 +28,4 @@ export { ClaudeCodeInputExample, claudeCodeInputCode } from './claude-code-input
 export { CodexInputExample, codexInputCode } from './codex-input'
 export { ChatGptInputExample, chatgptInputCode } from './chatgpt-input'
 export { PerplexityInputExample, perplexityInputCode } from './perplexity-input'
+export { VercelAiSdkExample, vercelAiSdkCode } from './vercel-ai-sdk'

@@ -34,6 +34,11 @@ const EXAMPLES = [
     description: 'usePromptAreaState, trigger presets, and segment helpers.',
   },
   {
+    href: '/docs/examples/vercel-ai-sdk',
+    title: 'Vercel AI SDK',
+    description: 'Stream chat with useChat — onSubmit to sendMessage, status-aware send/stop.',
+  },
+  {
     href: '/styles',
     title: 'Agent Styles',
     description: 'Claude Code– and Codex-style composers on the dedicated Styles page.',

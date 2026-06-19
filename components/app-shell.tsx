@@ -8,7 +8,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <>
       <SiteHeader />
-      <main role="main" className="min-h-screen overflow-x-hidden">
+      <main role="main" className="min-h-screen overflow-x-clip">
         {children}
       </main>
     </>
