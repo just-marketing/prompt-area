@@ -181,16 +181,25 @@ export function VercelAiSdkExample() {
 export const vercelAiSdkCode = `// app/api/chat/route.ts — stream completions from Claude via the AI SDK
 import { anthropic } from '@ai-sdk/anthropic'
 import { convertToModelMessages, streamText, type UIMessage } from 'ai'
+import { z } from 'zod'
 
 export const maxDuration = 30
 
+// Validate the request body — never trust what the client POSTs.
+const bodySchema = z.object({
+  messages: z.array(z.custom<UIMessage>()),
+})
+
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json()
+  const parsed = bodySchema.safeParse(await req.json())
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.issues }, { status: 400 })
+  }
 
   const result = streamText({
     model: anthropic('claude-opus-4-8'),
     system: 'You are a helpful assistant.',
-    messages: convertToModelMessages(messages),
+    messages: convertToModelMessages(parsed.data.messages),
   })
 
   return result.toUIMessageStreamResponse()

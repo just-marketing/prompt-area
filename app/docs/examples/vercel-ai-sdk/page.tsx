@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/docs/examples/vercel-ai-sdk` },
 }
 
-const INSTALL_CMD = 'npm install ai @ai-sdk/react @ai-sdk/anthropic'
+const INSTALL_CMD = 'npm install ai @ai-sdk/react @ai-sdk/anthropic zod'
 
 const STRUCTURED_CONTEXT_CODE = `import { getChipsByTrigger, segmentsToPlainText } from '@/components/segment-helpers'
 
@@ -37,12 +37,27 @@ function handleSubmit() {
   setSegments([])
 }`
 
-const SERVER_CONTEXT_CODE = `export async function POST(req: Request) {
-  // Read the extra fields you attached via \`body\` on sendMessage.
-  const { messages, mentions, command, model } = await req.json()
+const SERVER_CONTEXT_CODE = `import { anthropic } from '@ai-sdk/anthropic'
+import { convertToModelMessages, streamText, type UIMessage } from 'ai'
+import { z } from 'zod'
+
+// Allowlist everything you accept — the request body is untrusted input.
+const bodySchema = z.object({
+  messages: z.array(z.custom<UIMessage>()),
+  model: z.enum(['claude-opus-4-8', 'claude-haiku-4-5']).default('claude-opus-4-8'),
+  command: z.enum(['summarize', 'translate']).optional(),
+  mentions: z.array(z.string().max(64)).max(10).default([]),
+})
+
+export async function POST(req: Request) {
+  const parsed = bodySchema.safeParse(await req.json())
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.issues }, { status: 400 })
+  }
+  const { messages, model, command, mentions } = parsed.data
 
   const result = streamText({
-    model: anthropic(model ?? 'claude-opus-4-8'),
+    model: anthropic(model),
     system: command
       ? \`The user invoked the "\${command}" command. Follow its conventions.\`
       : 'You are a helpful assistant.',
@@ -160,13 +175,15 @@ export default function VercelAiSdkExamplesPage() {
       </DocsP>
       <CodeBlock code={STRUCTURED_CONTEXT_CODE} lang="tsx" />
       <DocsP>
-        Then read the extra fields in your route handler and shape the call accordingly:
+        Then validate the body with a Zod schema in your route handler and shape the call from the
+        parsed, allowlisted values:
       </DocsP>
       <CodeBlock code={SERVER_CONTEXT_CODE} lang="tsx" />
       <Callout variant="warning">
-        Request <code>body</code> is untrusted input. Validate <code>model</code>,{' '}
-        <code>command</code>, and any chip values server-side — allowlist model IDs and commands
-        rather than passing them straight through.
+        Request <code>body</code> is untrusted input. Parse it with a Zod schema and{' '}
+        <code>safeParse</code> on the server — allowlist <code>model</code> IDs and{' '}
+        <code>command</code> values with <code>z.enum()</code> and bound array sizes rather than
+        passing anything straight through to the model.
       </Callout>
 
       <DocsH2 id="attachments">Attachments</DocsH2>
