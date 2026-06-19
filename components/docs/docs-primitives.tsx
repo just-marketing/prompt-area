@@ -14,7 +14,7 @@ export function DocsP({ children }: { children: ReactNode }) {
 
 export function DocsH2({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <h2 id={id} className="group/h scroll-mt-24 pt-4 text-xl font-semibold tracking-tight">
+    <h2 id={id} className="group/h scroll-mt-28 pt-4 text-xl font-semibold tracking-tight">
       <a href={`#${id}`} className="hover:underline">
         {children}
       </a>
@@ -24,7 +24,7 @@ export function DocsH2({ id, children }: { id: string; children: ReactNode }) {
 
 export function DocsH3({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <h3 id={id} className="scroll-mt-24 pt-2 text-base font-semibold">
+    <h3 id={id} className="scroll-mt-28 pt-2 text-base font-semibold">
       <a href={`#${id}`} className="hover:underline">
         {children}
       </a>

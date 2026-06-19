@@ -56,11 +56,18 @@ export async function POST(req: Request) {
   }
   const { messages, model, command, mentions } = parsed.data
 
-  const result = streamText({
-    model: anthropic(model),
-    system: command
+  const system = [
+    command
       ? \`The user invoked the "\${command}" command. Follow its conventions.\`
       : 'You are a helpful assistant.',
+    mentions.length ? \`People referenced: \${mentions.join(', ')}.\` : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const result = streamText({
+    model: anthropic(model),
+    system,
     messages: convertToModelMessages(messages),
   })
 
@@ -145,11 +152,10 @@ export default function VercelAiSdkExamplesPage() {
 
       <DocsH2 id="how-it-works">How it works</DocsH2>
       <DocsP>
-        Prompt Area is provider-agnostic — it produces structured segments, and you decide what to
-        send. To feed the AI SDK, flatten the segments to a string with{' '}
-        <code>segmentsToPlainText()</code> and pass it to <code>sendMessage</code>. Mentions,
-        commands, and tags resolve to their display text, so a model-friendly prompt falls out for
-        free.
+        On submit, flatten the segments to a string with <code>segmentsToPlainText()</code> and pass
+        it to <code>sendMessage</code>. Mentions, commands, and tags resolve to their display text,
+        so a model-friendly prompt falls out for free; <code>useChat</code> appends it to{' '}
+        <code>messages</code> and POSTs to your route.
       </DocsP>
       <DocsP>
         The AI SDK&apos;s <code>status</code> (<code>ready</code>, <code>submitted</code>,{' '}
@@ -189,8 +195,8 @@ export default function VercelAiSdkExamplesPage() {
       <DocsH2 id="attachments">Attachments</DocsH2>
       <DocsP>
         Prompt Area handles the attachment UI — pasted screenshots and picked files render as
-        thumbnails with loading and remove states. The AI SDK accepts files on the same call:
-        collect them into a <code>FileList</code> and pass{' '}
+        thumbnails with loading and remove states. The AI SDK accepts files on the same call: hand
+        the underlying <code>File</code> objects to{' '}
         <code>sendMessage(&#123; text, files &#125;)</code>. See{' '}
         <Link
           href="/docs/examples/attachments"
