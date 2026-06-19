@@ -94,9 +94,9 @@ export default function HomeContent() {
     <div className="flex flex-col">
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:pt-24">
-        <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
           {/* Copy + install */}
-          <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+          <div className="flex min-w-0 flex-col items-center gap-6 text-center lg:items-start lg:text-left">
             <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
               npm + shadcn · zero dependencies
             </span>
@@ -105,7 +105,7 @@ export default function HomeContent() {
               A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags,
               inline markdown, and file attachments in one contentEditable component.
             </p>
-            <div className="w-full max-w-xl">
+            <div className="w-full max-w-xl min-w-0">
               <InstallMethodTabs />
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
@@ -126,7 +126,7 @@ export default function HomeContent() {
             </div>
           </div>
           {/* Live demo — Codex-style composer seeded with real content */}
-          <div id="demo" className="w-full scroll-mt-20">
+          <div id="demo" className="w-full min-w-0 scroll-mt-20">
             <CodexInputExample
               initialSegments={HERO_SEGMENTS}
               triggers={HERO_TRIGGERS}

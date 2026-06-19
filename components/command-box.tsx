@@ -3,8 +3,15 @@
 import { useCallback, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 
-/** Copy-to-clipboard shell command box with a leading `$` prompt. */
-export function CommandBox({ cmd }: { cmd: string }) {
+/** Soft fade on the right edge so an overflowing command reads as scrollable. */
+const FADE_MASK = 'linear-gradient(to right, #000 calc(100% - 1.5rem), transparent)'
+
+/**
+ * Copy-to-clipboard shell command box with a leading `$` prompt. Long commands
+ * stay on one line and scroll, with a right-edge fade instead of a hard cut.
+ * `compact` uses a smaller font for tight columns (e.g. the split hero).
+ */
+export function CommandBox({ cmd, compact = false }: { cmd: string; compact?: boolean }) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(cmd).then(() => {
@@ -19,7 +26,11 @@ export function CommandBox({ cmd }: { cmd: string }) {
       className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors"
       aria-label={`Copy: ${cmd}`}>
       <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
-      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
+      <code
+        className={`text-foreground min-w-0 flex-1 [scrollbar-width:none] overflow-x-auto font-mono whitespace-nowrap ${
+          compact ? 'text-xs' : 'text-xs sm:text-sm'
+        }`}
+        style={{ maskImage: FADE_MASK, WebkitMaskImage: FADE_MASK }}>
         {cmd}
       </code>
       {copied ? (

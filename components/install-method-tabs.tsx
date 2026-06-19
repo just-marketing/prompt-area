@@ -22,6 +22,7 @@ export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string })
           label: 'shadcn',
           content: (
             <CommandBox
+              compact
               cmd={packageManagerCommand('pnpm', {
                 dlx: `shadcn@latest add https://prompt-area.com/r/${block}.json`,
               })}
@@ -30,7 +31,7 @@ export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string })
         },
         {
           label: 'npm package',
-          content: <CommandBox cmd={packageManagerCommand('pnpm', { add: block })} />,
+          content: <CommandBox compact cmd={packageManagerCommand('pnpm', { add: block })} />,
         },
       ]}
     />
