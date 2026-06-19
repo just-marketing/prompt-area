@@ -93,45 +93,49 @@ export default function HomeContent() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 pt-16 pb-12 text-center sm:pt-24">
-        <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-          npm + shadcn · zero dependencies
-        </span>
-        <RotatingTitle className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl" />
-        <p className="text-muted-foreground max-w-2xl text-lg text-balance">
-          A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags, inline
-          markdown, and file attachments in one contentEditable component.
-        </p>
-        <div className="w-full max-w-xl">
-          <InstallMethodTabs />
+      <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:pt-24">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
+          {/* Copy + install */}
+          <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+              npm + shadcn · zero dependencies
+            </span>
+            <RotatingTitle className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl" />
+            <p className="text-muted-foreground max-w-2xl text-lg text-balance">
+              A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags,
+              inline markdown, and file attachments in one contentEditable component.
+            </p>
+            <div className="w-full max-w-xl">
+              <InstallMethodTabs />
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
+              <Link
+                href="/docs"
+                className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
+                Get started
+                <ArrowRight className="size-4" />
+              </Link>
+              <a
+                href="https://github.com/just-marketing/prompt-area"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+                Star on GitHub
+                <ArrowUpRight className="size-3.5" />
+              </a>
+            </div>
+          </div>
+          {/* Live demo — Codex-style composer seeded with real content */}
+          <div id="demo" className="w-full scroll-mt-20">
+            <CodexInputExample
+              initialSegments={HERO_SEGMENTS}
+              triggers={HERO_TRIGGERS}
+              initialFiles={HERO_FILES}
+              markdown
+              minHeight={76}
+            />
+          </div>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-          <Link
-            href="/docs"
-            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
-            Get started
-            <ArrowRight className="size-4" />
-          </Link>
-          <a
-            href="https://github.com/just-marketing/prompt-area"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
-            Star on GitHub
-            <ArrowUpRight className="size-3.5" />
-          </a>
-        </div>
-      </section>
-
-      {/* Live demo — Codex-style composer seeded with real content */}
-      <section id="demo" className="mx-auto w-full max-w-2xl scroll-mt-20 px-4 pb-16">
-        <CodexInputExample
-          initialSegments={HERO_SEGMENTS}
-          triggers={HERO_TRIGGERS}
-          initialFiles={HERO_FILES}
-          markdown
-          minHeight={76}
-        />
       </section>
 
       {/* Features */}
