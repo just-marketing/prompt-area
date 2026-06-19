@@ -19,7 +19,7 @@ export function CommandBox({ cmd }: { cmd: string }) {
       className="group bg-muted/50 hover:bg-muted flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors"
       aria-label={`Copy: ${cmd}`}>
       <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
-      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs sm:text-sm">
+      <code className="text-foreground flex-1 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
         {cmd}
       </code>
       {copied ? (

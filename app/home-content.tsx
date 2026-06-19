@@ -94,7 +94,7 @@ export default function HomeContent() {
     <div className="flex flex-col">
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:pt-24">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
           {/* Copy + install */}
           <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
             <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
