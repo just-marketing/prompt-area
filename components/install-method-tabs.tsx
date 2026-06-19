@@ -1,14 +1,17 @@
 import { CodeTabs } from '@/components/code-tabs'
-import { PackageManagerTabs } from '@/components/package-manager-tabs'
+import { CommandBox } from '@/components/command-box'
+import { packageManagerCommand } from '@/lib/package-managers'
 
 /**
- * Homepage install switcher: pick the shadcn registry or the npm package, each
- * with pnpm / npm / yarn sub-tabs. shadcn leads to match the "shadcn chat
- * input" framing, with npm one click away — so the install command stays
- * consistent with the "npm + shadcn" badge instead of only ever showing npm.
+ * Homepage install switcher: one row of tabs to pick the shadcn registry or
+ * the npm package, each showing a single pnpm-default command. shadcn leads to
+ * match the "shadcn chat input" framing, with the npm package one click away —
+ * so the install stays consistent with the "npm + shadcn" badge instead of
+ * only ever showing npm. Per-manager (pnpm / npm / yarn) commands live in the
+ * docs install section.
  *
- * Both variants render in the static HTML (only visibility toggles), so every
- * command stays crawlable.
+ * Both commands render in the static HTML (only visibility toggles), so they
+ * stay crawlable.
  */
 export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string }) {
   return (
@@ -18,12 +21,16 @@ export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string })
         {
           label: 'shadcn',
           content: (
-            <PackageManagerTabs dlx={`shadcn@latest add https://prompt-area.com/r/${block}.json`} />
+            <CommandBox
+              cmd={packageManagerCommand('pnpm', {
+                dlx: `shadcn@latest add https://prompt-area.com/r/${block}.json`,
+              })}
+            />
           ),
         },
         {
-          label: 'npm',
-          content: <PackageManagerTabs add={block} />,
+          label: 'npm package',
+          content: <CommandBox cmd={packageManagerCommand('pnpm', { add: block })} />,
         },
       ]}
     />

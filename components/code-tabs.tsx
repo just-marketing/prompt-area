@@ -41,10 +41,7 @@ export function CodeTabs({ tabs, label }: { tabs: Tab[]; label: string }) {
       default:
         return
     }
-    // Stop here so a nested tablist (e.g. package-manager tabs inside an
-    // install-method tab) doesn't also bubble this key up to an outer one.
     e.preventDefault()
-    e.stopPropagation()
     setActive(next)
     tabRefs.current[next]?.focus()
   }

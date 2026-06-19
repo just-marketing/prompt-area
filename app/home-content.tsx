@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
+import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -96,9 +97,7 @@ export default function HomeContent() {
         <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
           npm + shadcn · zero dependencies
         </span>
-        <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
-          The shadcn chat input for React
-        </h1>
+        <RotatingTitle className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl" />
         <p className="text-muted-foreground max-w-2xl text-lg text-balance">
           A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags, inline
           markdown, and file attachments in one contentEditable component.
