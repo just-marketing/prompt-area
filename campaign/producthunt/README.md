@@ -11,10 +11,11 @@ Everything needed to launch **Prompt Area** on Product Hunt. Open these in order
 
 ## The 60-second version
 
-- **What:** Open-source React textarea for AI chat UIs — @mentions, /commands, #tags, inline markdown, file attachments. shadcn registry, zero deps, MIT.
+- **What:** Open-source React textarea for AI chat UIs — @mentions, /commands, #tags, inline markdown, file attachments. Install via **npm** (`npm install prompt-area`, ships its own CSS, no Tailwind needed) **or shadcn** (own the source). Dependency-light, ~37 kB, MIT. Currently **v0.3.2**.
 - **Tagline:** _The open-source textarea built for AI chat UIs._
-- **When:** A Tue/Wed/Thu, post at **12:01 AM PST**. Suggested: **2026-06-16** or **2026-06-23**.
+- **When:** A Tue/Wed/Thu, post at **12:01 AM PST**. Suggested: **Thu 2026-07-09** (backup **Tue 2026-07-14**; avoid US July 4 week).
 - **Hunter:** Self-hunt. Add all contributors as makers.
+- **Try-it-live:** real Vite + React app in the browser → `prompt-area.com/docs/try-it-live` (use it as the PH interactive-demo link).
 - **Win condition:** Reply to every comment, all day. Lead with the pain (5 libraries) and the relief (1 component).
 
 ## Assets
@@ -42,11 +43,36 @@ Everything needed to launch **Prompt Area** on Product Hunt. Open these in order
 
 ## Regenerating the images
 
-The slides were generated from a temporary Next.js route that renders the real
-components on branded 1280×720 canvases (`app/launch-slides`) plus a dev-only
-writer route (`app/api/save-slide`). Both are removed from the app after export to
-keep the product clean. The reference source is saved here as
+The slides are generated from a temporary Next.js route that renders the real
+`prompt-area` components on branded 1280×720 canvases (`app/launch-slides`) plus a
+dev-only writer route (`app/api/save-slide`). Both are removed from the app after
+export to keep the product clean. The reference source is saved here as
 [`slide-generator.tsx.txt`](./slide-generator.tsx.txt) — drop it back into
 `app/launch-slides/page.tsx`, add the writer route, run `pnpm dev`, open
-`/launch-slides`, and in the browser console run html-to-image over each
-`[data-slide]` element. See the comment header in that file.
+`/launch-slides`, and in the browser console run the **manual rasterizer** snippet
+over each `[data-slide]` element. The full, current steps (incl. the npm-package
+imports and the gotchas below) live in the comment header of that file.
+
+> **Capture gotchas (learned 2026-06-20):**
+>
+> - Use the **manual rasterizer** (`toSvg` → `Image` → `<canvas>` → `toDataURL`).
+>   `html-to-image`'s `toPng()` **hangs** in some embedded/automation browsers.
+> - Capture from a **foreground / focused tab**. In a backgrounded tab React throttles its
+>   scheduler, so the layout's `<Suspense>` boundary never hydrates and the contentEditable
+>   engine never paints chips (composer editors render empty). Foreground the tab (a
+>   screenshot does it) + one real click, wait ~2s, and confirm `.prompt-area-chip` count > 0
+>   before capturing. Static slides (e.g. slide 6 — install) capture fine even backgrounded.
+> - The slideshow MP4 is built from the 8 gallery PNGs (position 2 is a still
+>   extracted from `gallery-02-demo.gif`) with the skill's `build-video.js`, then the
+>   two GIFs are derived with the `ffmpeg` commands below.
+
+```bash
+# slideshow MP4 (run from campaign/producthunt/assets, ffmpeg required)
+ffmpeg -y -i gallery-02-demo.gif -frames:v 1 -vf "scale=2560:1440:force_original_aspect_ratio=decrease,pad=2560:1440:(ow-iw)/2:(oh-ih)/2:white" gallery-02-triggers.png
+node build-video.js prompt-area-demo            # from ~/.claude/skills/producthunt-launch/assets/build-video.js
+# social GIF (~5MB, fine for README/X/LinkedIn)
+ffmpeg -y -i prompt-area-demo.mp4 -vf "fps=15,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" -loop 0 prompt-area-demo.gif
+# PH-gallery GIF (MUST be < 3MB)
+ffmpeg -y -i prompt-area-demo.mp4 -vf "fps=12,scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4" -loop 0 prompt-area-demo-compact.gif
+rm gallery-02-triggers.png                       # intermediate, not shipped
+```

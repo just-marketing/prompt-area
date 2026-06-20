@@ -1,32 +1,69 @@
 // ===========================================================================
-// Prompt Area — Product Hunt slide generator (REFERENCE COPY)
+// Prompt Area — Product Hunt slide generator (REFERENCE COPY — updated 2026-06-20)
 // ---------------------------------------------------------------------------
 // Renders the gallery slides as REAL components on branded 1280x720 canvases.
 // Removed from the app after export to keep the repo clean.
 //
-// To regenerate the launch images:
+// WHAT CHANGED IN THIS REVISION
+//   • Imports the published `prompt-area` npm package (the old
+//     `@/registry/new-york/...` path no longer exists — the package now lives in
+//     packages/prompt-area and the docs app consumes it). The docs app's
+//     globals.css supplies the .prompt-area-chip styling, so no styles.css import.
+//   • Slide 1 eyebrow → "Open source · npm + shadcn · no Tailwind required".
+//   • Slide 6 → dual install (npm install + shadcn add) with 0 / ~37 kB / MIT cards.
+//
+// TO REGENERATE THE LAUNCH IMAGES
 //   1. Restore this file to:  app/launch-slides/page.tsx
 //   2. Recreate the dev-only writer route  app/api/save-slide/route.ts  that
-//      accepts { name, dataUrl } and writes campaign/producthunt/assets/<name>.png
-//   3. pnpm dev  ->  open http://localhost:3000/launch-slides  (wait ~3-4s so
-//      markdown decoration settles AND the .dark class is stripped on mount)
-//   4. In the browser console:
-//        const h=await import("https://esm.sh/html-to-image@1.11.13");
+//      accepts { name, dataUrl } and writes campaign/producthunt/assets/<name>.png:
+//        import { writeFile, mkdir } from 'node:fs/promises'; import path from 'node:path'
+//        export async function POST(req: Request){const {name,dataUrl}=await req.json();
+//          const b=dataUrl.replace(/^data:image\/png;base64,/,'');const dir=path.join(process.cwd(),'campaign','producthunt','assets');
+//          await mkdir(dir,{recursive:true});const buf=Buffer.from(b,'base64');await writeFile(path.join(dir,name+'.png'),buf);
+//          return Response.json({ok:true,bytes:buf.length})}
+//   3. Capture in a NORMAL desktop browser (see CAVEAT below):
+//        pnpm dev   ->   open http://localhost:3000/launch-slides   (wait ~3-4s)
+//   4. In the browser console, run the MANUAL rasterizer below. NOTE: html-to-image's
+//      toPng() hangs in some embedded/automation browsers — toSvg() + a manual
+//      <canvas> draw + canvas.toDataURL() is reliable. Also reveal any hidden
+//      React Suspense wrapper first so the slides have layout:
+//        const h = await import("https://esm.sh/html-to-image@1.11.13");
+//        document.querySelectorAll("div[hidden]").forEach(d=>{d.removeAttribute("hidden");d.style.display="block"});
 //        document.querySelectorAll(".prompt-area-md-marker").forEach(m=>{m.style.fontSize="0";m.style.opacity="0"});
 //        document.querySelectorAll("[contenteditable] .font-bold").forEach(b=>b.style.fontWeight="700");
 //        document.querySelectorAll("[contenteditable] .italic").forEach(i=>i.style.fontStyle="italic");
+//        const save = async (name, el) => {
+//          const W=el.offsetWidth,H=el.offsetHeight,R=2;
+//          const svg=await h.toSvg(el,{width:W,height:H});
+//          const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=svg});
+//          const c=document.createElement("canvas");c.width=W*R;c.height=H*R;
+//          const x=c.getContext("2d");x.scale(R,R);x.drawImage(img,0,0);
+//          await fetch("/api/save-slide",{method:"POST",headers:{"content-type":"application/json"},
+//            body:JSON.stringify({name,dataUrl:c.toDataURL("image/png")})});
+//        };
 //        for (const el of document.querySelectorAll("[data-slide]")) {
 //          if (el.id==="thumb"){el.style.cssText+=";position:fixed;left:0;top:0;margin:0;z-index:100000"}
-//          const d=await h.toPng(el,{width:el.offsetWidth,height:el.offsetHeight,pixelRatio:2,cacheBust:true});
-//          await fetch("/api/save-slide",{method:"POST",headers:{"content-type":"application/json"},
-//            body:JSON.stringify({name:el.id,dataUrl:d})});
+//          await save(el.id, el);
 //        }
-//   5. Rebuild video/gif:  see commands in README.md
+//   5. Rename slide-N.png -> gallery-0N-<topic>.png; resize thumb.png -> thumbnail-240/600.
+//   6. Rebuild the slideshow MP4 (position 2 is a still extracted from
+//      gallery-02-demo.gif) + GIFs — see campaign/producthunt/README.md.
+//
+// ⚠️ CAVEAT (learned 2026-06-20): capture from a FOREGROUND / focused tab. In a
+//    backgrounded tab React throttles its scheduler, so the layout's <Suspense>
+//    boundary never hydrates and the contentEditable engine never paints the
+//    chips/text (composer editors render EMPTY). Foreground the tab (a screenshot
+//    does this), do one real click on the page, wait ~2s, and confirm
+//    document.querySelectorAll('.prompt-area-chip').length > 0 before capturing
+//    (call window.__paRepaint() if needed). Static slides (e.g. slide 6 — install)
+//    capture fine even backgrounded since they don't use the engine.
 //
 // Notes:
 //  - Logo mark: lucide TextCursorInput (https://lucide.dev/icons/text-cursor-input)
 //  - The page strips html.dark on mount so Tailwind `dark:` chip variants only
 //    apply inside the slide-8 `.dark` wrapper (true light-vs-dark contrast).
+//  - window.__paRepaint() force-remounts the slide tree (useful if the engine
+//    painted while the subtree was momentarily hidden).
 // ===========================================================================
 
 'use client'
@@ -48,14 +85,14 @@ import {
   Globe,
   Map,
 } from 'lucide-react'
-import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
-import { ActionBar } from '@/registry/new-york/blocks/action-bar/action-bar'
-import { StatusBar } from '@/registry/new-york/blocks/status-bar/status-bar'
-import type {
-  Segment,
-  PromptAreaFile,
-  TriggerConfig,
-} from '@/registry/new-york/blocks/prompt-area/types'
+import {
+  PromptArea,
+  ActionBar,
+  StatusBar,
+  type Segment,
+  type PromptAreaFile,
+  type TriggerConfig,
+} from 'prompt-area'
 
 const TRIGGERS: TriggerConfig[] = [
   {
@@ -286,6 +323,18 @@ function Chip({ trigger, label, color }: { trigger: string; label: string; color
   )
 }
 
+/* A terminal-style command row for the dark install slide. */
+function CommandRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-xl border px-5 py-3.5 font-mono text-[16px]"
+      style={{ background: '#141417', borderColor: '#27272a' }}>
+      <span style={{ color: '#6ee7b7' }}>$</span>
+      <span style={{ color: '#e4e4e7' }}>{children}</span>
+    </div>
+  )
+}
+
 /* --------------------------------- slides -------------------------------- */
 
 const LIGHT_TOKENS = `
@@ -337,16 +386,19 @@ nextjs-portal,
 `
 
 export default function LaunchSlidesPage() {
-  const [ready, setReady] = useState(true)
+  const [pass, setPass] = useState(0)
   useEffect(() => {
     try { localStorage.setItem('theme', 'light') } catch {}
     document.documentElement.classList.remove('dark')
-    setReady(true)
+    // The capture script can call this to remount the slide tree once everything
+    // is visible, forcing every PromptArea's contentEditable engine to repaint.
+    ;(window as unknown as { __paRepaint?: () => void }).__paRepaint = () =>
+      setPass((p) => p + 1)
   }, [])
-  if (!ready) return null
 
   return (
     <div
+      key={pass}
       className="pa-slides-root"
       style={{
         position: 'fixed',
@@ -366,7 +418,7 @@ export default function LaunchSlidesPage() {
             <span className="text-muted-foreground text-[13px] font-medium">prompt-area.com</span>
           </div>
           <div className="mt-9 flex flex-col gap-4">
-            <Eyebrow>Open source · shadcn registry · 0 dependencies</Eyebrow>
+            <Eyebrow>Open source · npm + shadcn · no Tailwind required</Eyebrow>
             <H>
               One textarea for AI chat.
               <br />
@@ -496,37 +548,35 @@ export default function LaunchSlidesPage() {
         </div>
       </Slide>
 
-      {/* 6 — INSTALL / ZERO DEPS */}
+      {/* 6 — INSTALL (npm + shadcn) */}
       <Slide id="slide-6" dark>
         <div className="flex h-full flex-col">
           <Wordmark dark />
           <div className="mt-7 flex flex-col gap-3">
-            <H>Install in one command. Own the code.</H>
+            <H>Install two ways. Own your stack.</H>
             <Sub dark>
-              Ships as source through the shadcn registry — it lives in your repo, fully editable,
-              with zero runtime dependencies added to your bundle.
+              Ship it as a versioned npm package — its own CSS, no Tailwind setup — or copy the
+              source in via the shadcn registry so you own every line. Same component, your call.
             </Sub>
           </div>
-          <div
-            className="mt-8 flex items-center gap-3 rounded-xl border px-5 py-4 font-mono text-[17px]"
-            style={{ background: '#141417', borderColor: '#27272a' }}>
-            <span style={{ color: '#6ee7b7' }}>$</span>
-            <span style={{ color: '#e4e4e7' }}>
+          <div className="mt-7 flex flex-col gap-3">
+            <CommandRow>npm install prompt-area</CommandRow>
+            <CommandRow>
               npx shadcn@latest add{' '}
               <span style={{ color: '#a5b4fc' }}>https://prompt-area.com/r/prompt-area.json</span>
-            </span>
+            </CommandRow>
           </div>
-          <div className="mt-8 grid grid-cols-3 gap-4">
+          <div className="mt-7 grid grid-cols-3 gap-4">
             {[
-              ['0', 'extra dependencies'],
-              ['1', 'component, fully yours'],
+              ['0', 'heavy editor deps'],
+              ['~37 kB', 'packed package size'],
               ['MIT', 'open source license'],
             ].map(([big, small]) => (
               <div
                 key={small}
                 className="rounded-xl border px-5 py-5"
                 style={{ background: '#141417', borderColor: '#27272a' }}>
-                <div className="text-[34px] font-bold tracking-tight">{big}</div>
+                <div className="text-[32px] font-bold tracking-tight">{big}</div>
                 <div style={{ color: '#a1a1aa' }} className="text-[14px]">{small}</div>
               </div>
             ))}
@@ -569,7 +619,7 @@ export default function LaunchSlidesPage() {
                     {x}
                   </div>
                 ))}
-                <div className="text-primary mt-1 text-[13px] font-medium">0 dependencies · 1 API</div>
+                <div className="text-primary mt-1 text-[13px] font-medium">0 extra deps · 1 API</div>
               </div>
             </Card>
           </div>

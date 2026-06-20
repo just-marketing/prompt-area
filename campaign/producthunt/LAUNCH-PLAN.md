@@ -1,7 +1,7 @@
 # Prompt Area — Product Hunt Launch Plan
 
 > Everything needed to run a Product-of-the-Day–caliber launch for **Prompt Area**,
-> the open-source React textarea for AI chat UIs (shadcn registry, zero deps).
+> the open-source React textarea for AI chat UIs (install via npm or shadcn — no Tailwind required).
 >
 > Companion files: [`COPY.md`](./COPY.md) · [`CHECKLIST.md`](./CHECKLIST.md) · [`assets/`](./assets) · [`README.md`](./README.md)
 
@@ -9,7 +9,7 @@
 
 ## 1. Positioning & strategy
 
-**One-line positioning:** _The open-source rich textarea built specifically for AI chat & prompt inputs — mentions, commands, markdown and files in one shadcn component, with zero extra dependencies._
+**One-line positioning:** _The open-source rich textarea built specifically for AI chat & prompt inputs — mentions, commands, markdown and files in one React component you install from npm or copy in via shadcn, with no heavy editor dependencies and no required Tailwind setup._
 
 **Who we're for (in priority order):**
 
@@ -22,16 +22,18 @@
 
 **The core narrative (repeat everywhere):**
 
-> Most rich text editors are document editors crammed into a chat box. Prompt Area is purpose-built for prompt-style inputs — @mentions, /commands, #tags, inline markdown, and file attachments — shipped as source via the shadcn registry so you own the code and add zero dependencies.
+> Most rich text editors are document editors crammed into a chat box. Prompt Area is purpose-built for prompt-style inputs — @mentions, /commands, #tags, inline markdown, and file attachments — in one dependency-light React component. Install it two ways from the same source: `npm install prompt-area` (ships its own CSS, no Tailwind needed) or copy it in via the shadcn registry so you own every line.
 
 **Proof points to hammer:**
 
-- 0 extra dependencies (vs 2–5 for Tiptap/Lexical/Plate/BlockNote)
-- Install in one command: `npx shadcn@latest add …`
-- You own the source — it lives in your repo, fully editable
-- Companion components included: Action Bar, Status Bar, Compact, Chat Layout
-- Production-grade: undo/redo, IME (CJK), ARIA a11y, copy/paste chip preservation
-- MIT licensed, built by Juma (formerly Team-GPT)
+- **Two install paths, zero lock-in:** `npm install prompt-area` _or_ `npx shadcn@latest add …` — same source.
+- **No required Tailwind setup** — the npm package ships a self-contained `styles.css` (optional Tailwind preset for theming).
+- 0 extra runtime deps vs 2–5 for Tiptap/Lexical/Plate/BlockNote; ~37 kB packed (no ProseMirror/Slate/Lexical).
+- **Try it live, no install** — a real Vite + React app runs in the browser at `prompt-area.com/docs/try-it-live`.
+- You own the source on the shadcn path — it lives in your repo, fully editable.
+- Companion components included: Action Bar, Status Bar, Compact, Chat Layout.
+- Production-grade: undo/redo, IME (CJK), ARIA a11y, copy/paste chip preservation.
+- MIT licensed, built by Juma (formerly Team-GPT). Current release: **v0.3.2**.
 
 ---
 
@@ -43,7 +45,7 @@
 | 🥈 Target   | **#1 Product of the Day**, 500+ upvotes, GitHub stars +500                |
 | 🥇 Stretch  | Product of the Week feature, 800+ upvotes, front-page of a dev newsletter |
 
-Secondary metrics that matter more than rank: **GitHub stars, `npx shadcn add` installs, site traffic, newsletter signups, and qualitative feedback from real builders.** PH is a traffic-and-credibility event, not the finish line.
+Secondary metrics that matter more than rank: **GitHub stars, npm downloads (`npm install prompt-area`), `npx shadcn add` installs, site traffic, newsletter signups, and qualitative feedback from real builders.** PH is a traffic-and-credibility event, not the finish line.
 
 ---
 
@@ -51,7 +53,7 @@ Secondary metrics that matter more than rank: **GitHub stars, `npx shadcn add` i
 
 - **Launch day:** Tue/Wed/Thu. **Reality check on competition:** Tue & Wed have the most traffic _and_ the most brutal competition (often **600–1000+ upvotes needed for #1**, frequently VC-backed). **Thursday** keeps high traffic with slightly lighter competition — a better risk-adjusted pick for an open-source tool without a huge existing network. Avoid Mon (crowded) and Fri–Sun (low traffic).
 - **Go-live time:** **12:01 AM PST** (PH days run 24h on PST) — gives the full 24-hour window. Be available the first 3–4 hours and again during US morning (6–9 AM PST) and US-East midday.
-- **Suggested date:** **Thursday, June 18 or 25, 2026** (or a Tuesday if you've built a large support network and want max exposure). Gives ~1.5–2 weeks of prep from today (2026‑06‑07). Schedule the draft now so the upcoming page collects followers.
+- **Suggested date:** **Thursday, July 9, 2026** (backup: **Tuesday, July 14** if you've built a large support network and want max exposure). Gives ~2.5 weeks of prep from today (2026‑06‑20) and clears the US **July 4** holiday week — avoid launching June 30–July 3, when much of the US audience is already checked out. Schedule the draft now so the upcoming page collects followers.
 - **Plan outreach waves by timezone** (stagger so it looks organic, not a spike — see §10):
 
   | Wave | PST                      | Who                                         |
@@ -79,7 +81,7 @@ Secondary metrics that matter more than rank: **GitHub stars, `npx shadcn add` i
 
 - Lock the launch date; create the PH post as a **draft/scheduled** so the "upcoming" page collects followers.
 - Finalize all copy from [`COPY.md`](./COPY.md) and all images in [`assets/`](./assets).
-- Make sure `https://prompt-area.com` and the `npx shadcn add` command work flawlessly (the #1 thing visitors will try). Test the install in a fresh project.
+- Make sure `https://prompt-area.com` and **both install paths** work flawlessly (the #1 thing visitors will try): `npm install prompt-area` + `import 'prompt-area/styles.css'` in a fresh Vite app, **and** `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` in a fresh Next app. Also smoke-test the in-browser demo at `prompt-area.com/docs/try-it-live` (it pins `prompt-area@0.3.2` — keep the version current).
 - Confirm GitHub repo is public, README polished, issues templates ready, a "good first issue" or two labeled.
 
 **T‑10 to T‑5 — Audience warm-up**
@@ -142,7 +144,7 @@ Secondary metrics that matter more than rank: **GitHub stars, `npx shadcn add` i
 | Gallery 3 — Inline markdown         | `gallery-03-markdown.png`                | 1280×720               | ✅                                                             |
 | Gallery 4 — Files & images          | `gallery-04-attachments.png`             | 1280×720               | ✅                                                             |
 | Gallery 5 — Drop-in replicas        | `gallery-05-drop-in-replicas.png`        | 1280×720               | ✅                                                             |
-| Gallery 6 — Install / zero deps     | `gallery-06-install-zero-deps.png`       | 1280×720               | ✅                                                             |
+| Gallery 6 — Install (npm + shadcn)  | `gallery-06-install-zero-deps.png`       | 1280×720               | ✅ shows both install paths + 0/1/MIT stat cards               |
 | Gallery 7 — One component vs five   | `gallery-07-one-component.png`           | 1280×720               | ✅                                                             |
 | Gallery 8 — Dark mode & a11y        | `gallery-08-dark-mode-a11y.png`          | 1280×720               | ✅                                                             |
 | **Typing demo video (primary)**     | `prompt-area-typing-demo.mp4`            | 1280×720, ~6.5s        | ✅ upload to YouTube for PH video field — focused product demo |
@@ -172,13 +174,14 @@ Secondary metrics that matter more than rank: **GitHub stars, `npx shadcn add` i
 
 ## 9. Risks & mitigations
 
-| Risk                                | Mitigation                                                                                                       |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Install command fails for a visitor | Test in a clean repo pre-launch; pin shadcn version notes in docs; watch issues on launch day.                   |
-| "It's just a textarea" skepticism   | Gallery 7 (one component vs five) + comparison table answer this head-on; first comment frames the real pain.    |
-| Low early velocity                  | Warm up the notify list; have 5–10 engaged supporters ready; launch 12:01 PST for full window.                   |
-| Comments go unanswered              | Block the full day; assign a maker to monitor; pre-write FAQ answers (COPY §10) + response templates (COPY §12). |
-| Launch-day collision                | Check PH upcoming + tech calendar; keep a backup date one week out.                                              |
+| Risk                                | Mitigation                                                                                                                                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install fails for a visitor         | Test **both** paths in clean repos pre-launch (npm + `styles.css` in Vite; `shadcn add` in Next); the live `try-it-live` demo is a fallback that always works in-browser; watch issues on launch day. |
+| "Which install do I use?" confusion | First comment + FAQ frame it: same source, pick npm for a versioned package or shadcn to own the code. Gallery 6 shows both side by side.                                                             |
+| "It's just a textarea" skepticism   | Gallery 7 (one component vs five) + comparison table answer this head-on; first comment frames the real pain.                                                                                         |
+| Low early velocity                  | Warm up the notify list; have 5–10 engaged supporters ready; launch 12:01 PST for full window.                                                                                                        |
+| Comments go unanswered              | Block the full day; assign a maker to monitor; pre-write FAQ answers (COPY §10) + response templates (COPY §12).                                                                                      |
+| Launch-day collision                | Check PH upcoming + tech calendar; keep a backup date one week out.                                                                                                                                   |
 
 ---
 

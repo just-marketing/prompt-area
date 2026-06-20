@@ -4,7 +4,7 @@ Tick these off in order. Details live in [`LAUNCH-PLAN.md`](./LAUNCH-PLAN.md) an
 
 ## Decide (now)
 
-- [ ] Pick launch date — a **Tue/Wed/Thu** (suggested: **2026-06-16** or **2026-06-23**)
+- [ ] Pick launch date — a **Tue/Wed/Thu** (suggested: **Thu 2026-07-09**; backup **Tue 2026-07-14**; avoid Jun 30–Jul 3 around US July 4)
 - [ ] Confirm maker accounts (all contributors, complete profiles + avatars)
 - [ ] Decide self-hunt (recommended) vs external hunter
 - [ ] Check PH "upcoming" + tech/holiday calendar for that day
@@ -12,7 +12,9 @@ Tick these off in order. Details live in [`LAUNCH-PLAN.md`](./LAUNCH-PLAN.md) an
 ## Product readiness (T‑14 → T‑7)
 
 - [ ] `prompt-area.com` loads fast and looks great on mobile
-- [ ] `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` works in a **fresh** project
+- [ ] **npm path:** `npm install prompt-area` + `import 'prompt-area/styles.css'` works in a **fresh Vite** app (no Tailwind)
+- [ ] **shadcn path:** `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` works in a **fresh Next** project
+- [ ] **Live demo:** `prompt-area.com/docs/try-it-live` loads & runs (pinned version matches latest npm — currently `0.3.2`)
 - [ ] GitHub repo public, README polished, MIT license visible
 - [ ] A couple of "good first issue" labels for inbound contributors
 - [ ] `llms.txt` / `llms-full.txt` current (great for the AI-agent install path)
@@ -31,7 +33,7 @@ Tick these off in order. Details live in [`LAUNCH-PLAN.md`](./LAUNCH-PLAN.md) an
 - [ ] Tagline (from `COPY.md §1`)
 - [ ] Description ≤ 260 chars (from `COPY.md §1`)
 - [ ] Topics (3) selected
-- [ ] Links: site, GitHub, demo, X
+- [ ] Links: site, GitHub, **interactive demo** (`/docs/try-it-live`), npm, X
 - [ ] Pricing: Free / Open Source
 - [ ] Makers all added
 - [ ] First comment drafted & ready to paste (`COPY.md §2`)

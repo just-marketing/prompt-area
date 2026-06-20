@@ -28,28 +28,28 @@ Alternatives by formula (pick what fits the audience you most want to win):
 - _Action + outcome_ → `Drop a rich chat input into any React app in 1 command` (54)
 - _Problem killer_ → `Stop stitching 5 libraries for one AI chat input` (48)
 - _Capability list_ → `@mentions, /commands & markdown in one React textarea` (53)
-- _Speed/ease_ → `A shadcn AI chat input — zero deps, one command` (47)
+- _Speed/ease_ → `One React textarea for AI chat — npm or shadcn` (46)
 
 > Avoid jargon; a non-React reader should still grasp it. Lead with the benefit, not the feature.
 
 ### Description (≤ 260 chars)
 
-**USE THIS** — _PAS (Problem → Agitate → Solution)_, the highest-converting framework (252 chars):
+**USE THIS** — _PAS (Problem → Agitate → Solution)_, the highest-converting framework (251 chars):
 
 ```
-Every AI chat box needs @mentions, /commands, #tags, markdown and file uploads. The usual way? Stitch together five libraries and five APIs. Prompt Area is all of it in one React component — installed from the shadcn registry in one command, with zero extra deps.
+Every AI chat box needs @mentions, /commands, #tags, markdown and file uploads. The usual way? Stitch five libraries. Prompt Area is all of it in one React component — install from npm or copy it in via shadcn. Zero heavy deps, no Tailwind required.
 ```
 
-Alternative A — _FAB (Feature → Advantage → Benefit)_, scannable (247 chars):
+Alternative A — _FAB (Feature → Advantage → Benefit)_, scannable (244 chars):
 
 ```
-The open-source React textarea purpose-built for AI chat & prompt inputs. @mentions, /commands, #tags, inline markdown, and file attachments in one component. Installs from the shadcn registry in one command — you own the code, with zero extra dependencies.
+The open-source React textarea for AI chat & prompt inputs. @mentions, /commands, #tags, inline markdown, file attachments — one component. Install from npm (with its own CSS, no Tailwind needed) or copy the source in via the shadcn registry.
 ```
 
-Alternative B — _capability-dense_ (238 chars):
+Alternative B — _capability-dense_ (225 chars):
 
 ```
-A production-grade React textarea for AI chat UIs: @mentions, /commands, #tags, inline markdown, files, undo/redo, dark mode & a11y. Ships as source via the shadcn registry — one command to install, zero extra dependencies, fully yours to edit.
+A production-grade React textarea for AI chat UIs: @mentions, /commands, #tags, markdown, files, undo/redo, dark mode & a11y. Install from npm or copy in via shadcn — ships its own CSS, zero heavy deps, fully yours to edit.
 ```
 
 ### Topics (pick 3, most relevant first)
@@ -64,9 +64,10 @@ Backup options if available: `GitHub`, `Design Tools`, `User Experience`, `React
 
 - **Main link:** `https://prompt-area.com`
 - **GitHub:** `https://github.com/just-marketing/prompt-area`
-- **Docs / install:** `https://prompt-area.com` (Quick Start)
+- **Docs / install:** `https://prompt-area.com/docs/installation` (npm + shadcn)
+- **Interactive demo:** `https://prompt-area.com/docs/try-it-live` — a real Vite + React app running live in the browser (edit the code, watch chips resolve). This is a genuine interactive demo for the PH demo field; no Arcade/Storylane needed.
+- **npm:** `https://www.npmjs.com/package/prompt-area`
 - **X/Twitter (product or maker):** add if available
-- **Interactive demo:** the live demo on prompt-area.com (or add an Arcade/Storylane walkthrough)
 
 ### Pricing tag
 
@@ -99,12 +100,17 @@ So we built Prompt Area and open-sourced it:
 • One contentEditable component — @mentions, /commands, #tags, inline markdown,
   files & images, undo/redo, IME (CJK), copy/paste chip preservation, dark mode,
   and ARIA accessibility.
-• Zero extra dependencies. It ships as *source* through the shadcn registry, so
-  it lives in your repo and you own every line.
-• Install in one command:
-    npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+• Two ways to install, same source — no lock-in either way:
+    – npm:    npm install prompt-area   (ships its own CSS, no Tailwind needed)
+    – shadcn: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+              (copies the source into your repo so you own every line)
+• Dependency-light: no ProseMirror / Slate / Lexical, ~37 kB packed.
 • Companion components included: Action Bar, Status Bar, Compact, and Chat Layout
   — enough to recreate the inputs in Claude Code, Codex, ChatGPT or Slack.
+
+You don't have to take my word for it — there's a full Vite + React app running
+live in your browser (no setup): https://prompt-area.com/docs/try-it-live —
+edit the code and watch the chips and markdown resolve.
 
 It's MIT licensed and free. We'd genuinely love your feedback — what's missing,
 what would make it a drop-in for your stack, and which trigger behaviors you'd
@@ -118,6 +124,7 @@ Docs & live demo → https://prompt-area.com
 
 - "Happy to show how to recreate a specific app's input — drop the app and I'll share the config."
 - "For the curious: the trickiest part was IME composition (CJK) + undo/redo on contentEditable without a framework. Ask me anything about the engine."
+- "Want to kick the tires without installing anything? The live editor runs a real Vite app in your browser: https://prompt-area.com/docs/try-it-live"
 
 ---
 
@@ -128,7 +135,7 @@ Docs & live demo → https://prompt-area.com
 3. **gallery-03-markdown** — `Inline markdown renders live as you type — no preview pane, no editor framework`
 4. **gallery-04-attachments** — `Files & images built into the composer — no extra upload widget`
 5. **gallery-05-drop-in-replicas** — `Recreate the inputs from Claude Code, Codex, ChatGPT & Slack`
-6. **gallery-06-install-zero-deps** — `Install in one command from the shadcn registry — zero dependencies, you own the code`
+6. **gallery-06-install-zero-deps** — `Two ways, one source: npm install (own CSS, no Tailwind) or shadcn to own the code`
 7. **gallery-07-one-component** — `One component instead of five libraries — a single typed API`
 8. **gallery-08-dark-mode-a11y** — `Dark mode, keyboard control, ARIA & IME — production-grade by default`
 
@@ -144,7 +151,7 @@ We just launched Prompt Area on Product Hunt 🚀
 The open-source React textarea built for AI chat UIs.
 
 @mentions · /commands · #tags · inline markdown · file attachments
-→ one component, zero dependencies, installed from the shadcn registry.
+→ one dependency-light component. Install from npm or copy it in via shadcn.
 
 Would love your support & feedback 👇
 [PH link]
@@ -163,11 +170,12 @@ Lexical + an upload widget. 5 deps, 5 APIs, for ONE input.
 **Tweet 3 (the relief):**
 
 ```
-Prompt Area is all of it in a single contentEditable component.
+Prompt Area is all of it in a single contentEditable component. Install it two ways:
 
-npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+→ npm install prompt-area   (ships its own CSS — no Tailwind setup)
+→ npx shadcn@latest add …    (copy the source into YOUR repo)
 
-It ships as source — it lives in YOUR repo. Zero runtime deps added to your bundle. MIT.
+Dependency-light, ~37 kB, MIT.
 ```
 
 **Tweet 4 (proof / demo GIF):**
@@ -181,6 +189,7 @@ It's production-grade, not a toy:
 • dark mode via your shadcn tokens
 • companions: Action Bar, Status Bar, Chat Layout
 
+Try it live in your browser → https://prompt-area.com/docs/try-it-live
 [attach demo.gif]
 ```
 
@@ -208,10 +217,11 @@ Building AI chat and agent UIs, we kept rebuilding the same input box: @mentions
 to stitch together five libraries.
 
 Prompt Area is all of that in ONE React component:
-→ Installs from the shadcn registry in a single command
-→ Zero extra dependencies — it ships as source, so you own the code
+→ Install two ways from the same source: `npm install prompt-area` (ships its own CSS, no Tailwind needed) or copy it in via the shadcn registry
+→ Dependency-light (~37 kB) — no ProseMirror/Slate/Lexical
 → Production-grade: undo/redo, IME, accessibility, dark mode
 → Companion components to recreate the inputs in Claude Code, Codex, ChatGPT & Slack
+→ Run it live in your browser before installing: https://prompt-area.com/docs/try-it-live
 → MIT licensed, free
 
 If you build with React/Next.js and AI, I'd love your feedback.
@@ -230,7 +240,7 @@ Demo: https://prompt-area.com
 **Title (r/reactjs, r/nextjs):**
 
 ```
-I open-sourced Prompt Area — a React textarea with @mentions, /commands, #tags & markdown for AI chat UIs (shadcn registry, zero deps)
+I open-sourced Prompt Area — a React textarea with @mentions, /commands, #tags & markdown for AI chat UIs (npm or shadcn, no Tailwind required)
 ```
 
 **Body:**
@@ -241,12 +251,16 @@ palette + a tag input + a markdown editor + an upload widget just to get one goo
 input box. So I built Prompt Area: a single contentEditable component with
 @mentions, /commands, #tags, inline markdown, and file attachments.
 
-It ships as source through the shadcn registry (npx shadcn add …), so there are
-zero extra dependencies and you fully own/edit the code. Production stuff is
+Install it whichever way you prefer — both from the same source:
+- npm install prompt-area  (ships its own styles.css, so no Tailwind setup needed)
+- npx shadcn add …          (copies the source into your repo so you own/edit it)
+
+Dependency-light (~37 kB, no ProseMirror/Slate/Lexical). Production stuff is
 handled too: undo/redo, IME (CJK), copy/paste chip preservation, ARIA a11y, dark
 mode. MIT licensed.
 
-Live demo + docs: https://prompt-area.com
+Run it live in your browser (real Vite app, no setup): https://prompt-area.com/docs/try-it-live
+Docs: https://prompt-area.com
 Code: https://github.com/just-marketing/prompt-area
 
 We're also on Product Hunt today if you want to weigh in: [PH link]
@@ -274,11 +288,15 @@ we made Prompt Area: a single contentEditable React component with @mentions,
 /commands, #tags, inline markdown and file attachments — no ProseMirror/Lexical/
 Slate underneath.
 
-It's distributed as source via the shadcn registry, so it adds zero runtime
-dependencies and you own the code. We handled the annoying parts: IME composition
-for CJK, undo/redo on contentEditable, and copy/paste that preserves chip data.
+You can install it as a normal npm package (it ships its own CSS, so no Tailwind
+setup) or copy the source in via the shadcn registry if you'd rather own/edit it.
+Either way it's dependency-light (~37 kB, no ProseMirror/Slate/Lexical). We handled
+the annoying parts: IME composition for CJK, undo/redo on contentEditable, and
+copy/paste that preserves chip data.
 
-MIT licensed. Demo: https://prompt-area.com — Code: https://github.com/just-marketing/prompt-area
+MIT licensed. There's a live, editable Vite app in the browser if you want to poke
+at it: https://prompt-area.com/docs/try-it-live
+Code: https://github.com/just-marketing/prompt-area
 Happy to go deep on the contentEditable engine in the comments.
 ```
 
@@ -311,8 +329,8 @@ UIs. If you build with React/AI, would love your honest feedback in the comments
 
 ```
 Just launched Prompt Area on PH — open-source React textarea for AI chat UIs
-(@mentions, /commands, #tags, markdown, files; shadcn registry, zero deps).
-Feedback very welcome 🙏 [PH link] · code: github.com/just-marketing/prompt-area
+(@mentions, /commands, #tags, markdown, files; npm or shadcn, no Tailwind needed).
+Feedback very welcome 🙏 [PH link] · live demo: prompt-area.com/docs/try-it-live
 ```
 
 ---
@@ -323,17 +341,17 @@ Feedback very welcome 🙏 [PH link] · code: github.com/just-marketing/prompt-a
 
 > Those are general-purpose editor _frameworks_ (ProseMirror/plugin-based, 2–5 deps) for full document editing. Prompt Area is purpose-built for chat/prompt inputs with zero deps. Use Tiptap/Lexical for docs; use Prompt Area for a chat box you can ship today.
 
-**"Why shadcn registry instead of an npm package?"**
+**"npm package or shadcn registry — which should I use?"**
 
-> So you own the source. It lives in your repo, you can edit anything, and your bundle only grows by the component code — no black-box dependency, no version-lock surprises.
+> Both install the same component from the same source; pick by how you like to consume code. `npm install prompt-area` if you want a versioned package that updates with your lockfile (it ships its own `styles.css`, so no Tailwind setup). Use `npx shadcn add …` if you'd rather copy the source into your repo and own/edit every line. You can start with npm and eject to shadcn later.
 
-**"Does it work outside Next.js / without shadcn?"**
+**"Does it work outside Next.js / without shadcn / without Tailwind?"**
 
-> It's plain React + Tailwind. Next.js + shadcn is the smoothest path, but you can drop the source into any React app with Tailwind.
+> Yes. The npm package ships a self-contained `prompt-area/styles.css`, so it drops into any React app — Vite, CRA, Remix, Next — with no Tailwind required. There's also an optional `prompt-area/tailwind.css` preset if you do want token-level theming. (Try-it-Live is literally a plain Vite + React app.)
 
-**"Is it really zero dependencies?"**
+**"Is it really dependency-light?"**
 
-> Zero _extra_ runtime dependencies beyond React and your existing Tailwind setup. The component is self-contained source.
+> Yes — no ProseMirror/Slate/Lexical and ~37 kB packed. The shadcn path adds zero runtime deps to your bundle (it's just source); the npm path is a single small package.
 
 **"Can I style the chips / add my own triggers?"**
 
