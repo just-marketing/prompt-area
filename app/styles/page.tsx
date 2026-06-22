@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { ExampleShowcase } from '@/components/example-showcase'
+import { StyleLogo } from '@/components/style-logo'
 import { ClaudeInputExample, claudeInputCode } from '@/app/examples/claude-input'
 import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
 import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
@@ -46,7 +47,10 @@ export default function StylesPage() {
       {/* ChatGPT */}
       <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
+          <div className="flex items-center gap-3">
+            <StyleLogo id="chatgpt" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
+          </div>
           <p className="text-muted-foreground leading-relaxed">
             A ChatGPT-style composer: a single-line rounded pill with the controls inline — a model
             selector that opens a menu above, a dictation button, and the blue voice affordance that
@@ -70,7 +74,10 @@ export default function StylesPage() {
       {/* Claude */}
       <section id="claude" className="flex scroll-mt-20 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">Claude</h2>
+          <div className="flex items-center gap-3">
+            <StyleLogo id="claude" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Claude</h2>
+          </div>
           <p className="text-muted-foreground leading-relaxed">
             A Claude-style composer: a rounded card with the input stacked over an inline control
             row — a model selector whose menu lists each model over a one-line description with a
@@ -96,7 +103,10 @@ export default function StylesPage() {
       {/* Claude Code */}
       <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
+          <div className="flex items-center gap-3">
+            <StyleLogo id="claude-code" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
+          </div>
           <p className="text-muted-foreground leading-relaxed">
             A Claude Code–style composer: environment and repository context above the input, an
             inline return-to-send arrow, and a control bar with a permission-mode menu, dictation,
@@ -132,7 +142,10 @@ export default function StylesPage() {
       {/* Codex */}
       <section id="codex" className="flex scroll-mt-20 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
+          <div className="flex items-center gap-3">
+            <StyleLogo id="codex" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
+          </div>
           <p className="text-muted-foreground leading-relaxed">
             An OpenAI Codex–style cloud-agent composer: a rounded card with a permissions menu and
             reasoning-effort model selector, layered over a peeking repository/environment/branch
@@ -162,7 +175,10 @@ export default function StylesPage() {
       {/* Perplexity */}
       <section id="perplexity" className="flex scroll-mt-20 flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">Perplexity</h2>
+          <div className="flex items-center gap-3">
+            <StyleLogo id="perplexity" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Perplexity</h2>
+          </div>
           <p className="text-muted-foreground leading-relaxed">
             A Perplexity-style composer: a rounded card with a turquoise focus glow, the input
             stacked over a control row with a segmented Search/Computer mode toggle, a gated model

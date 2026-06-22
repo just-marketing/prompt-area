@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { RotatingTitle } from '@/components/rotating-title'
+import { StyleLogo, type StyleLogoId } from '@/components/style-logo'
 import { FeaturesGrid } from './sections/features-grid'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -87,6 +88,16 @@ const COMPONENTS = [
     desc: 'Full-height chat layout.',
   },
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
+]
+
+// The built-in agent styles, each anchored to its section on /styles. The vendor
+// logo is the focal point so visitors can spot the style they want at a glance.
+const STYLE_LINKS: { id: StyleLogoId; label: string }[] = [
+  { id: 'chatgpt', label: 'ChatGPT' },
+  { id: 'claude', label: 'Claude' },
+  { id: 'claude-code', label: 'Claude Code' },
+  { id: 'codex', label: 'Codex' },
+  { id: 'perplexity', label: 'Perplexity' },
 ]
 
 export default function HomeContent() {
@@ -187,37 +198,19 @@ export default function HomeContent() {
           <div className="mx-auto w-full max-w-2xl">
             <ClaudeCodeInputExample />
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/styles#chatgpt"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              ChatGPT style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#claude"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Claude style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#claude-code"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Claude Code style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#codex"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Codex style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#perplexity"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Perplexity style
-              <ArrowRight className="size-3.5" />
-            </Link>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {STYLE_LINKS.map((s) => (
+              <Link
+                key={s.id}
+                href={`/styles#${s.id}`}
+                className="group hover:bg-accent flex flex-col items-center justify-center gap-3 rounded-xl border p-6 text-center transition-colors">
+                <StyleLogo
+                  id={s.id}
+                  className="size-12 transition-transform duration-200 group-hover:scale-110"
+                />
+                <span className="text-sm font-medium">{s.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
