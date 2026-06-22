@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { PromptArea, type Segment } from 'prompt-area'
 
 const TAGS = [
-  { value: 'campaign', label: 'campaign' },
-  { value: 'lead-gen', label: 'lead-gen' },
-  { value: 'conversion', label: 'conversion' },
-  { value: 'branding', label: 'branding' },
-  { value: 'outbound', label: 'outbound' },
+  { value: 'campaign', label: 'campaign', description: 'Marketing initiatives' },
+  { value: 'lead-gen', label: 'lead-gen', description: 'Top-of-funnel capture' },
+  { value: 'conversion', label: 'conversion', description: 'Funnel optimization' },
+  { value: 'branding', label: 'branding', description: 'Brand & identity' },
+  { value: 'outbound', label: 'outbound', description: 'Cold outreach' },
 ]
 
 export function TagsExample() {
@@ -40,10 +40,10 @@ import { PromptArea } from '@/components/prompt-area'
 import type { Segment } from '@/components/types'
 
 const TAGS = [
-  { value: 'campaign', label: 'campaign' },
-  { value: 'lead-gen', label: 'lead-gen' },
-  { value: 'conversion', label: 'conversion' },
-  { value: 'branding', label: 'branding' },
+  { value: 'campaign', label: 'campaign', description: 'Marketing initiatives' },
+  { value: 'lead-gen', label: 'lead-gen', description: 'Top-of-funnel capture' },
+  { value: 'conversion', label: 'conversion', description: 'Funnel optimization' },
+  { value: 'branding', label: 'branding', description: 'Brand & identity' },
 ]
 
 function TagsExample() {
