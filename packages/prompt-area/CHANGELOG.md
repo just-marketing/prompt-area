@@ -3,6 +3,16 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- **`autoGrow` now respects the `maxHeight` prop.** Previously, enabling
+  `autoGrow` ignored `maxHeight` and always capped the editor at `70dvh`, so a
+  composer seeded with lots of content could grow to fill most of the screen.
+  The explicit `maxHeight` is now honored (falling back to `70dvh` only when no
+  cap is provided).
+
 ## 0.3.2
 
 ### Fixed
