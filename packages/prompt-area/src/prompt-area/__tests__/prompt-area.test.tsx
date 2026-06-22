@@ -233,6 +233,18 @@ describe('PromptArea', () => {
       expect(editor.style.transition).toContain('height')
     })
 
+    it('respects maxHeight prop when autoGrow is enabled', () => {
+      render(<PromptArea {...defaultProps} autoGrow maxHeight={280} />)
+      const editor = screen.getByRole('textbox')
+      expect(editor.style.maxHeight).toBe('280px')
+    })
+
+    it('falls back to a viewport cap when autoGrow has no maxHeight', () => {
+      render(<PromptArea {...defaultProps} autoGrow />)
+      const editor = screen.getByRole('textbox')
+      expect(editor.style.maxHeight).toBe('70dvh')
+    })
+
     it('syncs height on focus when autoGrow is enabled', () => {
       render(<PromptArea {...defaultProps} autoGrow />)
       const editor = screen.getByRole('textbox')

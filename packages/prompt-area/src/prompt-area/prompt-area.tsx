@@ -209,7 +209,9 @@ export function PromptArea({
     return {
       height: isFocused && editorHeight ? `${editorHeight}px` : `${minHeight}px`,
       minHeight: `${minHeight}px`,
-      maxHeight: '70dvh',
+      // Respect an explicit maxHeight; otherwise fall back to a viewport-relative
+      // cap so the editor never grows past the screen.
+      maxHeight: maxHeight ? `${maxHeight}px` : '70dvh',
       overflowY: isFocused ? 'auto' : 'hidden',
       // `min-height` is eased so consumers that animate it (e.g. the compact
       // prompt area's collapse/expand) morph smoothly instead of snapping.
