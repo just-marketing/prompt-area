@@ -39,6 +39,11 @@ const EXAMPLES = [
     description: 'Stream chat with useChat — onSubmit to sendMessage, status-aware send/stop.',
   },
   {
+    href: '/docs/examples/collaborative',
+    title: 'Collaborative',
+    description: 'Multiplayer composer over Vercel WebSockets — live presence, typing, shared doc.',
+  },
+  {
     href: '/styles',
     title: 'Agent Styles',
     description: 'Claude Code– and Codex-style composers on the dedicated Styles page.',
