@@ -1,3 +1,5 @@
+'use client'
+
 import {
   AtSign,
   Type,
@@ -8,6 +10,7 @@ import {
   Keyboard,
   Puzzle,
 } from 'lucide-react'
+import { RevealGroup, RevealItem } from '@/components/reveal'
 
 const FEATURES = [
   {
@@ -62,9 +65,9 @@ const FEATURES = [
 
 export function FeaturesGrid() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <RevealGroup className="grid gap-3 sm:grid-cols-2">
       {FEATURES.map((feature) => (
-        <div key={feature.title} className="flex items-start gap-3 rounded-lg border p-4">
+        <RevealItem key={feature.title} className="flex items-start gap-3 rounded-lg border p-4">
           <div className="bg-muted shrink-0 rounded-md p-2">
             <feature.icon className="size-4" />
           </div>
@@ -72,8 +75,8 @@ export function FeaturesGrid() {
             <div className="text-sm font-medium">{feature.title}</div>
             <div className="text-muted-foreground text-xs">{feature.description}</div>
           </div>
-        </div>
+        </RevealItem>
       ))}
-    </div>
+    </RevealGroup>
   )
 }
