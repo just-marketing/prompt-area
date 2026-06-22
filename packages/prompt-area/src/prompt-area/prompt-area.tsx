@@ -211,7 +211,9 @@ export function PromptArea({
       minHeight: `${minHeight}px`,
       maxHeight: '70dvh',
       overflowY: isFocused ? 'auto' : 'hidden',
-      transition: 'height 150ms ease-out',
+      // `min-height` is eased so consumers that animate it (e.g. the compact
+      // prompt area's collapse/expand) morph smoothly instead of snapping.
+      transition: 'height 150ms ease-out, min-height 240ms cubic-bezier(0.33, 1, 0.68, 1)',
     }
   }, [autoGrow, minHeight, maxHeight, isFocused, editorHeight])
 
