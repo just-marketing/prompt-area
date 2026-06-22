@@ -85,7 +85,7 @@ const BLUE = '#1a73e8'
 // Material palette (light + dark) rather than the docs theme so the composer
 // reads as Gemini on any page.
 const ICON_BTN =
-  'flex size-10 shrink-0 items-center justify-center rounded-full text-[#444746] transition-colors hover:bg-black/[0.06] dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]'
+  'flex size-11 shrink-0 items-center justify-center rounded-full text-[#444746] transition-colors hover:bg-black/[0.06] dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]'
 const MENU =
   'absolute z-30 flex min-w-[248px] flex-col rounded-3xl border border-black/[0.06] bg-white p-2 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#282a2c] dark:shadow-[0_12px_36px_rgba(0,0,0,0.55)]'
 const ROW =
@@ -194,7 +194,7 @@ function PlusMenu({
           setSub(null)
         }}
         className={ICON_BTN}>
-        {open ? <X className="size-5" /> : <Plus className="size-5" />}
+        {open ? <X className="size-6" /> : <Plus className="size-6" />}
       </button>
       {open && (
         <div role="menu" className={cn(MENU, 'bottom-full left-0 mb-2')}>
@@ -299,9 +299,9 @@ function ModelMenu({
           setOpen(!open)
           setSub(false)
         }}
-        className="flex h-9 items-center gap-1 rounded-full border border-black/[0.08] pr-2.5 pl-3.5 text-sm text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
+        className="flex h-10 items-center gap-1 rounded-full border border-transparent pr-2.5 pl-3.5 text-[15px] text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
         <span className="max-w-32 truncate">{model.tier}</span>
-        <ChevronDown className="size-3.5 opacity-70" />
+        <ChevronDown className="size-4 opacity-70" />
       </button>
       {open && (
         <div role="menu" className={cn(MENU, 'right-0 bottom-full mb-2 w-[260px]')}>
@@ -443,13 +443,13 @@ export function GeminiInputExample({
       <div
         onClick={() => promptRef.current?.focus()}
         className={cn(
-          'relative cursor-text rounded-[28px] transition-colors',
+          'relative cursor-text rounded-[32px] transition-colors',
           'border border-black/[0.08] bg-white text-[#1f1f1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]',
           'dark:border-transparent dark:bg-[#1e1f20] dark:text-[#e3e3e3] dark:shadow-none',
           '[--prompt-area-surface:#ffffff] dark:[--prompt-area-surface:#1e1f20]',
           '[--prompt-area-placeholder:#5e5e5e] dark:[--prompt-area-placeholder:#969ba1]',
         )}>
-        <div className="flex items-center gap-1 px-2 py-1.5">
+        <div className="flex items-center gap-1 px-2.5 py-2">
           <PlusMenu
             open={openMenu === 'plus'}
             setOpen={(next) => setOpenMenu(next ? 'plus' : null)}
@@ -482,7 +482,7 @@ export function GeminiInputExample({
           />
 
           <button type="button" className={ICON_BTN} aria-label="Use microphone">
-            <Mic className="size-5" />
+            <Mic className="size-6" />
           </button>
 
           {!isEmpty && (
@@ -490,9 +490,9 @@ export function GeminiInputExample({
               type="button"
               onClick={() => submit(segments)}
               aria-label="Send message"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: BLUE }}>
-              <ArrowUp className="size-5" />
+              <ArrowUp className="size-6" />
             </button>
           )}
         </div>
@@ -569,7 +569,7 @@ const MORE_UPLOADS: MenuTool[] = [
 const ALL_TOOLS = [...TOOLS, ...MORE_TOOLS]
 const BLUE = '#1a73e8' // selected check, active-tool accent, send button
 
-const ICON_BTN = 'flex size-10 shrink-0 items-center justify-center rounded-full text-[#444746] transition-colors hover:bg-black/[0.06] dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]'
+const ICON_BTN = 'flex size-11 shrink-0 items-center justify-center rounded-full text-[#444746] transition-colors hover:bg-black/[0.06] dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]'
 const MENU = 'absolute z-30 flex min-w-[248px] flex-col rounded-3xl border border-black/[0.06] bg-white p-2 shadow-[0_12px_36px_rgba(0,0,0,0.16)] dark:border-white/10 dark:bg-[#282a2c]'
 const ROW = 'flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-[15px] text-[#1f1f1f] transition-colors hover:bg-black/[0.05] dark:text-[#e3e3e3] dark:hover:bg-white/[0.06]'
 const NEW_BADGE = 'rounded-md bg-black/[0.06] px-1.5 py-0.5 text-[11px] font-medium leading-none text-[#444746] dark:bg-white/[0.1] dark:text-[#c4c7c5]'
@@ -641,20 +641,20 @@ function GeminiInputExample() {
       <div
         onClick={() => promptRef.current?.focus()}
         className={cn(
-          'relative cursor-text rounded-[28px] transition-colors',
+          'relative cursor-text rounded-[32px] transition-colors',
           'border border-black/[0.08] bg-white text-[#1f1f1f] shadow-[0_1px_3px_rgba(0,0,0,0.08)]',
           'dark:border-transparent dark:bg-[#1e1f20] dark:text-[#e3e3e3] dark:shadow-none',
           '[--prompt-area-surface:#ffffff] dark:[--prompt-area-surface:#1e1f20]',
           '[--prompt-area-placeholder:#5e5e5e] dark:[--prompt-area-placeholder:#969ba1]',
         )}>
-        <div className="flex items-center gap-1 px-2 py-1.5">
+        <div className="flex items-center gap-1 px-2.5 py-2">
           {/* "+" Upload & tools menu — opens above; the trigger flips to an X while open */}
           <div className="relative">
             <button
               onClick={() => { setOpenMenu(openMenu === 'plus' ? null : 'plus'); setPlusSub(null) }}
               className={ICON_BTN}
               aria-label="Upload & tools">
-              {openMenu === 'plus' ? <X className="size-5" /> : <Plus className="size-5" />}
+              {openMenu === 'plus' ? <X className="size-6" /> : <Plus className="size-6" />}
             </button>
             {openMenu === 'plus' && (
               <div role="menu" className={cn(MENU, 'bottom-full left-0 mb-2')}>
@@ -715,9 +715,9 @@ function GeminiInputExample() {
           <div className="relative">
             <button
               onClick={() => { setOpenMenu(openMenu === 'model' ? null : 'model'); setModelSub(false) }}
-              className="flex h-9 items-center gap-1 rounded-full border border-black/[0.08] pl-3.5 pr-2.5 text-sm text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
+              className="flex h-10 items-center gap-1 rounded-full border border-transparent pl-3.5 pr-2.5 text-[15px] text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
               <span className="max-w-32 truncate">{model.tier}</span>
-              <ChevronDown className="size-3.5 opacity-70" />
+              <ChevronDown className="size-4 opacity-70" />
             </button>
             {openMenu === 'model' && (
               <div role="menu" className={cn(MENU, 'bottom-full right-0 mb-2 w-[260px]')}>
@@ -766,15 +766,15 @@ function GeminiInputExample() {
             )}
           </div>
 
-          <button className={ICON_BTN} aria-label="Use microphone"><Mic className="size-5" /></button>
+          <button className={ICON_BTN} aria-label="Use microphone"><Mic className="size-6" /></button>
 
           {!isEmpty && (
             <button
               onClick={() => submit(segments)}
               aria-label="Send message"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: BLUE }}>
-              <ArrowUp className="size-5" />
+              <ArrowUp className="size-6" />
             </button>
           )}
         </div>
