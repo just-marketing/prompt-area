@@ -1,5 +1,5 @@
 import type { SVGProps } from 'react'
-import { CodeXml, SquareTerminal, type LucideIcon } from 'lucide-react'
+import { SquareTerminal, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -10,12 +10,11 @@ import { cn } from '@/lib/utils'
  * adopt its brand color through `currentColor`, so the same mark works in light
  * and dark themes.
  *
- * The three chat assistants use their official single-path brand marks
- * (viewBox 0 0 24 24). The two coding agents — Codex and Claude Code — have no
- * brand mark distinct from their parents (OpenAI and Anthropic), so rather than
- * repeat the OpenAI/Claude logos we give each a code/terminal glyph tinted in
- * its parent's brand color: the glyph keeps every tile unique while the color
- * still signals the vendor.
+ * ChatGPT, Claude, and Perplexity use their official single-path brand marks
+ * (viewBox 0 0 24 24), tinted via `currentColor`. Codex uses its own full-color
+ * gradient mark. Claude Code has no mark distinct from Anthropic, so it borrows
+ * a terminal glyph tinted in Claude's coral — keeping every tile unique while
+ * color still signals the vendor.
  */
 
 type BrandMark = { title: string; d: string }
@@ -36,15 +35,51 @@ const PERPLEXITY: BrandMark = {
 }
 
 /**
- * Each style id maps to its mark plus the brand-color class it renders in.
- * OpenAI's mark is monochrome, so ChatGPT follows the page foreground (black on
- * light, white on dark); Claude keeps its coral and Perplexity its turquoise
- * (darkened in light mode for contrast, matching the style example). Codex and
- * Claude Code carry a code/terminal glyph in their parent's brand color.
+ * Codex ships a full-color gradient mark (a white badge with a violet-to-blue
+ * glyph), so unlike the single-path marks it renders its own paths and gradient
+ * rather than tinting `currentColor`.
+ */
+function CodexLogo({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" role="img" aria-label="Codex logo" className={className} {...props}>
+      <title>Codex</title>
+      <path
+        d="M19.503 0H4.496A4.496 4.496 0 000 4.496v15.007A4.496 4.496 0 004.496 24h15.007A4.496 4.496 0 0024 19.503V4.496A4.496 4.496 0 0019.503 0z"
+        fill="#fff"
+      />
+      <path
+        d="M9.064 3.344a4.578 4.578 0 012.285-.312c1 .115 1.891.54 2.673 1.275.01.01.024.017.037.021a.09.09 0 00.043 0 4.55 4.55 0 013.046.275l.047.022.116.057a4.581 4.581 0 012.188 2.399c.209.51.313 1.041.315 1.595a4.24 4.24 0 01-.134 1.223.123.123 0 00.03.115c.594.607.988 1.33 1.183 2.17.289 1.425-.007 2.71-.887 3.854l-.136.166a4.548 4.548 0 01-2.201 1.388.123.123 0 00-.081.076c-.191.551-.383 1.023-.74 1.494-.9 1.187-2.222 1.846-3.711 1.838-1.187-.006-2.239-.44-3.157-1.302a.107.107 0 00-.105-.024c-.388.125-.78.143-1.204.138a4.441 4.441 0 01-1.945-.466 4.544 4.544 0 01-1.61-1.335c-.152-.202-.303-.392-.414-.617a5.81 5.81 0 01-.37-.961 4.582 4.582 0 01-.014-2.298.124.124 0 00.006-.056.085.085 0 00-.027-.048 4.467 4.467 0 01-1.034-1.651 3.896 3.896 0 01-.251-1.192 5.189 5.189 0 01.141-1.6c.337-1.112.982-1.985 1.933-2.618.212-.141.413-.251.601-.33.215-.089.43-.164.646-.227a.098.098 0 00.065-.066 4.51 4.51 0 01.829-1.615 4.535 4.535 0 011.837-1.388zm3.482 10.565a.637.637 0 000 1.272h3.636a.637.637 0 100-1.272h-3.636zM8.462 9.23a.637.637 0 00-1.106.631l1.272 2.224-1.266 2.136a.636.636 0 101.095.649l1.454-2.455a.636.636 0 00.005-.64L8.462 9.23z"
+        fill="url(#style-logo-codex-gradient)"
+      />
+      <defs>
+        <linearGradient
+          id="style-logo-codex-gradient"
+          gradientUnits="userSpaceOnUse"
+          x1="12"
+          x2="12"
+          y1="3"
+          y2="21">
+          <stop stopColor="#B1A7FF" />
+          <stop offset=".5" stopColor="#7A9DFF" />
+          <stop offset="1" stopColor="#3941FF" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+/**
+ * Each style id maps to its mark plus, for the single-path marks, the brand
+ * color it renders in. OpenAI's mark is monochrome, so ChatGPT follows the page
+ * foreground (black on light, white on dark); Claude keeps its coral and
+ * Perplexity its turquoise (darkened in light mode for contrast, matching the
+ * style example). Claude Code borrows a coral terminal glyph; Codex carries its
+ * own full-color mark.
  */
 type LogoSpec =
   | { kind: 'mark'; mark: BrandMark; color: string }
   | { kind: 'glyph'; icon: LucideIcon; title: string; color: string }
+  | { kind: 'full'; title: string }
 
 const STYLE_LOGOS = {
   chatgpt: { kind: 'mark', mark: OPENAI, color: 'text-foreground' },
@@ -55,7 +90,7 @@ const STYLE_LOGOS = {
     title: 'Claude Code',
     color: 'text-[#D97757]',
   },
-  codex: { kind: 'glyph', icon: CodeXml, title: 'Codex', color: 'text-foreground' },
+  codex: { kind: 'full', title: 'Codex' },
   perplexity: { kind: 'mark', mark: PERPLEXITY, color: 'text-[#13889a] dark:text-[#20b8cd]' },
 } satisfies Record<string, LogoSpec>
 
@@ -69,6 +104,12 @@ type StyleLogoProps = {
 
 export function StyleLogo({ id, className, ...props }: StyleLogoProps) {
   const spec = STYLE_LOGOS[id]
+
+  // Codex carries its own colors, so it skips the brand-color class entirely.
+  if (spec.kind === 'full') {
+    return <CodexLogo className={cn('size-10', className)} {...props} />
+  }
+
   const classes = cn('size-10', spec.color, className)
 
   if (spec.kind === 'glyph') {

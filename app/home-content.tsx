@@ -90,14 +90,28 @@ const COMPONENTS = [
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
 ]
 
-// The built-in agent styles, each anchored to its section on /styles. The vendor
-// logo is the focal point so visitors can spot the style they want at a glance.
-const STYLE_LINKS: { id: StyleLogoId; label: string }[] = [
-  { id: 'chatgpt', label: 'ChatGPT' },
-  { id: 'claude', label: 'Claude' },
-  { id: 'claude-code', label: 'Claude Code' },
-  { id: 'codex', label: 'Codex' },
-  { id: 'perplexity', label: 'Perplexity' },
+// The built-in agent styles, grouped by vendor and anchored to their sections
+// on /styles. The vendor logo is the focal point so visitors can spot the style
+// they want at a glance.
+const STYLE_GROUPS: { vendor: string; styles: { id: StyleLogoId; label: string }[] }[] = [
+  {
+    vendor: 'OpenAI',
+    styles: [
+      { id: 'chatgpt', label: 'ChatGPT' },
+      { id: 'codex', label: 'Codex' },
+    ],
+  },
+  {
+    vendor: 'Anthropic',
+    styles: [
+      { id: 'claude', label: 'Claude' },
+      { id: 'claude-code', label: 'Claude Code' },
+    ],
+  },
+  {
+    vendor: 'Perplexity',
+    styles: [{ id: 'perplexity', label: 'Perplexity' }],
+  },
 ]
 
 export default function HomeContent() {
@@ -198,18 +212,27 @@ export default function HomeContent() {
           <div className="mx-auto w-full max-w-2xl">
             <ClaudeCodeInputExample />
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {STYLE_LINKS.map((s) => (
-              <Link
-                key={s.id}
-                href={`/styles#${s.id}`}
-                className="group hover:bg-accent flex flex-col items-center justify-center gap-3 rounded-xl border p-6 text-center transition-colors">
-                <StyleLogo
-                  id={s.id}
-                  className="size-12 transition-transform duration-200 group-hover:scale-110"
-                />
-                <span className="text-sm font-medium">{s.label}</span>
-              </Link>
+          <div className="flex flex-wrap items-start justify-center gap-x-8 gap-y-6">
+            {STYLE_GROUPS.map((group) => (
+              <div key={group.vendor} className="flex flex-col items-center gap-3">
+                <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                  {group.vendor}
+                </span>
+                <div className="flex gap-3">
+                  {group.styles.map((s) => (
+                    <Link
+                      key={s.id}
+                      href={`/styles#${s.id}`}
+                      className="group hover:bg-accent flex w-32 flex-col items-center justify-center gap-3 rounded-xl border p-6 text-center transition-colors sm:w-36">
+                      <StyleLogo
+                        id={s.id}
+                        className="size-12 transition-transform duration-200 group-hover:scale-110"
+                      />
+                      <span className="text-sm font-medium">{s.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
