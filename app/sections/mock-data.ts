@@ -31,9 +31,9 @@ export const COMMANDS = [
 ]
 
 export const TAGS = [
-  { value: 'campaign', label: 'campaign' },
-  { value: 'lead-gen', label: 'lead-gen' },
-  { value: 'conversion', label: 'conversion' },
-  { value: 'branding', label: 'branding' },
-  { value: 'outbound', label: 'outbound' },
+  { value: 'campaign', label: 'campaign', description: 'Marketing initiatives' },
+  { value: 'lead-gen', label: 'lead-gen', description: 'Top-of-funnel capture' },
+  { value: 'conversion', label: 'conversion', description: 'Funnel optimization' },
+  { value: 'branding', label: 'branding', description: 'Brand & identity' },
+  { value: 'outbound', label: 'outbound', description: 'Cold outreach' },
 ]
