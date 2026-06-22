@@ -524,9 +524,9 @@ export function usePromptArea({
         }
 
         if (isChipElement(node)) {
-          // Spawn ripple effect
-          const chipEl = node as HTMLElement
-          const rect = chipEl.getBoundingClientRect()
+          // Spawn ripple effect. `isChipElement` has already narrowed `node`
+          // to HTMLElement, so no cast is needed.
+          const rect = node.getBoundingClientRect()
           const ripple = document.createElement('span')
           ripple.className = 'prompt-area-chip-ripple'
           const size = Math.max(rect.width, rect.height)
@@ -534,7 +534,7 @@ export function usePromptArea({
           ripple.style.height = `${size}px`
           ripple.style.left = `${e.clientX - rect.left - size / 2}px`
           ripple.style.top = `${e.clientY - rect.top - size / 2}px`
-          chipEl.appendChild(ripple)
+          node.appendChild(ripple)
           ripple.addEventListener('animationend', () => ripple.remove())
 
           if (!onChipClick) return

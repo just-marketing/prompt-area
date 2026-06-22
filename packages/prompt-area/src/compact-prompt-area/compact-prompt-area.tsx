@@ -96,7 +96,20 @@ export function CompactPromptArea({
   const containerRef = useRef<HTMLDivElement>(null)
   const [isFocused, setIsFocused] = useState(false)
 
-  useImperativeHandle(ref, () => promptRef.current!, [])
+  // Forward a stable, null-safe handle that proxies to the inner PromptArea.
+  // Reading `promptRef.current` lazily on each call avoids both a non-null
+  // assertion and capturing a stale snapshot at mount time.
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => promptRef.current?.focus(),
+      blur: () => promptRef.current?.blur(),
+      insertChip: (chip) => promptRef.current?.insertChip(chip),
+      getPlainText: () => promptRef.current?.getPlainText() ?? '',
+      clear: () => promptRef.current?.clear(),
+    }),
+    [],
+  )
 
   const isEmpty =
     value.length === 0 || (value.length === 1 && value[0].type === 'text' && value[0].text === '')
