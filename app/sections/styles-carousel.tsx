@@ -63,8 +63,10 @@ const GROUPS = SLIDES.reduce<{ vendor: string; items: { slide: Slide; index: num
   [],
 )
 
-const ARROW =
-  'bg-background/80 hover:bg-accent text-foreground absolute top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm backdrop-blur transition-colors sm:size-10'
+// Round nav button. On desktop the arrows sit in the gutter beside the composer;
+// on mobile that gutter would squeeze the composer, so they move to a row below.
+const ARROW_BASE =
+  'bg-background hover:bg-accent text-foreground size-10 items-center justify-center rounded-full border shadow-sm transition-colors'
 
 export function StylesCarousel() {
   const [active, setActive] = useState(0)
@@ -95,7 +97,10 @@ export function StylesCarousel() {
           type="button"
           onClick={() => step(-1)}
           aria-label="Previous style"
-          className={cn(ARROW, 'left-0 lg:left-4')}>
+          className={cn(
+            ARROW_BASE,
+            'absolute top-1/2 left-4 z-10 hidden -translate-y-1/2 lg:flex',
+          )}>
           <ChevronLeft className="size-5" />
         </button>
 
@@ -103,7 +108,7 @@ export function StylesCarousel() {
             remounting these heavy composers on each step reset the page scroll,
             so instead the inactive ones are hidden (display:none keeps their
             menus from being clipped) and the active one animates in. */}
-        <div className="mx-auto flex min-h-[19rem] w-full max-w-2xl items-center px-12 lg:px-0">
+        <div className="mx-auto flex min-h-[19rem] w-full max-w-2xl items-center">
           {SLIDES.map((slide, i) => (
             <div
               key={slide.id}
@@ -126,7 +131,29 @@ export function StylesCarousel() {
           type="button"
           onClick={() => step(1)}
           aria-label="Next style"
-          className={cn(ARROW, 'right-0 lg:right-4')}>
+          className={cn(
+            ARROW_BASE,
+            'absolute top-1/2 right-4 z-10 hidden -translate-y-1/2 lg:flex',
+          )}>
+          <ChevronRight className="size-5" />
+        </button>
+      </div>
+
+      {/* On mobile the side arrows would squeeze the composer, so show them in a
+          row beneath it instead. */}
+      <div className="flex justify-center gap-3 lg:hidden">
+        <button
+          type="button"
+          onClick={() => step(-1)}
+          aria-label="Previous style"
+          className={cn(ARROW_BASE, 'flex')}>
+          <ChevronLeft className="size-5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => step(1)}
+          aria-label="Next style"
+          className={cn(ARROW_BASE, 'flex')}>
           <ChevronRight className="size-5" />
         </button>
       </div>

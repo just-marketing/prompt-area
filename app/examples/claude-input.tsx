@@ -253,7 +253,7 @@ export function ClaudeInputExample({
         {bannerOpen && (
           <div className="relative z-0 mx-2 -mb-5 flex items-center justify-between gap-3 rounded-t-[20px] border border-b-0 border-black/[0.06] bg-[#f5f3ec] px-4 pt-2.5 pb-7 dark:border-white/[0.07] dark:bg-[#262624]">
             <span className="text-sm font-bold text-[#1f1e1d] dark:text-[#f5f4ee]">
-              Claude Fable 5 is currently unavailable.
+              Introducing connectors — bring your tools into Claude.
             </span>
             <div className="flex shrink-0 items-center gap-3">
               <button
@@ -435,7 +435,7 @@ function ClaudeInputExample() {
         {/* Notice that peeks out above the composer card */}
         {bannerOpen && (
           <div className="relative z-0 mx-2 -mb-5 flex items-center justify-between gap-3 rounded-t-[20px] border border-b-0 border-black/[0.06] bg-[#f5f3ec] px-4 pb-7 pt-2.5 dark:border-white/[0.07] dark:bg-[#262624]">
-            <span className="text-sm font-bold text-[#1f1e1d] dark:text-[#f5f4ee]">Claude Fable 5 is currently unavailable.</span>
+            <span className="text-sm font-bold text-[#1f1e1d] dark:text-[#f5f4ee]">Introducing connectors — bring your tools into Claude.</span>
             <div className="flex shrink-0 items-center gap-3">
               <button className="text-sm underline decoration-black/30 underline-offset-[3px] hover:decoration-current">Learn more</button>
               <button aria-label="Dismiss" onClick={() => setBannerOpen(false)} className="flex size-6 items-center justify-center rounded-md hover:bg-black/[0.06] dark:hover:bg-white/[0.08]">
