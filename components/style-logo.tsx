@@ -1,4 +1,5 @@
 import type { SVGProps } from 'react'
+import { CodeXml, SquareTerminal, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -9,9 +10,12 @@ import { cn } from '@/lib/utils'
  * adopt its brand color through `currentColor`, so the same mark works in light
  * and dark themes.
  *
- * Paths are the official single-path marks (viewBox 0 0 24 24). ChatGPT and
- * Codex are OpenAI products, so they share the OpenAI mark; Claude and Claude
- * Code share the Anthropic Claude mark.
+ * The three chat assistants use their official single-path brand marks
+ * (viewBox 0 0 24 24). The two coding agents — Codex and Claude Code — have no
+ * brand mark distinct from their parents (OpenAI and Anthropic), so rather than
+ * repeat the OpenAI/Claude logos we give each a code/terminal glyph tinted in
+ * its parent's brand color: the glyph keeps every tile unique while the color
+ * still signals the vendor.
  */
 
 type BrandMark = { title: string; d: string }
@@ -32,18 +36,28 @@ const PERPLEXITY: BrandMark = {
 }
 
 /**
- * Each style id maps to its vendor mark plus the brand-color class the mark
- * renders in. OpenAI's mark is monochrome, so it follows the page foreground
- * (black on light, white on dark); Claude keeps its coral, and Perplexity its
- * turquoise (darkened in light mode for contrast, matching the style example).
+ * Each style id maps to its mark plus the brand-color class it renders in.
+ * OpenAI's mark is monochrome, so ChatGPT follows the page foreground (black on
+ * light, white on dark); Claude keeps its coral and Perplexity its turquoise
+ * (darkened in light mode for contrast, matching the style example). Codex and
+ * Claude Code carry a code/terminal glyph in their parent's brand color.
  */
+type LogoSpec =
+  | { kind: 'mark'; mark: BrandMark; color: string }
+  | { kind: 'glyph'; icon: LucideIcon; title: string; color: string }
+
 const STYLE_LOGOS = {
-  chatgpt: { mark: OPENAI, color: 'text-foreground' },
-  claude: { mark: CLAUDE, color: 'text-[#D97757]' },
-  'claude-code': { mark: CLAUDE, color: 'text-[#D97757]' },
-  codex: { mark: OPENAI, color: 'text-foreground' },
-  perplexity: { mark: PERPLEXITY, color: 'text-[#13889a] dark:text-[#20b8cd]' },
-} as const
+  chatgpt: { kind: 'mark', mark: OPENAI, color: 'text-foreground' },
+  claude: { kind: 'mark', mark: CLAUDE, color: 'text-[#D97757]' },
+  'claude-code': {
+    kind: 'glyph',
+    icon: SquareTerminal,
+    title: 'Claude Code',
+    color: 'text-[#D97757]',
+  },
+  codex: { kind: 'glyph', icon: CodeXml, title: 'Codex', color: 'text-foreground' },
+  perplexity: { kind: 'mark', mark: PERPLEXITY, color: 'text-[#13889a] dark:text-[#20b8cd]' },
+} satisfies Record<string, LogoSpec>
 
 export type StyleLogoId = keyof typeof STYLE_LOGOS
 
@@ -54,17 +68,26 @@ type StyleLogoProps = {
 } & Omit<SVGProps<SVGSVGElement>, 'id'>
 
 export function StyleLogo({ id, className, ...props }: StyleLogoProps) {
-  const { mark, color } = STYLE_LOGOS[id]
+  const spec = STYLE_LOGOS[id]
+  const classes = cn('size-10', spec.color, className)
+
+  if (spec.kind === 'glyph') {
+    const Glyph = spec.icon
+    return (
+      <Glyph strokeWidth={2.25} className={classes} aria-label={`${spec.title} logo`} {...props} />
+    )
+  }
+
   return (
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
       role="img"
-      aria-label={`${mark.title} logo`}
-      className={cn('size-10', color, className)}
+      aria-label={`${spec.mark.title} logo`}
+      className={classes}
       {...props}>
-      <title>{mark.title}</title>
-      <path d={mark.d} />
+      <title>{spec.mark.title}</title>
+      <path d={spec.mark.d} />
     </svg>
   )
 }
