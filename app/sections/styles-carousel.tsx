@@ -99,16 +99,27 @@ export function StylesCarousel() {
           <ChevronLeft className="size-5" />
         </button>
 
+        {/* Every slide stays mounted; we only toggle visibility. Swapping/
+            remounting these heavy composers on each step reset the page scroll,
+            so instead the inactive ones are hidden (display:none keeps their
+            menus from being clipped) and the active one animates in. */}
         <div className="mx-auto flex min-h-[19rem] w-full max-w-2xl items-center px-12 lg:px-0">
-          <div
-            key={active}
-            className={cn(
-              'animate-in fade-in w-full duration-300 ease-out',
-              dir > 0 && 'slide-in-from-right-6',
-              dir < 0 && 'slide-in-from-left-6',
-            )}>
-            {activeSlide.render()}
-          </div>
+          {SLIDES.map((slide, i) => (
+            <div
+              key={slide.id}
+              aria-hidden={i !== active || undefined}
+              className={
+                i === active
+                  ? cn(
+                      'animate-in fade-in w-full duration-300 ease-out',
+                      dir > 0 && 'slide-in-from-right-6',
+                      dir < 0 && 'slide-in-from-left-6',
+                    )
+                  : 'hidden'
+              }>
+              {slide.render()}
+            </div>
+          ))}
         </div>
 
         <button
