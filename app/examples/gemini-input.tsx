@@ -457,7 +457,7 @@ export function GeminiInputExample({
             toggleTool={toggleTool}
           />
 
-          <div className="min-w-0 flex-1 px-1 text-[18px] leading-7">
+          <div className="min-w-0 flex-1 px-1 [&_.prompt-area-editor]:text-[18px] [&_.prompt-area-editor]:leading-7 [&_[aria-hidden=true]]:text-[18px] [&_[aria-hidden=true]]:leading-7">
             <PromptArea
               ref={promptRef}
               value={segments}
@@ -703,7 +703,7 @@ function GeminiInputExample() {
             )}
           </div>
 
-          <div className="min-w-0 flex-1 px-1 text-[18px] leading-7">
+          <div className="min-w-0 flex-1 px-1 [&_.prompt-area-editor]:text-[18px] [&_.prompt-area-editor]:leading-7 [&_[aria-hidden=true]]:text-[18px] [&_[aria-hidden=true]]:leading-7">
             <PromptArea
               ref={promptRef}
               value={segments}
