@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
+import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
 import { StylesCarousel } from './sections/styles-carousel'
@@ -92,20 +93,28 @@ export default function HomeContent() {
       {/* Hero */}
       <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:pt-24">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
-          {/* Copy + install */}
-          <div className="flex min-w-0 flex-col items-center gap-6 text-center lg:items-start lg:text-left">
-            <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-              npm + shadcn · zero dependencies
-            </span>
-            <RotatingTitle className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl" />
-            <p className="text-muted-foreground max-w-2xl text-lg text-balance">
-              A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags,
-              inline markdown, and file attachments in one contentEditable component.
-            </p>
-            <div className="w-full max-w-xl min-w-0">
+          {/* Copy + install — staggered into place on load */}
+          <RevealGroup
+            trigger="mount"
+            className="flex min-w-0 flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <RevealItem>
+              <span className="border-border text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+                npm + shadcn · zero dependencies
+              </span>
+            </RevealItem>
+            <RevealItem>
+              <RotatingTitle className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl" />
+            </RevealItem>
+            <RevealItem>
+              <p className="text-muted-foreground max-w-2xl text-lg text-balance">
+                A production-grade textarea for AI chat interfaces — @mentions, /commands, #tags,
+                inline markdown, and file attachments in one contentEditable component.
+              </p>
+            </RevealItem>
+            <RevealItem className="w-full max-w-xl min-w-0">
               <InstallMethodTabs />
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
+            </RevealItem>
+            <RevealItem className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
               <Link
                 href="/docs"
                 className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
@@ -120,17 +129,21 @@ export default function HomeContent() {
                 Star on GitHub
                 <ArrowUpRight className="size-3.5" />
               </a>
-            </div>
-          </div>
-          {/* Live demo — Codex-style composer seeded with real content */}
+            </RevealItem>
+          </RevealGroup>
+          {/* Live demo — Codex-style composer seeded with real content. Opacity-only
+              (lift=false) so the composer's pop-up menus aren't anchored to a
+              transformed ancestor. */}
           <div id="demo" className="w-full min-w-0 scroll-mt-20">
-            <CodexInputExample
-              initialSegments={HERO_SEGMENTS}
-              triggers={HERO_TRIGGERS}
-              initialFiles={HERO_FILES}
-              markdown
-              minHeight={76}
-            />
+            <Reveal lift={false} delay={0.15}>
+              <CodexInputExample
+                initialSegments={HERO_SEGMENTS}
+                triggers={HERO_TRIGGERS}
+                initialFiles={HERO_FILES}
+                markdown
+                minHeight={76}
+              />
+            </Reveal>
           </div>
         </div>
       </section>
@@ -138,36 +151,39 @@ export default function HomeContent() {
       {/* Features */}
       <section className="bg-muted/20 border-y">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-16">
-          <div className="flex flex-col gap-2 text-center">
+          <Reveal className="flex flex-col gap-2 text-center">
             <h2 className="text-2xl font-semibold tracking-tight">Everything in one input</h2>
             <p className="text-muted-foreground">
               One component replaces five libraries — no ProseMirror, Slate, or Lexical.
             </p>
-          </div>
+          </Reveal>
           <FeaturesGrid />
         </div>
       </section>
 
       {/* Components */}
       <section className="mx-auto w-full max-w-5xl px-4 py-16">
-        <div className="mb-8 flex flex-col gap-2 text-center">
+        <Reveal className="mb-8 flex flex-col gap-2 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">Components &amp; layouts</h2>
           <p className="text-muted-foreground">
             Compose the input with companions to build full chat experiences.
           </p>
-        </div>
+        </Reveal>
+        {/* Per-card reveals (not a group stagger) so the cascade still lands when
+            the grid stacks into one tall column on mobile. */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {COMPONENTS.map((c) => (
-            <Link
-              key={c.href}
-              href={c.href}
-              className="group hover:bg-accent/40 flex items-start justify-between gap-3 rounded-lg border p-5 transition-colors">
-              <span className="flex flex-col gap-1">
-                <span className="text-sm font-semibold">{c.title}</span>
-                <span className="text-muted-foreground text-sm leading-relaxed">{c.desc}</span>
-              </span>
-              <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            <Reveal key={c.href} className="h-full">
+              <Link
+                href={c.href}
+                className="group hover:bg-accent/40 flex h-full items-start justify-between gap-3 rounded-lg border p-5 transition-colors">
+                <span className="flex flex-col gap-1">
+                  <span className="text-sm font-semibold">{c.title}</span>
+                  <span className="text-muted-foreground text-sm leading-relaxed">{c.desc}</span>
+                </span>
+                <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -175,55 +191,61 @@ export default function HomeContent() {
       {/* Built-in styles */}
       <section className="bg-muted/20 border-y">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-16">
-          <div className="flex flex-col gap-2 text-center">
+          <Reveal className="flex flex-col gap-2 text-center">
             <h2 className="text-2xl font-semibold tracking-tight">Built-in agent styles</h2>
             <p className="text-muted-foreground">
               Real, copy-paste compositions modeled on the agent UIs you already know.
             </p>
-          </div>
-          <StylesCarousel />
+          </Reveal>
+          <Reveal lift={false} delay={0.05}>
+            <StylesCarousel />
+          </Reveal>
         </div>
       </section>
 
       {/* Comparison teaser */}
       <section className="border-y">
-        <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">A modern alternative</h2>
-          <p className="text-muted-foreground max-w-2xl">
-            Lighter than Tiptap, Lexical, or Plate for chat inputs — and a drop-in upgrade from
-            react-mentions. See the honest, side-by-side breakdowns.
-          </p>
-          <Link
-            href="/compare"
-            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
-            Compare alternatives
-            <ArrowRight className="size-4" />
-          </Link>
+        <div className="mx-auto w-full max-w-3xl px-4 py-16">
+          <Reveal className="flex flex-col items-center gap-4 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight">A modern alternative</h2>
+            <p className="text-muted-foreground max-w-2xl">
+              Lighter than Tiptap, Lexical, or Plate for chat inputs — and a drop-in upgrade from
+              react-mentions. See the honest, side-by-side breakdowns.
+            </p>
+            <Link
+              href="/compare"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+              Compare alternatives
+              <ArrowRight className="size-4" />
+            </Link>
+          </Reveal>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-20 text-center">
-        <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
-        <p className="text-muted-foreground max-w-xl">
-          Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
-        </p>
-        <div className="w-full max-w-xl">
-          <InstallMethodTabs />
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/docs"
-            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
-            Read the docs
-            <ArrowRight className="size-4" />
-          </Link>
-          <Link
-            href="/docs/quick-start"
-            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
-            Quick start
-          </Link>
-        </div>
+      <section className="mx-auto w-full max-w-3xl px-4 py-20">
+        <Reveal className="flex flex-col items-center gap-6 text-center">
+          <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
+          <p className="text-muted-foreground max-w-xl">
+            Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
+          </p>
+          <div className="w-full max-w-xl">
+            <InstallMethodTabs />
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/docs"
+              className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
+              Read the docs
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/docs/quick-start"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
+              Quick start
+            </Link>
+          </div>
+        </Reveal>
       </section>
     </div>
   )

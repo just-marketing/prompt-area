@@ -1,3 +1,5 @@
+'use client'
+
 import {
   AtSign,
   Type,
@@ -8,6 +10,7 @@ import {
   Keyboard,
   Puzzle,
 } from 'lucide-react'
+import { Reveal } from '@/components/reveal'
 
 const FEATURES = [
   {
@@ -61,10 +64,13 @@ const FEATURES = [
 ]
 
 export function FeaturesGrid() {
+  // Each card reveals independently as it scrolls into view (rather than a
+  // single group stagger) so the effect holds up when the grid collapses to one
+  // tall column on mobile — otherwise the lower cards would animate off-screen.
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {FEATURES.map((feature) => (
-        <div key={feature.title} className="flex items-start gap-3 rounded-lg border p-4">
+        <Reveal key={feature.title} className="flex items-start gap-3 rounded-lg border p-4">
           <div className="bg-muted shrink-0 rounded-md p-2">
             <feature.icon className="size-4" />
           </div>
@@ -72,7 +78,7 @@ export function FeaturesGrid() {
             <div className="text-sm font-medium">{feature.title}</div>
             <div className="text-muted-foreground text-xs">{feature.description}</div>
           </div>
-        </div>
+        </Reveal>
       ))}
     </div>
   )
