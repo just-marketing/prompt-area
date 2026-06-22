@@ -449,7 +449,7 @@ export function GeminiInputExample({
           '[--prompt-area-surface:#ffffff] dark:[--prompt-area-surface:#1e1f20]',
           '[--prompt-area-placeholder:#5e5e5e] dark:[--prompt-area-placeholder:#969ba1]',
         )}>
-        <div className="flex items-center gap-1 px-2.5 py-2">
+        <div className="flex items-center gap-1 px-2.5 py-[9px]">
           <PlusMenu
             open={openMenu === 'plus'}
             setOpen={(next) => setOpenMenu(next ? 'plus' : null)}
@@ -520,8 +520,13 @@ export function GeminiInputExample({
       </div>
 
       {/* Gemini's footer disclaimer sits under the composer. */}
-      <p className="text-center text-xs text-[#5e5e5e] dark:text-[#969ba1]">
-        Gemini can make mistakes, so double-check it
+      <p className="text-center text-[13px] text-[#5e5e5e] dark:text-[#969ba1]">
+        Gemini is AI and can make mistakes, including about people.{' '}
+        <button
+          type="button"
+          className="underline underline-offset-2 transition-colors hover:text-[#1f1f1f] dark:hover:text-[#e3e3e3]">
+          Your privacy &amp; Gemini
+        </button>
       </p>
 
       <SubmittedPreview text={submitted?.text} onReset={reset} />
@@ -647,7 +652,7 @@ function GeminiInputExample() {
           '[--prompt-area-surface:#ffffff] dark:[--prompt-area-surface:#1e1f20]',
           '[--prompt-area-placeholder:#5e5e5e] dark:[--prompt-area-placeholder:#969ba1]',
         )}>
-        <div className="flex items-center gap-1 px-2.5 py-2">
+        <div className="flex items-center gap-1 px-2.5 py-[9px]">
           {/* "+" Upload & tools menu — opens above; the trigger flips to an X while open */}
           <div className="relative">
             <button
@@ -796,7 +801,10 @@ function GeminiInputExample() {
       </div>
 
       {/* Gemini's footer disclaimer */}
-      <p className="text-center text-xs text-[#5e5e5e] dark:text-[#969ba1]">Gemini can make mistakes, so double-check it</p>
+      <p className="text-center text-[13px] text-[#5e5e5e] dark:text-[#969ba1]">
+        Gemini is AI and can make mistakes, including about people.{' '}
+        <button type="button" className="underline underline-offset-2 hover:text-[#1f1f1f] dark:hover:text-[#e3e3e3]">Your privacy &amp; Gemini</button>
+      </p>
 
       {submitted && (
         <div className="bg-muted/50 flex items-center justify-between rounded-lg border p-3 text-sm">
