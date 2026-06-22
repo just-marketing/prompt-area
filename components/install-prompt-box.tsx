@@ -37,7 +37,7 @@ export function InstallPromptBox({ className }: { className?: string }) {
           </>
         )}
       </button>
-      <pre className="text-foreground max-h-72 [scrollbar-width:thin] overflow-auto px-4 py-3 pr-20 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+      <pre className="text-foreground max-h-24 [scrollbar-width:thin] overflow-auto px-4 py-3 pr-20 font-mono text-xs leading-relaxed whitespace-pre-wrap">
         {INSTALL_PROMPT}
       </pre>
     </div>
