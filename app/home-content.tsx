@@ -169,9 +169,11 @@ export default function HomeContent() {
             Compose the input with companions to build full chat experiences.
           </p>
         </Reveal>
-        <RevealGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Per-card reveals (not a group stagger) so the cascade still lands when
+            the grid stacks into one tall column on mobile. */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {COMPONENTS.map((c) => (
-            <RevealItem key={c.href}>
+            <Reveal key={c.href} className="h-full">
               <Link
                 href={c.href}
                 className="group hover:bg-accent/40 flex h-full items-start justify-between gap-3 rounded-lg border p-5 transition-colors">
@@ -181,9 +183,9 @@ export default function HomeContent() {
                 </span>
                 <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
               </Link>
-            </RevealItem>
+            </Reveal>
           ))}
-        </RevealGroup>
+        </div>
       </section>
 
       {/* Built-in styles */}
