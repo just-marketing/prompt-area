@@ -20,6 +20,9 @@ const ClaudeInputExample = dynamic(() =>
 const ClaudeCodeInputExample = dynamic(() =>
   import('@/app/examples/claude-code-input').then((m) => ({ default: m.ClaudeCodeInputExample })),
 )
+const GeminiInputExample = dynamic(() =>
+  import('@/app/examples/gemini-input').then((m) => ({ default: m.GeminiInputExample })),
+)
 const PerplexityInputExample = dynamic(() =>
   import('@/app/examples/perplexity-input').then((m) => ({ default: m.PerplexityInputExample })),
 )
@@ -32,7 +35,7 @@ type Slide = {
 }
 
 // Carousel order mirrors the vendor grouping in the picker: OpenAI, then
-// Anthropic, then Perplexity.
+// Anthropic, then Google, then Perplexity.
 const SLIDES: Slide[] = [
   { id: 'chatgpt', label: 'ChatGPT', vendor: 'OpenAI', render: () => <ChatGptInputExample /> },
   { id: 'codex', label: 'Codex', vendor: 'OpenAI', render: () => <CodexInputExample /> },
@@ -43,6 +46,7 @@ const SLIDES: Slide[] = [
     vendor: 'Anthropic',
     render: () => <ClaudeCodeInputExample />,
   },
+  { id: 'gemini', label: 'Gemini', vendor: 'Google', render: () => <GeminiInputExample /> },
   {
     id: 'perplexity',
     label: 'Perplexity',
