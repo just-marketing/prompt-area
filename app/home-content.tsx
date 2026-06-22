@@ -5,17 +5,13 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { RotatingTitle } from '@/components/rotating-title'
-import { StyleLogo, type StyleLogoId } from '@/components/style-logo'
 import { FeaturesGrid } from './sections/features-grid'
+import { StylesCarousel } from './sections/styles-carousel'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
-)
-
-const ClaudeCodeInputExample = dynamic(() =>
-  import('./examples/claude-code-input').then((m) => ({ default: m.ClaudeCodeInputExample })),
 )
 
 // Seed the hero composer with a realistic prompt so it shows off mentions,
@@ -88,30 +84,6 @@ const COMPONENTS = [
     desc: 'Full-height chat layout.',
   },
   { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
-]
-
-// The built-in agent styles, grouped by vendor and anchored to their sections
-// on /styles. The vendor logo is the focal point so visitors can spot the style
-// they want at a glance.
-const STYLE_GROUPS: { vendor: string; styles: { id: StyleLogoId; label: string }[] }[] = [
-  {
-    vendor: 'OpenAI',
-    styles: [
-      { id: 'chatgpt', label: 'ChatGPT' },
-      { id: 'codex', label: 'Codex' },
-    ],
-  },
-  {
-    vendor: 'Anthropic',
-    styles: [
-      { id: 'claude', label: 'Claude' },
-      { id: 'claude-code', label: 'Claude Code' },
-    ],
-  },
-  {
-    vendor: 'Perplexity',
-    styles: [{ id: 'perplexity', label: 'Perplexity' }],
-  },
 ]
 
 export default function HomeContent() {
@@ -209,32 +181,7 @@ export default function HomeContent() {
               Real, copy-paste compositions modeled on the agent UIs you already know.
             </p>
           </div>
-          <div className="mx-auto w-full max-w-2xl">
-            <ClaudeCodeInputExample />
-          </div>
-          <div className="flex flex-wrap items-start justify-center gap-x-8 gap-y-6">
-            {STYLE_GROUPS.map((group) => (
-              <div key={group.vendor} className="flex flex-col items-center gap-3">
-                <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                  {group.vendor}
-                </span>
-                <div className="flex gap-3">
-                  {group.styles.map((s) => (
-                    <Link
-                      key={s.id}
-                      href={`/styles#${s.id}`}
-                      className="group hover:bg-accent flex w-32 flex-col items-center justify-center gap-3 rounded-xl border p-6 text-center transition-colors sm:w-36">
-                      <StyleLogo
-                        id={s.id}
-                        className="size-12 transition-transform duration-200 group-hover:scale-110"
-                      />
-                      <span className="text-sm font-medium">{s.label}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <StylesCarousel />
         </div>
       </section>
 
