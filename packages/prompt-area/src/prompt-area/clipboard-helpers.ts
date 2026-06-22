@@ -7,11 +7,9 @@
  */
 import type { Segment, ChipSegment } from './types'
 import {
-  getChipAutoResolved,
-  getChipData,
+  chipNodeToSegment,
   getChipDisplay,
   getChipTrigger,
-  getChipValue,
   getSelectionRange,
   isChipElement,
   isHTMLElement,
@@ -62,23 +60,8 @@ export function serializeFragmentToSegments(fragment: DocumentFragment): Segment
         segments.push({ type: 'text', text })
       }
     } else if (isChipElement(node)) {
-      const trigger = getChipTrigger(node)
-      const chipValue = getChipValue(node)
-      const display = getChipDisplay(node)
-      const data = getChipData(node)
-      const autoResolved = getChipAutoResolved(node)
-
-      if (trigger && chipValue !== undefined && display) {
-        const chip: ChipSegment = {
-          type: 'chip',
-          trigger,
-          value: chipValue,
-          displayText: display,
-          ...(data !== undefined ? { data } : {}),
-          ...(autoResolved ? { autoResolved: true } : {}),
-        }
-        segments.push(chip)
-      }
+      const chip = chipNodeToSegment(node)
+      if (chip) segments.push(chip)
     } else if (isHTMLElement(node) && node.tagName === 'BR') {
       segments.push({ type: 'text', text: '\n' })
     } else {

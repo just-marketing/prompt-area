@@ -5,6 +5,8 @@
  * following the codebase rule: "Never use `any` or `as` assertions."
  */
 
+import type { ChipSegment } from './types'
+
 // ---------------------------------------------------------------------------
 // Type Guards
 // ---------------------------------------------------------------------------
@@ -135,6 +137,36 @@ export function chipNodeTextLength(node: HTMLElement): number {
   const trigger = node.dataset.chipTrigger ?? ''
   const display = node.dataset.chipDisplay ?? node.textContent ?? ''
   return trigger.length + display.length
+}
+
+/**
+ * Reads a chip element into a `ChipSegment`, mirroring how chips are written
+ * in `renderSegmentsToDOM`. Returns null when the node is not a chip or is
+ * missing a required attribute (trigger, value, or display text).
+ *
+ * This is the single chip reader shared by the DOM->model sync, chip-click
+ * delegation, and clipboard serialization, so they cannot diverge on which
+ * fields are required or how optional `data` / `autoResolved` are attached.
+ */
+export function chipNodeToSegment(node: Node): ChipSegment | null {
+  if (!isChipElement(node)) return null
+
+  const trigger = getChipTrigger(node)
+  const value = getChipValue(node)
+  const displayText = getChipDisplay(node)
+  if (!trigger || value === undefined || !displayText) return null
+
+  const data = getChipData(node)
+  const autoResolved = getChipAutoResolved(node)
+
+  return {
+    type: 'chip',
+    trigger,
+    value,
+    displayText,
+    ...(data !== undefined ? { data } : {}),
+    ...(autoResolved ? { autoResolved: true } : {}),
+  }
 }
 
 // ---------------------------------------------------------------------------

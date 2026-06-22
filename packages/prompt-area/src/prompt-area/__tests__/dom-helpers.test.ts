@@ -16,6 +16,7 @@ import {
   indexOfChildNode,
   getDirectChildContaining,
   chipNodeTextLength,
+  chipNodeToSegment,
   domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateURLsInEditor,
@@ -1076,5 +1077,81 @@ describe('domChildIndexToSegmentIndex', () => {
 
     // The second chip lives at DOM child index 3 but segment index 1.
     expect(domChildIndexToSegmentIndex(editor, 3)).toBe(1)
+  })
+})
+
+// ===========================================================================
+// chipNodeToSegment
+// ===========================================================================
+
+describe('chipNodeToSegment', () => {
+  const makeChip = (attrs: Partial<Record<string, string>>): HTMLElement => {
+    const el = document.createElement('span')
+    for (const [key, val] of Object.entries(attrs)) {
+      if (val !== undefined) el.dataset[key] = val
+    }
+    return el
+  }
+
+  it('returns null for a non-chip node', () => {
+    expect(chipNodeToSegment(document.createTextNode('hi'))).toBeNull()
+    expect(chipNodeToSegment(document.createElement('span'))).toBeNull()
+  })
+
+  it('reads a minimal chip', () => {
+    const node = makeChip({ chipTrigger: '@', chipValue: 'u1', chipDisplay: 'Alice' })
+    expect(chipNodeToSegment(node)).toEqual({
+      type: 'chip',
+      trigger: '@',
+      value: 'u1',
+      displayText: 'Alice',
+    })
+  })
+
+  it('attaches parsed data when present', () => {
+    const node = makeChip({
+      chipTrigger: '@',
+      chipValue: 'u1',
+      chipDisplay: 'Alice',
+      chipData: JSON.stringify({ role: 'admin' }),
+    })
+    expect(chipNodeToSegment(node)).toEqual({
+      type: 'chip',
+      trigger: '@',
+      value: 'u1',
+      displayText: 'Alice',
+      data: { role: 'admin' },
+    })
+  })
+
+  it('marks auto-resolved chips', () => {
+    const node = makeChip({
+      chipTrigger: '#',
+      chipValue: 'tag',
+      chipDisplay: 'tag',
+      chipAutoResolved: 'true',
+    })
+    expect(chipNodeToSegment(node)).toEqual({
+      type: 'chip',
+      trigger: '#',
+      value: 'tag',
+      displayText: 'tag',
+      autoResolved: true,
+    })
+  })
+
+  it('preserves an empty-string value (value === undefined is the only reject)', () => {
+    const node = makeChip({ chipTrigger: '@', chipValue: '', chipDisplay: 'Anon' })
+    expect(chipNodeToSegment(node)).toEqual({
+      type: 'chip',
+      trigger: '@',
+      value: '',
+      displayText: 'Anon',
+    })
+  })
+
+  it('returns null when the value attribute is absent', () => {
+    const node = makeChip({ chipTrigger: '@', chipDisplay: 'Alice' })
+    expect(chipNodeToSegment(node)).toBeNull()
   })
 })
