@@ -41,6 +41,7 @@ import {
   getChipAutoResolved,
   getDirectChildContaining,
   indexOfChildNode,
+  domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
@@ -590,19 +591,7 @@ export function usePromptArea({
       const chipIdx = indexOfChildNode(editor, chipNode)
       if (chipIdx === -1) return false
 
-      // Map DOM child index to segment index
-      let segIdx = 0
-      for (let i = 0; i < chipIdx; i++) {
-        const child = editor.childNodes[i]
-        if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
-          segIdx++
-        } else if (isChipElement(child)) {
-          segIdx++
-        } else if (isBRElement(child)) {
-          segIdx++
-        }
-      }
-
+      const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
       const deletedChip = segments[segIdx]
       const newSegments = removeChipAtIndex(segments, segIdx)
       onChange(newSegments)
@@ -627,19 +616,7 @@ export function usePromptArea({
       const chipIdx = indexOfChildNode(editor, chipNode)
       if (chipIdx === -1) return false
 
-      // Map DOM child index to segment index
-      let segIdx = 0
-      for (let i = 0; i < chipIdx; i++) {
-        const child = editor.childNodes[i]
-        if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
-          segIdx++
-        } else if (isChipElement(child)) {
-          segIdx++
-        } else if (isBRElement(child)) {
-          segIdx++
-        }
-      }
-
+      const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
       const revertedChip = segments[segIdx]
       const result = revertChipAtIndex(segments, segIdx)
       if (!result) return false

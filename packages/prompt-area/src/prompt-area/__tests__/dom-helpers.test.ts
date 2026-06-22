@@ -15,6 +15,8 @@ import {
   getChipAutoResolved,
   indexOfChildNode,
   getDirectChildContaining,
+  chipNodeTextLength,
+  domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
@@ -999,5 +1001,80 @@ describe('normalizeEditorDOM additional edge cases', () => {
     expect(editor.textContent).toContain('block content')
     expect(editor.textContent).toContain('bold text')
     expect(editor.textContent).toContain('end')
+  })
+})
+
+// ===========================================================================
+// chipNodeTextLength
+// ===========================================================================
+
+describe('chipNodeTextLength', () => {
+  const makeChip = (trigger?: string, display?: string, text?: string): HTMLElement => {
+    const el = document.createElement('span')
+    if (trigger !== undefined) el.dataset.chipTrigger = trigger
+    if (display !== undefined) el.dataset.chipDisplay = display
+    if (text !== undefined) el.textContent = text
+    return el
+  }
+
+  it('sums trigger and display lengths', () => {
+    expect(chipNodeTextLength(makeChip('@', 'Alice'))).toBe(6) // "@Alice"
+  })
+
+  it('handles multi-character display text', () => {
+    expect(chipNodeTextLength(makeChip('#', 'release-notes'))).toBe(14)
+  })
+
+  it('falls back to textContent when chipDisplay is missing', () => {
+    expect(chipNodeTextLength(makeChip('@', undefined, 'Bob'))).toBe(4) // "@" + "Bob"
+  })
+
+  it('treats missing trigger and display as zero length', () => {
+    expect(chipNodeTextLength(makeChip())).toBe(0)
+  })
+})
+
+// ===========================================================================
+// domChildIndexToSegmentIndex
+// ===========================================================================
+
+describe('domChildIndexToSegmentIndex', () => {
+  const chip = (): HTMLElement => {
+    const el = document.createElement('span')
+    el.dataset.chipTrigger = '@'
+    el.dataset.chipDisplay = 'Alice'
+    el.textContent = '@Alice'
+    return el
+  }
+
+  it('returns 0 for the first child', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('hello'))
+    editor.appendChild(chip())
+    expect(domChildIndexToSegmentIndex(editor, 0)).toBe(0)
+  })
+
+  it('counts non-empty text, chips, and br elements', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('hi ')) // 0
+    editor.appendChild(chip()) // 1
+    editor.appendChild(document.createElement('br')) // 2
+    editor.appendChild(document.createTextNode('end')) // 3
+
+    expect(domChildIndexToSegmentIndex(editor, 1)).toBe(1)
+    expect(domChildIndexToSegmentIndex(editor, 2)).toBe(2)
+    expect(domChildIndexToSegmentIndex(editor, 3)).toBe(3)
+    expect(domChildIndexToSegmentIndex(editor, 4)).toBe(4)
+  })
+
+  it('skips empty text nodes (they produce no segment)', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('')) // skipped
+    editor.appendChild(chip()) // 0
+    editor.appendChild(document.createTextNode('')) // skipped
+    editor.appendChild(chip()) // 1
+
+    // The second chip lives at DOM child index 3 but segment index 1.
+    expect(domChildIndexToSegmentIndex(editor, 3)).toBe(1)
   })
 })

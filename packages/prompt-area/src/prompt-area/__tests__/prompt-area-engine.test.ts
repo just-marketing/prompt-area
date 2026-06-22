@@ -13,6 +13,7 @@ import {
   parseInlineMarkdown,
   toggleMarkdownWrap,
   segmentsEqual,
+  isInlineWhitespace,
 } from '../prompt-area-engine'
 import {
   getListContext,
@@ -1440,5 +1441,34 @@ describe('normalizeListPrefixes', () => {
       type: 'text',
       text: 'format as:\n\u2022 **Key messages**\n\u2022 *Action items*',
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isInlineWhitespace
+// ---------------------------------------------------------------------------
+
+describe('isInlineWhitespace', () => {
+  it('returns true for space, newline, and tab', () => {
+    expect(isInlineWhitespace(' ')).toBe(true)
+    expect(isInlineWhitespace('\n')).toBe(true)
+    expect(isInlineWhitespace('\t')).toBe(true)
+  })
+
+  it('returns false for non-whitespace characters', () => {
+    expect(isInlineWhitespace('a')).toBe(false)
+    expect(isInlineWhitespace('@')).toBe(false)
+    expect(isInlineWhitespace('')).toBe(false)
+  })
+
+  it('returns false for undefined (out-of-range index reads)', () => {
+    expect(isInlineWhitespace(undefined)).toBe(false)
+  })
+
+  it('does not treat other unicode whitespace as a boundary', () => {
+    // Non-breaking space and carriage return are intentionally NOT boundaries —
+    // trigger detection only recognizes the three inline-whitespace characters.
+    expect(isInlineWhitespace(' ')).toBe(false)
+    expect(isInlineWhitespace('\r')).toBe(false)
   })
 })

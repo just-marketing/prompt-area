@@ -31,6 +31,36 @@ export function plainTextToSegments(text: string): Segment[] {
 }
 
 // ---------------------------------------------------------------------------
+// Whitespace / word boundaries
+// ---------------------------------------------------------------------------
+
+/**
+ * Single source of truth for what counts as an inline-whitespace word boundary
+ * in the editor model: a space, newline, or tab.
+ *
+ * Trigger detection, paste auto-resolution, and position validation all rely
+ * on the *same* notion of a boundary — keeping it here prevents the three
+ * call sites from silently drifting apart (e.g. one handling tabs and the
+ * others not).
+ */
+export function isInlineWhitespace(char: string | undefined): boolean {
+  return char === ' ' || char === '\n' || char === '\t'
+}
+
+/**
+ * Builds a lookup from trigger character to its config. When two triggers
+ * share a character the first one wins, preserving the previous `Array.find`
+ * semantics while turning the per-character scan into an O(1) map read.
+ */
+function buildTriggerCharMap(triggers: TriggerConfig[]): Map<string, TriggerConfig> {
+  const map = new Map<string, TriggerConfig>()
+  for (const trigger of triggers) {
+    if (!map.has(trigger.char)) map.set(trigger.char, trigger)
+  }
+  return map
+}
+
+// ---------------------------------------------------------------------------
 // Trigger position validation
 // ---------------------------------------------------------------------------
 
@@ -56,7 +86,7 @@ export function isValidTriggerPosition(
   }
 
   // position === 'any': valid after any whitespace
-  return prevChar === ' ' || prevChar === '\n' || prevChar === '\t'
+  return isInlineWhitespace(prevChar)
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +110,8 @@ export function detectActiveTrigger(
 ): ActiveTrigger | null {
   if (!text || cursorPos === 0 || triggers.length === 0) return null
 
+  const triggerByChar = buildTriggerCharMap(triggers)
+
   // Scan backwards from cursor to find the nearest trigger character.
   // Stop at whitespace (trigger word has ended) or start of text.
   for (let i = cursorPos - 1; i >= 0; i--) {
@@ -87,11 +119,11 @@ export function detectActiveTrigger(
 
     // If we hit whitespace before finding a trigger, check if this whitespace
     // is immediately followed by a trigger character
-    if (char === ' ' || char === '\n' || char === '\t') {
+    if (isInlineWhitespace(char)) {
       // The character after this whitespace could be a trigger
       if (i + 1 < cursorPos) {
         const nextChar = text[i + 1]
-        const matchingTrigger = triggers.find((t) => t.char === nextChar)
+        const matchingTrigger = triggerByChar.get(nextChar)
         if (matchingTrigger && isValidTriggerPosition(text, i + 1, matchingTrigger.position)) {
           return {
             config: matchingTrigger,
@@ -105,7 +137,7 @@ export function detectActiveTrigger(
     }
 
     // Check if this character is a trigger character
-    const matchingTrigger = triggers.find((t) => t.char === char)
+    const matchingTrigger = triggerByChar.get(char)
     if (matchingTrigger && isValidTriggerPosition(text, i, matchingTrigger.position)) {
       return {
         config: matchingTrigger,
@@ -286,7 +318,7 @@ export function resolveTriggersInSegments(
   const autoResolveTriggers = triggers.filter((t) => t.resolveOnSpace)
   if (autoResolveTriggers.length === 0) return segments
 
-  const triggerChars = new Set(autoResolveTriggers.map((t) => t.char))
+  const triggerByChar = buildTriggerCharMap(autoResolveTriggers)
   const result: Segment[] = []
 
   for (const seg of segments) {
@@ -295,7 +327,7 @@ export function resolveTriggersInSegments(
       continue
     }
 
-    const parts = splitTextByTriggerPatterns(seg.text, autoResolveTriggers, triggerChars)
+    const parts = splitTextByTriggerPatterns(seg.text, triggerByChar)
     result.push(...parts)
   }
 
@@ -309,8 +341,7 @@ export function resolveTriggersInSegments(
  */
 function splitTextByTriggerPatterns(
   text: string,
-  triggers: TriggerConfig[],
-  triggerChars: Set<string>,
+  triggerByChar: Map<string, TriggerConfig>,
 ): Segment[] {
   if (!text) return []
 
@@ -320,20 +351,14 @@ function splitTextByTriggerPatterns(
   while (i < text.length) {
     const char = text[i]
 
-    if (triggerChars.has(char)) {
-      const isAtBoundary =
-        i === 0 || text[i - 1] === ' ' || text[i - 1] === '\n' || text[i - 1] === '\t'
+    if (triggerByChar.has(char)) {
+      const isAtBoundary = i === 0 || isInlineWhitespace(text[i - 1])
 
       if (isAtBoundary) {
-        const trigger = triggers.find((t) => t.char === char)
+        const trigger = triggerByChar.get(char)
         if (trigger && isValidTriggerPosition(text, i, trigger.position)) {
           let end = i + 1
-          while (
-            end < text.length &&
-            text[end] !== ' ' &&
-            text[end] !== '\n' &&
-            text[end] !== '\t'
-          ) {
+          while (end < text.length && !isInlineWhitespace(text[end])) {
             end++
           }
 
@@ -359,13 +384,7 @@ function splitTextByTriggerPatterns(
 
     const start = i
     i++
-    while (
-      i < text.length &&
-      !(
-        triggerChars.has(text[i]) &&
-        (text[i - 1] === ' ' || text[i - 1] === '\n' || text[i - 1] === '\t')
-      )
-    ) {
+    while (i < text.length && !(triggerByChar.has(text[i]) && isInlineWhitespace(text[i - 1]))) {
       i++
     }
     segments.push({ type: 'text', text: text.slice(start, i) })
