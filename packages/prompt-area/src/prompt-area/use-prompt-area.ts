@@ -34,13 +34,11 @@ import {
   isChipElement,
   isLinkElement,
   isBRElement,
-  getChipTrigger,
-  getChipValue,
-  getChipDisplay,
-  getChipData,
+  chipNodeToSegment,
   getChipAutoResolved,
   getDirectChildContaining,
   indexOfChildNode,
+  domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
@@ -169,23 +167,8 @@ export function usePromptArea({
           segments.push({ type: 'text', text })
         }
       } else if (isChipElement(node)) {
-        // Type-safe chip reading via type guards
-        const trigger = getChipTrigger(node)
-        const chipValue = getChipValue(node)
-        const display = getChipDisplay(node)
-        const data = getChipData(node)
-
-        if (trigger && chipValue !== undefined && display) {
-          const autoResolved = getChipAutoResolved(node)
-          segments.push({
-            type: 'chip',
-            trigger,
-            value: chipValue,
-            displayText: display,
-            ...(data !== undefined ? { data } : {}),
-            ...(autoResolved ? { autoResolved: true } : {}),
-          })
-        }
+        const chip = chipNodeToSegment(node)
+        if (chip) segments.push(chip)
       } else if (isBRElement(node)) {
         if (node.dataset.sentinel) continue // skip sentinel <br>
         segments.push({ type: 'text', text: '\n' })
@@ -541,9 +524,9 @@ export function usePromptArea({
         }
 
         if (isChipElement(node)) {
-          // Spawn ripple effect
-          const chipEl = node as HTMLElement
-          const rect = chipEl.getBoundingClientRect()
+          // Spawn ripple effect. `isChipElement` has already narrowed `node`
+          // to HTMLElement, so no cast is needed.
+          const rect = node.getBoundingClientRect()
           const ripple = document.createElement('span')
           ripple.className = 'prompt-area-chip-ripple'
           const size = Math.max(rect.width, rect.height)
@@ -551,27 +534,12 @@ export function usePromptArea({
           ripple.style.height = `${size}px`
           ripple.style.left = `${e.clientX - rect.left - size / 2}px`
           ripple.style.top = `${e.clientY - rect.top - size / 2}px`
-          chipEl.appendChild(ripple)
+          node.appendChild(ripple)
           ripple.addEventListener('animationend', () => ripple.remove())
 
           if (!onChipClick) return
-          const trigger = getChipTrigger(node)
-          const chipValue = getChipValue(node)
-          const display = getChipDisplay(node)
-          const data = getChipData(node)
-
-          if (trigger && chipValue !== undefined && display) {
-            const autoResolved = getChipAutoResolved(node)
-            const chip: ChipSegment = {
-              type: 'chip',
-              trigger,
-              value: chipValue,
-              displayText: display,
-              ...(data !== undefined ? { data } : {}),
-              ...(autoResolved ? { autoResolved: true } : {}),
-            }
-            onChipClick(chip)
-          }
+          const chip = chipNodeToSegment(node)
+          if (chip) onChipClick(chip)
           return
         }
         node = node.parentNode
@@ -590,19 +558,7 @@ export function usePromptArea({
       const chipIdx = indexOfChildNode(editor, chipNode)
       if (chipIdx === -1) return false
 
-      // Map DOM child index to segment index
-      let segIdx = 0
-      for (let i = 0; i < chipIdx; i++) {
-        const child = editor.childNodes[i]
-        if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
-          segIdx++
-        } else if (isChipElement(child)) {
-          segIdx++
-        } else if (isBRElement(child)) {
-          segIdx++
-        }
-      }
-
+      const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
       const deletedChip = segments[segIdx]
       const newSegments = removeChipAtIndex(segments, segIdx)
       onChange(newSegments)
@@ -627,19 +583,7 @@ export function usePromptArea({
       const chipIdx = indexOfChildNode(editor, chipNode)
       if (chipIdx === -1) return false
 
-      // Map DOM child index to segment index
-      let segIdx = 0
-      for (let i = 0; i < chipIdx; i++) {
-        const child = editor.childNodes[i]
-        if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
-          segIdx++
-        } else if (isChipElement(child)) {
-          segIdx++
-        } else if (isBRElement(child)) {
-          segIdx++
-        }
-      }
-
+      const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
       const revertedChip = segments[segIdx]
       const result = revertChipAtIndex(segments, segIdx)
       if (!result) return false
