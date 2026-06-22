@@ -1,20 +1,20 @@
-import type { SVGProps } from 'react'
+import type { ReactElement, SVGProps } from 'react'
 import { SquareTerminal, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
  * Vendor logos for the built-in agent styles (ChatGPT, Claude, Claude Code,
- * Codex, Perplexity). lucide-react dropped brand glyphs, so — like
+ * Codex, Gemini, Perplexity). lucide-react dropped brand glyphs, so — like
  * github-icon.tsx — the official marks live here as inline SVG paths. Rendering
  * them inline (rather than as <img>) keeps them crisp at any size and lets each
  * adopt its brand color through `currentColor`, so the same mark works in light
  * and dark themes.
  *
  * ChatGPT, Claude, and Perplexity use their official single-path brand marks
- * (viewBox 0 0 24 24), tinted via `currentColor`. Codex uses its own full-color
- * gradient mark. Claude Code has no mark distinct from Anthropic, so it borrows
- * a terminal glyph tinted in Claude's coral — keeping every tile unique while
- * color still signals the vendor.
+ * (viewBox 0 0 24 24), tinted via `currentColor`. Codex and Gemini use their own
+ * full-color gradient marks. Claude Code has no mark distinct from Anthropic, so
+ * it borrows a terminal glyph tinted in Claude's coral — keeping every tile
+ * unique while color still signals the vendor.
  */
 
 type BrandMark = { title: string; d: string }
@@ -32,6 +32,36 @@ const CLAUDE: BrandMark = {
 const PERPLEXITY: BrandMark = {
   title: 'Perplexity',
   d: 'M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z',
+}
+
+/**
+ * Gemini's mark is a four-pointed "spark" filled with its blue→purple→pink brand
+ * gradient, so — like Codex — it renders its own path and gradient rather than
+ * tinting `currentColor`.
+ */
+function GeminiLogo({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" role="img" aria-label="Gemini logo" className={className} {...props}>
+      <title>Gemini</title>
+      <path
+        d="M12 24A14.304 14.304 0 0 0 0 12 14.304 14.304 0 0 0 12 0a14.305 14.305 0 0 0 12 12 14.305 14.305 0 0 0-12 12"
+        fill="url(#style-logo-gemini-gradient)"
+      />
+      <defs>
+        <linearGradient
+          id="style-logo-gemini-gradient"
+          gradientUnits="userSpaceOnUse"
+          x1="3"
+          x2="21"
+          y1="3"
+          y2="21">
+          <stop stopColor="#4285F4" />
+          <stop offset=".5" stopColor="#9168C0" />
+          <stop offset="1" stopColor="#D96570" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
 }
 
 /**
@@ -79,7 +109,7 @@ function CodexLogo({ className, ...props }: SVGProps<SVGSVGElement>) {
 type LogoSpec =
   | { kind: 'mark'; mark: BrandMark; color: string }
   | { kind: 'glyph'; icon: LucideIcon; title: string; color: string }
-  | { kind: 'full'; title: string }
+  | { kind: 'full'; render: (props: SVGProps<SVGSVGElement>) => ReactElement }
 
 const STYLE_LOGOS = {
   chatgpt: { kind: 'mark', mark: OPENAI, color: 'text-foreground' },
@@ -90,7 +120,8 @@ const STYLE_LOGOS = {
     title: 'Claude Code',
     color: 'text-[#D97757]',
   },
-  codex: { kind: 'full', title: 'Codex' },
+  codex: { kind: 'full', render: (props) => <CodexLogo {...props} /> },
+  gemini: { kind: 'full', render: (props) => <GeminiLogo {...props} /> },
   perplexity: { kind: 'mark', mark: PERPLEXITY, color: 'text-[#13889a] dark:text-[#20b8cd]' },
 } satisfies Record<string, LogoSpec>
 
@@ -105,9 +136,9 @@ type StyleLogoProps = {
 export function StyleLogo({ id, className, ...props }: StyleLogoProps) {
   const spec = STYLE_LOGOS[id]
 
-  // Codex carries its own colors, so it skips the brand-color class entirely.
+  // Codex and Gemini carry their own colors, so they skip the brand-color class.
   if (spec.kind === 'full') {
-    return <CodexLogo className={cn('size-10', className)} {...props} />
+    return spec.render({ className: cn('size-10', className), ...props })
   }
 
   const classes = cn('size-10', spec.color, className)

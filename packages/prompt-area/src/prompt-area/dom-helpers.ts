@@ -5,6 +5,8 @@
  * following the codebase rule: "Never use `any` or `as` assertions."
  */
 
+import type { ChipSegment } from './types'
+
 // ---------------------------------------------------------------------------
 // Type Guards
 // ---------------------------------------------------------------------------
@@ -123,6 +125,50 @@ export function getChipData(node: Node): unknown {
   return safeJsonParse(raw)
 }
 
+/**
+ * Length of a chip's plain-text representation (`trigger + displayText`).
+ *
+ * This is the single definition used wherever DOM offsets are mapped to the
+ * plain-text model (cursor mapping, selection sizing). The fallbacks mirror
+ * how chips are rendered: `chipDisplay` is always set, but we degrade to
+ * `textContent` for resilience against externally-mutated nodes.
+ */
+export function chipNodeTextLength(node: HTMLElement): number {
+  const trigger = node.dataset.chipTrigger ?? ''
+  const display = node.dataset.chipDisplay ?? node.textContent ?? ''
+  return trigger.length + display.length
+}
+
+/**
+ * Reads a chip element into a `ChipSegment`, mirroring how chips are written
+ * in `renderSegmentsToDOM`. Returns null when the node is not a chip or is
+ * missing a required attribute (trigger, value, or display text).
+ *
+ * This is the single chip reader shared by the DOM->model sync, chip-click
+ * delegation, and clipboard serialization, so they cannot diverge on which
+ * fields are required or how optional `data` / `autoResolved` are attached.
+ */
+export function chipNodeToSegment(node: Node): ChipSegment | null {
+  if (!isChipElement(node)) return null
+
+  const trigger = getChipTrigger(node)
+  const value = getChipValue(node)
+  const displayText = getChipDisplay(node)
+  if (!trigger || value === undefined || !displayText) return null
+
+  const data = getChipData(node)
+  const autoResolved = getChipAutoResolved(node)
+
+  return {
+    type: 'chip',
+    trigger,
+    value,
+    displayText,
+    ...(data !== undefined ? { data } : {}),
+    ...(autoResolved ? { autoResolved: true } : {}),
+  }
+}
+
 // ---------------------------------------------------------------------------
 // DOM manipulation helpers
 // ---------------------------------------------------------------------------
@@ -137,6 +183,33 @@ export function indexOfChildNode(parent: HTMLElement, child: Node): number {
     if (children[i] === child) return i
   }
   return -1
+}
+
+/**
+ * Maps the index of a direct child node within the editor to the index of the
+ * corresponding segment in the model array.
+ *
+ * The model (`readSegmentsFromDOM`) skips empty text nodes and the trailing
+ * sentinel handling, so a DOM child index and a segment index are not 1:1.
+ * This counts only the children that produce a segment — non-empty text nodes,
+ * chip elements, and `<br>` line breaks — up to (but not including) `childIndex`.
+ *
+ * Keeping this in one place ensures chip-removal and chip-revert agree on the
+ * exact same mapping rules as the reader.
+ */
+export function domChildIndexToSegmentIndex(editor: HTMLElement, childIndex: number): number {
+  let segIdx = 0
+  for (let i = 0; i < childIndex; i++) {
+    const child = editor.childNodes[i]
+    if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
+      segIdx++
+    } else if (isChipElement(child)) {
+      segIdx++
+    } else if (isBRElement(child)) {
+      segIdx++
+    }
+  }
+  return segIdx
 }
 
 /**

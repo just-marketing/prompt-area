@@ -199,10 +199,12 @@ export function PromptArea({
 
   const editorStyle = useMemo((): React.CSSProperties => {
     if (!autoGrow) {
-      return {
-        minHeight: `${minHeight}px`,
-        ...(maxHeight ? { maxHeight: `${maxHeight}px`, overflowY: 'auto' as const } : {}),
+      const style: React.CSSProperties = { minHeight: `${minHeight}px` }
+      if (maxHeight) {
+        style.maxHeight = `${maxHeight}px`
+        style.overflowY = 'auto'
       }
+      return style
     }
     return {
       height: isFocused && editorHeight ? `${editorHeight}px` : `${minHeight}px`,
@@ -210,7 +212,7 @@ export function PromptArea({
       // Respect an explicit maxHeight; otherwise fall back to a viewport-relative
       // cap so the editor never grows past the screen.
       maxHeight: maxHeight ? `${maxHeight}px` : '70dvh',
-      overflowY: isFocused ? 'auto' : ('hidden' as const),
+      overflowY: isFocused ? 'auto' : 'hidden',
       // `min-height` is eased so consumers that animate it (e.g. the compact
       // prompt area's collapse/expand) morph smoothly instead of snapping.
       transition: 'height 150ms ease-out, min-height 240ms cubic-bezier(0.33, 1, 0.68, 1)',

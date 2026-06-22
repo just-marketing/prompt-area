@@ -177,7 +177,8 @@ export function FileStrip({ files, onRemove, onClick, className }: FileStripProp
   useEffect(() => {
     if (!expanded) return
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as Node
+      const target = e.target
+      if (!(target instanceof Node)) return
       if (
         popoverRef.current &&
         !popoverRef.current.contains(target) &&

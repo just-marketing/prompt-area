@@ -12,6 +12,7 @@
  *   into a contentEditable=false subtree when mapping offsets.
  */
 import {
+  chipNodeTextLength,
   getDirectChildContaining,
   getSelectionRange,
   indexOfChildNode,
@@ -130,10 +131,7 @@ export function getTextLengthInRange(range: Range): number {
     if (node.nodeType === Node.TEXT_NODE) {
       length += (node.textContent ?? '').length
     } else if (isChipElement(node)) {
-      // Type-safe chip reading
-      const trigger = node.dataset.chipTrigger ?? ''
-      const display = node.dataset.chipDisplay ?? node.textContent ?? ''
-      length += trigger.length + display.length
+      length += chipNodeTextLength(node)
     } else if (isHTMLElement(node) && node.tagName === 'BR') {
       if (node.dataset.sentinel) return // skip sentinel <br>
       length += 1
@@ -218,9 +216,7 @@ export function findDOMPosition(
       }
       remaining -= len
     } else if (isChipElement(child)) {
-      const trigger = child.dataset.chipTrigger ?? ''
-      const display = child.dataset.chipDisplay ?? child.textContent ?? ''
-      const chipLen = trigger.length + display.length
+      const chipLen = chipNodeTextLength(child)
       if (remaining <= chipLen) {
         // Position after the chip element
         return { node: container, offset: i + 1 }

@@ -7,11 +7,9 @@
  */
 import type { Segment, ChipSegment } from './types'
 import {
-  getChipAutoResolved,
-  getChipData,
+  chipNodeToSegment,
   getChipDisplay,
   getChipTrigger,
-  getChipValue,
   getSelectionRange,
   isChipElement,
   isHTMLElement,
@@ -24,27 +22,61 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Serializes a DocumentFragment (from selection) to plain text,
- * converting chip elements to their `trigger + displayText` form.
+ * Visitor callbacks for {@link walkFragmentNodes}. Each fires for the
+ * corresponding node kind encountered during a depth-first walk.
  */
-export function serializeFragmentToPlainText(fragment: DocumentFragment): string {
-  let text = ''
+type FragmentVisitor = {
+  /** A text node — receives its text content (may be empty). */
+  onText: (text: string) => void
+  /** A chip element (has `data-chip-trigger`). */
+  onChip: (node: HTMLElement) => void
+  /** A `<br>` line break. */
+  onBreak: () => void
+}
 
+/**
+ * Depth-first walk of a selection fragment, classifying each node as text,
+ * chip, or line break and recursing into any other element (decoration spans,
+ * anchors, browser-inserted wrappers).
+ *
+ * Both fragment serializers share this single traversal so they cannot drift
+ * on which nodes count as chips/breaks or how nested decorations are unwrapped.
+ */
+function walkFragmentNodes(fragment: DocumentFragment, visitor: FragmentVisitor): void {
   const walk = (node: Node): void => {
     if (node.nodeType === Node.TEXT_NODE) {
-      text += node.textContent ?? ''
+      visitor.onText(node.textContent ?? '')
     } else if (isChipElement(node)) {
-      const trigger = getChipTrigger(node) ?? ''
-      const display = getChipDisplay(node) ?? ''
-      text += trigger + display
+      visitor.onChip(node)
     } else if (isHTMLElement(node) && node.tagName === 'BR') {
-      text += '\n'
+      visitor.onBreak()
     } else {
       node.childNodes.forEach(walk)
     }
   }
 
   fragment.childNodes.forEach(walk)
+}
+
+/**
+ * Serializes a DocumentFragment (from selection) to plain text,
+ * converting chip elements to their `trigger + displayText` form.
+ */
+export function serializeFragmentToPlainText(fragment: DocumentFragment): string {
+  let text = ''
+
+  walkFragmentNodes(fragment, {
+    onText: (value) => {
+      text += value
+    },
+    onChip: (node) => {
+      text += (getChipTrigger(node) ?? '') + (getChipDisplay(node) ?? '')
+    },
+    onBreak: () => {
+      text += '\n'
+    },
+  })
+
   return text
 }
 
@@ -55,38 +87,19 @@ export function serializeFragmentToPlainText(fragment: DocumentFragment): string
 export function serializeFragmentToSegments(fragment: DocumentFragment): Segment[] {
   const segments: Segment[] = []
 
-  const walk = (node: Node): void => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent ?? ''
-      if (text) {
-        segments.push({ type: 'text', text })
-      }
-    } else if (isChipElement(node)) {
-      const trigger = getChipTrigger(node)
-      const chipValue = getChipValue(node)
-      const display = getChipDisplay(node)
-      const data = getChipData(node)
-      const autoResolved = getChipAutoResolved(node)
-
-      if (trigger && chipValue !== undefined && display) {
-        const chip: ChipSegment = {
-          type: 'chip',
-          trigger,
-          value: chipValue,
-          displayText: display,
-          ...(data !== undefined ? { data } : {}),
-          ...(autoResolved ? { autoResolved: true } : {}),
-        }
-        segments.push(chip)
-      }
-    } else if (isHTMLElement(node) && node.tagName === 'BR') {
+  walkFragmentNodes(fragment, {
+    onText: (value) => {
+      if (value) segments.push({ type: 'text', text: value })
+    },
+    onChip: (node) => {
+      const chip = chipNodeToSegment(node)
+      if (chip) segments.push(chip)
+    },
+    onBreak: () => {
       segments.push({ type: 'text', text: '\n' })
-    } else {
-      node.childNodes.forEach(walk)
-    }
-  }
+    },
+  })
 
-  fragment.childNodes.forEach(walk)
   return segments
 }
 

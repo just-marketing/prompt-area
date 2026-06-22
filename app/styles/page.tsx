@@ -7,21 +7,22 @@ import { ClaudeInputExample, claudeInputCode } from '@/app/examples/claude-input
 import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
 import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
 import { ChatGptInputExample, chatgptInputCode } from '@/app/examples/chatgpt-input'
+import { GeminiInputExample, geminiInputCode } from '@/app/examples/gemini-input'
 import { PerplexityInputExample, perplexityInputCode } from '@/app/examples/perplexity-input'
 
 const SITE_URL = 'https://prompt-area.com'
 
 export const metadata: Metadata = {
-  title: 'Styles — ChatGPT, Claude, Claude Code, Codex & Perplexity Agent Inputs',
+  title: 'Styles — ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
   description:
-    'Ready-made agent-input styles built with Prompt Area: a ChatGPT-style composer, a Claude-style composer, a Claude Code–style composer, an OpenAI Codex–style composer, and a Perplexity-style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
+    'Ready-made agent-input styles built with Prompt Area: a ChatGPT-style composer, a Claude-style composer, a Claude Code–style composer, an OpenAI Codex–style composer, a Google Gemini–style composer, and a Perplexity-style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
   alternates: { canonical: `${SITE_URL}/styles` },
   openGraph: {
     type: 'website',
     url: `${SITE_URL}/styles`,
-    title: 'Styles — ChatGPT, Claude, Claude Code, Codex & Perplexity Agent Inputs',
+    title: 'Styles — ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
     description:
-      'Ready-made agent-input styles built with Prompt Area — ChatGPT, Claude, Claude Code, OpenAI Codex, and Perplexity composers you can drop into your app.',
+      'Ready-made agent-input styles built with Prompt Area — ChatGPT, Claude, Claude Code, OpenAI Codex, Google Gemini, and Perplexity composers you can drop into your app.',
   },
 }
 
@@ -169,6 +170,36 @@ export default function StylesPage() {
             Action Bar
           </Link>
           .
+        </p>
+      </section>
+
+      {/* Gemini */}
+      <section id="gemini" className="flex scroll-mt-20 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-3">
+            <StyleLogo id="gemini" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Gemini</h2>
+          </div>
+          <p className="text-muted-foreground leading-relaxed">
+            A Google Gemini–style composer: a single rounded pill with a left-hand &ldquo;+&rdquo;
+            menu that flips to a close button and nests &ldquo;More uploads&rdquo; and &ldquo;More
+            tools&rdquo; fly-outs, a model pill on the right whose menu lists each model and opens a
+            Thinking-level fly-out, and a persistent mic with a blue send button that appears once
+            there&apos;s text. Picking a tool collapses it into a removable accent chip under the
+            input.
+          </p>
+        </div>
+        <ExampleShowcase code={geminiInputCode}>
+          <GeminiInputExample />
+        </ExampleShowcase>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Composed from{' '}
+          <Link
+            href="/docs/components/prompt-area"
+            className="text-foreground font-medium underline underline-offset-4">
+            Prompt Area
+          </Link>{' '}
+          alone — the controls live inline around the input.
         </p>
       </section>
 
