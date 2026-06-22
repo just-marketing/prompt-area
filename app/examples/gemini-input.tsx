@@ -299,7 +299,7 @@ function ModelMenu({
           setOpen(!open)
           setSub(false)
         }}
-        className="flex h-10 items-center gap-1 rounded-full border border-transparent pr-2.5 pl-3.5 text-[15px] text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
+        className="flex h-10 items-center gap-1 rounded-full border border-transparent pr-2.5 pl-3.5 text-base text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
         <span className="max-w-32 truncate">{model.tier}</span>
         <ChevronDown className="size-4 opacity-70" />
       </button>
@@ -457,7 +457,7 @@ export function GeminiInputExample({
             toggleTool={toggleTool}
           />
 
-          <div className="min-w-0 flex-1 px-1 text-[16px] leading-6">
+          <div className="min-w-0 flex-1 px-1 text-[18px] leading-7">
             <PromptArea
               ref={promptRef}
               value={segments}
@@ -520,7 +520,7 @@ export function GeminiInputExample({
       </div>
 
       {/* Gemini's footer disclaimer sits under the composer. */}
-      <p className="text-center text-[13px] text-[#5e5e5e] dark:text-[#969ba1]">
+      <p className="text-center text-sm text-[#5e5e5e] dark:text-[#969ba1]">
         Gemini is AI and can make mistakes, including about people.{' '}
         <button
           type="button"
@@ -703,7 +703,7 @@ function GeminiInputExample() {
             )}
           </div>
 
-          <div className="min-w-0 flex-1 px-1 text-[16px] leading-6">
+          <div className="min-w-0 flex-1 px-1 text-[18px] leading-7">
             <PromptArea
               ref={promptRef}
               value={segments}
@@ -720,7 +720,7 @@ function GeminiInputExample() {
           <div className="relative">
             <button
               onClick={() => { setOpenMenu(openMenu === 'model' ? null : 'model'); setModelSub(false) }}
-              className="flex h-10 items-center gap-1 rounded-full border border-transparent pl-3.5 pr-2.5 text-[15px] text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
+              className="flex h-10 items-center gap-1 rounded-full border border-transparent pl-3.5 pr-2.5 text-base text-[#444746] transition-colors hover:bg-black/[0.05] dark:border-white/15 dark:text-[#c4c7c5] dark:hover:bg-white/[0.08]">
               <span className="max-w-32 truncate">{model.tier}</span>
               <ChevronDown className="size-4 opacity-70" />
             </button>
@@ -801,7 +801,7 @@ function GeminiInputExample() {
       </div>
 
       {/* Gemini's footer disclaimer */}
-      <p className="text-center text-[13px] text-[#5e5e5e] dark:text-[#969ba1]">
+      <p className="text-center text-sm text-[#5e5e5e] dark:text-[#969ba1]">
         Gemini is AI and can make mistakes, including about people.{' '}
         <button type="button" className="underline underline-offset-2 hover:text-[#1f1f1f] dark:hover:text-[#e3e3e3]">Your privacy &amp; Gemini</button>
       </p>
