@@ -200,4 +200,14 @@
     /* Base styles for status-bar; Tailwind utilities handle the layout.
        This class exists as a stable selector for consumer overrides. */
   }
+
+  /* Honour reduced-motion for the auto-grow editor. Its height / min-height
+     transition is applied via inline styles (e.g. the compact prompt area's
+     collapse/expand), so it sits outside Tailwind's `motion-reduce` variant
+     and needs an explicit override here. */
+  @media (prefers-reduced-motion: reduce) {
+    .prompt-area-editor {
+      transition: none !important;
+    }
+  }
 }

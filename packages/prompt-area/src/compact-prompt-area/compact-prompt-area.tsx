@@ -43,6 +43,15 @@ const ArrowUp = ({ className }: IconProps) => (
 )
 
 /**
+ * Shared timing for the collapse/expand morph. The same duration + easing is
+ * used by the container (border-radius), the editor region (padding) and the
+ * inner editor's `min-height`, so every part of the box eases in lock-step.
+ * `prefers-reduced-motion` switches the change instantly.
+ */
+const MORPH_TIMING =
+  'duration-[240ms] ease-[cubic-bezier(0.33,1,0.68,1)] motion-reduce:transition-none'
+
+/**
  * CompactPromptArea – A pill-shaped prompt input that sits on a single row
  * and expands downward on focus.
  *
@@ -126,100 +135,92 @@ export function CompactPromptArea({
       onBlur={handleContainerBlur}
       aria-label={ariaLabel}
       data-test-id={dataTestId}
+      data-expanded={isExpanded || undefined}
       className={cn(
-        'compact-prompt-area',
-        'bg-background border transition-all duration-200 ease-out',
-        isExpanded ? 'rounded-2xl' : 'rounded-full',
+        'compact-prompt-area relative isolate overflow-hidden',
+        'bg-background border',
+        // Only border-radius / colour / shadow tween here — the box's height
+        // is driven by the editor region below, so it eases along with it.
+        'transition-[border-radius,box-shadow,border-color]',
+        MORPH_TIMING,
+        isExpanded ? 'rounded-2xl shadow-sm' : 'rounded-3xl',
         className,
       )}>
-      <div className={cn('flex', isExpanded ? 'flex-col' : 'items-center p-1.5')}>
-        {/* Plus button – left side in collapsed mode */}
-        {!isExpanded && (
-          <button
-            type="button"
-            onClick={onPlusClick}
-            disabled={disabled}
-            className={cn(
-              'flex shrink-0 items-center justify-center rounded-xl transition-colors',
-              'bg-muted text-muted-foreground size-9',
-              'hover:bg-accent hover:text-foreground',
-              'disabled:pointer-events-none disabled:opacity-50',
-            )}
-            aria-label="Add attachment">
-            {plusButtonIcon ?? <Plus className="size-4" />}
-          </button>
+      {/* Editor region – the only in-flow child, so its height + padding drive
+          the container's height. Padding eases between a single inset row
+          (collapsed) and a roomy box that reserves space for the pinned
+          toolbar (expanded), giving a smooth, tween-able morph. */}
+      <div
+        onClick={() => promptRef.current?.focus()}
+        className={cn(
+          'min-w-0 cursor-text',
+          'transition-[padding]',
+          MORPH_TIMING,
+          // Collapsed: leave room on one row for the pinned plus (left) and the
+          // controls (right) — wider when a slot sits before the submit button.
+          // Expanded: roomy box with bottom space reserved for the toolbar.
+          isExpanded
+            ? 'pt-4 pr-5 pb-14 pl-5'
+            : cn('py-3 pl-[3.25rem]', beforeSubmitSlot ? 'pr-[5.5rem]' : 'pr-[3.25rem]'),
+        )}>
+        <PromptArea
+          ref={promptRef}
+          value={value}
+          onChange={onChange}
+          triggers={triggers}
+          placeholder={placeholder}
+          disabled={disabled}
+          markdown={markdown}
+          onSubmit={handleSubmit}
+          onEscape={onEscape}
+          onChipClick={onChipClick}
+          onChipAdd={onChipAdd}
+          onChipDelete={onChipDelete}
+          onPaste={onPaste}
+          images={images}
+          onImagePaste={onImagePaste}
+          onImageRemove={onImageRemove}
+          files={files}
+          onFileRemove={onFileRemove}
+          autoGrow
+          minHeight={isExpanded ? 48 : 24}
+          maxHeight={maxHeight}
+        />
+      </div>
+
+      {/* Plus button – pinned bottom-left in BOTH states (no teleport). As the
+          box grows it simply glides down with the bottom edge. */}
+      <button
+        type="button"
+        onClick={onPlusClick}
+        disabled={disabled}
+        className={cn(
+          'absolute bottom-1.5 left-1.5 z-10 flex size-9 shrink-0 items-center justify-center',
+          'rounded-xl transition-colors',
+          'bg-muted text-muted-foreground',
+          'hover:bg-accent hover:text-foreground',
+          'disabled:pointer-events-none disabled:opacity-50',
         )}
+        aria-label="Add attachment">
+        {plusButtonIcon ?? <Plus className="size-4" />}
+      </button>
 
-        {/* Prompt area region */}
-        <div
-          className={cn('min-w-0 flex-1', isExpanded ? 'px-5 pt-4 pb-2' : 'overflow-hidden px-3')}
-          onClick={() => promptRef.current?.focus()}>
-          <PromptArea
-            ref={promptRef}
-            value={value}
-            onChange={onChange}
-            triggers={triggers}
-            placeholder={placeholder}
-            disabled={disabled}
-            markdown={markdown}
-            onSubmit={handleSubmit}
-            onEscape={onEscape}
-            onChipClick={onChipClick}
-            onChipAdd={onChipAdd}
-            onChipDelete={onChipDelete}
-            onPaste={onPaste}
-            images={images}
-            onImagePaste={onImagePaste}
-            onImageRemove={onImageRemove}
-            files={files}
-            onFileRemove={onFileRemove}
-            autoGrow
-            minHeight={isExpanded ? 48 : 24}
-            maxHeight={maxHeight}
-          />
-        </div>
-
-        {/* Button bar */}
-        <div
+      {/* Right controls – pinned bottom-right in BOTH states (slot + submit). */}
+      <div className="absolute right-1.5 bottom-1.5 z-10 flex items-center gap-1.5">
+        {beforeSubmitSlot}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={disabled || isEmpty}
           className={cn(
-            'flex shrink-0 items-center',
-            isExpanded ? 'justify-between px-3 pt-1 pb-3' : 'gap-1.5',
-          )}>
-          {/* Plus button – bottom-left in expanded mode */}
-          {isExpanded && (
-            <button
-              type="button"
-              onClick={onPlusClick}
-              disabled={disabled}
-              className={cn(
-                'flex shrink-0 items-center justify-center rounded-xl transition-colors',
-                'bg-muted text-muted-foreground size-9',
-                'hover:bg-accent hover:text-foreground',
-                'disabled:pointer-events-none disabled:opacity-50',
-              )}
-              aria-label="Add attachment">
-              {plusButtonIcon ?? <Plus className="size-4" />}
-            </button>
+            'flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors',
+            'bg-primary text-primary-foreground',
+            'hover:bg-primary/90',
+            'disabled:pointer-events-none disabled:opacity-50',
           )}
-
-          {/* Right side: slot + submit */}
-          <div className="flex items-center gap-1.5">
-            {beforeSubmitSlot}
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={disabled || isEmpty}
-              className={cn(
-                'flex shrink-0 items-center justify-center rounded-xl transition-colors',
-                'bg-primary text-primary-foreground size-9',
-                'hover:bg-primary/90',
-                'disabled:pointer-events-none disabled:opacity-50',
-              )}
-              aria-label="Send message">
-              {submitButtonIcon ?? <ArrowUp className="size-4" />}
-            </button>
-          </div>
-        </div>
+          aria-label="Send message">
+          {submitButtonIcon ?? <ArrowUp className="size-4" />}
+        </button>
       </div>
     </div>
   )
