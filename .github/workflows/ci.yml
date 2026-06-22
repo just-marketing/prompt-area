@@ -100,3 +100,5 @@ jobs:
         run: pnpm --filter prompt-area build
       - name: Validate exports & types
         run: pnpm --filter prompt-area lint:exports
+      - name: Check bundle size
+        run: pnpm --filter prompt-area size
