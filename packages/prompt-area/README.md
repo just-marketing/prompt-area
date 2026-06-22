@@ -20,7 +20,13 @@ pnpm add prompt-area
 # or: npm install prompt-area  ·  yarn add prompt-area
 ```
 
-`react` and `react-dom` are peer dependencies (most React apps already have them).
+Peer dependencies: `react` and `react-dom` (most React apps already have them),
+plus `clsx` and `tailwind-merge` — the two `cn` helpers, already present in any
+shadcn/Tailwind project. If you don't have them yet:
+
+```bash
+pnpm add clsx tailwind-merge
+```
 
 ## Quick start
 
@@ -112,14 +118,17 @@ The components are client components and carry a `'use client'` boundary, so you
 
 ## Dependencies
 
-- **Peer:** `react`, `react-dom` (>= 18)
+- **Peer:** `react`, `react-dom` (>= 18), plus `clsx` and `tailwind-merge` —
+  the two `cn` helpers. These are peer (not bundled) dependencies so they
+  dedupe with the copies any shadcn/Tailwind project already ships, keeping
+  prompt-area's own footprint to **zero bundled runtime dependencies**. Both
+  are tiny and already present in shadcn projects; install them explicitly if
+  you don't have them (`pnpm add clsx tailwind-merge`).
 - **Tailwind is not a peer dependency.** The prebuilt `prompt-area/styles.css`
   is self-contained and works with **any** stack — Tailwind v4, v3, or no
   Tailwind at all. The optional `prompt-area/tailwind.css` preset uses Tailwind
   v4 syntax, so it requires Tailwind v4 in your own project; if you're on v3 or
   not using Tailwind, use `styles.css` (and theme via the CSS variables above).
-- **Runtime:** `clsx`, `tailwind-merge` — the two `cn` helpers, both already
-  present in any shadcn/Tailwind project.
 
 No animation library and no icon library: animations use CSS (`tw-animate-css`
 utilities) and icons are inline SVGs. No editor framework (ProseMirror, Slate,

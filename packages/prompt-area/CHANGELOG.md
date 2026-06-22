@@ -5,6 +5,17 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- **BREAKING: `clsx` and `tailwind-merge` are now peer dependencies** instead of
+  bundled runtime dependencies. The package no longer ships its own copies of
+  the two `cn` helpers; they dedupe with the copies any shadcn/Tailwind project
+  already has, so prompt-area now declares **zero bundled runtime dependencies**
+  (`tailwind-merge` alone was ~17 KB gzipped — larger than the rest of the
+  package combined). Both are tiny and present in essentially every shadcn
+  project, but if your project doesn't already depend on them, install them
+  explicitly: `pnpm add clsx tailwind-merge`.
+
 ### Fixed
 
 - **`autoGrow` now respects the `maxHeight` prop.** Previously, enabling

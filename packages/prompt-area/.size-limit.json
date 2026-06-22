@@ -1,0 +1,23 @@
+[
+  {
+    "name": "index (all exports)",
+    "path": "dist/index.js",
+    "import": "*",
+    "ignore": ["react", "react-dom", "react/jsx-runtime", "clsx", "tailwind-merge"],
+    "limit": "16 KB"
+  },
+  {
+    "name": "prompt-area (component)",
+    "path": "dist/prompt-area/index.js",
+    "import": "*",
+    "ignore": ["react", "react-dom", "react/jsx-runtime", "clsx", "tailwind-merge"],
+    "limit": "15 KB"
+  },
+  {
+    "name": "helpers (RSC-safe)",
+    "path": "dist/helpers/index.js",
+    "import": "*",
+    "ignore": ["react", "react-dom", "react/jsx-runtime", "clsx", "tailwind-merge"],
+    "limit": "2.5 KB"
+  }
+]
