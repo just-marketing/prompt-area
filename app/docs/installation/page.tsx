@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { PackageManagerTabs } from '@/components/package-manager-tabs'
+import { InstallPromptBox } from '@/components/install-prompt-box'
 import { DocsLead, DocsP, DocsH2, Callout } from '@/components/docs/docs-primitives'
 
 const SITE_URL = 'https://prompt-area.com'
@@ -133,16 +134,11 @@ npx shadcn@latest add https://prompt-area.com/r/chat-prompt-layout.json`}
           className="text-foreground font-medium underline underline-offset-4">
           /llms-full.txt
         </a>
-        . Give your coding agent (Claude Code, Cursor, Codex) this prompt:
+        . Copy this prompt into your coding agent (Claude Code, Cursor, Codex, …) — it reads the
+        docs, installs Prompt Area (npm by default, or the shadcn registry if you ask for it), and
+        wires it into your app, replacing any existing chat input or scaffolding a new one:
       </DocsP>
-      <CodeBlock
-        lang="bash"
-        code={`Fetch https://prompt-area.com/llms-full.txt and read the full
-documentation. Install the prompt-area component by running:
-npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
-then add the required CSS classes to globals.css and help me
-build a prompt input.`}
-      />
+      <InstallPromptBox />
 
       <Callout>
         Next:{' '}
