@@ -181,10 +181,12 @@ export default function StylesPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Gemini</h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            A Google Gemini–style composer: the signature filled, low-contrast surface with a large
-            radius, the input stacked over a control row with a Tools menu whose capabilities toggle
-            into removable accent chips, a model selector, and a gradient Gemini Live affordance
-            that swaps to a blue send button once there&apos;s text.
+            A Google Gemini–style composer: a single rounded pill with a left-hand &ldquo;+&rdquo;
+            menu that flips to a close button and nests &ldquo;More uploads&rdquo; and &ldquo;More
+            tools&rdquo; fly-outs, a model pill on the right whose menu lists each model and opens a
+            Thinking-level fly-out, and a persistent mic with a blue send button that appears once
+            there&apos;s text. Picking a tool collapses it into a removable accent chip under the
+            input.
           </p>
         </div>
         <ExampleShowcase code={geminiInputCode}>
