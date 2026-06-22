@@ -6,15 +6,12 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
+import { StylesCarousel } from './sections/styles-carousel'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
-)
-
-const ClaudeCodeInputExample = dynamic(() =>
-  import('./examples/claude-code-input').then((m) => ({ default: m.ClaudeCodeInputExample })),
 )
 
 // Seed the hero composer with a realistic prompt so it shows off mentions,
@@ -184,41 +181,7 @@ export default function HomeContent() {
               Real, copy-paste compositions modeled on the agent UIs you already know.
             </p>
           </div>
-          <div className="mx-auto w-full max-w-2xl">
-            <ClaudeCodeInputExample />
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/styles#chatgpt"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              ChatGPT style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#claude"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Claude style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#claude-code"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Claude Code style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#codex"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Codex style
-              <ArrowRight className="size-3.5" />
-            </Link>
-            <Link
-              href="/styles#perplexity"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-              Perplexity style
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </div>
+          <StylesCarousel />
         </div>
       </section>
 
