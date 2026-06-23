@@ -186,6 +186,19 @@
     font-size: 0;
     display: inline;
   }
+
+  /* Diagonal-hatch texture for placeholder / "empty slot" tiles. Theme-aware:
+     the hairlines are mixed from --foreground, so they read as faint light
+     lines on dark and faint dark lines on light without any per-theme rules. */
+  .bg-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--foreground) 6%, transparent) 0,
+      color-mix(in srgb, var(--foreground) 6%, transparent) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  }
   .prompt-area-chip--inline {
     padding: 0;
     border-radius: 0;
