@@ -142,7 +142,7 @@ export default function HomeContent() {
       </section>
 
       {/* Components */}
-      <section className="mx-auto w-full max-w-5xl px-4 py-16">
+      <section className="mx-auto w-full max-w-6xl px-4 py-16">
         <Reveal className="mb-8 flex flex-col gap-2 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">Components &amp; layouts</h2>
           <p className="text-muted-foreground">

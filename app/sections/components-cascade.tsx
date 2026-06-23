@@ -200,11 +200,13 @@ function CardFace({ c }: { c: ComponentCard }) {
     <Link href={c.href} className={cn(CARD_CLASS, 'h-full')}>
       <Cover id={c.id} />
       <div className="flex flex-1 flex-col px-2 pt-1 pb-2">
-        <div className="flex min-h-10 items-start gap-2">
-          <Icon className="text-foreground/70 group-hover:text-foreground mt-0.5 size-4 shrink-0 transition-colors" />
-          <span className="text-sm leading-tight font-semibold">{c.title}</span>
+        <div className="flex items-center gap-1.5">
+          <Icon className="text-foreground/70 group-hover:text-foreground size-3.5 shrink-0 transition-colors" />
+          <span className="truncate text-sm font-semibold">{c.title}</span>
         </div>
-        <span className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{c.desc}</span>
+        <span className="text-muted-foreground mt-1 line-clamp-2 min-h-10 text-xs leading-relaxed">
+          {c.desc}
+        </span>
         <span className="text-muted-foreground group-hover:text-foreground mt-auto inline-flex items-center gap-1 pt-3 text-xs font-medium transition-colors">
           Explore
           <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
