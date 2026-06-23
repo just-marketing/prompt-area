@@ -5,13 +5,15 @@ import Link from 'next/link'
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import {
   ArrowRight,
+  ArrowUp,
+  Paperclip,
+  Mic,
   TextCursorInput,
   PanelBottom,
   Info,
   Minimize2,
   MessagesSquare,
   Activity,
-  SendHorizontal,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -52,14 +54,14 @@ const COMPONENTS: ComponentCard[] = [
   {
     id: 'compact',
     href: '/docs/components/compact-prompt-area',
-    title: 'Compact Prompt Area',
+    title: 'Compact Area',
     desc: 'Pill-shaped expanding input.',
     icon: Minimize2,
   },
   {
     id: 'chat',
     href: '/docs/components/chat-prompt-layout',
-    title: 'Chat Prompt Layout',
+    title: 'Chat Layout',
     desc: 'Full-height chat layout.',
     icon: MessagesSquare,
   },
@@ -72,9 +74,9 @@ const COMPONENTS: ComponentCard[] = [
   },
 ]
 
-// An organic offset rhythm (not a uniform ramp) so the row reads as a curated
-// shelf rather than a tilted staircase. One value per column, in px.
-const OFFSETS = [40, 12, 28, 0, 18, 36]
+// A smooth gradation: each column lifts a step higher than the last so the row
+// climbs evenly to the right. One value per column, in px.
+const OFFSETS = [70, 56, 42, 28, 14, 0]
 
 // ── Covers ────────────────────────────────────────────────────────────────
 // Each card previews the real component with a few styled shapes instead of a
@@ -108,14 +110,17 @@ function Cover({ id }: { id: CardId }) {
     case 'action-bar':
       return (
         <div className={COVER_SHELL}>
-          <div className="flex w-full items-end justify-between p-3">
-            <div className="flex gap-1.5">
-              <span className="border-border bg-background size-5 rounded-md border" />
-              <span className="border-border bg-background size-5 rounded-md border" />
+          <div className="flex w-full items-center justify-between p-3">
+            <div className="flex items-center gap-1.5">
+              <span className="border-border bg-background text-muted-foreground grid size-5 place-items-center rounded-md border">
+                <Paperclip className="size-2.5" />
+              </span>
+              <span className="border-border bg-background text-muted-foreground grid size-5 place-items-center rounded-md border">
+                <Mic className="size-2.5" />
+              </span>
             </div>
-            <span className="bg-foreground text-background inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium transition-transform duration-200 group-hover:-translate-y-0.5">
-              Send
-              <SendHorizontal className="size-2.5" />
+            <span className="bg-foreground inline-flex size-6 items-center justify-center rounded-full transition-transform duration-200 group-hover:-translate-y-0.5">
+              <ArrowUp className="text-background size-3" />
             </span>
           </div>
         </div>
