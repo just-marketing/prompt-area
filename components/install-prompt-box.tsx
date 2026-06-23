@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, Copy, Maximize2, X } from 'lucide-react'
 import { INSTALL_PROMPT } from '@/lib/install-prompt'
+import { cn } from '@/lib/utils'
 
 const TOOLBAR_BTN =
   'text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors'
@@ -64,7 +65,7 @@ export function InstallPromptBox({ className }: { className?: string }) {
 
   return (
     <>
-      <div className={`bg-muted/50 overflow-hidden rounded-lg border ${className ?? ''}`}>
+      <div className={cn('bg-muted/50 overflow-hidden rounded-lg border', className)}>
         <div className="flex items-center justify-end gap-1 border-b px-2 py-1.5">
           <button
             type="button"
