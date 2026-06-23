@@ -16,7 +16,14 @@ import { packageManagerCommand } from '@/lib/package-managers'
  * toggles), so they stay crawlable. The AI prompt is client-rendered (it has a
  * copy button) but mirrors the prose on /docs/installation.
  */
-export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string }) {
+export function InstallMethodTabs({
+  block = 'prompt-area',
+  location,
+}: {
+  block?: string
+  /** Where the tabs are rendered, forwarded to copy analytics (e.g. 'hero'). */
+  location?: string
+}) {
   return (
     <CodeTabs
       label="Install method"
@@ -27,13 +34,22 @@ export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string })
         },
         {
           label: 'npm',
-          content: <CommandBox compact cmd={packageManagerCommand('pnpm', { add: block })} />,
+          content: (
+            <CommandBox
+              compact
+              method="npm"
+              location={location}
+              cmd={packageManagerCommand('pnpm', { add: block })}
+            />
+          ),
         },
         {
           label: 'shadcn',
           content: (
             <CommandBox
               compact
+              method="shadcn"
+              location={location}
               cmd={packageManagerCommand('pnpm', {
                 dlx: `shadcn@latest add https://prompt-area.com/r/${block}.json`,
               })}

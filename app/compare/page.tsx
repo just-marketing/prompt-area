@@ -62,7 +62,7 @@ export default function ComparePage() {
       </section>
 
       <section className="border-t pt-10">
-        <InstallCta />
+        <InstallCta location="compare" />
       </section>
     </div>
   )

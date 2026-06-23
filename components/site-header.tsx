@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, TextCursorInput, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { track } from '@/lib/analytics'
 import { GithubIcon } from '@/components/github-icon'
 import { ThemeToggle } from '@/components/theme-toggle'
 
@@ -50,6 +51,13 @@ export function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() =>
+                  track('nav_link_clicked', {
+                    label: link.label,
+                    href: link.href,
+                    location: 'header',
+                  })
+                }
                 className={cn(
                   'rounded-md px-3 py-1.5 text-sm transition-colors duration-150',
                   'hover:text-foreground',
@@ -70,6 +78,7 @@ export function SiteHeader() {
             rel="noopener noreferrer"
             aria-label="GitHub repository"
             title="GitHub repository"
+            onClick={() => track('github_clicked', { location: 'header' })}
             className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-md p-2 transition-colors">
             <GithubIcon className="size-4" />
           </a>
@@ -93,6 +102,13 @@ export function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() =>
+                track('nav_link_clicked', {
+                  label: link.label,
+                  href: link.href,
+                  location: 'header',
+                })
+              }
               className={cn(
                 'rounded-md px-2 py-2 text-sm transition-colors',
                 'hover:bg-accent',

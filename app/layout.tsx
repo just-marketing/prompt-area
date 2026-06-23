@@ -5,6 +5,7 @@ import './globals.css'
 import { AppShell } from '@/components/app-shell'
 import { SiteFooter } from '@/components/site-footer'
 import { Analytics } from '@/components/analytics'
+import { PostHogProvider } from '@/components/posthog-provider'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff2',
@@ -213,13 +214,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Suspense>
-          <AppShell>
-            {children}
-            <SiteFooter />
-          </AppShell>
-        </Suspense>
-        <Analytics />
+        <PostHogProvider>
+          <Suspense>
+            <AppShell>
+              {children}
+              <SiteFooter />
+            </AppShell>
+          </Suspense>
+          <Analytics />
+        </PostHogProvider>
       </body>
     </html>
   )

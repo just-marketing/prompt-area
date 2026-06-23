@@ -18,10 +18,24 @@ const TAB_CLASS =
  * and stays crawlable — this only toggles which one is visible. Implements
  * roving tabindex, Arrow/Home/End keyboard navigation, and tab↔panel linking.
  */
-export function CodeTabs({ tabs, label }: { tabs: Tab[]; label: string }) {
+export function CodeTabs({
+  tabs,
+  label,
+  onSelect,
+}: {
+  tabs: Tab[]
+  label: string
+  /** Fired when a tab becomes active (click or keyboard), for analytics. */
+  onSelect?: (index: number, label: string) => void
+}) {
   const [active, setActive] = useState(0)
   const uid = useId()
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  function select(index: number) {
+    setActive(index)
+    onSelect?.(index, tabs[index].label)
+  }
 
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     let next: number
@@ -42,7 +56,7 @@ export function CodeTabs({ tabs, label }: { tabs: Tab[]; label: string }) {
         return
     }
     e.preventDefault()
-    setActive(next)
+    select(next)
     tabRefs.current[next]?.focus()
   }
 
@@ -65,7 +79,7 @@ export function CodeTabs({ tabs, label }: { tabs: Tab[]; label: string }) {
             aria-controls={`${uid}-panel-${i}`}
             aria-selected={i === active}
             tabIndex={i === active ? 0 : -1}
-            onClick={() => setActive(i)}
+            onClick={() => select(i)}
             className={TAB_CLASS}>
             {tab.label}
           </button>

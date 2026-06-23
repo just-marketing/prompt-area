@@ -168,7 +168,7 @@ await streamChat({
 })`}
         />
         <div className="max-w-xl">
-          <InstallMethodTabs />
+          <InstallMethodTabs location="for_ai_apps" />
         </div>
       </section>
 

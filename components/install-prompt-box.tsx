@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, Copy, Maximize2, Sparkles, X } from 'lucide-react'
 import { INSTALL_PROMPT } from '@/lib/install-prompt'
+import { track, type AnalyticsEventMap } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
+
+type PromptLocation = AnalyticsEventMap['install_prompt_copied']['location']
 
 const TOOLBAR_BTN =
   'text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors'
@@ -18,20 +21,27 @@ const ICON_BTN =
 const COMPACT_ICON_BTN = 'text-muted-foreground hover:text-foreground shrink-0 transition-colors'
 
 /** Copy the canonical install prompt to the clipboard, with copied-state feedback. */
-function useCopyPrompt() {
+function useCopyPrompt(location: PromptLocation) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(INSTALL_PROMPT).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
+      track('install_prompt_copied', { location })
     })
-  }, [])
+  }, [location])
   return { copied, copy }
 }
 
 /** Text Copy button (icon + label) for the full preview toolbar and the dialog. */
-function CopyButton({ className = TOOLBAR_BTN }: { className?: string }) {
-  const { copied, copy } = useCopyPrompt()
+function CopyButton({
+  className = TOOLBAR_BTN,
+  location,
+}: {
+  className?: string
+  location: PromptLocation
+}) {
+  const { copied, copy } = useCopyPrompt(location)
   return (
     <button type="button" onClick={copy} className={className} aria-label="Copy the install prompt">
       {copied ? (
@@ -69,7 +79,15 @@ export function InstallPromptBox({
 }) {
   const [open, setOpen] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
-  const { copied, copy } = useCopyPrompt()
+  const { copied, copy } = useCopyPrompt('compact')
+
+  // The full-preview variant lives in the docs; the compact variant in the
+  // install tabs. Track which surface an expand came from.
+  const expandLocation: 'compact' | 'preview' = compact ? 'compact' : 'preview'
+  const expand = () => {
+    track('install_prompt_expanded', { location: expandLocation })
+    setOpen(true)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -100,7 +118,7 @@ export function InstallPromptBox({
           </span>
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={expand}
             className={COMPACT_ICON_BTN}
             aria-haspopup="dialog"
             aria-label="Expand the install prompt">
@@ -123,14 +141,14 @@ export function InstallPromptBox({
           <div className="flex items-center justify-end gap-1 border-b px-2 py-1.5">
             <button
               type="button"
-              onClick={() => setOpen(true)}
+              onClick={expand}
               className={TOOLBAR_BTN}
               aria-haspopup="dialog"
               aria-label="Expand the install prompt">
               <Maximize2 className="size-3.5" />
               Expand
             </button>
-            <CopyButton />
+            <CopyButton location="preview" />
           </div>
           <pre className="text-foreground max-h-24 [scrollbar-width:thin] overflow-auto px-4 py-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
             {INSTALL_PROMPT}
@@ -157,7 +175,7 @@ export function InstallPromptBox({
               <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
                 <h2 className="text-sm font-semibold">Install with an AI agent</h2>
                 <div className="flex items-center gap-1">
-                  <CopyButton />
+                  <CopyButton location="dialog" />
                   <button
                     type="button"
                     onClick={() => setOpen(false)}

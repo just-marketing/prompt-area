@@ -255,7 +255,7 @@ export default function StylesPage() {
       </section>
 
       <section className="border-t pt-10">
-        <InstallCta />
+        <InstallCta location="styles" />
       </section>
     </div>
   )

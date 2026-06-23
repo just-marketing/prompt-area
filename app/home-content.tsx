@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
+import { track } from '@/lib/analytics'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
@@ -93,11 +94,12 @@ export default function HomeContent() {
               </p>
             </RevealItem>
             <RevealItem className="w-full max-w-xl min-w-0">
-              <InstallMethodTabs />
+              <InstallMethodTabs location="hero" />
             </RevealItem>
             <RevealItem className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
               <Link
                 href="/docs"
+                onClick={() => track('cta_clicked', { cta: 'get_started', location: 'hero' })}
                 className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
                 Get started
                 <ArrowRight className="size-4" />
@@ -106,6 +108,7 @@ export default function HomeContent() {
                 href="https://github.com/just-marketing/prompt-area"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track('github_clicked', { location: 'hero' })}
                 className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
                 Star on GitHub
                 <ArrowUpRight className="size-3.5" />
@@ -179,6 +182,9 @@ export default function HomeContent() {
             </p>
             <Link
               href="/compare"
+              onClick={() =>
+                track('cta_clicked', { cta: 'compare_alternatives', location: 'home' })
+              }
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
               Compare alternatives
               <ArrowRight className="size-4" />
@@ -190,7 +196,7 @@ export default function HomeContent() {
       {/* CTA */}
       <section className="mx-auto w-full max-w-3xl px-4 py-20">
         <Reveal>
-          <InstallCta />
+          <InstallCta location="home" />
         </Reveal>
       </section>
     </div>
