@@ -389,21 +389,6 @@ app/                            # Docs + demo site (Next.js)
 registry.json                   # shadcn registry, built from packages/prompt-area/src
 ```
 
-### Analytics
-
-The docs/marketing site uses [PostHog](https://posthog.com) for product analytics, alongside Vercel Analytics and Google Analytics.
-
-- **Setup** lives in `components/posthog-provider.tsx` (client init) and `lib/analytics.ts` (the typed `track()` helper and the event taxonomy).
-- **Autocapture** records pageviews and generic clicks automatically. On top of that, a small set of named, typed conversion events is fired explicitly — `install_command_copied`, `install_prompt_copied`, `install_prompt_expanded`, `install_method_selected`, `cta_clicked`, `github_clicked`, and `nav_link_clicked`. Add new events to the `AnalyticsEventMap` in `lib/analytics.ts` so call sites stay type-safe.
-- **Reverse proxy:** ingestion is routed through a same-origin `/ingest` path (rewrites in `next.config.ts`) so requests come from our own domain and survive ad/tracker blockers.
-
-Configure via environment variables (see `.env.example`):
-
-| Variable                   | Required | Default                    | Notes                                                                          |
-| -------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_POSTHOG_KEY`  | No       | committed public key       | Write-only project key, safe in the browser. Set to `""` to disable PostHog.   |
-| `NEXT_PUBLIC_POSTHOG_HOST` | No       | `https://eu.i.posthog.com` | Upstream for the `/ingest` proxy. Use `https://us.i.posthog.com` for US cloud. |
-
 ## Related Projects
 
 - [Agency Skills](https://github.com/just-marketing/agency-skills) — A sibling open-source project by Juma: a library of Claude Code skills that give marketing agencies repeatable, deliverable-oriented workflows for audits, strategy, content, reporting, and operations.

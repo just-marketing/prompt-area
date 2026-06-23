@@ -73,6 +73,11 @@ export type AnalyticsEventMap = {
     href: string
     location: 'header' | 'footer'
   }
+  /** The visitor engaged with a live, interactive demo (focused it or typed). */
+  demo_interacted: {
+    /** Which demo, e.g. 'hero'. */
+    location: string
+  }
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventMap

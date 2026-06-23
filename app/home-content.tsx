@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
@@ -70,6 +71,16 @@ const HERO_FILES: PromptAreaFile[] = [
 ]
 
 export default function HomeContent() {
+  // Fire `demo_interacted` once, the first time the visitor focuses or types in
+  // the live hero composer — our best signal that they actually tried the
+  // component (autocapture can't see typing into a contentEditable).
+  const demoTracked = useRef(false)
+  const handleDemoInteract = useCallback(() => {
+    if (demoTracked.current) return
+    demoTracked.current = true
+    track('demo_interacted', { location: 'hero' })
+  }, [])
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -118,7 +129,11 @@ export default function HomeContent() {
           {/* Live demo — Codex-style composer seeded with real content. Opacity-only
               (lift=false) so the composer's pop-up menus aren't anchored to a
               transformed ancestor. */}
-          <div id="demo" className="w-full min-w-0 scroll-mt-20">
+          <div
+            id="demo"
+            className="w-full min-w-0 scroll-mt-20"
+            onFocusCapture={handleDemoInteract}
+            onInputCapture={handleDemoInteract}>
             <Reveal lift={false} delay={0.15}>
               <CodexInputExample
                 initialSegments={HERO_SEGMENTS}
