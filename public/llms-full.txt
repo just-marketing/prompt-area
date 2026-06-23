@@ -75,6 +75,7 @@ react-textarea-autosize provides a plain textarea that auto-resizes. Prompt Area
 - [Homepage](https://prompt-area.com): Live interactive demo, feature highlights, and links into the docs, styles, and comparison pages
 - [Docs](https://prompt-area.com/docs): Full documentation — installation, quick start, components, examples, and API reference
 - [Styles](https://prompt-area.com/styles): Ready-made agent-input styles — Claude Code and OpenAI Codex composers built with Prompt Area
+- [For AI Apps](https://prompt-area.com/for-ai-apps): Why Prompt Area fits LLM and AI chat apps — structured output, provider-agnostic integration, and FAQs
 - [About](https://prompt-area.com/about): Project information, team, and open source details
 - [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
@@ -105,13 +106,28 @@ pnpm dlx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 
 ### Install with AI Coding Agents
 
-Give your AI coding agent (Claude Code, Codex, Cursor, etc.) this prompt:
+Copy this prompt into your AI coding agent (Claude Code, Codex, Cursor, etc.). It reads these docs, installs Prompt Area (the npm package by default, or the shadcn registry if you ask), and wires it into your app — replacing any existing chat input or scaffolding a new one:
 
-"Fetch https://prompt-area.com/llms-full.txt and read the full documentation. Install the prompt-area component by running: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json — then add the required CSS classes from the documentation to globals.css and help me build a prompt input. If there are any existing chat or prompt textarea inputs in the project, replace them with PromptArea using the context from the documentation."
+```text
+Install Prompt Area — a production-grade React chat/prompt input (@mentions, /commands, #tags, inline markdown, file attachments) — into this project. Do the full integration yourself; don't just print instructions.
 
-### Required CSS
+1. Read the docs first. Fetch https://prompt-area.com/llms-full.txt and read it in full. It is the source of truth for the API, props, triggers, helpers, and required CSS — use it, don't guess.
 
-Add the following CSS classes to your `globals.css` after `@layer base`:
+2. Detect the project's package manager from its lockfile (npm, yarn, pnpm, or bun) and use it for every install and CLI command below.
+
+3. Choose how to install, and default to the npm package:
+   - npm package (default): add prompt-area with the detected package manager, then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css' once at the app root. No Tailwind required.
+   - shadcn: only if this project already uses shadcn/ui (a components.json exists) AND I explicitly ask for it — run shadcn@latest add https://prompt-area.com/r/prompt-area.json with the detected package manager's runner (npx, pnpm dlx, yarn dlx, or bunx), then add the .prompt-area-* component classes from the docs to globals.css.
+   If it is ambiguous, ask me once which I want; otherwise use the npm package.
+
+4. Wire it into the app. If a chat/prompt composer (or a <textarea> used as one) already exists, replace it with PromptArea, keeping the existing submit, placeholder, and send/attach controls, and connect @mentions, /commands, or #tags to real project data when it is obvious (otherwise leave a clearly marked stub). If there is no composer yet, scaffold a minimal working one from the Quick Start — controlled state via usePromptAreaState and an onSubmit that sends the plain text.
+
+5. Verify your work. Make sure the project typechecks and builds, fix any import or CSS wiring, then show me the final component and how to run it.
+```
+
+### Required CSS (shadcn registry route only)
+
+The npm package ships these styles in `prompt-area/styles.css`, so if you installed via npm you can skip this step. When installing via the shadcn registry, add the following CSS classes to your `globals.css` after `@layer base`:
 
 ```css
 @layer components {
@@ -491,6 +507,21 @@ function ChatInput() {
 | `focus()`   | `() => void`                                | Focus the editor                                          |
 | `blur()`    | `() => void`                                | Blur the editor                                           |
 | `insertChip`| `(chip: Omit<ChipSegment, 'type'>) => void` | Insert a chip at the current cursor position              |
+
+### Lower-level hook: usePromptArea
+
+For advanced cases, a lower-level `usePromptArea(options)` hook is also exported. It drives the editor's internal segment state and ref wiring directly. Most apps should prefer `usePromptAreaState` (above) or the controlled `value` / `onChange` props; reach for `usePromptArea` only when you need fine-grained control over the editor internals.
+
+## Server Components (prompt-area/helpers)
+
+All framework-agnostic helpers — segment factories, predicates, serialization, trigger presets, and the engine functions — are also exported from a dedicated `prompt-area/helpers` entry point, built without a `'use client'` boundary so it can run on the server. Import from there when you need them in a React Server Component or other server context (e.g. converting stored segments to text in a route handler, or parsing markdown on the server):
+
+```tsx
+// Server Component or route handler — no 'use client' required
+import { segmentsToPlainText, getChipsByTrigger, parseInlineMarkdown } from 'prompt-area/helpers'
+```
+
+`prompt-area/helpers` re-exports the same segment helpers, engine functions, trigger presets, and types as the main entry — just without any client component code. For the components and hooks (which are client-side), keep importing from `prompt-area`.
 
 ## Chip Customization
 
@@ -1121,6 +1152,19 @@ When you install `prompt-area`, the following modules are available:
 - **Dark mode**: Full light/dark theme via CSS variables
 - **Accessible**: ARIA labels, keyboard navigation, screen reader announcements
 - **Zero extra dependencies**: Only React + your existing shadcn/tailwind setup
+
+## Live Examples
+
+Interactive, copy-paste examples on the docs site:
+
+- Triggers — mentions, commands, tags, callback mode, async search: https://prompt-area.com/docs/examples/triggers
+- Formatting — inline markdown, list auto-formatting, rotating placeholders: https://prompt-area.com/docs/examples/formatting
+- Attachments — image and file attachments, chip-preserving copy/paste: https://prompt-area.com/docs/examples/attachments
+- DX Helpers — usePromptAreaState, trigger presets, segment helpers: https://prompt-area.com/docs/examples/dx-helpers
+- Vercel AI SDK — stream chat completions with PromptArea as the composer: https://prompt-area.com/docs/examples/vercel-ai-sdk
+- Collaborative — real-time multi-user editing with shared segment state over WebSockets: https://prompt-area.com/docs/examples/collaborative
+
+API reference: https://prompt-area.com/docs/api/prompt-area (props) and https://prompt-area.com/docs/api/hooks (hooks & helpers).
 
 ## Links
 

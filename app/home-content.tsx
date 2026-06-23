@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
+import { InstallCta } from '@/components/install-cta'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
@@ -188,27 +189,8 @@ export default function HomeContent() {
 
       {/* CTA */}
       <section className="mx-auto w-full max-w-3xl px-4 py-20">
-        <Reveal className="flex flex-col items-center gap-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Drop it into your app</h2>
-          <p className="text-muted-foreground max-w-xl">
-            Install from npm, or copy the source via the shadcn registry. Zero extra dependencies.
-          </p>
-          <div className="w-full max-w-xl">
-            <InstallMethodTabs />
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/docs"
-              className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
-              Read the docs
-              <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              href="/docs/quick-start"
-              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
-              Quick start
-            </Link>
-          </div>
+        <Reveal>
+          <InstallCta />
         </Reveal>
       </section>
     </div>
