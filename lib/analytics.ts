@@ -78,6 +78,17 @@ export type AnalyticsEventMap = {
     /** Which demo, e.g. 'hero'. */
     location: string
   }
+  /** A built-in agent style was selected to preview in the styles carousel. */
+  style_selected: {
+    /** Style id, e.g. 'chatgpt', 'claude-code'. */
+    style: string
+    /** Vendor group, e.g. 'OpenAI', 'Anthropic'. */
+    vendor: string
+    /** Whether it was picked via a provider logo tile or the prev/next arrows. */
+    method: 'logo' | 'arrow'
+    /** Where the carousel lives, e.g. 'home_carousel'. */
+    location: string
+  }
 }
 
 export type AnalyticsEvent = keyof AnalyticsEventMap
