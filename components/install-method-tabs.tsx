@@ -33,11 +33,14 @@ export function InstallMethodTabs({
           content: <InstallPromptBox compact />,
         },
         {
+          // Labelled "npm" in the UI, but the command we copy uses pnpm — so
+          // report method:'pnpm' to match the actual command and stay
+          // consistent with PackageManagerTabs (method = the real CLI).
           label: 'npm',
           content: (
             <CommandBox
               compact
-              method="npm"
+              method="pnpm"
               location={location}
               cmd={packageManagerCommand('pnpm', { add: block })}
             />

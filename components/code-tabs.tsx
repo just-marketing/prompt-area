@@ -33,6 +33,9 @@ export function CodeTabs({
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   function select(index: number) {
+    // Skip no-op re-selection (clicking / Home/End onto the already-active tab)
+    // so analytics consumers don't see spurious selection events.
+    if (index === active) return
     setActive(index)
     onSelect?.(index, tabs[index].label)
   }
