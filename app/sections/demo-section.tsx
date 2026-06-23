@@ -29,6 +29,7 @@ import {
   type PromptAreaHandle,
   type PromptAreaFile,
 } from 'prompt-area'
+import { cn } from '@/lib/utils'
 import { USERS, COMMANDS, TAGS } from './mock-data'
 
 type SubmissionData = {
@@ -247,11 +248,12 @@ export function DemoSection() {
               <>
                 <button
                   type="button"
-                  className={`rounded-md p-1.5 ${
+                  className={cn(
+                    'rounded-md p-1.5',
                     markdownEnabled
                       ? 'bg-accent text-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  }`}
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                  )}
                   aria-label="Toggle markdown"
                   onClick={() => setMarkdownEnabled((v) => !v)}>
                   {markdownEnabled ? <Code className="size-4" /> : <Type className="size-4" />}
@@ -311,7 +313,7 @@ export function DemoSection() {
                     <button
                       key={model.id}
                       type="button"
-                      className={`${MENU_ITEM} ${model.id === selectedModel.id ? 'bg-accent' : ''}`}
+                      className={cn(MENU_ITEM, model.id === selectedModel.id && 'bg-accent')}
                       onClick={() => {
                         setSelectedModel(model)
                         setModelMenuOpen(false)
@@ -380,7 +382,10 @@ export function DemoSection() {
                   return (
                     <span
                       key={i}
-                      className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ${chipColors[seg.trigger] ?? 'bg-muted text-foreground'}`}>
+                      className={cn(
+                        'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium',
+                        chipColors[seg.trigger] ?? 'bg-muted text-foreground',
+                      )}>
                       {seg.trigger}
                       {seg.displayText}
                     </span>
