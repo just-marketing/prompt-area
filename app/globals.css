@@ -186,6 +186,24 @@
     font-size: 0;
     display: inline;
   }
+
+  /* Blinking caret for the Prompt Area cover preview on the homepage. Idle
+     animation, so it only runs when the user hasn't asked to reduce motion. */
+  @keyframes pa-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pa-caret {
+      animation: pa-blink 1.1s step-end infinite;
+    }
+  }
   .prompt-area-chip--inline {
     padding: 0;
     border-radius: 0;

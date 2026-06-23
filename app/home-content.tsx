@@ -7,6 +7,7 @@ import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
+import { ComponentsCascade } from './sections/components-cascade'
 import { StylesCarousel } from './sections/styles-carousel'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
 import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
@@ -64,27 +65,6 @@ const HERO_FILES: PromptAreaFile[] = [
     size: 3_420_000,
     type: 'application/pdf',
   },
-]
-
-const COMPONENTS = [
-  { href: '/docs/components/prompt-area', title: 'Prompt Area', desc: 'The core rich-text input.' },
-  {
-    href: '/docs/components/action-bar',
-    title: 'Action Bar',
-    desc: 'Toolbar with attach, mic, send.',
-  },
-  { href: '/docs/components/status-bar', title: 'Status Bar', desc: 'Contextual info bar.' },
-  {
-    href: '/docs/components/compact-prompt-area',
-    title: 'Compact Prompt Area',
-    desc: 'Pill-shaped expanding input.',
-  },
-  {
-    href: '/docs/components/chat-prompt-layout',
-    title: 'Chat Prompt Layout',
-    desc: 'Full-height chat layout.',
-  },
-  { href: '/docs/inspector', title: 'Inspector', desc: 'Live event & API playground.' },
 ]
 
 export default function HomeContent() {
@@ -162,30 +142,14 @@ export default function HomeContent() {
       </section>
 
       {/* Components */}
-      <section className="mx-auto w-full max-w-5xl px-4 py-16">
+      <section className="mx-auto w-full max-w-6xl px-4 py-16">
         <Reveal className="mb-8 flex flex-col gap-2 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">Components &amp; layouts</h2>
           <p className="text-muted-foreground">
             Compose the input with companions to build full chat experiences.
           </p>
         </Reveal>
-        {/* Per-card reveals (not a group stagger) so the cascade still lands when
-            the grid stacks into one tall column on mobile. */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {COMPONENTS.map((c) => (
-            <Reveal key={c.href} className="h-full">
-              <Link
-                href={c.href}
-                className="group hover:bg-accent/40 flex h-full items-start justify-between gap-3 rounded-lg border p-5 transition-colors">
-                <span className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold">{c.title}</span>
-                  <span className="text-muted-foreground text-sm leading-relaxed">{c.desc}</span>
-                </span>
-                <ArrowRight className="text-muted-foreground mt-0.5 size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </Reveal>
-          ))}
-        </div>
+        <ComponentsCascade />
       </section>
 
       {/* Built-in styles */}

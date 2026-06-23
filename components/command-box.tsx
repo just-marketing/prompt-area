@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 /** Soft fade on the right edge so an overflowing command reads as scrollable. */
 const FADE_MASK = 'linear-gradient(to right, #000 calc(100% - 1.5rem), transparent)'
@@ -27,9 +28,10 @@ export function CommandBox({ cmd, compact = false }: { cmd: string; compact?: bo
       aria-label={`Copy: ${cmd}`}>
       <span className="text-muted-foreground/60 font-mono text-sm select-none">$</span>
       <code
-        className={`text-foreground min-w-0 flex-1 [scrollbar-width:none] overflow-x-auto font-mono whitespace-nowrap ${
-          compact ? 'text-xs' : 'text-xs sm:text-sm'
-        }`}
+        className={cn(
+          'text-foreground min-w-0 flex-1 [scrollbar-width:none] overflow-x-auto font-mono whitespace-nowrap',
+          compact ? 'text-xs' : 'text-xs sm:text-sm',
+        )}
         style={{ maskImage: FADE_MASK, WebkitMaskImage: FADE_MASK }}>
         {cmd}
       </code>
