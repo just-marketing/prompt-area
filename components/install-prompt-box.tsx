@@ -2,15 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, Copy, Maximize2, X } from 'lucide-react'
+import { Check, Copy, Maximize2, Sparkles, X } from 'lucide-react'
 import { INSTALL_PROMPT } from '@/lib/install-prompt'
 import { cn } from '@/lib/utils'
 
 const TOOLBAR_BTN =
   'text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors'
 
-/** Copy-to-clipboard button with copied-state feedback, reused by the box and the dialog. */
-function CopyButton({ className = TOOLBAR_BTN }: { className?: string }) {
+const ICON_BTN =
+  'text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors'
+
+/** Copy the canonical install prompt to the clipboard, with copied-state feedback. */
+function useCopyPrompt() {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(INSTALL_PROMPT).then(() => {
@@ -18,7 +21,12 @@ function CopyButton({ className = TOOLBAR_BTN }: { className?: string }) {
       setTimeout(() => setCopied(false), 1500)
     })
   }, [])
+  return { copied, copy }
+}
 
+/** Text Copy button (icon + label) for the full preview toolbar and the dialog. */
+function CopyButton({ className = TOOLBAR_BTN }: { className?: string }) {
+  const { copied, copy } = useCopyPrompt()
   return (
     <button type="button" onClick={copy} className={className} aria-label="Copy the install prompt">
       {copied ? (
@@ -37,16 +45,26 @@ function CopyButton({ className = TOOLBAR_BTN }: { className?: string }) {
 }
 
 /**
- * Copyable "install with an AI agent" prompt. Shows a compact, scrollable
- * preview with Expand and Copy actions; Expand opens the full canonical
+ * Copyable "install with an AI agent" prompt. Expand opens the full canonical
  * INSTALL_PROMPT in a centered modal (rendered through a portal so it isn't
- * clipped by the box or anchored to a transformed ancestor, and the page
- * layout stays put). Closes on Escape, backdrop click, or the close button.
- * Used by the homepage install tabs and the docs Installation page.
+ * clipped by the box or anchored to a transformed ancestor, and the page layout
+ * stays put). Closes on Escape, backdrop click, or the close button.
+ *
+ * `compact` renders a single row sized to match the npm / shadcn command boxes,
+ * so the three install tabs line up; the default renders a scrollable preview
+ * (used on the docs Installation page, where there's room). Used by the install
+ * tabs and the docs Installation page.
  */
-export function InstallPromptBox({ className }: { className?: string }) {
+export function InstallPromptBox({
+  className,
+  compact = false,
+}: {
+  className?: string
+  compact?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
+  const { copied, copy } = useCopyPrompt()
 
   useEffect(() => {
     if (!open) return
@@ -65,23 +83,55 @@ export function InstallPromptBox({ className }: { className?: string }) {
 
   return (
     <>
-      <div className={cn('bg-muted/50 overflow-hidden rounded-lg border', className)}>
-        <div className="flex items-center justify-end gap-1 border-b px-2 py-1.5">
+      {compact ? (
+        <div
+          className={cn(
+            'bg-muted/50 flex items-center gap-2.5 rounded-lg border px-4 py-3',
+            className,
+          )}>
+          <Sparkles className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-foreground min-w-0 flex-1 truncate text-xs sm:text-sm">
+            Prompt for Claude Code, Cursor &amp; Codex
+          </span>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={TOOLBAR_BTN}
+            className={ICON_BTN}
             aria-haspopup="dialog"
             aria-label="Expand the install prompt">
-            <Maximize2 className="size-3.5" />
-            Expand
+            <Maximize2 className="size-4" />
           </button>
-          <CopyButton />
+          <button
+            type="button"
+            onClick={copy}
+            className={ICON_BTN}
+            aria-label="Copy the install prompt">
+            {copied ? (
+              <Check className="size-4 text-green-600 dark:text-green-400" />
+            ) : (
+              <Copy className="size-4" />
+            )}
+          </button>
         </div>
-        <pre className="text-foreground max-h-24 [scrollbar-width:thin] overflow-auto px-4 py-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
-          {INSTALL_PROMPT}
-        </pre>
-      </div>
+      ) : (
+        <div className={cn('bg-muted/50 overflow-hidden rounded-lg border', className)}>
+          <div className="flex items-center justify-end gap-1 border-b px-2 py-1.5">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className={TOOLBAR_BTN}
+              aria-haspopup="dialog"
+              aria-label="Expand the install prompt">
+              <Maximize2 className="size-3.5" />
+              Expand
+            </button>
+            <CopyButton />
+          </div>
+          <pre className="text-foreground max-h-24 [scrollbar-width:thin] overflow-auto px-4 py-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+            {INSTALL_PROMPT}
+          </pre>
+        </div>
+      )}
 
       {open &&
         typeof document !== 'undefined' &&
@@ -106,7 +156,7 @@ export function InstallPromptBox({ className }: { className?: string }) {
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-7 items-center justify-center rounded-md transition-colors"
+                    className={ICON_BTN}
                     aria-label="Close">
                     <X className="size-4" />
                   </button>

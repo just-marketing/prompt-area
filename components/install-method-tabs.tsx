@@ -23,7 +23,7 @@ export function InstallMethodTabs({ block = 'prompt-area' }: { block?: string })
       tabs={[
         {
           label: 'AI agent',
-          content: <InstallPromptBox />,
+          content: <InstallPromptBox compact />,
         },
         {
           label: 'npm',
