@@ -90,6 +90,8 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 - [Homepage](https://prompt-area.com): Live interactive demo, feature highlights, built-in agent styles, and links into the docs, examples, and comparison pages
 - [Docs](https://prompt-area.com/docs): Full documentation — installation, quick start, components, examples, and API reference
 - [Styles](https://prompt-area.com/styles): Ready-made agent-input styles — Claude Code and OpenAI Codex composers built with Prompt Area
+- [For AI Apps](https://prompt-area.com/for-ai-apps): Why Prompt Area fits LLM and AI chat apps — structured output, provider-agnostic integration, and FAQs
+- [Blog](https://prompt-area.com/blog): Guides and articles on building AI chat inputs in React with Prompt Area
 - [About](https://prompt-area.com/about): Project information, team, and open source details
 - [Contact](https://prompt-area.com/contact): Bug reporting, feature requests, and business inquiries
 - [Press](https://prompt-area.com/press): Media resources, project overview, and press contact
@@ -142,6 +144,8 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 - [Copy & Paste](https://prompt-area.com/docs/examples/attachments): Chip data preservation and trigger auto-resolution
 - [Image Attachments](https://prompt-area.com/docs/examples/attachments): Paste screenshots with loading states, removal, and configurable placement
 - [File Attachments](https://prompt-area.com/docs/examples/attachments): Attach files with type icons, metadata, and a collapsible "+N more" strip
+- [Vercel AI SDK](https://prompt-area.com/docs/examples/vercel-ai-sdk): Stream chat completions with the Vercel AI SDK — PromptArea is the composer; read plain text and structured chips and send them to your model
+- [Collaborative Editing](https://prompt-area.com/docs/examples/collaborative): Real-time multi-user editing with shared PromptArea segment state synced over WebSockets
 - [Claude Code–Style Input](https://prompt-area.com/styles#claude-code): Full composition of PromptArea, ActionBar, and StatusBar replicating a Claude Code–style chat input with plan mode and model selector
 - [Codex–Style Input](https://prompt-area.com/styles#codex): Stacked Codex-style composer with a permissions pill, reasoning-effort model selector, and a peeking repository/environment/branch context tray
 
@@ -155,6 +159,16 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 ## Comparison
 
 - [Feature Matrix](https://prompt-area.com/compare): Side-by-side comparison of prompt-area against react-mentions, Tiptap, Lexical, Plate.js, BlockNote, BlockSuite, and react-textarea-autosize across 14 feature dimensions
+- [Prompt Area vs react-mentions](https://prompt-area.com/vs/react-mentions): The modern react-mentions alternative — commands, tags, markdown, and attachments beyond mentions
+- [Prompt Area vs Tiptap](https://prompt-area.com/vs/tiptap): Lightweight chat input vs the ProseMirror-based Tiptap editor framework
+- [Prompt Area vs Lexical](https://prompt-area.com/vs/lexical): Built-in mentions and commands vs Lexical's plugin-assembly editor framework
+- [Prompt Area vs Plate.js](https://prompt-area.com/vs/plate): Zero-dependency prompt input vs the Slate-based Plate.js editor
+- [Prompt Area vs assistant-ui](https://prompt-area.com/vs/assistant-ui): Prompt Area as the composer/input layer compared with assistant-ui
+
+## API Reference
+
+- [PromptArea Props](https://prompt-area.com/docs/api/prompt-area): Complete prop reference for the PromptArea component — every prop, its type, and default
+- [Hooks & Helpers](https://prompt-area.com/docs/api/hooks): Reference for usePromptAreaState, trigger presets, segment helpers, and the server-safe prompt-area/helpers entry point
 
 ## Full Documentation
 
