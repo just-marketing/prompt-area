@@ -12,6 +12,11 @@ const TOOLBAR_BTN =
 const ICON_BTN =
   'text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors'
 
+// Bare icon button for the compact row — no padding box, so the row height is
+// governed by its 20px text line and matches the npm / shadcn command boxes
+// (no layout shift when switching tabs).
+const COMPACT_ICON_BTN = 'text-muted-foreground hover:text-foreground shrink-0 transition-colors'
+
 /** Copy the canonical install prompt to the clipboard, with copied-state feedback. */
 function useCopyPrompt() {
   const [copied, setCopied] = useState(false)
@@ -86,17 +91,17 @@ export function InstallPromptBox({
       {compact ? (
         <div
           className={cn(
-            'bg-muted/50 flex items-center gap-2.5 rounded-lg border px-4 py-3',
+            'bg-muted/50 flex items-center gap-3 rounded-lg border px-4 py-3',
             className,
           )}>
           <Sparkles className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-foreground min-w-0 flex-1 truncate text-xs sm:text-sm">
+          <span className="text-foreground min-w-0 flex-1 truncate text-xs leading-5">
             Prompt for Claude Code, Cursor &amp; Codex
           </span>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={ICON_BTN}
+            className={COMPACT_ICON_BTN}
             aria-haspopup="dialog"
             aria-label="Expand the install prompt">
             <Maximize2 className="size-4" />
@@ -104,7 +109,7 @@ export function InstallPromptBox({
           <button
             type="button"
             onClick={copy}
-            className={ICON_BTN}
+            className={COMPACT_ICON_BTN}
             aria-label="Copy the install prompt">
             {copied ? (
               <Check className="size-4 text-green-600 dark:text-green-400" />
