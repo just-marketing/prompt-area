@@ -16,7 +16,7 @@
  * ```
  */
 
-import type { TriggerConfig } from './types'
+import type { TriggerConfig, TriggerPosition } from './types'
 
 // ---------------------------------------------------------------------------
 // Shared option type — everything in TriggerConfig except the keys each
@@ -53,25 +53,35 @@ export function mentionTrigger(opts: MentionTriggerOptions = {}): TriggerConfig 
 }
 
 // ---------------------------------------------------------------------------
-// /command — dropdown only at line start
+// /command — dropdown anywhere (opt into line-start-only with `position`)
 // ---------------------------------------------------------------------------
 
 export type CommandTriggerOptions = TriggerPresetOptions & {
   /** Override the trigger character. Defaults to `'/'`. */
   char?: string
+  /**
+   * Where the command trigger is valid. Defaults to `'any'`, so commands fire
+   * anywhere a `/` follows whitespace — not just at the start of a line.
+   * Set to `'start'` to restrict the dropdown to the very start of the input
+   * or immediately after a newline (the classic slash-command behavior).
+   */
+  position?: TriggerPosition
 }
 
 /**
  * Creates a **command** trigger (`/`).
  *
- * Defaults: `position: 'start'`, `mode: 'dropdown'`, `chipStyle: 'inline'`,
+ * Defaults: `position: 'any'`, `mode: 'dropdown'`, `chipStyle: 'inline'`,
  * accessible label `"command"`.
+ *
+ * By default commands work everywhere in the input. Pass `position: 'start'`
+ * to limit them to the start of a line.
  */
 export function commandTrigger(opts: CommandTriggerOptions = {}): TriggerConfig {
-  const { char = '/', ...rest } = opts
+  const { char = '/', position = 'any', ...rest } = opts
   return {
     char,
-    position: 'start',
+    position,
     mode: 'dropdown',
     chipStyle: 'inline',
     accessibilityLabel: 'command',

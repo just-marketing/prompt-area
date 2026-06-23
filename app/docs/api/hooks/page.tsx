@@ -76,7 +76,8 @@ export default function HooksApiPage() {
           {
             name: 'commandTrigger(opts?)',
             type: '(opts) => TriggerConfig',
-            description: '/ dropdown with start-of-line detection.',
+            description:
+              '/ dropdown anywhere in the input. Pass position: "start" to limit it to the start of a line.',
           },
           {
             name: 'hashtagTrigger(opts?)',

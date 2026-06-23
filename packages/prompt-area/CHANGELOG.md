@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **`commandTrigger()` now fires anywhere in the input by default, and exposes a
+  `position` option.** Previously the preset hardcoded `position: 'start'` and
+  did not let you override it, so `/commands` only worked at the very start of a
+  line — an artificial limitation. The default is now `position: 'any'` (a `/`
+  after any whitespace opens the menu), and you can opt back into the classic
+  line-start behavior with `commandTrigger({ position: 'start' })`. Consumers
+  using the raw `TriggerConfig` are unaffected — they already set `position`
+  explicitly.
 - **BREAKING: `clsx` and `tailwind-merge` are now peer dependencies** instead of
   bundled runtime dependencies. The package no longer ships its own copies of
   the two `cn` helpers; they dedupe with the copies any shadcn/Tailwind project
