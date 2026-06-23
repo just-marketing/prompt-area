@@ -33,10 +33,19 @@ describe('trigger-presets', () => {
     it('returns sensible defaults', () => {
       const config = commandTrigger()
       expect(config.char).toBe('/')
-      expect(config.position).toBe('start')
+      expect(config.position).toBe('any')
       expect(config.mode).toBe('dropdown')
       expect(config.chipStyle).toBe('inline')
       expect(config.accessibilityLabel).toBe('command')
+    })
+
+    it('defaults to working everywhere in the input', () => {
+      expect(commandTrigger().position).toBe('any')
+    })
+
+    it('allows restricting to the start of a line', () => {
+      const config = commandTrigger({ position: 'start' })
+      expect(config.position).toBe('start')
     })
 
     it('allows overriding emptyMessage', () => {

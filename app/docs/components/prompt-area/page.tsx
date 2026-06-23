@@ -76,7 +76,7 @@ const { bind } = usePromptAreaState()
       <DocsUl
         items={[
           'mentionTrigger() — @ dropdown for users, agents, or documents',
-          'commandTrigger() — / dropdown with start-of-line detection',
+          'commandTrigger() — / dropdown anywhere (opt into start-of-line only with position: "start")',
           'hashtagTrigger() — # tags that auto-resolve on space',
           'callbackTrigger() — fire a callback (e.g. open a file picker) instead of a dropdown',
         ]}
