@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowUpRight, Bot, Boxes, Code2, Plug, ShieldCheck, Zap } from 'lucide-react'
 import { CodeBlock } from '@/components/code-block'
+import { InstallMethodTabs } from '@/components/install-method-tabs'
 
 const SITE_URL = 'https://prompt-area.com'
-const INSTALL_CMD = 'npx shadcn@latest add https://prompt-area.com/r/prompt-area.json'
 
 export const metadata: Metadata = {
   title: 'React Input for AI Chatbots & LLM Apps — Prompt Area',
@@ -167,9 +167,9 @@ await streamChat({
   command,
 })`}
         />
-        <code className="bg-background text-foreground overflow-x-auto rounded-md border px-3 py-2 font-mono text-xs">
-          {INSTALL_CMD}
-        </code>
+        <div className="max-w-xl">
+          <InstallMethodTabs />
+        </div>
       </section>
 
       <section className="flex flex-col gap-4">

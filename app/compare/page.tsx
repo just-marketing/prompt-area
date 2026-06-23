@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { COMPARISONS, SITE_URL } from '../vs/comparisons'
 import { ComparisonSection } from '../sections/comparison-section'
+import { InstallCta } from '@/components/install-cta'
 
 export const metadata: Metadata = {
   title: 'Compare Prompt Area vs Tiptap, Lexical, Plate.js & react-mentions',
@@ -58,6 +59,10 @@ export default function ComparePage() {
           chat or prompt input.
         </p>
         <ComparisonSection />
+      </section>
+
+      <section className="border-t pt-10">
+        <InstallCta />
       </section>
     </div>
   )

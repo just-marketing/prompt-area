@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { ExampleShowcase } from '@/components/example-showcase'
+import { InstallCta } from '@/components/install-cta'
 import { StyleLogo } from '@/components/style-logo'
 import { ClaudeInputExample, claudeInputCode } from '@/app/examples/claude-input'
 import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
@@ -251,6 +252,10 @@ export default function StylesPage() {
             Components
           </Link>
         </div>
+      </section>
+
+      <section className="border-t pt-10">
+        <InstallCta />
       </section>
     </div>
   )
