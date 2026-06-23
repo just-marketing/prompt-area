@@ -187,17 +187,22 @@
     display: inline;
   }
 
-  /* Diagonal-hatch texture for placeholder / "empty slot" tiles. Theme-aware:
-     the hairlines are mixed from --foreground, so they read as faint light
-     lines on dark and faint dark lines on light without any per-theme rules. */
-  .bg-hatch {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      color-mix(in srgb, var(--foreground) 6%, transparent) 0,
-      color-mix(in srgb, var(--foreground) 6%, transparent) 1px,
-      transparent 1px,
-      transparent 9px
-    );
+  /* Blinking caret for the Prompt Area cover preview on the homepage. Idle
+     animation, so it only runs when the user hasn't asked to reduce motion. */
+  @keyframes pa-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pa-caret {
+      animation: pa-blink 1.1s step-end infinite;
+    }
   }
   .prompt-area-chip--inline {
     padding: 0;
