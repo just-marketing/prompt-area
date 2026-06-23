@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { track } from '@/lib/analytics'
 
 /** Soft fade on the right edge so an overflowing command reads as scrollable. */
 const FADE_MASK = 'linear-gradient(to right, #000 calc(100% - 1.5rem), transparent)'
@@ -12,14 +13,27 @@ const FADE_MASK = 'linear-gradient(to right, #000 calc(100% - 1.5rem), transpare
  * stay on one line and scroll, with a right-edge fade instead of a hard cut.
  * `compact` uses a smaller font for tight columns (e.g. the split hero).
  */
-export function CommandBox({ cmd, compact = false }: { cmd: string; compact?: boolean }) {
+export function CommandBox({
+  cmd,
+  compact = false,
+  method,
+  location,
+}: {
+  cmd: string
+  compact?: boolean
+  /** Install method this command represents, e.g. 'npm' | 'pnpm' | 'yarn' | 'shadcn'. */
+  method?: string
+  /** Where on the site the box is rendered, e.g. 'hero' | 'docs'. */
+  location?: string
+}) {
   const [copied, setCopied] = useState(false)
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(cmd).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
+      track('install_command_copied', { method: method ?? 'unknown', command: cmd, location })
     })
-  }, [cmd])
+  }, [cmd, method, location])
 
   return (
     <button

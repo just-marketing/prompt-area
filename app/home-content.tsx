@@ -1,10 +1,12 @@
 'use client'
 
+import { useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
+import { track } from '@/lib/analytics'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
@@ -69,6 +71,16 @@ const HERO_FILES: PromptAreaFile[] = [
 ]
 
 export default function HomeContent() {
+  // Fire `demo_interacted` once, the first time the visitor focuses or types in
+  // the live hero composer — our best signal that they actually tried the
+  // component (autocapture can't see typing into a contentEditable).
+  const demoTracked = useRef(false)
+  const handleDemoInteract = useCallback(() => {
+    if (demoTracked.current) return
+    demoTracked.current = true
+    track('demo_interacted', { location: 'hero' })
+  }, [])
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -93,11 +105,12 @@ export default function HomeContent() {
               </p>
             </RevealItem>
             <RevealItem className="w-full max-w-xl min-w-0">
-              <InstallMethodTabs />
+              <InstallMethodTabs location="hero" />
             </RevealItem>
             <RevealItem className="flex flex-wrap items-center justify-center gap-3 pt-1 lg:justify-start">
               <Link
                 href="/docs"
+                onClick={() => track('cta_clicked', { cta: 'get_started', location: 'hero' })}
                 className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90">
                 Get started
                 <ArrowRight className="size-4" />
@@ -106,6 +119,7 @@ export default function HomeContent() {
                 href="https://github.com/just-marketing/prompt-area"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track('github_clicked', { location: 'hero' })}
                 className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
                 Star on GitHub
                 <ArrowUpRight className="size-3.5" />
@@ -115,7 +129,11 @@ export default function HomeContent() {
           {/* Live demo — Codex-style composer seeded with real content. Opacity-only
               (lift=false) so the composer's pop-up menus aren't anchored to a
               transformed ancestor. */}
-          <div id="demo" className="w-full min-w-0 scroll-mt-20">
+          <div
+            id="demo"
+            className="w-full min-w-0 scroll-mt-20"
+            onFocusCapture={handleDemoInteract}
+            onInputCapture={handleDemoInteract}>
             <Reveal lift={false} delay={0.15}>
               <CodexInputExample
                 initialSegments={HERO_SEGMENTS}
@@ -179,6 +197,9 @@ export default function HomeContent() {
             </p>
             <Link
               href="/compare"
+              onClick={() =>
+                track('cta_clicked', { cta: 'compare_alternatives', location: 'home' })
+              }
               className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-5 py-2.5 text-sm font-medium transition-colors">
               Compare alternatives
               <ArrowRight className="size-4" />
@@ -190,7 +211,7 @@ export default function HomeContent() {
       {/* CTA */}
       <section className="mx-auto w-full max-w-3xl px-4 py-20">
         <Reveal>
-          <InstallCta />
+          <InstallCta location="home" />
         </Reveal>
       </section>
     </div>

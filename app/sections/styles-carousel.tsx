@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { track } from '@/lib/analytics'
 import { StyleLogo, type StyleLogoId } from '@/components/style-logo'
 
 // The style examples are heavy, interactive composers, so load each on demand.
@@ -78,13 +79,29 @@ export function StylesCarousel() {
   // moving forward and from the left when moving back.
   const [dir, setDir] = useState(0)
 
+  // Record which style the visitor chose to preview (skipping no-op re-selects),
+  // tagged by how they got there — a provider logo tile or the prev/next arrows.
+  const trackSelect = (index: number, method: 'logo' | 'arrow') => {
+    if (index === active) return
+    const slide = SLIDES[index]
+    track('style_selected', {
+      style: slide.id,
+      vendor: slide.vendor,
+      method,
+      location: 'home_carousel',
+    })
+  }
+
   const goTo = (index: number) => {
+    trackSelect(index, 'logo')
     setDir(Math.sign(index - active))
     setActive(index)
   }
   const step = (delta: 1 | -1) => {
+    const next = (active + delta + SLIDES.length) % SLIDES.length
+    trackSelect(next, 'arrow')
     setDir(delta)
-    setActive((a) => (a + delta + SLIDES.length) % SLIDES.length)
+    setActive(next)
   }
 
   const activeSlide = SLIDES[active]

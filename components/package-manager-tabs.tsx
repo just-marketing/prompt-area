@@ -2,6 +2,7 @@
 
 import { CodeTabs } from '@/components/code-tabs'
 import { CommandBox } from '@/components/command-box'
+import { track } from '@/lib/analytics'
 import {
   PACKAGE_MANAGERS,
   packageManagerCommand,
@@ -20,9 +21,10 @@ export function PackageManagerTabs(props: { add: string } | { dlx: string }) {
   return (
     <CodeTabs
       label="Package manager"
+      onSelect={(_, label) => track('install_method_selected', { method: label, location: 'docs' })}
       tabs={PACKAGE_MANAGERS.map((pm: PackageManager) => ({
         label: pm,
-        content: <CommandBox cmd={packageManagerCommand(pm, op)} />,
+        content: <CommandBox method={pm} location="docs" cmd={packageManagerCommand(pm, op)} />,
       }))}
     />
   )
