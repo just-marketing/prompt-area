@@ -14,11 +14,13 @@ export const INSTALL_PROMPT = `Install Prompt Area — a production-grade React 
 
 1. Read the docs first. Fetch https://prompt-area.com/llms-full.txt and read it in full. It is the source of truth for the API, props, triggers, helpers, and required CSS — use it, don't guess.
 
-2. Choose how to install, and default to the npm package:
-   - npm (default): install prompt-area with the project's package manager, then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css' once at the app root. No Tailwind required.
-   - shadcn: only if this project already uses shadcn/ui (a components.json exists) AND I explicitly ask for it — run npx shadcn@latest add https://prompt-area.com/r/prompt-area.json, then add the .prompt-area-* component classes from the docs to globals.css.
-   If it is ambiguous, ask me once which I want; otherwise use npm.
+2. Detect the project's package manager from its lockfile (npm, yarn, pnpm, or bun) and use it for every install and CLI command below.
 
-3. Wire it into the app. If a chat/prompt composer (or a <textarea> used as one) already exists, replace it with PromptArea, keeping the existing submit, placeholder, and send/attach controls, and connect @mentions, /commands, or #tags to real project data when it is obvious (otherwise leave a clearly marked stub). If there is no composer yet, scaffold a minimal working one from the Quick Start — controlled state via usePromptAreaState and an onSubmit that sends the plain text.
+3. Choose how to install, and default to the npm package:
+   - npm package (default): add prompt-area with the detected package manager, then import { PromptArea } from 'prompt-area' and import 'prompt-area/styles.css' once at the app root. No Tailwind required.
+   - shadcn: only if this project already uses shadcn/ui (a components.json exists) AND I explicitly ask for it — run shadcn@latest add https://prompt-area.com/r/prompt-area.json with the detected package manager's runner (npx, pnpm dlx, yarn dlx, or bunx), then add the .prompt-area-* component classes from the docs to globals.css.
+   If it is ambiguous, ask me once which I want; otherwise use the npm package.
 
-4. Verify your work. Make sure the project typechecks and builds, fix any import or CSS wiring, then show me the final component and how to run it.`
+4. Wire it into the app. If a chat/prompt composer (or a <textarea> used as one) already exists, replace it with PromptArea, keeping the existing submit, placeholder, and send/attach controls, and connect @mentions, /commands, or #tags to real project data when it is obvious (otherwise leave a clearly marked stub). If there is no composer yet, scaffold a minimal working one from the Quick Start — controlled state via usePromptAreaState and an onSubmit that sends the plain text.
+
+5. Verify your work. Make sure the project typechecks and builds, fix any import or CSS wiring, then show me the final component and how to run it.`
