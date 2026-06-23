@@ -7,6 +7,7 @@ import { Menu, TextCursorInput, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { track } from '@/lib/analytics'
 import { GithubIcon } from '@/components/github-icon'
+import { ProductHuntNavBadge } from '@/components/product-hunt-nav-badge'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 // Sticky global header: brand on the left, site nav, and the GitHub repo link
@@ -26,7 +27,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function SiteHeader() {
+export function SiteHeader({ phInitialLive = false }: { phInitialLive?: boolean }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
@@ -72,6 +73,7 @@ export function SiteHeader() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <ProductHuntNavBadge initialLive={phInitialLive} />
           <a
             href={REPO_URL}
             target="_blank"

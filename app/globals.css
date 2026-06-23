@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Product Hunt brand coral (same in light & dark) — enables bg-ph / text-ph / border-ph */
+  --color-ph: #ff6154;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
