@@ -95,7 +95,7 @@ export function ChatGptInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -314,6 +314,7 @@ function ChatGptInputExample() {
             onChange={setSegments}
             placeholder="Ask anything"
             onSubmit={submit}
+            markdown
             autoGrow
             minHeight={24}
             maxHeight={160}

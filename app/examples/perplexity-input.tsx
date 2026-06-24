@@ -307,7 +307,7 @@ export function PerplexityInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -617,6 +617,7 @@ function PerplexityInputExample() {
               onChange={setSegments}
               placeholder={mode === 'search' ? ['Ask anything…', 'Type @ for connectors and sources'] : 'What should we work on next?'}
               onSubmit={submit}
+              markdown
               minHeight={44}
               maxHeight={240}
             />

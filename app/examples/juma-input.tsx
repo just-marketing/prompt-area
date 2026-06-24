@@ -818,7 +818,7 @@ export function JumaInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -1150,6 +1150,7 @@ function JumaInputExample() {
             triggers={DEFAULT_TRIGGERS}
             placeholder="Enter @ to add context or / for prompt"
             onSubmit={submit}
+            markdown
             autoGrow
             minHeight={28}
             maxHeight={220}

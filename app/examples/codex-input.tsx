@@ -149,7 +149,7 @@ export function CodexInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
   minHeight = 40,
 }: {
   initialSegments?: Segment[]
@@ -394,6 +394,7 @@ function CodexInputExample() {
             onChange={setSegments}
             placeholder="Do anything"
             onSubmit={submit}
+            markdown
             autoGrow
             minHeight={40}
             maxHeight={280}

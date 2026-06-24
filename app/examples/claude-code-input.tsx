@@ -243,7 +243,7 @@ export function ClaudeCodeInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -767,7 +767,7 @@ function ClaudeCodeInputExample() {
         <div className="flex items-end gap-1 py-1.5 pr-1.5 pl-3.5">
           <div className="min-w-0 flex-1 py-1.5 text-[16px] leading-6">
             <PromptArea ref={promptRef} value={segments} onChange={setSegments}
-              placeholder="Describe a task or ask a question" onSubmit={submit} autoGrow minHeight={28} maxHeight={216} />
+              placeholder="Describe a task or ask a question" onSubmit={submit} markdown autoGrow minHeight={28} maxHeight={216} />
           </div>
           <button onClick={() => submit(segments)} disabled={isEmpty} aria-label="Send"
             className={cn(GHOST_SQ, 'self-end disabled:opacity-40 disabled:hover:bg-transparent')}>
