@@ -9,9 +9,8 @@ import { track } from '@/lib/analytics'
 import { StyleLogo, type StyleLogoId } from '@/components/style-logo'
 
 // The style examples are heavy, interactive composers, so load each on demand.
-const JumaInputExample = dynamic(() =>
-  import('@/app/examples/juma-input').then((m) => ({ default: m.JumaInputExample })),
-)
+// The home carousel shows the six well-known agent styles; the full set —
+// including Juma — lives on the /styles page.
 const ChatGptInputExample = dynamic(() =>
   import('@/app/examples/chatgpt-input').then((m) => ({ default: m.ChatGptInputExample })),
 )
@@ -38,10 +37,10 @@ type Slide = {
   render: () => ReactNode
 }
 
-// Carousel order mirrors the vendor grouping in the picker: Juma first (it's the
-// home brand), then OpenAI, Anthropic, Google, and Perplexity.
+// Carousel order mirrors the vendor grouping in the picker: OpenAI, then
+// Anthropic, then Google, then Perplexity. Juma is intentionally omitted here
+// and showcased on the /styles page instead, so the home picker stays six-up.
 const SLIDES: Slide[] = [
-  { id: 'juma', label: 'Juma', vendor: 'Juma', render: () => <JumaInputExample /> },
   { id: 'chatgpt', label: 'ChatGPT', vendor: 'OpenAI', render: () => <ChatGptInputExample /> },
   { id: 'codex', label: 'Codex', vendor: 'OpenAI', render: () => <CodexInputExample /> },
   { id: 'claude', label: 'Claude', vendor: 'Anthropic', render: () => <ClaudeInputExample /> },
