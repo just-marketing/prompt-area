@@ -1,5 +1,12 @@
 import posthog from 'posthog-js'
 
+declare global {
+  interface Window {
+    // Defined by the gtag snippet in components/analytics.tsx.
+    gtag?: (command: 'event' | 'config' | 'js', ...args: unknown[]) => void
+  }
+}
+
 /**
  * The PostHog project (write-only, public) key. Safe to ship in client code.
  * Overridable per-environment via `NEXT_PUBLIC_POSTHOG_KEY`; the committed
@@ -94,11 +101,13 @@ export type AnalyticsEventMap = {
 export type AnalyticsEvent = keyof AnalyticsEventMap
 
 /**
- * Capture a typed analytics event. No-ops on the server and when PostHog has
- * no key configured, so it's always safe to call from client components.
+ * Capture a typed analytics event. No-ops on the server, so it's always safe to
+ * call from client components. The same named event is mirrored into both
+ * PostHog (primary product analytics) and Google Analytics 4, so it shows up in
+ * GA's "Event count by Event name" / realtime as well.
  */
 export function track<E extends AnalyticsEvent>(event: E, properties: AnalyticsEventMap[E]): void {
   if (typeof window === 'undefined') return
-  if (!POSTHOG_KEY) return
-  posthog.capture(event, properties)
+  if (POSTHOG_KEY) posthog.capture(event, properties)
+  window.gtag?.('event', event, properties)
 }
