@@ -10,20 +10,21 @@ import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
 import { ChatGptInputExample, chatgptInputCode } from '@/app/examples/chatgpt-input'
 import { GeminiInputExample, geminiInputCode } from '@/app/examples/gemini-input'
 import { PerplexityInputExample, perplexityInputCode } from '@/app/examples/perplexity-input'
+import { JumaInputExample, jumaInputCode } from '@/app/examples/juma-input'
 
 const SITE_URL = 'https://prompt-area.com'
 
 export const metadata: Metadata = {
-  title: 'Styles — ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
+  title: 'Styles — Juma, ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
   description:
-    'Ready-made agent-input styles built with Prompt Area: a ChatGPT-style composer, a Claude-style composer, a Claude Code–style composer, an OpenAI Codex–style composer, a Google Gemini–style composer, and a Perplexity-style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
+    'Ready-made agent-input styles built with Prompt Area: a Juma-style composer, a ChatGPT-style composer, a Claude-style composer, a Claude Code–style composer, an OpenAI Codex–style composer, a Google Gemini–style composer, and a Perplexity-style composer, assembled from Prompt Area, Action Bar, and Status Bar.',
   alternates: { canonical: `${SITE_URL}/styles` },
   openGraph: {
     type: 'website',
     url: `${SITE_URL}/styles`,
-    title: 'Styles — ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
+    title: 'Styles — Juma, ChatGPT, Claude, Claude Code, Codex, Gemini & Perplexity Agent Inputs',
     description:
-      'Ready-made agent-input styles built with Prompt Area — ChatGPT, Claude, Claude Code, OpenAI Codex, Google Gemini, and Perplexity composers you can drop into your app.',
+      'Ready-made agent-input styles built with Prompt Area — Juma, ChatGPT, Claude, Claude Code, OpenAI Codex, Google Gemini, and Perplexity composers you can drop into your app.',
   },
 }
 
@@ -45,6 +46,37 @@ export default function StylesPage() {
           and Code on any example.
         </p>
       </header>
+
+      {/* Juma */}
+      <section id="juma" className="flex scroll-mt-20 flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-3">
+            <StyleLogo id="juma" className="size-9 shrink-0" />
+            <h2 className="text-2xl font-semibold tracking-tight">Juma</h2>
+          </div>
+          <p className="text-muted-foreground leading-relaxed">
+            A Juma-style marketing-agent composer: a rounded card with attached-context chips above
+            the input, an add menu whose &ldquo;Use a project&rdquo;, &ldquo;Use a brand
+            profile&rdquo;, and &ldquo;Add from integrations&rdquo; rows fly out to the side, a
+            connected-integrations cluster, and a dedicated brand-profile button. The model selector
+            opens a &ldquo;Models&rdquo; menu with an Advanced disclosure, and a teal send button
+            sits beside dictation. Typing <code>@</code> attaches context inline and <code>/</code>{' '}
+            drops in a saved prompt.
+          </p>
+        </div>
+        <ExampleShowcase code={jumaInputCode}>
+          <JumaInputExample />
+        </ExampleShowcase>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Composed from{' '}
+          <Link
+            href="/docs/components/prompt-area"
+            className="text-foreground font-medium underline underline-offset-4">
+            Prompt Area
+          </Link>{' '}
+          alone — the menus, chips, and triggers live inline around the input.
+        </p>
+      </section>
 
       {/* ChatGPT */}
       <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
