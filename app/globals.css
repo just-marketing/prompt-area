@@ -131,6 +131,14 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Smooth in-page anchor scrolling — e.g. the /styles sidebar and the
+     homepage section nav. Idle motion, so it honours prefers-reduced-motion.
+     Route navigations stay instant via data-scroll-behavior on <html>. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 @layer components {
