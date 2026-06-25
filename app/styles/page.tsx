@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { ExampleShowcase } from '@/components/example-showcase'
 import { InstallCta } from '@/components/install-cta'
 import { StyleLogo } from '@/components/style-logo'
+import { StylesSidebar } from '@/components/styles-sidebar'
 import { ClaudeInputExample, claudeInputCode } from '@/app/examples/claude-input'
 import { ClaudeCodeInputExample, claudeCodeInputCode } from '@/app/examples/claude-code-input'
 import { CodexInputExample, codexInputCode } from '@/app/examples/codex-input'
@@ -30,265 +31,275 @@ export const metadata: Metadata = {
 
 export default function StylesPage() {
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-12 px-4 py-16">
-      <Link
-        href="/"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors">
-        <ArrowLeft className="size-3.5" />
-        Back to Prompt Area
-      </Link>
+    <div className="mx-auto flex w-full max-w-6xl gap-10 px-4 py-16 lg:gap-12 lg:px-6">
+      {/* Left — sticky style nav */}
+      <aside className="hidden w-44 shrink-0 lg:block">
+        <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+          <StylesSidebar />
+        </div>
+      </aside>
 
-      <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Styles</h1>
-        <p className="text-muted-foreground text-base leading-relaxed">
-          Ready-made agent-input styles, assembled from Prompt Area and its companions. Each is a
-          real, copy-paste composition modeled on the agent UIs you already know — toggle Preview
-          and Code on any example.
-        </p>
-      </header>
+      {/* Center — style showcase */}
+      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-1 flex-col gap-12 lg:mx-0">
+        <Link
+          href="/"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors">
+          <ArrowLeft className="size-3.5" />
+          Back to Prompt Area
+        </Link>
 
-      {/* ChatGPT */}
-      <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="chatgpt" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
-          </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A ChatGPT-style composer: a single-line rounded pill with the controls inline — a model
-            selector that opens a menu above, a dictation button, and the blue voice affordance that
-            swaps to a send arrow once there&apos;s text.
+        <header className="flex flex-col gap-3">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Styles</h1>
+          <p className="text-muted-foreground text-base leading-relaxed">
+            Ready-made agent-input styles, assembled from Prompt Area and its companions. Each is a
+            real, copy-paste composition modeled on the agent UIs you already know — toggle Preview
+            and Code on any example.
           </p>
-        </div>
-        <ExampleShowcase code={chatgptInputCode}>
-          <ChatGptInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          alone — the controls live inline around the input.
-        </p>
-      </section>
+        </header>
 
-      {/* Claude */}
-      <section id="claude" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="claude" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Claude</h2>
+        {/* ChatGPT */}
+        <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="chatgpt" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A ChatGPT-style composer: a single-line rounded pill with the controls inline — a
+              model selector that opens a menu above, a dictation button, and the blue voice
+              affordance that swaps to a send arrow once there&apos;s text.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A Claude-style composer: a rounded card with the input stacked over an inline control
-            row — a model selector whose menu lists each model over a one-line description with a
-            blue check on the active one, a dictation button, and a voice affordance that swaps to a
-            coral send button once there&apos;s text. A dismissible notice peeks out above the card,
-            and suggested-prompt chips sit below.
+          <ExampleShowcase code={chatgptInputCode}>
+            <ChatGptInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            alone — the controls live inline around the input.
           </p>
-        </div>
-        <ExampleShowcase code={claudeInputCode}>
-          <ClaudeInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          alone — the controls live inline around the input.
-        </p>
-      </section>
+        </section>
 
-      {/* Claude Code */}
-      <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="claude-code" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
+        {/* Claude */}
+        <section id="claude" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="claude" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Claude</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A Claude-style composer: a rounded card with the input stacked over an inline control
+              row — a model selector whose menu lists each model over a one-line description with a
+              blue check on the active one, a dictation button, and a voice affordance that swaps to
+              a coral send button once there&apos;s text. A dismissible notice peeks out above the
+              card, and suggested-prompt chips sit below.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A Claude Code–style composer: environment and repository context above the input, an
-            inline return-to-send arrow, and a control bar with a permission-mode menu, dictation,
-            model and reasoning-effort selectors, and a plan-usage meter.
+          <ExampleShowcase code={claudeInputCode}>
+            <ClaudeInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            alone — the controls live inline around the input.
           </p>
-        </div>
-        <ExampleShowcase code={claudeCodeInputCode}>
-          <ClaudeCodeInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>
-          ,{' '}
-          <Link
-            href="/docs/components/action-bar"
-            className="text-foreground font-medium underline underline-offset-4">
-            Action Bar
-          </Link>
-          , and{' '}
-          <Link
-            href="/docs/components/status-bar"
-            className="text-foreground font-medium underline underline-offset-4">
-            Status Bar
-          </Link>
-          .
-        </p>
-      </section>
+        </section>
 
-      {/* Codex */}
-      <section id="codex" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="codex" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
+        {/* Claude Code */}
+        <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="claude-code" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A Claude Code–style composer: environment and repository context above the input, an
+              inline return-to-send arrow, and a control bar with a permission-mode menu, dictation,
+              model and reasoning-effort selectors, and a plan-usage meter.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            An OpenAI Codex–style cloud-agent composer: a rounded card with a permissions menu and
-            reasoning-effort model selector, layered over a peeking repository/environment/branch
-            context tray.
+          <ExampleShowcase code={claudeCodeInputCode}>
+            <ClaudeCodeInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>
+            ,{' '}
+            <Link
+              href="/docs/components/action-bar"
+              className="text-foreground font-medium underline underline-offset-4">
+              Action Bar
+            </Link>
+            , and{' '}
+            <Link
+              href="/docs/components/status-bar"
+              className="text-foreground font-medium underline underline-offset-4">
+              Status Bar
+            </Link>
+            .
           </p>
-        </div>
-        <ExampleShowcase code={codexInputCode}>
-          <CodexInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          and{' '}
-          <Link
-            href="/docs/components/action-bar"
-            className="text-foreground font-medium underline underline-offset-4">
-            Action Bar
-          </Link>
-          .
-        </p>
-      </section>
+        </section>
 
-      {/* Gemini */}
-      <section id="gemini" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="gemini" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Gemini</h2>
+        {/* Codex */}
+        <section id="codex" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="codex" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              An OpenAI Codex–style cloud-agent composer: a rounded card with a permissions menu and
+              reasoning-effort model selector, layered over a peeking repository/environment/branch
+              context tray.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A Google Gemini–style composer: a single rounded pill with a left-hand &ldquo;+&rdquo;
-            menu that flips to a close button and nests &ldquo;More uploads&rdquo; and &ldquo;More
-            tools&rdquo; fly-outs, a model pill on the right whose menu lists each model and opens a
-            Thinking-level fly-out, and a persistent mic with a blue send button that appears once
-            there&apos;s text. Picking a tool collapses it into a removable accent chip under the
-            input.
+          <ExampleShowcase code={codexInputCode}>
+            <CodexInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/docs/components/action-bar"
+              className="text-foreground font-medium underline underline-offset-4">
+              Action Bar
+            </Link>
+            .
           </p>
-        </div>
-        <ExampleShowcase code={geminiInputCode}>
-          <GeminiInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          alone — the controls live inline around the input.
-        </p>
-      </section>
+        </section>
 
-      {/* Perplexity */}
-      <section id="perplexity" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="perplexity" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Perplexity</h2>
+        {/* Gemini */}
+        <section id="gemini" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="gemini" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Gemini</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A Google Gemini–style composer: a single rounded pill with a left-hand &ldquo;+&rdquo;
+              menu that flips to a close button and nests &ldquo;More uploads&rdquo; and &ldquo;More
+              tools&rdquo; fly-outs, a model pill on the right whose menu lists each model and opens
+              a Thinking-level fly-out, and a persistent mic with a blue send button that appears
+              once there&apos;s text. Picking a tool collapses it into a removable accent chip under
+              the input.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A Perplexity-style composer: a rounded card with a turquoise focus glow, the input
-            stacked over a control row with a segmented Search/Computer mode toggle, a gated model
-            picker whose list and label switch with the mode, and an add menu with a Connectors
-            fly-out. A fade-masked rail of starter cards with a shuffle sits below.
+          <ExampleShowcase code={geminiInputCode}>
+            <GeminiInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            alone — the controls live inline around the input.
           </p>
-        </div>
-        <ExampleShowcase code={perplexityInputCode}>
-          <PerplexityInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          alone — the controls live inline around the input.
-        </p>
-      </section>
+        </section>
 
-      {/* Juma */}
-      <section id="juma" className="flex scroll-mt-20 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-3">
-            <StyleLogo id="juma" className="size-9 shrink-0" />
-            <h2 className="text-2xl font-semibold tracking-tight">Juma</h2>
+        {/* Perplexity */}
+        <section id="perplexity" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="perplexity" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Perplexity</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A Perplexity-style composer: a rounded card with a turquoise focus glow, the input
+              stacked over a control row with a segmented Search/Computer mode toggle, a gated model
+              picker whose list and label switch with the mode, and an add menu with a Connectors
+              fly-out. A fade-masked rail of starter cards with a shuffle sits below.
+            </p>
           </div>
-          <p className="text-muted-foreground leading-relaxed">
-            A Juma-style marketing-agent composer: a rounded card with attached-context chips above
-            the input, an add menu whose &ldquo;Use a project&rdquo;, &ldquo;Use a brand
-            profile&rdquo;, and &ldquo;Add from integrations&rdquo; rows fly out to the side, a
-            connected-integrations cluster, and a dedicated brand-profile button. The model selector
-            opens a &ldquo;Models&rdquo; menu with an Advanced disclosure, and a teal send button
-            sits beside dictation. Typing <code>@</code> attaches context inline and <code>/</code>{' '}
-            drops in a saved prompt.
+          <ExampleShowcase code={perplexityInputCode}>
+            <PerplexityInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            alone — the controls live inline around the input.
           </p>
-        </div>
-        <ExampleShowcase code={jumaInputCode}>
-          <JumaInputExample />
-        </ExampleShowcase>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Composed from{' '}
-          <Link
-            href="/docs/components/prompt-area"
-            className="text-foreground font-medium underline underline-offset-4">
-            Prompt Area
-          </Link>{' '}
-          alone — the menus, chips, and triggers live inline around the input.
-        </p>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section className="bg-muted/30 flex flex-col gap-3 rounded-xl border p-6">
-        <h2 className="text-lg font-semibold">Build your own</h2>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Every style is just Prompt Area plus companions. Start from the docs to compose your own
-          agent input.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/docs"
-            className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90">
-            Read the docs
-            <ArrowRight className="size-3.5" />
-          </Link>
-          <Link
-            href="/docs/components/prompt-area"
-            className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-            Components
-          </Link>
-        </div>
-      </section>
+        {/* Juma */}
+        <section id="juma" className="flex scroll-mt-20 flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <StyleLogo id="juma" className="size-9 shrink-0" />
+              <h2 className="text-2xl font-semibold tracking-tight">Juma</h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              A Juma-style marketing-agent composer: a rounded card with attached-context chips
+              above the input, an add menu whose &ldquo;Use a project&rdquo;, &ldquo;Use a brand
+              profile&rdquo;, and &ldquo;Add from integrations&rdquo; rows fly out to the side, a
+              connected-integrations cluster, and a dedicated brand-profile button. The model
+              selector opens a &ldquo;Models&rdquo; menu with an Advanced disclosure, and a teal
+              send button sits beside dictation. Typing <code>@</code> attaches context inline and{' '}
+              <code>/</code> drops in a saved prompt.
+            </p>
+          </div>
+          <ExampleShowcase code={jumaInputCode}>
+            <JumaInputExample />
+          </ExampleShowcase>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Composed from{' '}
+            <Link
+              href="/docs/components/prompt-area"
+              className="text-foreground font-medium underline underline-offset-4">
+              Prompt Area
+            </Link>{' '}
+            alone — the menus, chips, and triggers live inline around the input.
+          </p>
+        </section>
 
-      <section className="border-t pt-10">
-        <InstallCta location="styles" />
-      </section>
+        {/* CTA */}
+        <section className="bg-muted/30 flex flex-col gap-3 rounded-xl border p-6">
+          <h2 className="text-lg font-semibold">Build your own</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Every style is just Prompt Area plus companions. Start from the docs to compose your own
+            agent input.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/docs"
+              className="bg-foreground text-background inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90">
+              Read the docs
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
+              href="/docs/components/prompt-area"
+              className="hover:bg-accent inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
+              Components
+            </Link>
+          </div>
+        </section>
+
+        <section className="border-t pt-10">
+          <InstallCta location="styles" />
+        </section>
+      </div>
     </div>
   )
 }
