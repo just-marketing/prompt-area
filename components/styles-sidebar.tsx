@@ -27,11 +27,11 @@ export function StylesSidebar() {
   }, [])
 
   return (
-    <nav aria-label="Styles" className="flex flex-col gap-2 pb-8">
+    <nav aria-label="Styles" className="flex flex-col gap-3 pb-8">
       <h2 className="text-muted-foreground/60 text-xs font-medium tracking-wider uppercase">
         Styles
       </h2>
-      <ul className="flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-1">
         {stylesNavigation.map((item) => {
           const isActive = activeId === item.id
           return (
@@ -39,7 +39,7 @@ export function StylesSidebar() {
               <a
                 href={`#${item.id}`}
                 className={cn(
-                  'flex items-center gap-2 rounded-md py-1 text-sm transition-colors',
+                  'flex items-center gap-2.5 rounded-md py-1.5 text-sm transition-colors',
                   isActive
                     ? 'text-foreground font-medium'
                     : 'text-muted-foreground hover:text-foreground',

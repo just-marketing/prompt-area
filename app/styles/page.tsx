@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function StylesPage() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-10 px-4 py-16 lg:gap-12 lg:px-6">
+    <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 py-16 lg:gap-16 lg:px-6">
       {/* Left — sticky style nav */}
       <aside className="hidden w-44 shrink-0 lg:block">
         <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
@@ -40,7 +40,7 @@ export default function StylesPage() {
       </aside>
 
       {/* Center — style showcase */}
-      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-1 flex-col gap-12 lg:mx-0">
+      <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-1 flex-col gap-16 lg:mx-0">
         <Link
           href="/"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors">
@@ -58,8 +58,8 @@ export default function StylesPage() {
         </header>
 
         {/* ChatGPT */}
-        <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="chatgpt" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="chatgpt" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">ChatGPT</h2>
@@ -85,8 +85,8 @@ export default function StylesPage() {
         </section>
 
         {/* Claude */}
-        <section id="claude" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="claude" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="claude" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Claude</h2>
@@ -114,8 +114,8 @@ export default function StylesPage() {
         </section>
 
         {/* Claude Code */}
-        <section id="claude-code" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="claude-code" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="claude-code" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Claude Code</h2>
@@ -153,8 +153,8 @@ export default function StylesPage() {
         </section>
 
         {/* Codex */}
-        <section id="codex" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="codex" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="codex" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Codex</h2>
@@ -186,8 +186,8 @@ export default function StylesPage() {
         </section>
 
         {/* Gemini */}
-        <section id="gemini" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="gemini" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="gemini" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Gemini</h2>
@@ -216,8 +216,8 @@ export default function StylesPage() {
         </section>
 
         {/* Perplexity */}
-        <section id="perplexity" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="perplexity" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="perplexity" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Perplexity</h2>
@@ -244,8 +244,8 @@ export default function StylesPage() {
         </section>
 
         {/* Juma */}
-        <section id="juma" className="flex scroll-mt-20 flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
+        <section id="juma" className="flex scroll-mt-20 flex-col gap-6">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-3">
               <StyleLogo id="juma" className="size-9 shrink-0" />
               <h2 className="text-2xl font-semibold tracking-tight">Juma</h2>
