@@ -3,8 +3,8 @@ import { SquareTerminal, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
- * Vendor logos for the built-in agent styles (ChatGPT, Claude, Claude Code,
- * Codex, Gemini, Perplexity). lucide-react dropped brand glyphs, so — like
+ * Vendor logos for the built-in agent styles (Juma, ChatGPT, Claude, Claude
+ * Code, Codex, Gemini, Perplexity). lucide-react dropped brand glyphs, so — like
  * github-icon.tsx — the official marks live here as inline SVG paths. Rendering
  * them inline (rather than as <img>) keeps them crisp at any size and lets each
  * adopt its brand color through `currentColor`, so the same mark works in light
@@ -65,6 +65,38 @@ function GeminiLogo({ className, ...props }: SVGProps<SVGSVGElement>) {
 }
 
 /**
+ * Juma's mark is its eight-petal "spark" set in a rounded square — the official
+ * logo (apps/web/public/logo/svg/juma-icon-sky.svg in the product). It carries
+ * its own colors (the brand's sky tile with a near-black spark, which reads on
+ * both light and dark tiles), so like Codex and Gemini it renders its own paths
+ * rather than tinting `currentColor`.
+ */
+function JumaLogo({ className, ...props }: SVGProps<SVGSVGElement>) {
+  const petals = [
+    'M79.9745 127.906C79.3681 127.927 78.3489 128.497 76.9323 129.282C70.7918 132.946 64.8755 135.448 67.3419 126.744C68.5903 122.872 73.8085 110.799 75.7857 107.411C80.8255 99.5987 84.2907 107.299 86.8488 112.777C89.2439 118.015 92.1383 123.549 93.1881 129.109C94.3194 137.7 82.39 127.942 80.0866 127.906H79.9694H79.9745Z',
+    'M80.0255 32.0938C80.6319 32.0734 81.6511 31.5026 83.0677 30.7179C89.2082 27.0539 95.1245 24.5519 92.6581 33.2556C91.4096 37.1285 86.1915 49.2006 84.2143 52.5893C79.1745 60.4013 75.7093 52.7014 73.1512 47.2234C70.7561 41.9848 67.8616 36.4507 66.8119 30.8911C65.6806 22.2995 77.61 32.0581 79.9134 32.0938H80.0306H80.0255Z',
+    'M32.0938 79.9745C32.0734 79.3681 31.5026 78.3489 30.7179 76.9323C27.0539 70.7918 24.5519 64.8755 33.2556 67.3419C37.1285 68.5903 49.2006 73.8085 52.5893 75.7857C60.4013 80.8255 52.7014 84.2907 47.2234 86.8488C41.9848 89.2439 36.4507 92.1383 30.8911 93.1881C22.2995 94.3194 32.0581 82.39 32.0938 80.0866V79.9694V79.9745Z',
+    'M127.906 80.0255C127.927 80.6319 128.497 81.6511 129.282 83.0677C132.946 89.2082 135.448 95.1245 126.744 92.6581C122.872 91.4096 110.799 86.1915 107.411 84.2143C99.5987 79.1745 107.299 75.7093 112.777 73.1512C118.015 70.7561 123.549 67.8616 129.109 66.8119C137.7 65.6806 127.942 77.61 127.906 79.9134V80.0306V80.0255Z',
+    'M46.1074 113.857C45.6641 113.444 44.543 113.123 42.9836 112.68C36.0482 110.927 30.0962 108.516 37.9999 104.103C41.6179 102.249 53.848 97.4024 57.6444 96.4036C66.7304 94.4468 63.7391 102.34 61.6702 108.022C59.6624 113.419 57.7973 119.381 54.6022 124.054C49.328 130.928 47.789 115.595 46.194 113.938L46.1074 113.857Z',
+    'M113.893 46.1431C114.336 46.5558 115.457 46.8769 117.016 47.3202C123.952 49.0732 129.904 51.4835 122 55.8966C118.382 57.7514 106.152 62.5976 102.356 63.5964C93.2696 65.5532 96.2609 57.6597 98.3298 51.9778C100.338 46.5813 102.203 40.6191 105.398 35.9462C110.672 29.0719 112.211 44.4054 113.806 46.0615L113.893 46.1431Z',
+    'M46.1431 46.1074C46.5558 45.6641 46.8769 44.543 47.3202 42.9836C49.0732 36.0482 51.4835 30.0962 55.8966 37.9999C57.7514 41.6179 62.5976 53.848 63.5964 57.6444C65.5532 66.7304 57.6597 63.7391 51.9778 61.6702C46.5813 59.6624 40.6191 57.7973 35.9462 54.6022C29.0719 49.328 44.4054 47.789 46.0615 46.194L46.1431 46.1074Z',
+    'M113.857 113.893C113.444 114.336 113.123 115.457 112.68 117.016C110.927 123.952 108.516 129.904 104.103 122C102.249 118.382 97.4024 106.152 96.4036 102.356C94.4468 93.2696 102.34 96.2609 108.022 98.3298C113.419 100.338 119.381 102.203 124.054 105.398C130.928 110.672 115.595 112.211 113.938 113.806L113.857 113.893Z',
+  ]
+  return (
+    <svg viewBox="0 0 160 160" role="img" aria-label="Juma logo" className={className} {...props}>
+      <title>Juma</title>
+      <path
+        d="M121.878 0H38.1222C17.0679 0 0 17.0679 0 38.1222V121.878C0 142.932 17.0679 160 38.1222 160H121.878C142.932 160 160 142.932 160 121.878V38.1222C160 17.0679 142.932 0 121.878 0Z"
+        fill="#9AEDF7"
+      />
+      {petals.map((d) => (
+        <path key={d} d={d} fill="#0a2026" />
+      ))}
+    </svg>
+  )
+}
+
+/**
  * Codex ships a full-color gradient mark (a white badge with a violet-to-blue
  * glyph), so unlike the single-path marks it renders its own paths and gradient
  * rather than tinting `currentColor`.
@@ -112,6 +144,7 @@ type LogoSpec =
   | { kind: 'full'; render: (props: SVGProps<SVGSVGElement>) => ReactElement }
 
 const STYLE_LOGOS = {
+  juma: { kind: 'full', render: (props) => <JumaLogo {...props} /> },
   chatgpt: { kind: 'mark', mark: OPENAI, color: 'text-foreground' },
   claude: { kind: 'mark', mark: CLAUDE, color: 'text-[#D97757]' },
   'claude-code': {

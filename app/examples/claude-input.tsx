@@ -207,7 +207,7 @@ export function ClaudeInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -464,6 +464,7 @@ function ClaudeInputExample() {
                 onChange={setSegments}
                 placeholder="Paste a doc, an email, or a question to get started"
                 onSubmit={submit}
+                markdown
                 autoGrow
                 minHeight={48}
                 maxHeight={280}

@@ -391,7 +391,7 @@ export function GeminiInputExample({
   initialSegments = [],
   initialFiles = [],
   triggers,
-  markdown = false,
+  markdown = true,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
@@ -710,6 +710,7 @@ function GeminiInputExample() {
               onChange={setSegments}
               placeholder="Ask Gemini"
               onSubmit={submit}
+              markdown
               autoGrow
               minHeight={28}
               maxHeight={240}
