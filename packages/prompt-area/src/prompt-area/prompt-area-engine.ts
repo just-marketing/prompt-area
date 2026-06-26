@@ -30,6 +30,33 @@ export function plainTextToSegments(text: string): Segment[] {
   return [{ type: 'text', text }]
 }
 
+/**
+ * Truncates segments so their combined plain-text length is at most `maxLength`.
+ * Whole segments are kept while they fit; a text segment that crosses the limit
+ * is sliced to fit, and a chip that would cross the limit is dropped (a chip
+ * can't be partially represented).
+ */
+export function truncateSegmentsToLength(segments: Segment[], maxLength: number): Segment[] {
+  if (maxLength <= 0) return []
+  const result: Segment[] = []
+  let length = 0
+  for (const seg of segments) {
+    const segLength =
+      seg.type === 'text' ? seg.text.length : seg.trigger.length + seg.displayText.length
+    if (length + segLength <= maxLength) {
+      result.push(seg)
+      length += segLength
+      continue
+    }
+    if (seg.type === 'text') {
+      const remaining = maxLength - length
+      if (remaining > 0) result.push({ type: 'text', text: seg.text.slice(0, remaining) })
+    }
+    break
+  }
+  return result
+}
+
 // ---------------------------------------------------------------------------
 // Whitespace / word boundaries
 // ---------------------------------------------------------------------------

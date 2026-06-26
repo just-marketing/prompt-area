@@ -20,6 +20,7 @@ import {
   revertChipAtIndex,
   replaceTextRange,
   toggleMarkdownWrap,
+  truncateSegmentsToLength,
 } from './prompt-area-engine'
 import {
   getListContext,
@@ -79,6 +80,7 @@ type UsePromptAreaOptions = {
   onImagePaste?: (file: File) => void
   markdown?: boolean
   submitOnEnter?: boolean
+  maxLength?: number
 }
 
 type UsePromptAreaReturn = {
@@ -131,6 +133,7 @@ export function usePromptArea({
   onImagePaste,
   markdown: markdownEnabled = true,
   submitOnEnter = true,
+  maxLength,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
@@ -452,6 +455,18 @@ export function usePromptArea({
 
     const segments = readSegmentsFromDOM()
 
+    // Enforce maxLength: if the edit pushed the editor past the cap, truncate
+    // back to maxLength characters, re-render, and put the caret at the cap.
+    if (maxLength != null && editor && segmentsToPlainText(segments).length > maxLength) {
+      const truncated = truncateSegmentsToLength(segments, maxLength)
+      lastRenderedValue.current = truncated
+      onChange(truncated)
+      renderSegmentsToDOM(truncated)
+      setCursorAtOffset(editor, maxLength)
+      runTriggerDetection()
+      return
+    }
+
     // Check for list auto-formatting (e.g., "- " -> "bullet ")
     if (markdownEnabled && editor && savedCursorOffset !== null) {
       const formatted = autoFormatListPrefix(segments, savedCursorOffset)
@@ -498,6 +513,7 @@ export function usePromptArea({
     runTriggerDetection,
     renderSegmentsToDOM,
     markdownEnabled,
+    maxLength,
     events,
   ])
 

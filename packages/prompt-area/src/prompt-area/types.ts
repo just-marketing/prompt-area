@@ -236,6 +236,13 @@ export type PromptAreaProps = {
   minHeight?: number
   /** Maximum height in pixels */
   maxHeight?: number
+  /**
+   * Maximum number of plain-text characters allowed. Typed input past the cap
+   * is truncated back to this length (like a native `<textarea maxLength>`).
+   * Chips count as their `trigger + displayText` length. To cap pasted text,
+   * handle it via `onRawPaste`.
+   */
+  maxLength?: number
   /** Auto-focus on mount */
   autoFocus?: boolean
   /** When true, the area auto-grows to fit content on focus and shrinks on blur */

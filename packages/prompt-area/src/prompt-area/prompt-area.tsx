@@ -72,6 +72,7 @@ export function PromptArea({
   onRawPaste,
   submitOnEnter,
   spellCheck,
+  maxLength,
   'aria-describedby': ariaDescribedBy,
   ref,
 }: PromptAreaProps & { ref?: React.Ref<PromptAreaHandle> }) {
@@ -107,6 +108,7 @@ export function PromptArea({
     onImagePaste,
     markdown,
     submitOnEnter,
+    maxLength,
   })
 
   // Expose imperative handle via ref
@@ -292,7 +294,7 @@ export function PromptArea({
           spellCheck={spellCheck}
           className={cn(
             'prompt-area-editor',
-            'w-full min-w-0 whitespace-pre-wrap break-words outline-none',
+            'w-full min-w-0 break-words whitespace-pre-wrap outline-none',
             'text-sm leading-relaxed',
             disabled && 'cursor-not-allowed opacity-50',
           )}
@@ -315,7 +317,7 @@ export function PromptArea({
         {autoGrow && hasOverflow && !isFocused && (
           <div
             aria-hidden="true"
-            className="pointer-events-auto absolute bottom-0 left-0 right-0 cursor-pointer"
+            className="pointer-events-auto absolute right-0 bottom-0 left-0 cursor-pointer"
             style={{ height: '32px' }}
             onClick={() => editorRef.current?.focus()}>
             <div
@@ -335,7 +337,7 @@ export function PromptArea({
             <AnimatedPlaceholder texts={placeholder} />
           ) : (
             <div
-              className="pointer-events-none absolute left-0 top-0 select-none text-sm leading-relaxed"
+              className="pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
               style={{ color: 'var(--prompt-area-placeholder, var(--muted-foreground))' }}
               aria-hidden="true">
               {placeholder}
