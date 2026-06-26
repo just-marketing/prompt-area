@@ -35,6 +35,8 @@ export function ActionBar({
   left,
   right,
   className,
+  leftClassName,
+  rightClassName,
   disabled = false,
   'aria-label': ariaLabel,
   'data-test-id': dataTestId,
@@ -53,8 +55,10 @@ export function ActionBar({
         disabled && 'pointer-events-none opacity-50',
         className,
       )}>
-      {left && <div className="flex items-center gap-1">{left}</div>}
-      {right && <div className="ml-auto flex items-center gap-1">{right}</div>}
+      {left && <div className={cn('flex items-center gap-1', leftClassName)}>{left}</div>}
+      {right && (
+        <div className={cn('ml-auto flex items-center gap-1', rightClassName)}>{right}</div>
+      )}
     </div>
   )
 }

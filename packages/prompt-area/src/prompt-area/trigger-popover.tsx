@@ -54,15 +54,22 @@ export function TriggerPopover({
   if (!triggerRect) return null
   if (suggestions.length === 0 && !loading && !error && !emptyMessage) return null
 
-  // Position the popover below the trigger character, clamped to viewport
+  // Position the popover relative to the trigger character, clamped to the
+  // viewport. Flip above the trigger when there isn't enough room below, so the
+  // suggestion list stays on-screen near the bottom edge.
   const popoverMaxWidth = Math.min(320, window.innerWidth - 16)
+  const popoverMaxHeight = 240 // matches max-h-[240px] below
   const left = Math.min(triggerRect.left, window.innerWidth - popoverMaxWidth - 8)
+  const spaceBelow = window.innerHeight - triggerRect.bottom
+  const positionAbove = spaceBelow < popoverMaxHeight && triggerRect.top > spaceBelow
   const style: React.CSSProperties = {
     position: 'fixed',
     left: `${Math.max(8, left)}px`,
-    top: `${triggerRect.bottom + 4}px`,
     zIndex: 50,
     maxWidth: `${popoverMaxWidth}px`,
+    ...(positionAbove
+      ? { bottom: `${window.innerHeight - triggerRect.top + 4}px` }
+      : { top: `${triggerRect.bottom + 4}px` }),
   }
 
   return (

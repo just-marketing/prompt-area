@@ -67,6 +67,12 @@ export function PromptArea({
   filePosition = 'above',
   onFileRemove,
   onFileClick,
+  onKeyDown,
+  onBlur,
+  onRawPaste,
+  submitOnEnter,
+  spellCheck,
+  'aria-describedby': ariaDescribedBy,
   ref,
 }: PromptAreaProps & { ref?: React.Ref<PromptAreaHandle> }) {
   const {
@@ -95,10 +101,12 @@ export function PromptArea({
     onChipDelete,
     onLinkClick,
     onPaste,
+    onRawPaste,
     onUndo,
     onRedo,
     onImagePaste,
     markdown,
+    submitOnEnter,
   })
 
   // Expose imperative handle via ref
@@ -219,6 +227,28 @@ export function PromptArea({
     }
   }, [autoGrow, minHeight, maxHeight, isFocused, editorHeight])
 
+  // Run a consumer's onKeyDown first; if it calls preventDefault, skip all of
+  // PromptArea's built-in key handling (submit, trigger nav, etc.).
+  const handleKeyDownCombined = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      onKeyDown?.(e)
+      if (e.defaultPrevented) return
+      handleKeyDown(e)
+    },
+    [onKeyDown, handleKeyDown],
+  )
+
+  // Forward blur to the consumer (with relatedTarget) alongside the internal
+  // trigger-dismiss / auto-grow-shrink handling.
+  const handleBlurCombined = useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      onBlur?.(e)
+      if (autoGrow) handleBlurWithShrink()
+      else eventHandlers.onBlur()
+    },
+    [onBlur, autoGrow, handleBlurWithShrink, eventHandlers],
+  )
+
   const isEmpty =
     value.length === 0 || (value.length === 1 && value[0].type === 'text' && value[0].text === '')
 
@@ -257,17 +287,19 @@ export function PromptArea({
           aria-label={ariaLabel ?? 'Text input'}
           aria-multiline="true"
           aria-disabled={disabled || undefined}
+          aria-describedby={ariaDescribedBy}
           data-test-id={dataTestId}
+          spellCheck={spellCheck}
           className={cn(
             'prompt-area-editor',
-            'w-full min-w-0 break-words whitespace-pre-wrap outline-none',
+            'w-full min-w-0 whitespace-pre-wrap break-words outline-none',
             'text-sm leading-relaxed',
             disabled && 'cursor-not-allowed opacity-50',
           )}
           style={editorStyle}
           onFocus={handleFocus}
           onInput={autoGrow ? handleInputWithGrow : handleInput}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleKeyDownCombined}
           onClick={handleClick}
           onPaste={eventHandlers.onPaste}
           onCopy={eventHandlers.onCopy}
@@ -276,14 +308,14 @@ export function PromptArea({
           onDragOver={eventHandlers.onDragOver}
           onCompositionStart={eventHandlers.onCompositionStart}
           onCompositionEnd={eventHandlers.onCompositionEnd}
-          onBlur={autoGrow ? handleBlurWithShrink : eventHandlers.onBlur}
+          onBlur={handleBlurCombined}
         />
 
         {/* Overflow gradient indicator – visible when auto-grow is collapsed and content is clipped */}
         {autoGrow && hasOverflow && !isFocused && (
           <div
             aria-hidden="true"
-            className="pointer-events-auto absolute right-0 bottom-0 left-0 cursor-pointer"
+            className="pointer-events-auto absolute bottom-0 left-0 right-0 cursor-pointer"
             style={{ height: '32px' }}
             onClick={() => editorRef.current?.focus()}>
             <div
@@ -303,7 +335,7 @@ export function PromptArea({
             <AnimatedPlaceholder texts={placeholder} />
           ) : (
             <div
-              className="pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
+              className="pointer-events-none absolute left-0 top-0 select-none text-sm leading-relaxed"
               style={{ color: 'var(--prompt-area-placeholder, var(--muted-foreground))' }}
               aria-hidden="true">
               {placeholder}

@@ -13,6 +13,7 @@ import type {
 import {
   detectActiveTrigger,
   segmentsToPlainText,
+  plainTextToSegments,
   segmentsEqual,
   resolveChip,
   removeChipAtIndex,
@@ -72,10 +73,12 @@ type UsePromptAreaOptions = {
   onChipDelete?: (chip: ChipSegment) => void
   onLinkClick?: (url: string) => void
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
+  onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
   onImagePaste?: (file: File) => void
   markdown?: boolean
+  submitOnEnter?: boolean
 }
 
 type UsePromptAreaReturn = {
@@ -122,10 +125,12 @@ export function usePromptArea({
   onChipDelete,
   onLinkClick,
   onPaste,
+  onRawPaste,
   onUndo,
   onRedo,
   onImagePaste,
   markdown: markdownEnabled = true,
+  submitOnEnter = true,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
@@ -369,6 +374,7 @@ export function usePromptArea({
     dismissTrigger,
     triggers,
     onPaste,
+    onRawPaste,
     onUndo,
     onRedo,
     onChipAdd,
@@ -921,41 +927,43 @@ export function usePromptArea({
         }
       }
 
-      // 2.8 Shift+Enter: insert newline at model level (avoids browser's broken
-      // contentEditable behavior near <a> elements)
+      // Insert a newline at the model level (avoids the browser's broken
+      // contentEditable behaviour near <a> elements).
+      const insertPlainNewline = (editor: HTMLDivElement): void => {
+        const offsets = getSelectionOffsets(editor)
+        if (!offsets) return
+        const currentSegments = readSegmentsFromDOM()
+        events.pushUndo(currentSegments)
+        const newSegments = replaceTextRange(currentSegments, offsets.start, offsets.end, '\n')
+        applyEditResult(editor, { segments: newSegments, cursorOffset: offsets.start + 1 })
+      }
+
+      // 2.8 Shift+Enter always inserts a newline (after a list-continuation check).
       if (e.key === 'Enter' && e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault()
         const editor = editorRef.current
-        if (editor) {
-          // Check for list continuation first (same as Enter)
-          if (tryListContinuation(editor)) return
-          // Fallback: plain newline (existing behavior)
-          const offsets = getSelectionOffsets(editor)
-          if (offsets) {
-            const currentSegments = readSegmentsFromDOM()
-            events.pushUndo(currentSegments)
-            const newSegments = replaceTextRange(currentSegments, offsets.start, offsets.end, '\n')
-            applyEditResult(editor, { segments: newSegments, cursorOffset: offsets.start + 1 })
-          }
-        }
+        if (editor && !tryListContinuation(editor)) insertPlainNewline(editor)
         return
       }
 
-      // 3. Submit on Enter (without Shift), skip during IME
+      // 3. Enter without Shift (skipping IME): continue a list, else submit when
+      // `submitOnEnter` is set, else insert a newline.
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-        // 3a. Check for list continuation first (only when markdown is enabled)
         const editor = editorRef.current
         if (editor && tryListContinuation(editor)) {
           e.preventDefault()
           return
         }
-
-        // 3b. Submit (if no list context)
-        if (onSubmit) {
-          e.preventDefault()
-          onSubmit(readSegmentsFromDOM())
+        if (submitOnEnter) {
+          if (onSubmit) {
+            e.preventDefault()
+            onSubmit(readSegmentsFromDOM())
+          }
           return
         }
+        e.preventDefault()
+        if (editor) insertPlainNewline(editor)
+        return
       }
 
       // 4. Escape
@@ -1016,6 +1024,7 @@ export function usePromptArea({
       suggestions,
       selectedSuggestionIndex,
       onSubmit,
+      submitOnEnter,
       onEscape,
       readSegmentsFromDOM,
       onChange,
@@ -1060,6 +1069,41 @@ export function usePromptArea({
           undoTimer.current = null
         }
         undoBaseState.current = null
+      },
+      setText: (text) => {
+        const segments = plainTextToSegments(text)
+        onChange(segments)
+        renderSegmentsToDOM(segments)
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, text.length)
+      },
+      appendText: (text) => {
+        const segments = readSegmentsFromDOM()
+        const next: Segment[] = [...segments, { type: 'text', text }]
+        onChange(next)
+        renderSegmentsToDOM(next)
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, segmentsToPlainText(next).length)
+      },
+      getCursorPosition: () => {
+        const editor = editorRef.current
+        return editor ? getCursorOffset(editor) : null
+      },
+      setCursorPosition: (offset) => {
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, offset)
+      },
+      setCursorToEnd: () => {
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, segmentsToPlainText(readSegmentsFromDOM()).length)
+      },
+      getSelection: () => {
+        const editor = editorRef.current
+        return editor ? getSelectionOffsets(editor) : null
+      },
+      setSelection: (start, end) => {
+        const editor = editorRef.current
+        if (editor) setSelectionAtOffsets(editor, start, end)
       },
     }),
     [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events],
