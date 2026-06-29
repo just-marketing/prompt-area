@@ -29,7 +29,7 @@ export function AnimatedPlaceholder({ texts, interval = 3000 }: AnimatedPlacehol
 
   return (
     <div
-      className="pointer-events-none absolute top-0 left-0 overflow-hidden text-sm leading-relaxed select-none"
+      className="pointer-events-none absolute top-0 left-0 overflow-hidden select-none"
       style={{ color: 'var(--prompt-area-placeholder, var(--muted-foreground))' }}
       aria-hidden="true">
       <div

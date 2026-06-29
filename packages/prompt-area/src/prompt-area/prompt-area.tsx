@@ -274,8 +274,11 @@ export function PromptArea({
       />
     ) : null
 
+  // Typography (font-size/line-height) lives on the container, not the editor, so
+  // it cascades to the editor AND the placeholder overlays — and a consumer can
+  // override all three at once via `className` (e.g. `text-base leading-6`).
   return (
-    <div className={cn('prompt-area-container relative', className)}>
+    <div className={cn('prompt-area-container relative text-sm leading-relaxed', className)}>
       {imagePosition === 'above' && imageStrip}
       {filePosition === 'above' && fileStrip}
 
@@ -295,7 +298,6 @@ export function PromptArea({
           className={cn(
             'prompt-area-editor',
             'w-full min-w-0 break-words whitespace-pre-wrap outline-none',
-            'text-sm leading-relaxed',
             disabled && 'cursor-not-allowed opacity-50',
           )}
           style={editorStyle}
@@ -337,7 +339,7 @@ export function PromptArea({
             <AnimatedPlaceholder texts={placeholder} />
           ) : (
             <div
-              className="pointer-events-none absolute top-0 left-0 text-sm leading-relaxed select-none"
+              className="pointer-events-none absolute top-0 left-0 select-none"
               style={{ color: 'var(--prompt-area-placeholder, var(--muted-foreground))' }}
               aria-hidden="true">
               {placeholder}
