@@ -17,6 +17,8 @@ export type ListContext = {
   indent: number
   /** Type of list */
   listType: 'bullet' | 'numbered'
+  /** For bullet lists, the marker char actually used (`•`, `-`, or `*`) */
+  marker?: string
   /** For numbered lists, the number */
   number?: number
   /** Offset in plain text where content after the prefix starts */
@@ -43,6 +45,7 @@ export function getListContext(text: string, cursorPos: number): ListContext | n
       prefix: bulletMatch[0],
       indent: Math.floor(indentStr.length / 2),
       listType: 'bullet',
+      marker: bulletMatch[2],
       contentStart: lineStart + bulletMatch[0].length,
     }
   }
@@ -120,7 +123,7 @@ export function insertListContinuation(
   const indent = '  '.repeat(ctx.indent)
   let nextPrefix: string
   if (ctx.listType === 'bullet') {
-    nextPrefix = `${indent}• `
+    nextPrefix = `${indent}${ctx.marker ?? '•'} `
   } else {
     const nextNum = (ctx.number ?? 1) + 1
     nextPrefix = `${indent}${nextNum}. `

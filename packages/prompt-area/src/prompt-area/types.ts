@@ -214,6 +214,13 @@ export type PromptAreaProps = {
   disabled?: boolean
   /** Whether to render simple inline markdown (bold, italic, URLs, lists) */
   markdown?: boolean
+  /**
+   * When markdown is on, the editor rewrites typed list markers (`- ` / `* `)
+   * to a `•` bullet glyph in the model. Set to `false` to keep the original
+   * marker in the value/`onChange` text — needed when a host renders the output
+   * as real markdown, where `•` is not a valid list marker. Default `true`.
+   */
+  normalizeBullets?: boolean
   /** Called when Enter is pressed (without Shift) */
   onSubmit?: (segments: Segment[]) => void
   /** Called when Escape is pressed */

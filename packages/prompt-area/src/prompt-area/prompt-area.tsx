@@ -43,6 +43,7 @@ export function PromptArea({
   className,
   disabled = false,
   markdown,
+  normalizeBullets,
   onSubmit,
   onEscape,
   onChipClick,
@@ -107,6 +108,7 @@ export function PromptArea({
     onRedo,
     onImagePaste,
     markdown,
+    normalizeBullets,
     submitOnEnter,
     maxLength,
   })

@@ -79,6 +79,7 @@ type UsePromptAreaOptions = {
   onRedo?: (segments: Segment[]) => void
   onImagePaste?: (file: File) => void
   markdown?: boolean
+  normalizeBullets?: boolean
   submitOnEnter?: boolean
   maxLength?: number
 }
@@ -132,6 +133,7 @@ export function usePromptArea({
   onRedo,
   onImagePaste,
   markdown: markdownEnabled = true,
+  normalizeBullets = true,
   submitOnEnter = true,
   maxLength,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
@@ -394,7 +396,7 @@ export function usePromptArea({
 
     // Normalize list prefixes (e.g., "- " → "• " when markdown is on)
     // so externally-provided segments render bullet characters correctly.
-    if (markdownEnabled) {
+    if (markdownEnabled && normalizeBullets) {
       const normalized = normalizeListPrefixes(value, true)
       if (normalized !== value) {
         onChange(normalized)
@@ -403,7 +405,7 @@ export function usePromptArea({
     }
 
     renderSegmentsToDOM(value)
-  }, [value, renderSegmentsToDOM, markdownEnabled, onChange])
+  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
 
   // Re-render when markdown mode changes to apply/strip decorations
   // Also convert bullet characters: • ↔ - in text segments
@@ -412,13 +414,13 @@ export function usePromptArea({
     if (prevMarkdown.current === markdownEnabled) return
     prevMarkdown.current = markdownEnabled
 
-    const converted = normalizeListPrefixes(value, markdownEnabled)
+    const converted = normalizeBullets ? normalizeListPrefixes(value, markdownEnabled) : value
     if (converted !== value) {
       onChange(converted)
     } else {
       renderSegmentsToDOM(value)
     }
-  }, [markdownEnabled, renderSegmentsToDOM, value, onChange])
+  }, [markdownEnabled, normalizeBullets, renderSegmentsToDOM, value, onChange])
 
   // Clean up undo debounce timer on unmount
   useEffect(() => {
@@ -468,7 +470,7 @@ export function usePromptArea({
     }
 
     // Check for list auto-formatting (e.g., "- " -> "bullet ")
-    if (markdownEnabled && editor && savedCursorOffset !== null) {
+    if (markdownEnabled && normalizeBullets && editor && savedCursorOffset !== null) {
       const formatted = autoFormatListPrefix(segments, savedCursorOffset)
       if (formatted) {
         lastRenderedValue.current = formatted.segments
@@ -513,6 +515,7 @@ export function usePromptArea({
     runTriggerDetection,
     renderSegmentsToDOM,
     markdownEnabled,
+    normalizeBullets,
     maxLength,
     events,
   ])
