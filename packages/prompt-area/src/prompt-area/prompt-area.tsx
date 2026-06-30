@@ -247,10 +247,11 @@ export function PromptArea({
   const handleBlurCombined = useCallback(
     (e: React.FocusEvent<HTMLDivElement>) => {
       onBlur?.(e)
-      if (autoGrow) handleBlurWithShrink()
-      else eventHandlers.onBlur()
+      // handleBlurWithShrink already calls eventHandlers.onBlur() and only
+      // shrinks when autoGrow is on, so it covers both modes.
+      handleBlurWithShrink()
     },
-    [onBlur, autoGrow, handleBlurWithShrink, eventHandlers],
+    [onBlur, handleBlurWithShrink],
   )
 
   const isEmpty =
