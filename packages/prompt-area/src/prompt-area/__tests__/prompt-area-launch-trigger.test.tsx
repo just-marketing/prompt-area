@@ -3,35 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import type { Segment, TriggerConfig } from '../types'
-
-// ---------------------------------------------------------------------------
-// jsdom polyfill: keydown handling reads selection geometry.
-// ---------------------------------------------------------------------------
-if (!Range.prototype.getBoundingClientRect) {
-  Range.prototype.getBoundingClientRect = function () {
-    return {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      toJSON: () => ({}),
-    } as DOMRect
-  }
-}
-
-function placeCursor(editor: HTMLElement, offset: number) {
-  const range = document.createRange()
-  const node = editor.firstChild ?? editor
-  range.setStart(node, offset)
-  range.collapse(true)
-  const sel = window.getSelection()!
-  sel.removeAllRanges()
-  sel.addRange(range)
-}
+import { placeCursor } from './test-helpers'
 
 function renderWithLaunch(onActivate: () => void) {
   function Wrap() {

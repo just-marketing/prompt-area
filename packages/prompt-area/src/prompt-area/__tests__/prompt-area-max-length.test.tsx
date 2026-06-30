@@ -5,27 +5,6 @@ import { PromptArea } from '../prompt-area'
 import { truncateSegmentsToLength, segmentsToPlainText } from '../prompt-area-engine'
 import type { Segment } from '../types'
 
-// ---------------------------------------------------------------------------
-// jsdom polyfill: Range.getBoundingClientRect is not implemented; trigger
-// detection geometry runs on input, so keep it so handleInput doesn't throw.
-// ---------------------------------------------------------------------------
-
-if (!Range.prototype.getBoundingClientRect) {
-  Range.prototype.getBoundingClientRect = function () {
-    return {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      toJSON: () => ({}),
-    } as DOMRect
-  }
-}
-
 const chip = (trigger: string, displayText: string): Segment => ({
   type: 'chip',
   trigger,

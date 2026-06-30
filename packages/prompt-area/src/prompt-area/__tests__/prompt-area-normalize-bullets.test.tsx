@@ -4,36 +4,7 @@ import { useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import { segmentsToPlainText } from '../prompt-area-engine'
 import type { Segment } from '../types'
-
-// ---------------------------------------------------------------------------
-// jsdom polyfill: Range.getBoundingClientRect is not implemented; trigger
-// detection geometry runs on input, so keep it so handleInput doesn't throw.
-// ---------------------------------------------------------------------------
-
-if (!Range.prototype.getBoundingClientRect) {
-  Range.prototype.getBoundingClientRect = function () {
-    return {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      toJSON: () => ({}),
-    } as DOMRect
-  }
-}
-
-function placeCursorAtEnd(editor: HTMLElement) {
-  const range = document.createRange()
-  range.selectNodeContents(editor)
-  range.collapse(false)
-  const sel = window.getSelection()!
-  sel.removeAllRanges()
-  sel.addRange(range)
-}
+import { placeCursorAtEnd } from './test-helpers'
 
 function renderEditor(props: { normalizeBullets?: boolean }) {
   const onChangeSpy = vi.fn()

@@ -5,28 +5,6 @@ import { PromptArea } from '../prompt-area'
 import type { PromptAreaHandle, Segment } from '../types'
 
 // ---------------------------------------------------------------------------
-// jsdom polyfill: Range.getBoundingClientRect is not implemented. Imperative
-// caret/selection methods read text-node lengths (no layout), but trigger
-// detection geometry runs on input — keep the polyfill so nothing throws.
-// ---------------------------------------------------------------------------
-
-if (!Range.prototype.getBoundingClientRect) {
-  Range.prototype.getBoundingClientRect = function () {
-    return {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      toJSON: () => ({}),
-    } as DOMRect
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Controlled harness: PromptArea is a controlled component (the `value` prop
 // drives the DOM). A wrapper that mirrors onChange back into `value` keeps the
 // rendered DOM in sync, so the imperative handle operates on realistic content.

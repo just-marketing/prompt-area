@@ -2,27 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PromptArea } from '../prompt-area'
 import type { Segment } from '../types'
-
-// ---------------------------------------------------------------------------
-// jsdom polyfill: Range.getBoundingClientRect is not implemented. Enter
-// handling reads the selection geometry, so replicate the existing pattern.
-// ---------------------------------------------------------------------------
-
-if (!Range.prototype.getBoundingClientRect) {
-  Range.prototype.getBoundingClientRect = function () {
-    return {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      toJSON: () => ({}),
-    } as DOMRect
-  }
-}
+import { placeCursorAtEnd } from './test-helpers'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -31,16 +11,6 @@ if (!Range.prototype.getBoundingClientRect) {
 const defaultProps = {
   value: [] as Segment[],
   onChange: vi.fn(),
-}
-
-/** Place the caret at the end of the editor's last text node. */
-function placeCursorAtEnd(editor: HTMLElement) {
-  const range = document.createRange()
-  range.selectNodeContents(editor)
-  range.collapse(false)
-  const sel = window.getSelection()!
-  sel.removeAllRanges()
-  sel.addRange(range)
 }
 
 // ---------------------------------------------------------------------------
