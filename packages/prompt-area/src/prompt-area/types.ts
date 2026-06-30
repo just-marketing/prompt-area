@@ -46,9 +46,12 @@ export type TriggerPosition = 'start' | 'any'
 /**
  * Defines how a trigger behaves when activated.
  * - 'dropdown': Shows a popover with suggestions from `onSearch`
- * - 'callback': Fires `onActivate` immediately without a dropdown
+ * - 'callback': Inserts the char, then fires `onActivate` with the typed query
+ * - 'launch': Fires `onActivate` on keydown and SUPPRESSES the char (it never
+ *   enters the editor) — for opening an external surface (dialog, palette) where
+ *   no in-editor text should appear. Honors `position` like the other modes.
  */
-export type TriggerMode = 'dropdown' | 'callback'
+export type TriggerMode = 'dropdown' | 'callback' | 'launch'
 
 /**
  * Visual style for rendered chips.
@@ -101,8 +104,9 @@ export type TriggerConfig = {
    */
   onSelect?: (suggestion: TriggerSuggestion) => string | void
   /**
-   * For 'callback' mode: called when the trigger is activated.
-   * Receives the full input text and cursor position.
+   * For 'callback' and 'launch' modes: called when the trigger is activated.
+   * Receives the full input text and cursor position. For 'launch' it fires on
+   * keydown (before the char would insert); for 'callback' it fires after.
    */
   onActivate?: (context: TriggerActivateContext) => void
   /**

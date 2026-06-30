@@ -12,6 +12,7 @@ import type {
 } from './types'
 import {
   detectActiveTrigger,
+  isValidTriggerPosition,
   segmentsToPlainText,
   plainTextToSegments,
   segmentsEqual,
@@ -279,6 +280,30 @@ export function usePromptArea({
   // Trigger detection (extracted so events module can call it)
   // -----------------------------------------------------------------------
 
+  // Builds the insertChip handed to callback/launch activations: replaces the
+  // trigger's range with a chip and notifies onChipAdd.
+  const buildInsertChip = useCallback(
+    (segments: Segment[], trigger: ActiveTrigger) => (chip: Omit<ChipSegment, 'type'>) => {
+      const chipResult = resolveChip(segments, trigger, {
+        value: chip.value,
+        displayText: chip.displayText,
+        data: chip.data,
+      })
+      onChange(chipResult.segments)
+      renderSegmentsToDOM(chipResult.segments)
+      onChipAdd?.({
+        type: 'chip',
+        trigger: trigger.config.char,
+        value: chip.value,
+        displayText: chip.displayText,
+        ...(chip.data !== undefined ? { data: chip.data } : {}),
+      })
+      const editor = editorRef.current
+      if (editor) setCursorAtOffset(editor, chipResult.cursorOffset)
+    },
+    [onChange, renderSegmentsToDOM, onChipAdd],
+  )
+
   const runTriggerDetection = useCallback(() => {
     const editor = editorRef.current
     if (!editor) return
@@ -318,43 +343,14 @@ export function usePromptArea({
         detected.config.onActivate({
           text: plainText,
           cursorPosition: cursorPos,
-          insertChip: (chip) => {
-            const chipResult = resolveChip(segments, detected, {
-              value: chip.value,
-              displayText: chip.displayText,
-              data: chip.data,
-            })
-            onChange(chipResult.segments)
-            renderSegmentsToDOM(chipResult.segments)
-
-            onChipAdd?.({
-              type: 'chip',
-              trigger: detected.config.char,
-              value: chip.value,
-              displayText: chip.displayText,
-              ...(chip.data !== undefined ? { data: chip.data } : {}),
-            })
-
-            const editor = editorRef.current
-            if (editor) {
-              setCursorAtOffset(editor, chipResult.cursorOffset)
-            }
-          },
+          insertChip: buildInsertChip(segments, detected),
         })
       }
     } else {
       setActiveTrigger(null)
       resetSearch()
     }
-  }, [
-    triggers,
-    readSegmentsFromDOM,
-    onChange,
-    renderSegmentsToDOM,
-    onChipAdd,
-    resetSearch,
-    runSearch,
-  ])
+  }, [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -888,6 +884,36 @@ export function usePromptArea({
         return
       }
 
+      // 1.75 Launch triggers: a trigger with mode 'launch' fires onActivate on
+      // keydown and suppresses the char so it never enters the editor — for
+      // opening an external surface (dialog, palette). The DOM read is gated on
+      // the typed key actually matching a launch char, so it stays off the hot
+      // path. insertChip still inserts a chip at the cursor if the consumer
+      // wants one after the external selection.
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
+        const launcher = triggers.find((t) => t.mode === 'launch' && t.char === e.key)
+        const editor = editorRef.current
+        if (launcher?.onActivate && editor) {
+          const cursorPos = getCursorOffset(editor)
+          if (cursorPos !== null) {
+            const segments = readSegmentsFromDOM()
+            const plainText = segmentsToPlainText(segments)
+            if (isValidTriggerPosition(plainText, cursorPos, launcher.position)) {
+              e.preventDefault()
+              launcher.onActivate({
+                text: plainText,
+                cursorPosition: cursorPos,
+                insertChip: buildInsertChip(
+                  replaceTextRange(segments, cursorPos, cursorPos, launcher.char),
+                  { config: launcher, startOffset: cursorPos, query: '' },
+                ),
+              })
+              return
+            }
+          }
+        }
+      }
+
       // 2. Trigger dropdown navigation
       if (activeTrigger && activeTrigger.config.mode === 'dropdown' && suggestions.length > 0) {
         if (e.key === 'ArrowDown') {
@@ -1056,6 +1082,8 @@ export function usePromptArea({
       runTriggerDetection,
       selectSuggestionInternal,
       events,
+      triggers,
+      buildInsertChip,
     ],
   )
 
