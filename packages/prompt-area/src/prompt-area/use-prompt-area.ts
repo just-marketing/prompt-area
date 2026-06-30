@@ -890,7 +890,13 @@ export function usePromptArea({
       // the typed key actually matching a launch char, so it stays off the hot
       // path. insertChip still inserts a chip at the cursor if the consumer
       // wants one after the external selection.
-      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
+      if (
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.nativeEvent.isComposing &&
+        e.key.length === 1
+      ) {
         const launcher = triggers.find((t) => t.mode === 'launch' && t.char === e.key)
         const editor = editorRef.current
         if (launcher?.onActivate && editor) {
