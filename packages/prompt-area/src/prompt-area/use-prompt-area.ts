@@ -1006,10 +1006,8 @@ export function usePromptArea({
           return
         }
         if (submitOnEnter) {
-          if (onSubmit) {
-            e.preventDefault()
-            onSubmit(readSegmentsFromDOM())
-          }
+          e.preventDefault()
+          onSubmit?.(readSegmentsFromDOM())
           return
         }
         e.preventDefault()
