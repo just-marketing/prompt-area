@@ -46,9 +46,12 @@ export type TriggerPosition = 'start' | 'any'
 /**
  * Defines how a trigger behaves when activated.
  * - 'dropdown': Shows a popover with suggestions from `onSearch`
- * - 'callback': Fires `onActivate` immediately without a dropdown
+ * - 'callback': Inserts the char, then fires `onActivate` with the typed query
+ * - 'launch': Fires `onActivate` on keydown and SUPPRESSES the char (it never
+ *   enters the editor) — for opening an external surface (dialog, palette) where
+ *   no in-editor text should appear. Honors `position` like the other modes.
  */
-export type TriggerMode = 'dropdown' | 'callback'
+export type TriggerMode = 'dropdown' | 'callback' | 'launch'
 
 /**
  * Visual style for rendered chips.
@@ -101,8 +104,9 @@ export type TriggerConfig = {
    */
   onSelect?: (suggestion: TriggerSuggestion) => string | void
   /**
-   * For 'callback' mode: called when the trigger is activated.
-   * Receives the full input text and cursor position.
+   * For 'callback' and 'launch' modes: called when the trigger is activated.
+   * Receives the full input text and cursor position. For 'launch' it fires on
+   * keydown (before the char would insert); for 'callback' it fires after.
    */
   onActivate?: (context: TriggerActivateContext) => void
   /**
@@ -214,6 +218,13 @@ export type PromptAreaProps = {
   disabled?: boolean
   /** Whether to render simple inline markdown (bold, italic, URLs, lists) */
   markdown?: boolean
+  /**
+   * When markdown is on, the editor rewrites typed list markers (`- ` / `* `)
+   * to a `•` bullet glyph in the model. Set to `false` to keep the original
+   * marker in the value/`onChange` text — needed when a host renders the output
+   * as real markdown, where `•` is not a valid list marker. Default `true`.
+   */
+  normalizeBullets?: boolean
   /** Called when Enter is pressed (without Shift) */
   onSubmit?: (segments: Segment[]) => void
   /** Called when Escape is pressed */
@@ -236,6 +247,18 @@ export type PromptAreaProps = {
   minHeight?: number
   /** Maximum height in pixels */
   maxHeight?: number
+  /**
+   * Maximum number of plain-text characters allowed, enforced on typed input:
+   * once the editor exceeds the cap it is truncated back to this length, with
+   * the caret kept where the edit happened. Chips count as their
+   * `trigger + displayText` length.
+   *
+   * The cap applies to typing only. Paste is not capped — divert it via
+   * `onRawPaste` if needed — and the imperative `setText` / `appendText` also
+   * bypass it, so a programmatic write can exceed the cap until the next
+   * keystroke truncates.
+   */
+  maxLength?: number
   /** Auto-focus on mount */
   autoFocus?: boolean
   /** When true, the area auto-grows to fit content on focus and shrinks on blur */
@@ -262,6 +285,34 @@ export type PromptAreaProps = {
   onFileRemove?: (file: PromptAreaFile) => void
   /** Called when the user clicks a file attachment */
   onFileClick?: (file: PromptAreaFile) => void
+  /**
+   * Called on keydown before PromptArea's own handling. Call `preventDefault()`
+   * to suppress the built-in behaviour (submit, trigger navigation, etc.) for
+   * that key and take over entirely.
+   */
+  onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void
+  /**
+   * Called on blur with the native FocusEvent, so consumers can inspect
+   * `relatedTarget` (e.g. to retain focus when a composer toolbar is clicked).
+   */
+  onBlur?: (e: React.FocusEvent<HTMLDivElement>) => void
+  /**
+   * Called at the start of a paste, before PromptArea reads the clipboard. Call
+   * `preventDefault()` to take over the paste completely — e.g. to divert large
+   * text or non-image files to an upload pipeline. The built-in segment/image
+   * paste handling is skipped when the event's default is prevented.
+   */
+  onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
+  /**
+   * Whether pressing Enter (without Shift) submits. Defaults to true. Set false
+   * to make Enter insert a newline instead (e.g. on touch devices where submit
+   * is a dedicated button).
+   */
+  submitOnEnter?: boolean
+  /** Forwarded to the editable element. */
+  spellCheck?: boolean
+  /** Forwarded to the editable element as `aria-describedby`. */
+  'aria-describedby'?: string
 }
 
 /**
@@ -278,4 +329,24 @@ export type PromptAreaHandle = {
   getPlainText: () => string
   /** Clear all content */
   clear: () => void
+  /**
+   * Replace all content with plain text (chips dropped), caret moved to the
+   * end. Not capped by `maxLength` (see its docs); undoable.
+   */
+  setText: (text: string) => void
+  /**
+   * Append plain text at the end (existing chips preserved), caret moved to the
+   * end. Not capped by `maxLength` (see its docs); undoable.
+   */
+  appendText: (text: string) => void
+  /** Caret offset in plain-text characters, or null when unavailable. */
+  getCursorPosition: () => number | null
+  /** Move the caret to a plain-text offset. */
+  setCursorPosition: (offset: number) => void
+  /** Move the caret to the end of the content. */
+  setCursorToEnd: () => void
+  /** Current selection as plain-text offsets, or null when there is none. */
+  getSelection: () => { start: number; end: number } | null
+  /** Set the selection between two plain-text offsets. */
+  setSelection: (start: number, end: number) => void
 }

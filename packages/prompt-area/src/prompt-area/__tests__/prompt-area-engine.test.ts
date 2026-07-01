@@ -910,6 +910,20 @@ describe('insertListContinuation', () => {
     expect(result).not.toBeNull()
     expect(segmentsToPlainText(result!.segments)).toBe('  \u2022 nested\n  \u2022 ')
   })
+
+  it('continues a dash bullet with the dash marker, not \u2022', () => {
+    const segments: Segment[] = [{ type: 'text', text: '- item1' }]
+    const result = insertListContinuation(segments, 7)
+    expect(result).not.toBeNull()
+    expect(segmentsToPlainText(result!.segments)).toBe('- item1\n- ')
+  })
+
+  it('continues an asterisk bullet with the asterisk marker', () => {
+    const segments: Segment[] = [{ type: 'text', text: '* item1' }]
+    const result = insertListContinuation(segments, 7)
+    expect(result).not.toBeNull()
+    expect(segmentsToPlainText(result!.segments)).toBe('* item1\n* ')
+  })
 })
 
 // ===========================================================================

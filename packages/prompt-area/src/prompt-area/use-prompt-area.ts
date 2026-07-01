@@ -12,13 +12,16 @@ import type {
 } from './types'
 import {
   detectActiveTrigger,
+  isValidTriggerPosition,
   segmentsToPlainText,
+  plainTextToSegments,
   segmentsEqual,
   resolveChip,
   removeChipAtIndex,
   revertChipAtIndex,
   replaceTextRange,
   toggleMarkdownWrap,
+  truncateSegmentsToLength,
 } from './prompt-area-engine'
 import {
   getListContext,
@@ -72,10 +75,14 @@ type UsePromptAreaOptions = {
   onChipDelete?: (chip: ChipSegment) => void
   onLinkClick?: (url: string) => void
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
+  onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
   onImagePaste?: (file: File) => void
   markdown?: boolean
+  normalizeBullets?: boolean
+  submitOnEnter?: boolean
+  maxLength?: number
 }
 
 type UsePromptAreaReturn = {
@@ -122,10 +129,14 @@ export function usePromptArea({
   onChipDelete,
   onLinkClick,
   onPaste,
+  onRawPaste,
   onUndo,
   onRedo,
   onImagePaste,
   markdown: markdownEnabled = true,
+  normalizeBullets = true,
+  submitOnEnter = true,
+  maxLength,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
@@ -269,6 +280,30 @@ export function usePromptArea({
   // Trigger detection (extracted so events module can call it)
   // -----------------------------------------------------------------------
 
+  // Builds the insertChip handed to callback/launch activations: replaces the
+  // trigger's range with a chip and notifies onChipAdd.
+  const buildInsertChip = useCallback(
+    (segments: Segment[], trigger: ActiveTrigger) => (chip: Omit<ChipSegment, 'type'>) => {
+      const chipResult = resolveChip(segments, trigger, {
+        value: chip.value,
+        displayText: chip.displayText,
+        data: chip.data,
+      })
+      onChange(chipResult.segments)
+      renderSegmentsToDOM(chipResult.segments)
+      onChipAdd?.({
+        type: 'chip',
+        trigger: trigger.config.char,
+        value: chip.value,
+        displayText: chip.displayText,
+        ...(chip.data !== undefined ? { data: chip.data } : {}),
+      })
+      const editor = editorRef.current
+      if (editor) setCursorAtOffset(editor, chipResult.cursorOffset)
+    },
+    [onChange, renderSegmentsToDOM, onChipAdd],
+  )
+
   const runTriggerDetection = useCallback(() => {
     const editor = editorRef.current
     if (!editor) return
@@ -308,43 +343,14 @@ export function usePromptArea({
         detected.config.onActivate({
           text: plainText,
           cursorPosition: cursorPos,
-          insertChip: (chip) => {
-            const chipResult = resolveChip(segments, detected, {
-              value: chip.value,
-              displayText: chip.displayText,
-              data: chip.data,
-            })
-            onChange(chipResult.segments)
-            renderSegmentsToDOM(chipResult.segments)
-
-            onChipAdd?.({
-              type: 'chip',
-              trigger: detected.config.char,
-              value: chip.value,
-              displayText: chip.displayText,
-              ...(chip.data !== undefined ? { data: chip.data } : {}),
-            })
-
-            const editor = editorRef.current
-            if (editor) {
-              setCursorAtOffset(editor, chipResult.cursorOffset)
-            }
-          },
+          insertChip: buildInsertChip(segments, detected),
         })
       }
     } else {
       setActiveTrigger(null)
       resetSearch()
     }
-  }, [
-    triggers,
-    readSegmentsFromDOM,
-    onChange,
-    renderSegmentsToDOM,
-    onChipAdd,
-    resetSearch,
-    runSearch,
-  ])
+  }, [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -369,6 +375,7 @@ export function usePromptArea({
     dismissTrigger,
     triggers,
     onPaste,
+    onRawPaste,
     onUndo,
     onRedo,
     onChipAdd,
@@ -385,7 +392,7 @@ export function usePromptArea({
 
     // Normalize list prefixes (e.g., "- " → "• " when markdown is on)
     // so externally-provided segments render bullet characters correctly.
-    if (markdownEnabled) {
+    if (markdownEnabled && normalizeBullets) {
       const normalized = normalizeListPrefixes(value, true)
       if (normalized !== value) {
         onChange(normalized)
@@ -394,7 +401,7 @@ export function usePromptArea({
     }
 
     renderSegmentsToDOM(value)
-  }, [value, renderSegmentsToDOM, markdownEnabled, onChange])
+  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
 
   // Re-render when markdown mode changes to apply/strip decorations
   // Also convert bullet characters: • ↔ - in text segments
@@ -403,13 +410,13 @@ export function usePromptArea({
     if (prevMarkdown.current === markdownEnabled) return
     prevMarkdown.current = markdownEnabled
 
-    const converted = normalizeListPrefixes(value, markdownEnabled)
+    const converted = normalizeBullets ? normalizeListPrefixes(value, markdownEnabled) : value
     if (converted !== value) {
       onChange(converted)
     } else {
       renderSegmentsToDOM(value)
     }
-  }, [markdownEnabled, renderSegmentsToDOM, value, onChange])
+  }, [markdownEnabled, normalizeBullets, renderSegmentsToDOM, value, onChange])
 
   // Clean up undo debounce timer on unmount
   useEffect(() => {
@@ -446,8 +453,22 @@ export function usePromptArea({
 
     const segments = readSegmentsFromDOM()
 
+    // Enforce maxLength: if the edit pushed the editor past the cap, truncate
+    // back to maxLength characters and keep the caret where the user was
+    // editing (clamped to the cap) rather than forcing it to the end.
+    if (maxLength != null && editor && segmentsToPlainText(segments).length > maxLength) {
+      const caret = getCursorOffset(editor)
+      const truncated = truncateSegmentsToLength(segments, maxLength)
+      lastRenderedValue.current = truncated
+      onChange(truncated)
+      renderSegmentsToDOM(truncated)
+      setCursorAtOffset(editor, caret != null ? Math.min(caret, maxLength) : maxLength)
+      runTriggerDetection()
+      return
+    }
+
     // Check for list auto-formatting (e.g., "- " -> "bullet ")
-    if (markdownEnabled && editor && savedCursorOffset !== null) {
+    if (markdownEnabled && normalizeBullets && editor && savedCursorOffset !== null) {
       const formatted = autoFormatListPrefix(segments, savedCursorOffset)
       if (formatted) {
         lastRenderedValue.current = formatted.segments
@@ -492,6 +513,8 @@ export function usePromptArea({
     runTriggerDetection,
     renderSegmentsToDOM,
     markdownEnabled,
+    normalizeBullets,
+    maxLength,
     events,
   ])
 
@@ -863,6 +886,42 @@ export function usePromptArea({
         return
       }
 
+      // 1.75 Launch triggers: a trigger with mode 'launch' fires onActivate on
+      // keydown and suppresses the char so it never enters the editor — for
+      // opening an external surface (dialog, palette). The DOM read is gated on
+      // the typed key actually matching a launch char, so it stays off the hot
+      // path. insertChip still inserts a chip at the cursor if the consumer
+      // wants one after the external selection.
+      if (
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.nativeEvent.isComposing &&
+        e.key.length === 1
+      ) {
+        const launcher = triggers.find((t) => t.mode === 'launch' && t.char === e.key)
+        const editor = editorRef.current
+        if (launcher?.onActivate && editor) {
+          const cursorPos = getCursorOffset(editor)
+          if (cursorPos !== null) {
+            const segments = readSegmentsFromDOM()
+            const plainText = segmentsToPlainText(segments)
+            if (isValidTriggerPosition(plainText, cursorPos, launcher.position)) {
+              e.preventDefault()
+              launcher.onActivate({
+                text: plainText,
+                cursorPosition: cursorPos,
+                insertChip: buildInsertChip(
+                  replaceTextRange(segments, cursorPos, cursorPos, launcher.char),
+                  { config: launcher, startOffset: cursorPos, query: '' },
+                ),
+              })
+              return
+            }
+          }
+        }
+      }
+
       // 2. Trigger dropdown navigation
       if (activeTrigger && activeTrigger.config.mode === 'dropdown' && suggestions.length > 0) {
         if (e.key === 'ArrowDown') {
@@ -921,41 +980,41 @@ export function usePromptArea({
         }
       }
 
-      // 2.8 Shift+Enter: insert newline at model level (avoids browser's broken
-      // contentEditable behavior near <a> elements)
+      // Insert a newline at the model level (avoids the browser's broken
+      // contentEditable behaviour near <a> elements).
+      const insertPlainNewline = (editor: HTMLDivElement): void => {
+        const offsets = getSelectionOffsets(editor)
+        if (!offsets) return
+        const currentSegments = readSegmentsFromDOM()
+        events.pushUndo(currentSegments)
+        const newSegments = replaceTextRange(currentSegments, offsets.start, offsets.end, '\n')
+        applyEditResult(editor, { segments: newSegments, cursorOffset: offsets.start + 1 })
+      }
+
+      // 2.8 Shift+Enter always inserts a newline (after a list-continuation check).
       if (e.key === 'Enter' && e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault()
         const editor = editorRef.current
-        if (editor) {
-          // Check for list continuation first (same as Enter)
-          if (tryListContinuation(editor)) return
-          // Fallback: plain newline (existing behavior)
-          const offsets = getSelectionOffsets(editor)
-          if (offsets) {
-            const currentSegments = readSegmentsFromDOM()
-            events.pushUndo(currentSegments)
-            const newSegments = replaceTextRange(currentSegments, offsets.start, offsets.end, '\n')
-            applyEditResult(editor, { segments: newSegments, cursorOffset: offsets.start + 1 })
-          }
-        }
+        if (editor && !tryListContinuation(editor)) insertPlainNewline(editor)
         return
       }
 
-      // 3. Submit on Enter (without Shift), skip during IME
+      // 3. Enter without Shift (skipping IME): continue a list, else submit when
+      // `submitOnEnter` is set, else insert a newline.
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-        // 3a. Check for list continuation first (only when markdown is enabled)
         const editor = editorRef.current
         if (editor && tryListContinuation(editor)) {
           e.preventDefault()
           return
         }
-
-        // 3b. Submit (if no list context)
-        if (onSubmit) {
+        if (submitOnEnter) {
           e.preventDefault()
-          onSubmit(readSegmentsFromDOM())
+          onSubmit?.(readSegmentsFromDOM())
           return
         }
+        e.preventDefault()
+        if (editor) insertPlainNewline(editor)
+        return
       }
 
       // 4. Escape
@@ -1016,6 +1075,7 @@ export function usePromptArea({
       suggestions,
       selectedSuggestionIndex,
       onSubmit,
+      submitOnEnter,
       onEscape,
       readSegmentsFromDOM,
       onChange,
@@ -1028,6 +1088,8 @@ export function usePromptArea({
       runTriggerDetection,
       selectSuggestionInternal,
       events,
+      triggers,
+      buildInsertChip,
     ],
   )
 
@@ -1060,6 +1122,49 @@ export function usePromptArea({
           undoTimer.current = null
         }
         undoBaseState.current = null
+      },
+      setText: (text) => {
+        events.pushUndo(readSegmentsFromDOM())
+        const segments = plainTextToSegments(text)
+        onChange(segments)
+        renderSegmentsToDOM(segments)
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, text.length)
+      },
+      appendText: (text) => {
+        const segments = readSegmentsFromDOM()
+        events.pushUndo(segments)
+        // Merge into the trailing text segment so the onChange value doesn't
+        // carry two adjacent un-merged text segments.
+        const last = segments[segments.length - 1]
+        const next: Segment[] =
+          last?.type === 'text'
+            ? [...segments.slice(0, -1), { type: 'text', text: last.text + text }]
+            : [...segments, { type: 'text', text }]
+        onChange(next)
+        renderSegmentsToDOM(next)
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, segmentsToPlainText(next).length)
+      },
+      getCursorPosition: () => {
+        const editor = editorRef.current
+        return editor ? getCursorOffset(editor) : null
+      },
+      setCursorPosition: (offset) => {
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, offset)
+      },
+      setCursorToEnd: () => {
+        const editor = editorRef.current
+        if (editor) setCursorAtOffset(editor, segmentsToPlainText(readSegmentsFromDOM()).length)
+      },
+      getSelection: () => {
+        const editor = editorRef.current
+        return editor ? getSelectionOffsets(editor) : null
+      },
+      setSelection: (start, end) => {
+        const editor = editorRef.current
+        if (editor) setSelectionAtOffsets(editor, start, end)
       },
     }),
     [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events],

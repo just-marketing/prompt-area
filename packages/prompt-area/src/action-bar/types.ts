@@ -16,6 +16,10 @@ export type ActionBarProps = {
   right?: React.ReactNode
   /** Additional CSS class for the root element */
   className?: string
+  /** Additional CSS class for the left slot wrapper */
+  leftClassName?: string
+  /** Additional CSS class for the right slot wrapper */
+  rightClassName?: string
   /** Whether the action bar is disabled (visually dims and disables pointer events) */
   disabled?: boolean
   /** Accessible label for the toolbar */

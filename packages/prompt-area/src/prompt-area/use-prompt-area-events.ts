@@ -28,6 +28,7 @@ type EventHandlerDeps = {
   onRedo?: (segments: Segment[]) => void
   onChipAdd?: (chip: ChipSegment) => void
   onImagePaste?: (file: File) => void
+  onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
 }
 
 type PromptAreaEventHandlers = {
@@ -81,6 +82,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     onRedo,
     onChipAdd,
     onImagePaste,
+    onRawPaste,
   } = deps
 
   const isComposing = useRef(false)
@@ -115,6 +117,10 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLDivElement>) => {
+      // Let a consumer take over the paste entirely (e.g. divert large text or
+      // arbitrary files to an upload pipeline) by calling preventDefault().
+      onRawPaste?.(e)
+      if (e.defaultPrevented) return
       e.preventDefault()
 
       const editor = editorRef.current
@@ -242,6 +248,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       onPasteCallback,
       onChipAdd,
       onImagePaste,
+      onRawPaste,
     ],
   )
 
