@@ -5,6 +5,31 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ## 0.4.0
 
+### Added
+
+- **Consumer control surface for embedding the editor.** New props to drive
+  PromptArea from a host composer: `onKeyDown`, `onBlur` and `onRawPaste` (the
+  consumer runs first; call `preventDefault()` to suppress the built-in
+  handling), plus `maxLength`, `submitOnEnter`, `spellCheck` and
+  `aria-describedby`.
+- **Imperative handle methods** on the PromptArea ref — `setText`, `appendText`,
+  `getCursorPosition`, `setCursorPosition`, `setCursorToEnd`, `getSelection` and
+  `setSelection` — a textarea-shaped surface for programmatic control. Cursor
+  offsets are plain-text character indices; `setText` / `appendText` are not
+  capped by `maxLength`.
+- **`maxLength` prop** — caps typed input at N plain-text characters (chips
+  count as their `trigger + displayText` length). Paste is not capped; divert it
+  via `onRawPaste`.
+- **`normalizeBullets` prop** — set `false` to keep a typed `- ` as literal
+  markdown instead of rewriting it to `• `.
+- **`'launch'` trigger mode** — fires `onActivate` on keydown and suppresses the
+  character, for opening an external surface (command palette, context picker)
+  instead of the built-in dropdown.
+- **Trigger popover flips above the trigger** when there isn't room below, so
+  the suggestion list stays on-screen.
+- **ActionBar `leftClassName` / `rightClassName`** for styling the left and
+  right slot wrappers.
+
 ### Changed
 
 - **`commandTrigger()` now fires anywhere in the input by default, and exposes a

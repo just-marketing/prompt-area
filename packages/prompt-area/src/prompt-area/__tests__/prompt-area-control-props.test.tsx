@@ -71,6 +71,18 @@ describe('onKeyDown control prop', () => {
     expect(onKeyDown).toHaveBeenCalled()
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
+
+  it('suppresses the browser default on Enter when submitOnEnter has no onSubmit', () => {
+    render(<PromptArea value={[{ type: 'text', text: 'hello' }]} onChange={vi.fn()} />)
+    const editor = screen.getByRole('textbox')
+    placeCursorAtEnd(editor)
+
+    // submitOnEnter defaults to true; with no onSubmit, Enter must still
+    // preventDefault (no native contentEditable newline) rather than fall through.
+    const notPrevented = fireEvent.keyDown(editor, { key: 'Enter' })
+
+    expect(notPrevented).toBe(false)
+  })
 })
 
 // ---------------------------------------------------------------------------

@@ -3,6 +3,8 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import { truncateSegmentsToLength, segmentsToPlainText } from '../prompt-area-engine'
+import { getCursorOffset } from '../cursor-helpers'
+import { placeCursor } from './test-helpers'
 import type { Segment } from '../types'
 
 const chip = (trigger: string, displayText: string): Segment => ({
@@ -46,6 +48,13 @@ describe('truncateSegmentsToLength', () => {
   it('returns empty for a non-positive limit', () => {
     expect(truncateSegmentsToLength([{ type: 'text', text: 'x' }], 0)).toEqual([])
   })
+
+  it('does not split a surrogate pair at the cap boundary', () => {
+    // 😀 is one code point but two UTF-16 code units; a cap that lands mid-emoji
+    // drops the whole pair instead of emitting a lone surrogate.
+    const segs: Segment[] = [{ type: 'text', text: 'ab😀c' }]
+    expect(truncateSegmentsToLength(segs, 3)).toEqual([{ type: 'text', text: 'ab' }])
+  })
 })
 
 describe('PromptArea maxLength prop', () => {
@@ -88,5 +97,17 @@ describe('PromptArea maxLength prop', () => {
     const last = onChangeSpy.mock.calls.at(-1)?.[0] as Segment[]
     expect(segmentsToPlainText(last)).toBe('short text')
     expect(editor.textContent).toBe('short text')
+  })
+
+  it('keeps the caret where the edit happened when truncating past the cap', () => {
+    const { editor } = renderWithCap(5)
+    act(() => {
+      editor.textContent = 'helloX' // one past the cap
+      placeCursor(editor, 3) // caret mid-text, not at the end
+      fireEvent.input(editor)
+    })
+    // Truncated back to 5; the caret stays at 3 (clamped to the cap) instead of
+    // being forced to the end.
+    expect(getCursorOffset(editor)).toBe(3)
   })
 })

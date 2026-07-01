@@ -248,10 +248,15 @@ export type PromptAreaProps = {
   /** Maximum height in pixels */
   maxHeight?: number
   /**
-   * Maximum number of plain-text characters allowed. Typed input past the cap
-   * is truncated back to this length (like a native `<textarea maxLength>`).
-   * Chips count as their `trigger + displayText` length. To cap pasted text,
-   * handle it via `onRawPaste`.
+   * Maximum number of plain-text characters allowed, enforced on typed input:
+   * once the editor exceeds the cap it is truncated back to this length, with
+   * the caret kept where the edit happened. Chips count as their
+   * `trigger + displayText` length.
+   *
+   * The cap applies to typing only. Paste is not capped — divert it via
+   * `onRawPaste` if needed — and the imperative `setText` / `appendText` also
+   * bypass it, so a programmatic write can exceed the cap until the next
+   * keystroke truncates.
    */
   maxLength?: number
   /** Auto-focus on mount */
@@ -324,9 +329,15 @@ export type PromptAreaHandle = {
   getPlainText: () => string
   /** Clear all content */
   clear: () => void
-  /** Replace all content with plain text (chips dropped), caret moved to the end. */
+  /**
+   * Replace all content with plain text (chips dropped), caret moved to the
+   * end. Not capped by `maxLength` (see its docs); undoable.
+   */
   setText: (text: string) => void
-  /** Append plain text at the end (existing chips preserved), caret moved to the end. */
+  /**
+   * Append plain text at the end (existing chips preserved), caret moved to the
+   * end. Not capped by `maxLength` (see its docs); undoable.
+   */
   appendText: (text: string) => void
   /** Caret offset in plain-text characters, or null when unavailable. */
   getCursorPosition: () => number | null

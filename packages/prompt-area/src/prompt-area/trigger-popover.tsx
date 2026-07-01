@@ -16,6 +16,10 @@ type TriggerPopoverProps = {
   triggerChar: string
 }
 
+// Single source of truth for the popover height: drives both the flip-above
+// calculation and the maxHeight style.
+const POPOVER_MAX_HEIGHT = 240
+
 /**
  * Floating popover that displays trigger suggestions.
  * Positioned relative to the trigger character location in the editor.
@@ -58,15 +62,15 @@ export function TriggerPopover({
   // viewport. Flip above the trigger when there isn't enough room below, so the
   // suggestion list stays on-screen near the bottom edge.
   const popoverMaxWidth = Math.min(320, window.innerWidth - 16)
-  const popoverMaxHeight = 240 // matches max-h-[240px] below
   const left = Math.min(triggerRect.left, window.innerWidth - popoverMaxWidth - 8)
   const spaceBelow = window.innerHeight - triggerRect.bottom
-  const positionAbove = spaceBelow < popoverMaxHeight && triggerRect.top > spaceBelow
+  const positionAbove = spaceBelow < POPOVER_MAX_HEIGHT && triggerRect.top > spaceBelow
   const style: React.CSSProperties = {
     position: 'fixed',
     left: `${Math.max(8, left)}px`,
     zIndex: 50,
     maxWidth: `${popoverMaxWidth}px`,
+    maxHeight: `${POPOVER_MAX_HEIGHT}px`,
     ...(positionAbove
       ? { bottom: `${window.innerHeight - triggerRect.top + 4}px` }
       : { top: `${triggerRect.bottom + 4}px` }),
@@ -76,7 +80,7 @@ export function TriggerPopover({
     <div
       ref={popoverRef}
       className={cn(
-        'max-h-[240px] min-w-[200px] overflow-y-auto',
+        'min-w-[200px] overflow-y-auto',
         'bg-popover rounded-xl border p-2 shadow-md',
         'animate-in fade-in-0 zoom-in-95',
       )}

@@ -145,6 +145,17 @@ describe('PromptArea imperative handle', () => {
 
       expect(handle.getCursorPosition()).toBe('abcdef'.length)
     })
+
+    it('merges into the trailing text segment instead of adding a second one', () => {
+      const { handle, onChangeSpy } = renderHarness([{ type: 'text', text: 'hello' }])
+
+      act(() => {
+        handle.appendText(' world')
+      })
+
+      const lastSegments = onChangeSpy.mock.calls.at(-1)![0] as Segment[]
+      expect(lastSegments).toEqual([{ type: 'text', text: 'hello world' }])
+    })
   })
 
   describe('setCursorToEnd', () => {

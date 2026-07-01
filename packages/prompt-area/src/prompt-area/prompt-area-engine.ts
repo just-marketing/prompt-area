@@ -49,8 +49,14 @@ export function truncateSegmentsToLength(segments: Segment[], maxLength: number)
       continue
     }
     if (seg.type === 'text') {
-      const remaining = maxLength - length
-      if (remaining > 0) result.push({ type: 'text', text: seg.text.slice(0, remaining) })
+      let remaining = maxLength - length
+      if (remaining > 0) {
+        // Don't split a surrogate pair: if the cut lands right after a high
+        // surrogate, drop the incomplete code point instead of a lone surrogate.
+        const code = seg.text.charCodeAt(remaining - 1)
+        if (code >= 0xd800 && code <= 0xdbff) remaining -= 1
+        if (remaining > 0) result.push({ type: 'text', text: seg.text.slice(0, remaining) })
+      }
     }
     break
   }

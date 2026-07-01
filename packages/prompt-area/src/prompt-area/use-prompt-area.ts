@@ -454,13 +454,15 @@ export function usePromptArea({
     const segments = readSegmentsFromDOM()
 
     // Enforce maxLength: if the edit pushed the editor past the cap, truncate
-    // back to maxLength characters, re-render, and put the caret at the cap.
+    // back to maxLength characters and keep the caret where the user was
+    // editing (clamped to the cap) rather than forcing it to the end.
     if (maxLength != null && editor && segmentsToPlainText(segments).length > maxLength) {
+      const caret = getCursorOffset(editor)
       const truncated = truncateSegmentsToLength(segments, maxLength)
       lastRenderedValue.current = truncated
       onChange(truncated)
       renderSegmentsToDOM(truncated)
-      setCursorAtOffset(editor, maxLength)
+      setCursorAtOffset(editor, caret != null ? Math.min(caret, maxLength) : maxLength)
       runTriggerDetection()
       return
     }
@@ -1122,6 +1124,7 @@ export function usePromptArea({
         undoBaseState.current = null
       },
       setText: (text) => {
+        events.pushUndo(readSegmentsFromDOM())
         const segments = plainTextToSegments(text)
         onChange(segments)
         renderSegmentsToDOM(segments)
@@ -1130,7 +1133,14 @@ export function usePromptArea({
       },
       appendText: (text) => {
         const segments = readSegmentsFromDOM()
-        const next: Segment[] = [...segments, { type: 'text', text }]
+        events.pushUndo(segments)
+        // Merge into the trailing text segment so the onChange value doesn't
+        // carry two adjacent un-merged text segments.
+        const last = segments[segments.length - 1]
+        const next: Segment[] =
+          last?.type === 'text'
+            ? [...segments.slice(0, -1), { type: 'text', text: last.text + text }]
+            : [...segments, { type: 'text', text }]
         onChange(next)
         renderSegmentsToDOM(next)
         const editor = editorRef.current

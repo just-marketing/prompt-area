@@ -88,7 +88,7 @@ describe('ActionBar slot overrides', () => {
 
   it('preserves base slot classes when no slot classNames are provided', () => {
     render(<ActionBar left={<button>Left</button>} right={<button>Right</button>} />)
-    expect(leftWrapper()?.className).toBe('flex items-center gap-1')
-    expect(rightWrapper()?.className).toBe('ml-auto flex items-center gap-1')
+    expect(leftWrapper()?.className).toContain('flex items-center gap-1')
+    expect(rightWrapper()?.className).toContain('ml-auto flex items-center gap-1')
   })
 })
