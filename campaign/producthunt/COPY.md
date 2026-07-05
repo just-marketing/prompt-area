@@ -32,9 +32,15 @@ Alternatives by formula (pick what fits the audience you most want to win):
 
 > Avoid jargon; a non-React reader should still grasp it. Lead with the benefit, not the feature.
 
-### Description (≤ 260 chars)
+### Description (≤ 500 chars — PH raised the limit; audited on the live form 2026-07-05)
 
-**USE THIS** — _PAS (Problem → Agitate → Solution)_, the highest-converting framework (251 chars):
+**USE THIS** — expanded PAS with proof points, uses the full field (481 chars):
+
+```
+Every AI chat box needs @mentions, /commands, #tags, markdown and file uploads. The usual way? Stitch five libraries. Prompt Area is all of it in one dependency-light React component (~37 kB, no ProseMirror, Slate or Lexical). Install from npm (ships its own CSS, no Tailwind required) or copy the source in via the shadcn registry and own every line. Production-grade: undo/redo, IME, ARIA a11y, dark mode. MIT licensed, free forever. Try it live in your browser, no setup needed.
+```
+
+Shorter fallback — _PAS (Problem → Agitate → Solution)_ (251 chars):
 
 ```
 Every AI chat box needs @mentions, /commands, #tags, markdown and file uploads. The usual way? Stitch five libraries. Prompt Area is all of it in one React component — install from npm or copy it in via shadcn. Zero heavy deps, no Tailwind required.

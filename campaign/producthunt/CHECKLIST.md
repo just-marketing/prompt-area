@@ -14,30 +14,32 @@ Tick these off in order. Details live in [`LAUNCH-PLAN.md`](./LAUNCH-PLAN.md) an
 - [ ] `prompt-area.com` loads fast and looks great on mobile
 - [ ] **npm path:** `npm install prompt-area` + `import 'prompt-area/styles.css'` works in a **fresh Vite** app (no Tailwind)
 - [ ] **shadcn path:** `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` works in a **fresh Next** project
-- [ ] **Live demo:** `prompt-area.com/docs/try-it-live` loads & runs (pinned version matches latest npm — currently `0.3.2`)
+- [ ] **Live demo:** `prompt-area.com/docs/try-it-live` loads & runs (pinned version matches latest npm — currently `0.5.0`)
 - [ ] GitHub repo public, README polished, MIT license visible
 - [ ] A couple of "good first issue" labels for inbound contributors
 - [ ] `llms.txt` / `llms-full.txt` current (great for the AI-agent install path)
 
 ## Assets (T‑10 → T‑5) — all in [`assets/`](./assets)
 
-- [ ] Thumbnail uploaded (`thumbnail-240.png`)
-- [ ] Gallery images 01–08 uploaded in order
-- [ ] First gallery image = hero with value prop overlay ✅
-- [ ] (Optional, recommended) `demo.gif` recorded (5–8s, <3MB, good first frame)
-- [ ] Captions set under each gallery image (from `COPY.md §3`)
+- [x] Thumbnail uploaded (logo mark; PH limit is **2MB**, ours is 11KB) ✅ 2026-07-05
+- [x] Gallery images uploaded (9 slides: new hero + the 8 story slides) ✅ 2026-07-05
+- [x] First gallery image = hero with value prop overlay ✅
+- [ ] Verify the **animated GIF** slide is in the gallery and sits at position #2 (motion early)
+- [ ] Captions under gallery images — the new PH form may not expose caption fields; check in-form (`COPY.md §3` has the copy if it does)
 
-## PH post draft (T‑5 → T‑1)
+## PH post draft (T‑5 → T‑1) — draft exists, audited 2026-07-05
 
-- [ ] Name: `Prompt Area`
-- [ ] Tagline (from `COPY.md §1`)
-- [ ] Description ≤ 260 chars (from `COPY.md §1`)
-- [ ] Topics (3) selected
-- [ ] Links: site, GitHub, **interactive demo** (`/docs/try-it-live`), npm, X
-- [ ] Pricing: Free / Open Source
-- [ ] Makers all added
-- [ ] First comment drafted & ready to paste (`COPY.md §2`)
-- [ ] Post **scheduled for 12:01 AM PST** on launch day
+- [x] Name: `Prompt Area` ✅
+- [x] Tagline set — ⚠️ says "A production-grade rich text input for AI chat interfaces"; COPY.md §1 recommends "The open-source textarea built for AI chat UIs" (open-source signal). Pick one.
+- [ ] Description — currently 193 chars; PH limit is now **500 chars** (not 260). Use the expanded version in `COPY.md §1`.
+- [ ] Launch tags (3) — only 2 set (Artificial Intelligence, User Experience); add **Developer Tools** / **Open Source** per COPY.md priority
+- [ ] Links: site ✅, GitHub ✅ — still add **npm** link; put `/docs/try-it-live` in the **Interactive demo** field (accepts any URL)
+- [x] Pricing: Free ✅ (open-source checkbox ticked)
+- [ ] Makers — only @ilko_kacharov added; add other contributors (they need PH accounts first)
+- [ ] Shoutouts — 1/3 (shadcn/ui); add 2 more (ideas: Claude Code, Next.js/Vercel, Remotion)
+- [ ] First comment — **empty in form**; paste from `COPY.md §2`
+- [ ] Video — field empty; accepts **YouTube or Loom**; upload `prompt-area-typing-demo.mp4` and link it
+- [ ] Post **scheduled for 12:01 AM PST** on launch day (form still "In progress" — scheduling creates the upcoming page that collects followers)
 
 ## Audience warm-up (T‑10 → T‑1)
 

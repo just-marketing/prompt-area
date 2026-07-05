@@ -33,7 +33,7 @@
 - You own the source on the shadcn path — it lives in your repo, fully editable.
 - Companion components included: Action Bar, Status Bar, Compact, Chat Layout.
 - Production-grade: undo/redo, IME (CJK), ARIA a11y, copy/paste chip preservation.
-- MIT licensed, built by Juma (formerly Team-GPT). Current release: **v0.3.2**.
+- MIT licensed, built by Juma (formerly Team-GPT). Current release: **v0.5.0**.
 
 ---
 
@@ -81,7 +81,7 @@ Secondary metrics that matter more than rank: **GitHub stars, npm downloads (`np
 
 - Lock the launch date; create the PH post as a **draft/scheduled** so the "upcoming" page collects followers.
 - Finalize all copy from [`COPY.md`](./COPY.md) and all images in [`assets/`](./assets).
-- Make sure `https://prompt-area.com` and **both install paths** work flawlessly (the #1 thing visitors will try): `npm install prompt-area` + `import 'prompt-area/styles.css'` in a fresh Vite app, **and** `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` in a fresh Next app. Also smoke-test the in-browser demo at `prompt-area.com/docs/try-it-live` (it pins `prompt-area@0.3.2` — keep the version current).
+- Make sure `https://prompt-area.com` and **both install paths** work flawlessly (the #1 thing visitors will try): `npm install prompt-area` + `import 'prompt-area/styles.css'` in a fresh Vite app, **and** `npx shadcn@latest add https://prompt-area.com/r/prompt-area.json` in a fresh Next app. Also smoke-test the in-browser demo at `prompt-area.com/docs/try-it-live` (it pins `prompt-area@0.5.0` — keep the version current).
 - Confirm GitHub repo is public, README polished, issues templates ready, a "good first issue" or two labeled.
 
 **T‑10 to T‑5 — Audience warm-up**
@@ -136,21 +136,21 @@ Secondary metrics that matter more than rank: **GitHub stars, npm downloads (`np
 
 ## 7. Assets checklist (all in [`assets/`](./assets))
 
-| Asset                               | File                                     | Spec                   | Status                                                         |
-| ----------------------------------- | ---------------------------------------- | ---------------------- | -------------------------------------------------------------- |
-| Thumbnail (square)                  | `thumbnail-240.png`, `thumbnail-600.png` | 240×240 min, <3MB      | ✅                                                             |
-| Gallery 1 — Hero (value prop)       | `gallery-01-hero.png`                    | 1280×720 (16:9)        | ✅                                                             |
-| **Gallery 2 — Live demo (motion!)** | `gallery-02-demo.gif`                    | 1200×675, 0.2MB (<3MB) | ✅ animated — chips + markdown resolving as you type           |
-| Gallery 3 — Inline markdown         | `gallery-03-markdown.png`                | 1280×720               | ✅                                                             |
-| Gallery 4 — Files & images          | `gallery-04-attachments.png`             | 1280×720               | ✅                                                             |
-| Gallery 5 — Drop-in replicas        | `gallery-05-drop-in-replicas.png`        | 1280×720               | ✅                                                             |
-| Gallery 6 — Install (npm + shadcn)  | `gallery-06-install-zero-deps.png`       | 1280×720               | ✅ shows both install paths + 0/1/MIT stat cards               |
-| Gallery 7 — One component vs five   | `gallery-07-one-component.png`           | 1280×720               | ✅                                                             |
-| Gallery 8 — Dark mode & a11y        | `gallery-08-dark-mode-a11y.png`          | 1280×720               | ✅                                                             |
-| **Typing demo video (primary)**     | `prompt-area-typing-demo.mp4`            | 1280×720, ~6.5s        | ✅ upload to YouTube for PH video field — focused product demo |
-| Slideshow video                     | `prompt-area-demo.mp4`                   | 1280×720, ~17s         | ✅ social teaser (all slides)                                  |
-| Looping GIF (social)                | `prompt-area-demo.gif`                   | 960px, ~4.6MB          | ✅                                                             |
-| Looping GIF (slideshow, <3MB)       | `prompt-area-demo-compact.gif`           | 720px, ~2MB            | ✅                                                             |
+| Asset                               | File                                     | Spec                                  | Status                                                                 |
+| ----------------------------------- | ---------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| Thumbnail (square)                  | `thumbnail-240.png`, `thumbnail-600.png` | 240×240 min, **<2MB** (PH form limit) | ✅                                                                     |
+| Gallery 1 — Hero (value prop)       | `gallery-01-hero.png`                    | 1280×720 (16:9)                       | ✅                                                                     |
+| **Gallery 2 — Live demo (motion!)** | `gallery-02-demo.gif`                    | 1200×675, 0.2MB (<3MB)                | ✅ animated — chips + markdown resolving as you type                   |
+| Gallery 3 — Inline markdown         | `gallery-03-markdown.png`                | 1280×720                              | ✅                                                                     |
+| Gallery 4 — Files & images          | `gallery-04-attachments.png`             | 1280×720                              | ✅                                                                     |
+| Gallery 5 — Drop-in replicas        | `gallery-05-drop-in-replicas.png`        | 1280×720                              | ✅                                                                     |
+| Gallery 6 — Install (npm + shadcn)  | `gallery-06-install-zero-deps.png`       | 1280×720                              | ✅ shows both install paths + 0/1/MIT stat cards                       |
+| Gallery 7 — One component vs five   | `gallery-07-one-component.png`           | 1280×720                              | ✅                                                                     |
+| Gallery 8 — Dark mode & a11y        | `gallery-08-dark-mode-a11y.png`          | 1280×720                              | ✅                                                                     |
+| **Typing demo video (primary)**     | `prompt-area-typing-demo.mp4`            | 1280×720, ~6.5s                       | ✅ upload to **YouTube or Loom** (PH accepts both) for the video field |
+| Slideshow video                     | `prompt-area-demo.mp4`                   | 1280×720, ~17s                        | ✅ social teaser (all slides)                                          |
+| Looping GIF (social)                | `prompt-area-demo.gif`                   | 960px, ~4.6MB                         | ✅                                                                     |
+| Looping GIF (slideshow, <3MB)       | `prompt-area-demo-compact.gif`           | 720px, ~2MB                           | ✅                                                                     |
 
 **Gallery notes (PH best practice):**
 
