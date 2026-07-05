@@ -95,16 +95,14 @@ preview**. Fixed and verified locally (2026-07-05): the Sandpack setup and
 `examples/basic` now list `clsx@2.1.1` + `tailwind-merge@3.6.0` explicitly, and
 the demo renders correctly with 0.5.0.
 
-**Open launch decision:** npm ≥7, pnpm ≥8 and bun auto-install peers, but
-**yarn does not** — `yarn add prompt-area` on 0.5.0 yields a broken install
-unless users also add clsx + tailwind-merge. The installation docs
-(`app/docs/installation/page.tsx`) and README still say `yarn add prompt-area`
-works as-is. Before launch either:
-
-1. document the two peers in README + installation docs (and mention them in
-   the PH FAQ answer about being dependency-light), or
-2. ship a `0.5.1` that returns clsx/tailwind-merge to regular `dependencies`
-   (safest for the "it just works" story; the packed size impact is tiny).
+**Resolved (2026-07-05): keep the peers, no 0.5.1.** The move was deliberate
+(commit `4c3ba2e`: tailwind-merge is ~17 KB gz — bigger than the package — and
+dedupes with consumers' copies; size-limit CI guard added; documented as
+breaking in the package CHANGELOG/README). npm ≥7, pnpm ≥8 and bun auto-install
+peers; only yarn and in-browser sandboxes need them explicit. Docs gap closed
+instead: installation page + root README now note the peers and give
+`yarn add prompt-area clsx tailwind-merge`; the COPY.md §10 dependency FAQ was
+updated to match.
 
 ## PH guide deltas (form/guide read 2026-07-05)
 

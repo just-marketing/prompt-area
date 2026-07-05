@@ -88,6 +88,17 @@ import 'prompt-area/styles.css'`}
         </code>{' '}
         instead for token-level theming.
       </DocsP>
+      <DocsP>
+        The package bundles zero runtime dependencies:{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">clsx</code> and{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">tailwind-merge</code> are
+        peer dependencies so they dedupe with the copies most projects already have. npm, pnpm and
+        bun install them automatically; with yarn (or if your setup skips peers), add them yourself:{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+          yarn add prompt-area clsx tailwind-merge
+        </code>
+        .
+      </DocsP>
 
       <DocsH2 id="prerequisites">Prerequisites for the shadcn registry</DocsH2>
       <DocsP>

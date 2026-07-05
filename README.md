@@ -28,7 +28,7 @@ import { PromptArea } from 'prompt-area'
 import 'prompt-area/styles.css'
 ```
 
-The package ships a prebuilt, self-contained `styles.css` (no Tailwind required) plus an optional `prompt-area/tailwind.css` preset for token-level theming. See [`packages/prompt-area/README.md`](packages/prompt-area/README.md) for the full guide.
+The package ships a prebuilt, self-contained `styles.css` (no Tailwind required) plus an optional `prompt-area/tailwind.css` preset for token-level theming. `clsx` and `tailwind-merge` are peer dependencies (zero bundled runtime deps) — npm/pnpm/bun install them automatically; on yarn run `yarn add prompt-area clsx tailwind-merge`. See [`packages/prompt-area/README.md`](packages/prompt-area/README.md) for the full guide.
 
 ### shadcn registry
 

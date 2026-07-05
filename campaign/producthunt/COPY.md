@@ -357,7 +357,7 @@ Feedback very welcome 🙏 [PH link] · live demo: prompt-area.com/docs/try-it-l
 
 **"Is it really dependency-light?"**
 
-> Yes — no ProseMirror/Slate/Lexical and ~37 kB packed. The shadcn path adds zero runtime deps to your bundle (it's just source); the npm path is a single small package.
+> Yes — no ProseMirror/Slate/Lexical, zero bundled runtime deps, ~37 kB packed (CI-guarded with size-limit). The only peers besides React are clsx + tailwind-merge, which dedupe with the copies most projects already ship (npm/pnpm/bun install them automatically). The shadcn path is just source in your repo.
 
 **"Can I style the chips / add my own triggers?"**
 
