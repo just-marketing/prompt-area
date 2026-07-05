@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 // We override the Sandpack vite-react-ts template's `index.html` so Vite uses
 // the example's own `/src/main.tsx` entry (the template otherwise boots its own
 // root-level `/App.tsx`).
-const PROMPT_AREA_VERSION = '0.3.2'
+const PROMPT_AREA_VERSION = '0.5.0'
 // Sandpack's in-browser bundler doesn't reliably process the `prompt-area/styles.css`
 // import (it resolves through the package `exports` map), so we also load the
 // published stylesheet via a <link>. `examples/basic` itself keeps the canonical
@@ -60,7 +60,16 @@ export default function TryItLivePage() {
         Edit <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">src/App.tsx</code> and
         the preview updates live. The first run installs dependencies, so give it a few seconds.
       </DocsP>
-      <LiveExample files={exampleFiles} dependencies={{ 'prompt-area': PROMPT_AREA_VERSION }} />
+      {/* clsx + tailwind-merge are peerDependencies since 0.5.0 — Sandpack does
+          not auto-install peers, so they must be listed explicitly. */}
+      <LiveExample
+        files={exampleFiles}
+        dependencies={{
+          'prompt-area': PROMPT_AREA_VERSION,
+          clsx: '2.1.1',
+          'tailwind-merge': '3.6.0',
+        }}
+      />
 
       <DocsP>
         This is the real{' '}
