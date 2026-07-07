@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Plus,
   Hand,
@@ -159,44 +159,11 @@ export function CodexInputExample({
   triggers?: TriggerConfig[]
   markdown?: boolean
   minHeight?: number
-  /**
-   * Called when a chip in the composer is clicked. `replaceChip` swaps the
-   * clicked chip (matched by trigger + value) for another one in place, so
-   * hosts can build pickers on top of chip clicks without owning the
-   * segment state.
-   */
-  onChipClick?: (
-    chip: ChipSegment,
-    actions: { replaceChip: (next: Omit<ChipSegment, 'type'>) => void },
-  ) => void
+  /** Forwarded to PromptArea — fires when a chip in the composer is clicked. */
+  onChipClick?: (chip: ChipSegment) => void
 } = {}) {
   const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
     useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles })
-
-  const handleChipClick = useCallback(
-    (chip: ChipSegment) => {
-      if (!onChipClick) return
-      onChipClick(chip, {
-        replaceChip: (next) =>
-          setSegments((prev) => {
-            let replaced = false
-            return prev.map((seg) => {
-              if (
-                !replaced &&
-                seg.type === 'chip' &&
-                seg.trigger === chip.trigger &&
-                seg.value === chip.value
-              ) {
-                replaced = true
-                return { ...next, type: 'chip' as const }
-              }
-              return seg
-            })
-          }),
-      })
-    },
-    [onChipClick, setSegments],
-  )
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
   const [model, setModel] = useState<Model>(MODELS[0])
@@ -244,7 +211,7 @@ export function CodexInputExample({
               triggers={triggers}
               placeholder="Do anything"
               onSubmit={submit}
-              onChipClick={onChipClick ? handleChipClick : undefined}
+              onChipClick={onChipClick}
               markdown={markdown}
               autoGrow
               minHeight={minHeight}

@@ -117,6 +117,14 @@ export type TriggerConfig = {
    */
   resolveOnSpace?: boolean
   /**
+   * For 'dropdown' mode: when true, clicking a chip created by this trigger
+   * reopens the suggestion dropdown anchored to the chip, and selecting a
+   * suggestion replaces the chip in place. The empty-query suggestions are
+   * shown with the chip's current value preselected. `onChipClick` still
+   * fires, so side effects (analytics, etc.) keep working.
+   */
+  reopenOnChipClick?: boolean
+  /**
    * Visual style for chips created by this trigger.
    * - 'pill' (default): Button-like pill with background, padding, border-radius
    * - 'inline': Bold inline text without pill styling

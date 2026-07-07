@@ -143,6 +143,11 @@ export function usePromptArea({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
 
+  // Chip whose dropdown was reopened via `reopenOnChipClick`. While set, the
+  // active dropdown edits this chip in place instead of resolving typed text.
+  // Cleared on dismiss and by any fresh trigger detection (typing).
+  const editingChip = useRef<{ node: HTMLElement; chip: ChipSegment } | null>(null)
+
   const {
     suggestions,
     suggestionsLoading,
@@ -316,6 +321,10 @@ export function usePromptArea({
 
     const detected = detectActiveTrigger(plainText, cursorPos, triggers)
 
+    // Typing supersedes a chip-click dropdown: whichever branch we take next,
+    // the popover no longer edits the clicked chip.
+    editingChip.current = null
+
     if (detected) {
       setActiveTrigger(detected)
       setSelectedSuggestionIndex(0)
@@ -357,6 +366,7 @@ export function usePromptArea({
   // -----------------------------------------------------------------------
 
   const dismissTrigger = useCallback(() => {
+    editingChip.current = null
     setActiveTrigger(null)
     setSelectedSuggestionIndex(0)
     resetSearch()
@@ -560,15 +570,26 @@ export function usePromptArea({
           node.appendChild(ripple)
           ripple.addEventListener('animationend', () => ripple.remove())
 
-          if (!onChipClick) return
           const chip = chipNodeToSegment(node)
-          if (chip) onChipClick(chip)
+          if (chip) {
+            // Native chip-click dropdown: reopen this trigger's suggestions
+            // anchored to the chip so the selection can replace it in place.
+            const config = triggers.find((t) => t.char === chip.trigger)
+            if (config?.reopenOnChipClick && config.mode === 'dropdown' && config.onSearch) {
+              editingChip.current = { node, chip }
+              setActiveTrigger({ config, startOffset: 0, query: '' })
+              setSelectedSuggestionIndex(0)
+              setTriggerRect(rect)
+              runSearch('', config)
+            }
+            onChipClick?.(chip)
+          }
           return
         }
         node = node.parentNode
       }
     },
-    [onChipClick, onLinkClick],
+    [onChipClick, onLinkClick, triggers, runSearch],
   )
 
   // -----------------------------------------------------------------------
@@ -788,6 +809,45 @@ export function usePromptArea({
         displayText: displayText || suggestion.label,
         data: suggestion.data,
       }
+
+      // Chip-click dropdown (`reopenOnChipClick`): replace the clicked chip in
+      // place instead of resolving typed trigger text at the caret.
+      const editing = editingChip.current
+      if (editing) {
+        const editor = editorRef.current
+        const chipIdx = editor ? indexOfChildNode(editor, editing.node) : -1
+        if (editor && chipIdx !== -1) {
+          const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
+          const oldChip = segments[segIdx]
+          const newChip: ChipSegment = {
+            type: 'chip',
+            trigger: activeTrigger.config.char,
+            ...chipData,
+          }
+          const newSegments = segments.map((seg, i) => (i === segIdx ? newChip : seg))
+          onChange(newSegments)
+          renderSegmentsToDOM(newSegments)
+
+          if (oldChip?.type === 'chip') onChipDelete?.(oldChip)
+          onChipAdd?.(newChip)
+
+          // Place the caret right after the replaced chip
+          let caretOffset = 0
+          for (let i = 0; i <= segIdx; i++) {
+            const seg = newSegments[i]
+            caretOffset +=
+              seg.type === 'text' ? seg.text.length : seg.trigger.length + seg.displayText.length
+          }
+          setCursorAtOffset(editor, caretOffset)
+        }
+
+        dismissTrigger()
+        setTimeout(() => {
+          editorRef.current?.focus()
+        }, 0)
+        return
+      }
+
       const result = resolveChip(segments, activeTrigger, chipData)
 
       onChange(result.segments)
@@ -812,10 +872,27 @@ export function usePromptArea({
         editorRef.current?.focus()
       }, 0)
     },
-    [activeTrigger, readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
+    [
+      activeTrigger,
+      readSegmentsFromDOM,
+      onChange,
+      renderSegmentsToDOM,
+      dismissTrigger,
+      onChipAdd,
+      onChipDelete,
+    ],
   )
 
   const selectSuggestion = selectSuggestionInternal
+
+  // Chip-click dropdown: once the empty-query suggestions arrive, preselect
+  // the chip's current value so the list opens "on" the existing choice.
+  useEffect(() => {
+    const editing = editingChip.current
+    if (!editing || !activeTrigger?.config.reopenOnChipClick) return
+    const idx = suggestions.findIndex((s) => s.value === editing.chip.value)
+    if (idx > 0) setSelectedSuggestionIndex(idx)
+  }, [suggestions, activeTrigger])
 
   // -----------------------------------------------------------------------
   // Handle key events

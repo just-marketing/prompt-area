@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight, Check, Loader2, Sparkles, X } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Loader2, Sparkles, X } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
 import { track } from '@/lib/analytics'
@@ -60,6 +60,9 @@ const HERO_TRIGGERS: TriggerConfig[] = [
     position: 'any',
     mode: 'dropdown',
     resolveOnSpace: true,
+    // Clicking a #tag chip reopens the native tag dropdown anchored to the
+    // chip; picking a suggestion swaps the chip in place.
+    reopenOnChipClick: true,
     chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
     accessibilityLabel: 'tag',
     onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
@@ -75,8 +78,6 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
-const TAG_MENU_WIDTH = 256
-
 export default function HomeContent() {
   // Fire `demo_interacted` once, the first time the visitor focuses or types in
   // the live hero composer — our best signal that they actually tried the
@@ -89,57 +90,29 @@ export default function HomeContent() {
   }, [])
 
   // Every chip in the hero composer does something when clicked, so visitors
-  // learn the chips are live objects, not styled text: #tags reopen the tag
-  // list (picking one swaps the chip), @mentions pop a "notified" toast, and
-  // /commands run a mock execution with a result card.
-  const demoRef = useRef<HTMLDivElement>(null)
-  const [tagMenu, setTagMenu] = useState<{
-    chip: ChipSegment
-    top: number
-    left: number
-    replaceChip: (next: Omit<ChipSegment, 'type'>) => void
-  } | null>(null)
+  // learn the chips are live objects, not styled text: #tags reopen the native
+  // tag dropdown (via `reopenOnChipClick` on the trigger — picking one swaps
+  // the chip in place), @mentions pop a "notified" toast, and /commands run a
+  // mock execution with a result card.
   const [toast, setToast] = useState<{ title: string; description?: string } | null>(null)
   const [command, setCommand] = useState<{
     chip: ChipSegment
     status: 'running' | 'done'
   } | null>(null)
 
-  const handleChipClick = useCallback(
-    (chip: ChipSegment, actions: { replaceChip: (next: Omit<ChipSegment, 'type'>) => void }) => {
-      track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
+  const handleChipClick = useCallback((chip: ChipSegment) => {
+    track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
 
-      if (chip.trigger === '#') {
-        // Anchor the tag list right under the clicked chip, clamped so it
-        // never overflows the demo column on narrow screens.
-        const root = demoRef.current
-        const el = root?.querySelector<HTMLElement>(
-          `[data-chip-trigger="#"][data-chip-value="${CSS.escape(chip.value)}"]`,
-        )
-        if (!root || !el) return
-        const chipRect = el.getBoundingClientRect()
-        const rootRect = root.getBoundingClientRect()
-        setTagMenu({
-          chip,
-          top: chipRect.bottom - rootRect.top + 6,
-          left: Math.max(
-            0,
-            Math.min(chipRect.left - rootRect.left, rootRect.width - TAG_MENU_WIDTH),
-          ),
-          replaceChip: actions.replaceChip,
-        })
-      } else if (chip.trigger === '@') {
-        const user = USERS.find((u) => u.value === chip.value)
-        setToast({
-          title: `${chip.displayText} notified`,
-          description: user ? `${user.description} — looped in on this prompt.` : undefined,
-        })
-      } else if (chip.trigger === '/') {
-        setCommand({ chip, status: 'running' })
-      }
-    },
-    [],
-  )
+    if (chip.trigger === '@') {
+      const user = USERS.find((u) => u.value === chip.value)
+      setToast({
+        title: `${chip.displayText} notified`,
+        description: user ? `${user.description} — looped in on this prompt.` : undefined,
+      })
+    } else if (chip.trigger === '/') {
+      setCommand({ chip, status: 'running' })
+    }
+  }, [])
 
   // Auto-dismiss the mention toast.
   useEffect(() => {
@@ -157,24 +130,6 @@ export default function HomeContent() {
     )
     return () => clearTimeout(timer)
   }, [command])
-
-  // Close the tag list on outside click or Escape, like a real dropdown.
-  useEffect(() => {
-    if (!tagMenu) return
-    const onDown = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('[data-hero-tag-menu]')) setTagMenu(null)
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setTagMenu(null)
-    }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [tagMenu])
 
   return (
     <div className="flex flex-col">
@@ -226,8 +181,7 @@ export default function HomeContent() {
               transformed ancestor. */}
           <div
             id="demo"
-            ref={demoRef}
-            className="relative w-full min-w-0 scroll-mt-20"
+            className="w-full min-w-0 scroll-mt-20"
             onFocusCapture={handleDemoInteract}
             onInputCapture={handleDemoInteract}>
             <Reveal lift={false} delay={0.15} trigger="mount">
@@ -301,51 +255,6 @@ export default function HomeContent() {
                 </div>
               )}
             </Reveal>
-
-            {/* Tag picker — clicking a #tag chip reopens the tag list; picking
-                one swaps the chip in place. */}
-            {tagMenu && (
-              <div
-                data-hero-tag-menu
-                role="menu"
-                aria-label="Swap tag"
-                style={{ top: tagMenu.top, left: tagMenu.left, width: TAG_MENU_WIDTH }}
-                className="bg-popover animate-in fade-in zoom-in-95 absolute z-30 flex flex-col rounded-xl border p-1 shadow-md duration-150">
-                <div className="text-muted-foreground px-3 py-1.5 text-xs font-medium">
-                  Swap tag
-                </div>
-                {TAGS.map((tag) => {
-                  const active = tag.value === tagMenu.chip.value
-                  return (
-                    <button
-                      key={tag.value}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={active}
-                      onClick={() => {
-                        if (!active) {
-                          tagMenu.replaceChip({
-                            trigger: '#',
-                            value: tag.value,
-                            displayText: tag.label,
-                          })
-                          track('demo_tag_swapped', { location: 'hero', tag: tag.value })
-                        }
-                        setTagMenu(null)
-                      }}
-                      className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm transition-colors">
-                      <span className="font-medium text-green-700 dark:text-green-400">
-                        #{tag.label}
-                      </span>
-                      <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">
-                        {tag.description}
-                      </span>
-                      {active && <Check className="size-3.5 shrink-0" />}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
 
             {/* Mention toast — clicking an @mention chip "notifies" that teammate. */}
             {toast && (

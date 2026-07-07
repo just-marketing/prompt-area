@@ -123,13 +123,6 @@ export type AnalyticsEventMap = {
     /** The chip's resolved value, e.g. 'strategist', 'summarize', 'campaign'. */
     value: string
   }
-  /** A #tag chip was swapped for another tag via the demo's tag picker. */
-  demo_tag_swapped: {
-    /** Which demo, e.g. 'hero'. */
-    location: string
-    /** The tag value that was picked. */
-    tag: string
-  }
   /** A built-in agent style was selected to preview in the styles carousel. */
   style_selected: {
     /** Style id, e.g. 'chatgpt', 'claude-code'. */

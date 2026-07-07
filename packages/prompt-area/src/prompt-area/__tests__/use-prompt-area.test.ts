@@ -1817,6 +1817,138 @@ describe('usePromptArea', () => {
   })
 
   // -------------------------------------------------------------------------
+  // reopenOnChipClick — chip click reopens the dropdown, selection replaces
+  // -------------------------------------------------------------------------
+
+  describe('reopenOnChipClick', () => {
+    function makeReopenTrigger(): TriggerConfig {
+      return {
+        char: '#',
+        position: 'any',
+        mode: 'dropdown',
+        reopenOnChipClick: true,
+        onSearch: vi.fn(() => [
+          { value: 'campaign', label: 'campaign' },
+          { value: 'lead-gen', label: 'lead-gen' },
+        ]),
+      }
+    }
+
+    function clickChip(
+      result: { handleClick: (e: React.MouseEvent<HTMLDivElement>) => void },
+      chip: HTMLElement,
+    ) {
+      const clickEvent = new MouseEvent('click', { bubbles: true })
+      Object.defineProperty(clickEvent, 'target', { value: chip })
+      act(() => {
+        result.handleClick(clickEvent as unknown as React.MouseEvent<HTMLDivElement>)
+      })
+    }
+
+    it('opens the dropdown with the empty-query suggestions on chip click', () => {
+      const trigger = makeReopenTrigger()
+      const onChipClick = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChipClick, triggers: [trigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip, ' now')
+
+      clickChip(result.current, chip)
+
+      expect(result.current.activeTrigger?.config).toBe(trigger)
+      expect(trigger.onSearch).toHaveBeenCalledWith('', expect.anything())
+      // onChipClick still fires for app-level side effects
+      expect(onChipClick).toHaveBeenCalledWith(
+        expect.objectContaining({ trigger: '#', value: 'campaign' }),
+      )
+
+      document.body.removeChild(editor)
+    })
+
+    it('does not open the dropdown when reopenOnChipClick is not set', () => {
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChipClick: vi.fn(), triggers: [hashTrigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip)
+
+      clickChip(result.current, chip)
+
+      expect(result.current.activeTrigger).toBeNull()
+
+      document.body.removeChild(editor)
+    })
+
+    it('replaces the clicked chip in place when a suggestion is selected', () => {
+      const trigger = makeReopenTrigger()
+      const onChange = vi.fn()
+      const onChipAdd = vi.fn()
+      const onChipDelete = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChange, onChipAdd, onChipDelete, triggers: [trigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip, ' now')
+
+      clickChip(result.current, chip)
+
+      act(() => {
+        result.current.selectSuggestion({ value: 'lead-gen', label: 'lead-gen' })
+      })
+
+      expect(onChange).toHaveBeenCalledWith([
+        { type: 'text', text: 'tag ' },
+        expect.objectContaining({ type: 'chip', trigger: '#', value: 'lead-gen' }),
+        { type: 'text', text: ' now' },
+      ])
+      expect(onChipDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ trigger: '#', value: 'campaign' }),
+      )
+      expect(onChipAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ trigger: '#', value: 'lead-gen' }),
+      )
+      expect(result.current.activeTrigger).toBeNull()
+
+      document.body.removeChild(editor)
+    })
+
+    it('dismissTrigger closes the chip dropdown without replacing anything', () => {
+      const trigger = makeReopenTrigger()
+      const onChange = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChange, triggers: [trigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip)
+
+      clickChip(result.current, chip)
+      expect(result.current.activeTrigger).not.toBeNull()
+
+      act(() => {
+        result.current.dismissTrigger()
+      })
+      expect(result.current.activeTrigger).toBeNull()
+
+      // A later selection must not fall back to editing the dismissed chip
+      act(() => {
+        result.current.selectSuggestion({ value: 'lead-gen', label: 'lead-gen' })
+      })
+      expect(onChange).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+  })
+
+  // -------------------------------------------------------------------------
   // Dropdown navigation with active trigger & suggestions
   // -------------------------------------------------------------------------
 
