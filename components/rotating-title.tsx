@@ -49,9 +49,28 @@ export function RotatingTitle({ className }: { className?: string }) {
       }, HOLD_MS)
     }
 
-    schedule()
+    // Rotation starts on the visitor's first interaction, not on load. Every
+    // swap repaints the headline — the page's LCP element — and each repaint
+    // that lands a slightly larger text box registers a NEW, later LCP
+    // candidate, dragging the measured LCP out to whenever the last swap
+    // happened. LCP is finalized at the first input, so gating on interaction
+    // means rotation can never affect it: engaged visitors still get the full
+    // cycle, idle ones keep the strongest headline.
+    const startEvents = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'] as const
+    const start = () => {
+      stopListening()
+      schedule()
+    }
+    const stopListening = () => {
+      for (const ev of startEvents) window.removeEventListener(ev, start)
+      window.removeEventListener('scroll', start)
+    }
+    for (const ev of startEvents) window.addEventListener(ev, start, { passive: true })
+    window.addEventListener('scroll', start, { passive: true })
+
     return () => {
       cancelled = true
+      stopListening()
       clearTimeout(timer)
     }
   }, [])

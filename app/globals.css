@@ -255,19 +255,23 @@
      no-preference media query, so reduced-motion users get static content
      with zero JS involvement. */
   @media (prefers-reduced-motion: no-preference) {
-    @keyframes reveal-in {
+    /* Mount reveals slide only — no fade. An opacity entrance runs on the
+       compositor, so the text is painted once while invisible and Chrome
+       never records it as a contentful paint; the hero headline (the LCP
+       element) would not register until some later repaint. Transform-only
+       keeps the content painted-visible from the first frame, so LCP is
+       recorded at first paint. */
+    @keyframes reveal-in-mount {
       from {
-        opacity: 0;
         transform: translate(var(--reveal-x, 0px), var(--reveal-y, 24px));
       }
       to {
-        opacity: 1;
         transform: translate(0, 0);
       }
     }
 
     [data-reveal='mount'] {
-      animation: reveal-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: reveal-in-mount 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-delay: var(--reveal-delay, 0s);
     }
 

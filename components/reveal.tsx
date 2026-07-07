@@ -18,12 +18,13 @@ import {
  * page moves with a single, calm voice rather than a grab-bag of effects.
  *
  * The animation itself is pure CSS (see the reveal block in `globals.css`):
- * `trigger="mount"` runs a keyframe animation at first paint with **no
- * JavaScript in the critical path** — vital for LCP, since the hero must not
- * wait on hydration to become visible — while `trigger="scroll"` starts hidden
- * and transitions in when the shared IntersectionObserver below stamps
- * `data-revealed`. `prefers-reduced-motion` is handled entirely in CSS, where
- * the reduced render keeps the exact same layout with the entrance dropped.
+ * `trigger="mount"` runs a transform-only keyframe animation at first paint
+ * with **no JavaScript in the critical path** — and no fade, so the hero (the
+ * LCP element) is painted visible from the very first frame — while
+ * `trigger="scroll"` starts hidden and fades/lifts in when the shared
+ * IntersectionObserver below stamps `data-revealed`. `prefers-reduced-motion`
+ * is handled entirely in CSS, where the reduced render keeps the exact same
+ * layout with the entrance dropped.
  */
 
 // Fire once, starting a little before the element is fully on-screen so the
