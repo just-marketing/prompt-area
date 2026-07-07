@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Suspense } from 'react'
 import localFont from 'next/font/local'
 import './globals.css'
 import { AppShell } from '@/components/app-shell'
@@ -111,6 +110,12 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
+        {/* Scroll reveals (components/reveal.tsx) hide content until an
+            IntersectionObserver marks it visible — without JS that never
+            happens, so force everything visible. */}
+        <noscript>
+          <style>{`[data-reveal='scroll']{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -215,12 +220,15 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PostHogProvider>
-          <Suspense>
-            <AppShell>
-              {children}
-              <SiteFooter />
-            </AppShell>
-          </Suspense>
+          {/* No Suspense around the shell: a root-level boundary turns the
+              whole page body into a hidden deferred streaming segment whenever
+              anything inside suspends, which blocks first paint until the full
+              HTML has parsed. Anything that suspends must bring its own local
+              boundary (e.g. the homepage hero demo). */}
+          <AppShell>
+            {children}
+            <SiteFooter />
+          </AppShell>
           <Analytics />
         </PostHogProvider>
       </body>

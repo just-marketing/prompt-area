@@ -1,8 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import {
   ArrowRight,
   ArrowUp,
@@ -216,50 +215,37 @@ function CardFace({ c }: { c: ComponentCard }) {
   )
 }
 
-// One desktop column: an entrance fade plus a gentle, per-column scroll parallax
-// so the row drifts as you scroll rather than sitting flat like a static deck.
-function CascadeColumn({
-  c,
-  index,
-  progress,
-}: {
-  c: ComponentCard
-  index: number
-  progress: MotionValue<number>
-}) {
-  const reduce = useReducedMotion()
+// One desktop column: an entrance fade plus a gentle, per-column scroll drift
+// so the row moves as you scroll rather than sitting flat like a static deck.
+// The drift is a CSS scroll-driven animation (`.cascade-drift` in globals.css)
+// — free of any scroll-listener JS, and a no-op in browsers without scroll
+// timelines or with reduced motion, which just show the static offset shelf.
+function CascadeColumn({ c, index }: { c: ComponentCard; index: number }) {
   // Alternate drift direction and vary the range a touch so columns separate
   // in depth instead of moving as one block.
   const dir = index % 2 === 0 ? 1 : -1
   const range = 22 + (index % 3) * 8
-  const y = useTransform(progress, [0, 1], [dir * range, -dir * range])
 
   return (
-    <motion.div
+    <Reveal
+      lift={false}
+      delay={index * 0.05}
       className="min-w-0 flex-1"
-      style={{ marginTop: OFFSETS[index] ?? 0, ...(reduce ? {} : { y }) }}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: index * 0.05 }}>
-      <CardFace c={c} />
-    </motion.div>
+      style={{ marginTop: OFFSETS[index] ?? 0 }}>
+      <div className="cascade-drift" style={{ '--drift': `${dir * range}px` } as CSSProperties}>
+        <CardFace c={c} />
+      </div>
+    </Reveal>
   )
 }
 
 export function ComponentsCascade() {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
-
   return (
     <>
-      {/* Desktop — staggered, parallaxing shelf of preview cards. */}
-      <div ref={ref} className="hidden items-start gap-4 lg:flex">
+      {/* Desktop — staggered, drifting shelf of preview cards. */}
+      <div className="hidden items-start gap-4 lg:flex">
         {COMPONENTS.map((c, i) => (
-          <CascadeColumn key={c.id} c={c} index={i} progress={scrollYProgress} />
+          <CascadeColumn key={c.id} c={c} index={i} />
         ))}
       </div>
 

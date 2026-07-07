@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -82,6 +82,33 @@ export function StylesCarousel() {
   // moving forward and from the left when moving back.
   const [dir, setDir] = useState(0)
 
+  // The six composers are heavy (each pulls in the full prompt-area component),
+  // so don't mount — or even fetch — any of them until the visitor scrolls
+  // near the section. Keeps their chunks off the critical path and their
+  // markup out of the initial HTML, which matters a lot on mobile.
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const el = viewportRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setReady(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setReady(true)
+          io.disconnect()
+        }
+      },
+      // Start loading well before the section is on screen so the active
+      // composer is usually interactive by the time it's visible.
+      { rootMargin: '600px 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   // Record which style the visitor chose to preview (skipping no-op re-selects),
   // tagged by how they got there — a provider logo tile or the prev/next arrows.
   const trackSelect = (index: number, method: 'logo' | 'arrow') => {
@@ -132,23 +159,24 @@ export function StylesCarousel() {
             remounting these heavy composers on each step reset the page scroll,
             so instead the inactive ones are hidden (display:none keeps their
             menus from being clipped) and the active one animates in. */}
-        <div className="mx-auto flex min-h-[19rem] w-full max-w-2xl items-center">
-          {SLIDES.map((slide, i) => (
-            <div
-              key={slide.id}
-              aria-hidden={i !== active || undefined}
-              className={
-                i === active
-                  ? cn(
-                      'animate-in fade-in w-full duration-300 ease-out',
-                      dir > 0 && 'slide-in-from-right-6',
-                      dir < 0 && 'slide-in-from-left-6',
-                    )
-                  : 'hidden'
-              }>
-              {slide.render()}
-            </div>
-          ))}
+        <div ref={viewportRef} className="mx-auto flex min-h-[19rem] w-full max-w-2xl items-center">
+          {ready &&
+            SLIDES.map((slide, i) => (
+              <div
+                key={slide.id}
+                aria-hidden={i !== active || undefined}
+                className={
+                  i === active
+                    ? cn(
+                        'animate-in fade-in w-full duration-300 ease-out',
+                        dir > 0 && 'slide-in-from-right-6',
+                        dir < 0 && 'slide-in-from-left-6',
+                      )
+                    : 'hidden'
+                }>
+                {slide.render()}
+              </div>
+            ))}
         </div>
 
         <button

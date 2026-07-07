@@ -8,11 +8,13 @@ export function Analytics() {
   return (
     <>
       <VercelAnalytics />
+      {/* lazyOnload (not afterInteractive): keep gtag.js from competing with
+          hydration and LCP-critical requests on slow mobile connections. */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
-      <Script id="google-analytics" strategy="afterInteractive">
+      <Script id="google-analytics" strategy="lazyOnload">
         {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}');`}
       </Script>
       <GaRouteTracker />
