@@ -68,6 +68,7 @@ type UsePromptAreaOptions = {
   value: Segment[]
   onChange: (segments: Segment[]) => void
   triggers?: TriggerConfig[]
+  disabled?: boolean
   onSubmit?: (segments: Segment[]) => void
   onEscape?: () => void
   onChipClick?: (chip: ChipSegment) => void
@@ -122,6 +123,7 @@ export function usePromptArea({
   value,
   onChange,
   triggers = [],
+  disabled = false,
   onSubmit,
   onEscape,
   onChipClick,
@@ -146,7 +148,20 @@ export function usePromptArea({
   // Chip whose dropdown was reopened via `reopenOnChipClick`. While set, the
   // active dropdown edits this chip in place instead of resolving typed text.
   // Cleared on dismiss and by any fresh trigger detection (typing).
-  const editingChip = useRef<{ node: HTMLElement; chip: ChipSegment } | null>(null)
+  //
+  // `segIndex` is the segment index at CLICK time (computed from the live DOM,
+  // so it's always accurate then) — deliberately not the DOM node itself,
+  // which can detach if `renderSegmentsToDOM` re-renders while the dropdown is
+  // open (external value update, undo/redo). At selection time we re-verify
+  // this index still holds the same chip and fall back to a trigger+value
+  // search if the model shifted underneath, instead of silently no-op'ing.
+  const editingChip = useRef<{ chip: ChipSegment; segIndex: number } | null>(null)
+
+  // Set by `dismissTrigger` to the chip whose dropdown it just closed; read
+  // and cleared by `handleClick` to distinguish "reopen" from "toggle closed"
+  // when the same chip is clicked again. See `dismissTrigger` for why this
+  // ordering is reliable.
+  const justDismissedChip = useRef<{ trigger: string; value: string } | null>(null)
 
   const {
     suggestions,
@@ -366,6 +381,14 @@ export function usePromptArea({
   // -----------------------------------------------------------------------
 
   const dismissTrigger = useCallback(() => {
+    // Remember which chip (if any) this dismiss closed, so a click landing on
+    // that same chip — which is what triggers the dismiss in the first place,
+    // since TriggerPopover's outside-mousedown dismiss fires before the click
+    // event reaches handleClick — can tell "reopen" apart from "toggle closed"
+    // instead of always reopening. Consumed and cleared by the next chip click.
+    justDismissedChip.current = editingChip.current
+      ? { trigger: editingChip.current.chip.trigger, value: editingChip.current.chip.value }
+      : null
     editingChip.current = null
     setActiveTrigger(null)
     setSelectedSuggestionIndex(0)
@@ -574,9 +597,28 @@ export function usePromptArea({
           if (chip) {
             // Native chip-click dropdown: reopen this trigger's suggestions
             // anchored to the chip so the selection can replace it in place.
+            // Gated on `!disabled` — a disabled composer must not accept edits
+            // through any path, including this one.
             const config = triggers.find((t) => t.char === chip.trigger)
-            if (config?.reopenOnChipClick && config.mode === 'dropdown' && config.onSearch) {
-              editingChip.current = { node, chip }
+            // A click on THIS chip while its own dropdown was open just closed
+            // it (TriggerPopover's outside-mousedown dismiss runs before this
+            // click handler) — treat that as a toggle-close, not a reopen.
+            const wasOpenForThisChip =
+              justDismissedChip.current?.trigger === chip.trigger &&
+              justDismissedChip.current?.value === chip.value
+            justDismissedChip.current = null
+            if (
+              !disabled &&
+              !wasOpenForThisChip &&
+              config?.reopenOnChipClick &&
+              config.mode === 'dropdown' &&
+              config.onSearch
+            ) {
+              const childIdx = indexOfChildNode(editor, node)
+              editingChip.current = {
+                chip,
+                segIndex: domChildIndexToSegmentIndex(editor, childIdx),
+              }
               setActiveTrigger({ config, startOffset: 0, query: '' })
               setSelectedSuggestionIndex(0)
               setTriggerRect(rect)
@@ -589,7 +631,7 @@ export function usePromptArea({
         node = node.parentNode
       }
     },
-    [onChipClick, onLinkClick, triggers, runSearch],
+    [onChipClick, onLinkClick, triggers, runSearch, disabled],
   )
 
   // -----------------------------------------------------------------------
@@ -815,30 +857,68 @@ export function usePromptArea({
       const editing = editingChip.current
       if (editing) {
         const editor = editorRef.current
-        const chipIdx = editor ? indexOfChildNode(editor, editing.node) : -1
-        if (editor && chipIdx !== -1) {
-          const segIdx = domChildIndexToSegmentIndex(editor, chipIdx)
-          const oldChip = segments[segIdx]
-          const newChip: ChipSegment = {
-            type: 'chip',
-            trigger: activeTrigger.config.char,
-            ...chipData,
-          }
-          const newSegments = segments.map((seg, i) => (i === segIdx ? newChip : seg))
-          onChange(newSegments)
-          renderSegmentsToDOM(newSegments)
+        if (editor) {
+          // Re-verify the click-time index still holds the same chip — the
+          // model may have shifted (external value update, undo/redo) while
+          // the dropdown was open. Fall back to a trigger+value search so a
+          // shifted-but-present chip is still found instead of silently
+          // dropping the user's selection.
+          const atIndex = segments[editing.segIndex]
+          const stillThere =
+            atIndex?.type === 'chip' &&
+            atIndex.trigger === editing.chip.trigger &&
+            atIndex.value === editing.chip.value
+          const segIdx = stillThere
+            ? editing.segIndex
+            : segments.findIndex(
+                (seg) =>
+                  seg.type === 'chip' &&
+                  seg.trigger === editing.chip.trigger &&
+                  seg.value === editing.chip.value,
+              )
+          const oldChip = segIdx !== -1 ? segments[segIdx] : undefined
 
-          if (oldChip?.type === 'chip') onChipDelete?.(oldChip)
-          onChipAdd?.(newChip)
+          if (oldChip?.type === 'chip') {
+            const newChip: ChipSegment = {
+              type: 'chip',
+              trigger: activeTrigger.config.char,
+              ...chipData,
+            }
+            let newSegments = segments.map((seg, i) => (i === segIdx ? newChip : seg))
 
-          // Place the caret right after the replaced chip
-          let caretOffset = 0
-          for (let i = 0; i <= segIdx; i++) {
-            const seg = newSegments[i]
-            caretOffset +=
-              seg.type === 'text' ? seg.text.length : seg.trigger.length + seg.displayText.length
+            // Guarantee a real landing spot after the replaced chip, mirroring
+            // resolveChip's trailing-space convention (prompt-area-engine.ts):
+            // if the new chip is now the last segment (or directly followed by
+            // another chip), the caret would land at a bare element boundary
+            // with no text node, which some engines fail to render/snap a
+            // visible caret at.
+            const nextSeg = newSegments[segIdx + 1]
+            if (!nextSeg || nextSeg.type !== 'text' || nextSeg.text.length === 0) {
+              newSegments = [
+                ...newSegments.slice(0, segIdx + 1),
+                { type: 'text', text: ' ' },
+                ...newSegments.slice(segIdx + 1),
+              ]
+            }
+
+            events.pushUndo(segments)
+            onChange(newSegments)
+            renderSegmentsToDOM(newSegments)
+
+            // Same value + display text: treat as a no-op confirmation rather
+            // than a destructive delete+add — onChipDelete is documented as
+            // firing on backspace/forward-delete, not on re-confirming the
+            // already-selected suggestion.
+            const unchanged =
+              oldChip.value === newChip.value && oldChip.displayText === newChip.displayText
+            if (!unchanged) {
+              onChipDelete?.(oldChip)
+              onChipAdd?.(newChip)
+            }
+
+            const caretOffset = segmentsToPlainText(newSegments.slice(0, segIdx + 1)).length
+            setCursorAtOffset(editor, caretOffset)
           }
-          setCursorAtOffset(editor, caretOffset)
         }
 
         dismissTrigger()
@@ -880,6 +960,7 @@ export function usePromptArea({
       dismissTrigger,
       onChipAdd,
       onChipDelete,
+      events,
     ],
   )
 
@@ -999,16 +1080,33 @@ export function usePromptArea({
         }
       }
 
-      // 2. Trigger dropdown navigation
-      if (activeTrigger && activeTrigger.config.mode === 'dropdown' && suggestions.length > 0) {
+      // 2. Trigger dropdown navigation. Gated on the dropdown actually being
+      // ON SCREEN, which matches TriggerPopover's own render condition
+      // (non-empty suggestions, OR loading/error/emptyMessage) rather than
+      // just `suggestions.length > 0` — otherwise a popover left open in a
+      // loading/empty state (e.g. right after a chip-click reopen, before its
+      // empty-query search resolves) lets Enter fall through to onSubmit and
+      // Escape fall through to onEscape while still visibly on screen.
+      const dropdownVisible =
+        activeTrigger &&
+        activeTrigger.config.mode === 'dropdown' &&
+        (suggestions.length > 0 ||
+          suggestionsLoading ||
+          suggestionsError !== null ||
+          !!activeTrigger.config.emptyMessage)
+      if (dropdownVisible) {
         if (e.key === 'ArrowDown') {
           e.preventDefault()
-          setSelectedSuggestionIndex((prev) => Math.min(prev + 1, suggestions.length - 1))
+          if (suggestions.length > 0) {
+            setSelectedSuggestionIndex((prev) => Math.min(prev + 1, suggestions.length - 1))
+          }
           return
         }
         if (e.key === 'ArrowUp') {
           e.preventDefault()
-          setSelectedSuggestionIndex((prev) => Math.max(prev - 1, 0))
+          if (suggestions.length > 0) {
+            setSelectedSuggestionIndex((prev) => Math.max(prev - 1, 0))
+          }
           return
         }
         if (e.key === 'Enter' || e.key === 'Tab') {
@@ -1150,6 +1248,8 @@ export function usePromptArea({
     [
       activeTrigger,
       suggestions,
+      suggestionsLoading,
+      suggestionsError,
       selectedSuggestionIndex,
       onSubmit,
       submitOnEnter,

@@ -1078,6 +1078,53 @@ describe('domChildIndexToSegmentIndex', () => {
     // The second chip lives at DOM child index 3 but segment index 1.
     expect(domChildIndexToSegmentIndex(editor, 3)).toBe(1)
   })
+
+  it('counts decoration elements (markdown span, URL anchor) as one segment each, matching readSegmentsFromDOM', () => {
+    // Mirrors what decorateMarkdownInEditor / decorateURLsInEditor produce:
+    // direct-child <span data-md> / <a data-url> wrapping text that
+    // readSegmentsFromDOM's "unknown element" branch turns into a text
+    // segment — they must count here too, or a chip after them resolves to
+    // the wrong segment index.
+    const mdSpan = document.createElement('span')
+    mdSpan.dataset.md = 'true'
+    mdSpan.textContent = '**bold**'
+
+    const link = document.createElement('a')
+    link.dataset.url = 'true'
+    link.textContent = 'https://example.com'
+
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('Hi ')) // 0
+    editor.appendChild(mdSpan) // 1
+    editor.appendChild(document.createTextNode(' see ')) // 2
+    editor.appendChild(link) // 3
+    editor.appendChild(chip()) // 4 — DOM index 4, must map to segment index 4
+
+    expect(domChildIndexToSegmentIndex(editor, 4)).toBe(4)
+  })
+
+  it('does not count an empty decoration element (no text content)', () => {
+    const emptySpan = document.createElement('span')
+    emptySpan.dataset.md = 'true'
+
+    const editor = document.createElement('div')
+    editor.appendChild(emptySpan) // skipped, no textContent
+    editor.appendChild(chip()) // 0
+
+    expect(domChildIndexToSegmentIndex(editor, 1)).toBe(0)
+  })
+
+  it('skips a sentinel <br> (matches readSegmentsFromDOM skipping it)', () => {
+    const sentinel = document.createElement('br')
+    sentinel.dataset.sentinel = 'true'
+
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('hi')) // 0
+    editor.appendChild(sentinel) // skipped
+    editor.appendChild(chip()) // 1
+
+    expect(domChildIndexToSegmentIndex(editor, 2)).toBe(1)
+  })
 })
 
 // ===========================================================================

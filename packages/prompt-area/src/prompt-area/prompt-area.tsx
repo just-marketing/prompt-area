@@ -96,6 +96,7 @@ export function PromptArea({
     value,
     onChange,
     triggers,
+    disabled,
     onSubmit,
     onEscape,
     onChipClick,

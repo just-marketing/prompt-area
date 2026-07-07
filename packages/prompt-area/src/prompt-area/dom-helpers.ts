@@ -186,28 +186,35 @@ export function indexOfChildNode(parent: HTMLElement, child: Node): number {
 }
 
 /**
+ * Whether a direct editor child node produces a segment when read by
+ * `readSegmentsFromDOM` in use-prompt-area.ts. This is the single predicate
+ * shared with `domChildIndexToSegmentIndex` below, so a DOM child index can
+ * never map to a different segment index than the one the reader actually
+ * produces — decoration elements (the URL `<a>` from `decorateURLsInEditor`,
+ * the markdown `<span data-md>` from `decorateMarkdownInEditor`) fall through
+ * to the reader's "unknown element" branch and DO produce a text segment, so
+ * they must count here too, not just chips/text/`<br>`.
+ */
+export function childProducesSegment(child: Node): boolean {
+  if (child.nodeType === Node.TEXT_NODE) return (child.textContent ?? '') !== ''
+  if (isBRElement(child)) return !child.dataset.sentinel
+  if (isChipElement(child)) return true
+  if (isHTMLElement(child)) return (child.textContent ?? '') !== ''
+  return false
+}
+
+/**
  * Maps the index of a direct child node within the editor to the index of the
- * corresponding segment in the model array.
+ * corresponding segment in the model array, by counting `childProducesSegment`
+ * matches up to (but not including) `childIndex`.
  *
- * The model (`readSegmentsFromDOM`) skips empty text nodes and the trailing
- * sentinel handling, so a DOM child index and a segment index are not 1:1.
- * This counts only the children that produce a segment — non-empty text nodes,
- * chip elements, and `<br>` line breaks — up to (but not including) `childIndex`.
- *
- * Keeping this in one place ensures chip-removal and chip-revert agree on the
- * exact same mapping rules as the reader.
+ * Keeping this in one place ensures chip-removal, chip-revert, and chip
+ * in-place replacement all agree on the exact same mapping rules as the reader.
  */
 export function domChildIndexToSegmentIndex(editor: HTMLElement, childIndex: number): number {
   let segIdx = 0
   for (let i = 0; i < childIndex; i++) {
-    const child = editor.childNodes[i]
-    if (child.nodeType === Node.TEXT_NODE && (child.textContent ?? '') !== '') {
-      segIdx++
-    } else if (isChipElement(child)) {
-      segIdx++
-    } else if (isBRElement(child)) {
-      segIdx++
-    }
+    if (childProducesSegment(editor.childNodes[i])) segIdx++
   }
   return segIdx
 }
