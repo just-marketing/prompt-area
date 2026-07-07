@@ -238,4 +238,68 @@
       transition: none !important;
     }
   }
+
+  /* ── Reveal (components/reveal.tsx) ──────────────────────────────────────
+     CSS engine for the marketing pages' fade/lift entrances. Two modes:
+
+     - data-reveal="mount": animates at first paint via a plain CSS animation,
+       so above-the-fold content (the hero) is visible in the server-rendered
+       frame and never waits on JavaScript — this is what keeps mobile LCP low.
+     - data-reveal="scroll": starts hidden and transitions in when the shared
+       IntersectionObserver in reveal.tsx stamps data-revealed. Only used below
+       the fold, so it can't delay LCP; a <noscript> override in the root
+       layout keeps content visible when JS is off.
+
+     Offsets are driven by --reveal-x / --reveal-y so callers can slide from
+     any direction; --reveal-delay staggers. Everything sits inside a single
+     no-preference media query, so reduced-motion users get static content
+     with zero JS involvement. */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes reveal-in {
+      from {
+        opacity: 0;
+        transform: translate(var(--reveal-x, 0px), var(--reveal-y, 24px));
+      }
+      to {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    [data-reveal='mount'] {
+      animation: reveal-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--reveal-delay, 0s);
+    }
+
+    [data-reveal='scroll'] {
+      opacity: 0;
+      transform: translate(var(--reveal-x, 0px), var(--reveal-y, 24px));
+      transition:
+        opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
+        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
+    }
+    [data-reveal='scroll'][data-revealed] {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    /* Gentle per-column drift for the homepage components cascade — the
+       CSS scroll-driven successor to the old framer-motion parallax. Pure
+       progressive enhancement: browsers without scroll timelines just show
+       the static (already offset) shelf. */
+    @supports (animation-timeline: view()) {
+      @keyframes cascade-drift {
+        from {
+          transform: translateY(var(--drift, 22px));
+        }
+        to {
+          transform: translateY(calc(-1 * var(--drift, 22px)));
+        }
+      }
+      .cascade-drift {
+        animation: cascade-drift linear both;
+        animation-timeline: view();
+      }
+    }
+  }
 }

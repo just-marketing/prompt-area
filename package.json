@@ -31,7 +31,6 @@
     "@vercel/functions": "^3.7.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.42.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.22.0",
     "next": "^16.2.9",

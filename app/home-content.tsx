@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { Suspense, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
@@ -134,14 +134,28 @@ export default function HomeContent() {
             className="w-full min-w-0 scroll-mt-20"
             onFocusCapture={handleDemoInteract}
             onInputCapture={handleDemoInteract}>
-            <Reveal lift={false} delay={0.15}>
-              <CodexInputExample
-                initialSegments={HERO_SEGMENTS}
-                triggers={HERO_TRIGGERS}
-                initialFiles={HERO_FILES}
-                markdown
-                minHeight={76}
-              />
+            <Reveal lift={false} delay={0.15} trigger="mount">
+              {/* Local Suspense boundary: the lazy composer suspends during
+                  SSR, and without this it bubbles to the layout-level boundary
+                  — React then wraps the ENTIRE page body in a hidden deferred
+                  segment, so nothing paints until the full HTML has parsed.
+                  Scoped here, only the demo pops in late; the fallback
+                  reserves its footprint so the swap causes no layout shift. */}
+              <Suspense
+                fallback={
+                  <div
+                    aria-hidden
+                    className="bg-card min-h-[13rem] rounded-[24px] border border-[#ececec] shadow-sm dark:border-0 dark:bg-[#2d2d2d]"
+                  />
+                }>
+                <CodexInputExample
+                  initialSegments={HERO_SEGMENTS}
+                  triggers={HERO_TRIGGERS}
+                  initialFiles={HERO_FILES}
+                  markdown
+                  minHeight={76}
+                />
+              </Suspense>
             </Reveal>
           </div>
         </div>

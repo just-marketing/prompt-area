@@ -10,12 +10,8 @@ import {
   Keyboard,
   Puzzle,
 } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { Reveal } from '@/components/reveal'
 
-// Shared motion vocabulary with the page's Reveal primitive: the same
-// "ease-out-expo" settle so cards glide in and decelerate, reading as premium.
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const DURATION = 0.7
 // How far off-screen a card starts. The clip wrapper hides this travel, so the
 // card appears to enter from the section's edge.
 const OFFSET = 220
@@ -72,8 +68,6 @@ const FEATURES = [
 ]
 
 export function FeaturesGrid() {
-  const reduce = useReducedMotion()
-
   // Cards converge from the section's edges to the center, row by row, as you
   // scroll: the left column slides in from the left, the right column from the
   // right. Each card triggers its own scroll reveal (rather than one group
@@ -81,48 +75,27 @@ export function FeaturesGrid() {
   // the same moment — animate together and meet in the middle. When the grid
   // collapses to a single column on mobile, the alternating left/right origin
   // turns into a gentle zig-zag instead of breaking.
-  const cardClass = 'flex items-start gap-3 rounded-lg border p-4'
-
   return (
     // overflow-x-clip so a card's off-screen starting position never adds a
     // horizontal scrollbar while it travels in.
     <div className="overflow-x-clip">
       <div className="grid gap-3 sm:grid-cols-2">
-        {FEATURES.map((feature, i) => {
-          const inner = (
-            <>
-              <div className="bg-muted shrink-0 rounded-md p-2">
-                <feature.icon className="size-4" />
-              </div>
-              <div>
-                <div className="text-sm font-medium">{feature.title}</div>
-                <div className="text-muted-foreground text-xs">{feature.description}</div>
-              </div>
-            </>
-          )
-
-          if (reduce) {
-            return (
-              <div key={feature.title} className={cardClass}>
-                {inner}
-              </div>
-            )
-          }
-
+        {FEATURES.map((feature, i) => (
           // Even index → left column → enter from the left; odd → from the right.
-          const fromLeft = i % 2 === 0
-          return (
-            <motion.div
-              key={feature.title}
-              className={cardClass}
-              initial={{ opacity: 0, x: fromLeft ? -OFFSET : OFFSET }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '0px 0px -15% 0px' }}
-              transition={{ duration: DURATION, ease: EASE }}>
-              {inner}
-            </motion.div>
-          )
-        })}
+          <Reveal
+            key={feature.title}
+            lift={false}
+            x={i % 2 === 0 ? -OFFSET : OFFSET}
+            className="flex items-start gap-3 rounded-lg border p-4">
+            <div className="bg-muted shrink-0 rounded-md p-2">
+              <feature.icon className="size-4" />
+            </div>
+            <div>
+              <div className="text-sm font-medium">{feature.title}</div>
+              <div className="text-muted-foreground text-xs">{feature.description}</div>
+            </div>
+          </Reveal>
+        ))}
       </div>
     </div>
   )

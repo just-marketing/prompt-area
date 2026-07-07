@@ -1,7 +1,14 @@
 'use client'
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import type { ReactNode } from 'react'
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 
 /**
  * Scroll-reveal primitives — the motion vocabulary for the marketing pages.
@@ -10,60 +17,98 @@ import type { ReactNode } from 'react'
  * viewport (or on mount, above the fold), all sharing one easing curve so the
  * page moves with a single, calm voice rather than a grab-bag of effects.
  *
- * Every export degrades to a plain `<div>` under `prefers-reduced-motion`, so
- * the reduced-motion render is byte-for-byte identical in layout — only the
- * entrance is dropped. Pass `lift={false}` (opacity only) around interactive
- * widgets whose floating menus shouldn't sit inside a transformed ancestor.
+ * The animation itself is pure CSS (see the reveal block in `globals.css`):
+ * `trigger="mount"` runs a keyframe animation at first paint with **no
+ * JavaScript in the critical path** — vital for LCP, since the hero must not
+ * wait on hydration to become visible — while `trigger="scroll"` starts hidden
+ * and transitions in when the shared IntersectionObserver below stamps
+ * `data-revealed`. `prefers-reduced-motion` is handled entirely in CSS, where
+ * the reduced render keeps the exact same layout with the entrance dropped.
  */
-
-// "ease-out-expo"-ish: decelerates as it settles, reading as premium not springy.
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const DURATION = 0.6
-const DISTANCE = 24
 
 // Fire once, starting a little before the element is fully on-screen so the
 // motion resolves around the time it reaches a comfortable reading position.
-const VIEWPORT = { once: true, margin: '0px 0px -15% 0px' } as const
+const VIEWPORT_MARGIN = '0px 0px -15% 0px'
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: DISTANCE },
-  show: { opacity: 1, y: 0, transition: { duration: DURATION, ease: EASE } },
+// One shared observer for every scroll-revealed element on the page.
+let observer: IntersectionObserver | null = null
+function observe(el: Element) {
+  if (typeof IntersectionObserver === 'undefined') {
+    el.setAttribute('data-revealed', '')
+    return () => {}
+  }
+  observer ??= new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        entry.target.setAttribute('data-revealed', '')
+        observer?.unobserve(entry.target)
+      }
+    },
+    { rootMargin: VIEWPORT_MARGIN },
+  )
+  observer.observe(el)
+  return () => observer?.unobserve(el)
+}
+
+/** Attach the shared reveal observer to a `data-reveal="scroll"` element. */
+function useScrollReveal(enabled: boolean) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!enabled || !ref.current) return
+    return observe(ref.current)
+  }, [enabled])
+  return ref
+}
+
+function revealVars(delay: number, x: number, y: number): CSSProperties {
+  const vars: Record<string, string> = {}
+  if (delay) vars['--reveal-delay'] = `${delay}s`
+  if (x) vars['--reveal-x'] = `${x}px`
+  if (y !== 24) vars['--reveal-y'] = `${y}px`
+  return vars as CSSProperties
 }
 
 /**
- * Fades + lifts its children into place the first time they scroll into view.
- * Above-the-fold usage animates on mount (the element is already in view).
+ * Fades + lifts its children into place. `trigger="scroll"` (default) fires
+ * the first time the element scrolls into view; `trigger="mount"` animates at
+ * first paint without waiting for JS — use it above the fold (e.g. the hero).
  */
 export function Reveal({
   children,
   delay = 0,
   className,
+  style,
   lift = true,
+  x = 0,
+  trigger = 'scroll',
 }: {
   children: ReactNode
   delay?: number
   className?: string
+  style?: CSSProperties
   /** Disable the vertical translate (opacity-only) — avoids a lingering
    *  `transform` ancestor that would re-anchor a child's fixed-position menus. */
   lift?: boolean
+  /** Horizontal offset (px) to slide in from, e.g. ±220 for the features grid. */
+  x?: number
+  trigger?: 'scroll' | 'mount'
 }) {
-  const reduce = useReducedMotion()
-  if (reduce) return <div className={className}>{children}</div>
+  const ref = useScrollReveal(trigger === 'scroll')
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={className}
-      initial={lift ? { opacity: 0, y: DISTANCE } : { opacity: 0 }}
-      whileInView={lift ? { opacity: 1, y: 0 } : { opacity: 1 }}
-      viewport={VIEWPORT}
-      transition={{ duration: DURATION, ease: EASE, delay }}>
+      data-reveal={trigger}
+      style={{ ...style, ...revealVars(delay, x, lift ? 24 : 0) }}>
       {children}
-    </motion.div>
+    </div>
   )
 }
 
 /**
  * Staggers its {@link RevealItem} children so they cascade in one after another.
- * `trigger="scroll"` (default) starts when the group scrolls into view;
+ * `trigger="scroll"` (default) starts when each item scrolls into view;
  * `trigger="mount"` starts immediately — use it above the fold (e.g. the hero).
  */
 export function RevealGroup({
@@ -79,32 +124,38 @@ export function RevealGroup({
   stagger?: number
   delayChildren?: number
 }) {
-  const reduce = useReducedMotion()
-  if (reduce) return <div className={className}>{children}</div>
-
-  const variants: Variants = {
-    hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren } },
-  }
-  const activate =
-    trigger === 'mount'
-      ? { animate: 'show' as const }
-      : { whileInView: 'show' as const, viewport: VIEWPORT }
-
+  let index = 0
   return (
-    <motion.div className={className} variants={variants} initial="hidden" {...activate}>
-      {children}
-    </motion.div>
+    <div className={className}>
+      {Children.map(children, (child) => {
+        if (isValidElement<RevealItemProps>(child) && child.type === RevealItem) {
+          return cloneElement(child, { trigger, delay: delayChildren + index++ * stagger })
+        }
+        return child
+      })}
+    </div>
   )
 }
 
+type RevealItemProps = {
+  children: ReactNode
+  className?: string
+  /** Injected by {@link RevealGroup}. */
+  trigger?: 'scroll' | 'mount'
+  /** Injected by {@link RevealGroup}. */
+  delay?: number
+}
+
 /** A single staggered child. Must be rendered inside a {@link RevealGroup}. */
-export function RevealItem({ children, className }: { children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion()
-  if (reduce) return <div className={className}>{children}</div>
+export function RevealItem({
+  children,
+  className,
+  trigger = 'scroll',
+  delay = 0,
+}: RevealItemProps) {
   return (
-    <motion.div className={className} variants={itemVariants}>
+    <Reveal className={className} trigger={trigger} delay={delay}>
       {children}
-    </motion.div>
+    </Reveal>
   )
 }
