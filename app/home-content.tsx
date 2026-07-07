@@ -78,6 +78,9 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
+const TOAST_DURATION_MS = 3200
+const MAX_TOASTS = 4
+
 export default function HomeContent() {
   // Fire `demo_interacted` once, the first time the visitor focuses or types in
   // the live hero composer — our best signal that they actually tried the
@@ -94,32 +97,50 @@ export default function HomeContent() {
   // tag dropdown (via `reopenOnChipClick` on the trigger — picking one swaps
   // the chip in place), @mentions pop a "notified" toast, and /commands run a
   // mock execution with a result card.
-  const [toast, setToast] = useState<{ title: string; description?: string } | null>(null)
+  //
+  // Toasts stack: each mention click pushes its own toast with its own
+  // auto-dismiss timer, capped at the newest few so rapid clicking can't
+  // flood the corner.
+  const [toasts, setToasts] = useState<{ id: number; title: string; description?: string }[]>([])
+  const toastSeq = useRef(0)
+  const toastTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
   const [command, setCommand] = useState<{
     chip: ChipSegment
     status: 'running' | 'done'
   } | null>(null)
 
-  const handleChipClick = useCallback((chip: ChipSegment) => {
-    track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
-
-    if (chip.trigger === '@') {
-      const user = USERS.find((u) => u.value === chip.value)
-      setToast({
-        title: `${chip.displayText} notified`,
-        description: user ? `${user.description} — looped in on this prompt.` : undefined,
-      })
-    } else if (chip.trigger === '/') {
-      setCommand({ chip, status: 'running' })
-    }
+  const pushToast = useCallback((toast: { title: string; description?: string }) => {
+    const id = ++toastSeq.current
+    setToasts((prev) => [...prev, { id, ...toast }].slice(-MAX_TOASTS))
+    const timer = setTimeout(() => {
+      toastTimers.current.delete(timer)
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, TOAST_DURATION_MS)
+    toastTimers.current.add(timer)
   }, [])
 
-  // Auto-dismiss the mention toast.
+  // Clear any in-flight toast timers on unmount.
   useEffect(() => {
-    if (!toast) return
-    const timer = setTimeout(() => setToast(null), 3200)
-    return () => clearTimeout(timer)
-  }, [toast])
+    const timers = toastTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const handleChipClick = useCallback(
+    (chip: ChipSegment) => {
+      track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
+
+      if (chip.trigger === '@') {
+        const user = USERS.find((u) => u.value === chip.value)
+        pushToast({
+          title: `${chip.displayText} notified`,
+          description: user ? `${user.description} — looped in on this prompt.` : undefined,
+        })
+      } else if (chip.trigger === '/') {
+        setCommand({ chip, status: 'running' })
+      }
+    },
+    [pushToast],
+  )
 
   // Let the mock command "run" briefly before showing its result.
   useEffect(() => {
@@ -256,22 +277,28 @@ export default function HomeContent() {
               )}
             </Reveal>
 
-            {/* Mention toast — clicking an @mention chip "notifies" that teammate. */}
-            {toast && (
-              <div
-                role="status"
-                className="animate-in fade-in slide-in-from-bottom-3 fixed bottom-6 left-1/2 z-50 -translate-x-1/2 duration-300">
-                <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                    @
-                  </span>
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium">{toast.title}</div>
-                    {toast.description && (
-                      <div className="text-muted-foreground text-xs">{toast.description}</div>
-                    )}
+            {/* Mention toasts — each @mention chip click "notifies" that
+                teammate. Toasts stack bottom-up, newest nearest the edge. */}
+            {toasts.length > 0 && (
+              <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2">
+                {toasts.map((toast) => (
+                  <div
+                    key={toast.id}
+                    role="status"
+                    className="animate-in fade-in slide-in-from-bottom-3 duration-300">
+                    <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                        @
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">{toast.title}</div>
+                        {toast.description && (
+                          <div className="text-muted-foreground text-xs">{toast.description}</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
