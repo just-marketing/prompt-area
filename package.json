@@ -31,7 +31,6 @@
     "@vercel/functions": "^3.7.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.42.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.22.0",
     "next": "^16.2.9",
@@ -46,12 +45,12 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.1",
+    "@tailwindcss/postcss": "^4.3.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest-axe": "^3.5.9",
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
@@ -66,7 +65,7 @@
     "prettier": "^3.9.1",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "pretty-quick": "^4.2.2",
-    "tailwindcss": "^4.3.1",
+    "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
     "vite": "^8.1.0",
     "vitest": "^4.1.9"

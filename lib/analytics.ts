@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import type { PostHog } from 'posthog-js'
 
 declare global {
   interface Window {
@@ -25,6 +25,35 @@ export const POSTHOG_API_HOST = '/ingest'
 
 /** PostHog app host used for links from the SDK (e.g. toolbar, session links). */
 export const POSTHOG_UI_HOST = 'https://eu.posthog.com'
+
+let posthogPromise: Promise<PostHog | null> | null = null
+
+/**
+ * Lazily load and initialize the PostHog SDK.
+ *
+ * posthog-js is ~60 KB gzipped, so it is deliberately kept out of the initial
+ * bundle: nothing imports it statically. `PostHogProvider` calls this once the
+ * page has settled (or on first interaction), and `track` calls it on demand —
+ * events fired before the SDK arrives simply await the same promise, so
+ * nothing is lost. Resolves to `null` when PostHog is disabled.
+ *
+ * `defaults: '2026-05-30'` opts into PostHog's modern defaults, including
+ * automatic pageview capture on App Router client-side navigations.
+ */
+export function loadPostHog(): Promise<PostHog | null> {
+  if (!POSTHOG_KEY || typeof window === 'undefined') return Promise.resolve(null)
+  posthogPromise ??= import('posthog-js').then(({ default: posthog }) => {
+    if (!posthog.__loaded) {
+      posthog.init(POSTHOG_KEY, {
+        api_host: POSTHOG_API_HOST,
+        ui_host: POSTHOG_UI_HOST,
+        defaults: '2026-05-30',
+      })
+    }
+    return posthog
+  })
+  return posthogPromise
+}
 
 /**
  * Marketing-site analytics — a thin, typed wrapper over PostHog.
@@ -124,6 +153,6 @@ export type AnalyticsEvent = keyof AnalyticsEventMap
  */
 export function track<E extends AnalyticsEvent>(event: E, properties: AnalyticsEventMap[E]): void {
   if (typeof window === 'undefined') return
-  if (POSTHOG_KEY) posthog.capture(event, properties)
+  if (POSTHOG_KEY) void loadPostHog().then((posthog) => posthog?.capture(event, properties))
   window.gtag?.('event', event, properties)
 }
