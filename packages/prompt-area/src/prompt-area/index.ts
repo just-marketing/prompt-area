@@ -17,6 +17,12 @@ export type {
 } from './types'
 
 export { usePromptArea } from './use-prompt-area'
+export { promptAreaEventName, buildSubmitEvent } from './analytics'
+export type {
+  PromptAreaAnalyticsEvent,
+  PromptAreaAnalyticsHandler,
+  ChipAddMethod,
+} from './analytics'
 export { usePromptAreaState } from './use-prompt-area-state'
 export type {
   UsePromptAreaStateOptions,

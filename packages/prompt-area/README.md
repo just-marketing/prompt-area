@@ -96,6 +96,39 @@ If you run Tailwind yourself, import the preset from your CSS entry instead. It 
 
 In a shadcn project the token names already exist, so the component automatically inherits your theme — you usually don't need to do anything.
 
+## Usage analytics
+
+Track how your users use the composer — in **your** analytics tool. Pass
+`onAnalyticsEvent` and forward the typed event stream to PostHog, GA4, Segment,
+or anything else:
+
+```tsx
+import { PromptArea, promptAreaEventName } from 'prompt-area'
+
+;<PromptArea
+  value={value}
+  onChange={setValue}
+  onSubmit={send}
+  onAnalyticsEvent={(event) => posthog.capture(promptAreaEventName(event), event)}
+/>
+```
+
+Events cover the compose funnel (`input_start` → `submit` with text/chip/attachment
+counts and `msSinceInputStart`), feature usage (`trigger_activate`, `chip_add`,
+`chip_delete`, `paste`, `undo`/`redo`), and friction signals (`search_empty`,
+`search_error`, `max_length_reached`). See `PromptAreaAnalyticsEvent` for the
+full taxonomy and per-event deduplication semantics, and `buildSubmitEvent` for
+emitting `method: 'button'` submits from your own send button.
+
+**Privacy by design, zero phone-home.** Payloads carry metadata only — counts,
+lengths, trigger characters, methods — never the text your users type. Chip
+`value` (your own suggestion ID) is included only when it came from you and is
+omitted for auto-resolved chips. The package makes **no network calls**: events
+exist only inside your callback (grep `dist/` for `fetch`/`sendBeacon` if you
+want to verify). Once you forward events into a tool tied to user identities,
+that data is yours to govern — consent and legal basis are the host app's
+responsibility.
+
 ## Exports
 
 | Import                            | Description                                               |

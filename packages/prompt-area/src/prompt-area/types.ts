@@ -8,6 +8,8 @@
  * - Simple inline markdown rendering
  */
 
+import type { PromptAreaAnalyticsHandler } from './analytics'
+
 /**
  * A segment of content within the editable text.
  * The document model is an ordered array of these segments.
@@ -243,6 +245,14 @@ export type PromptAreaProps = {
   onUndo?: (segments: Segment[]) => void
   /** Called after a redo operation. Receives the restored segments. */
   onRedo?: (segments: Segment[]) => void
+  /**
+   * Called for notable usage interactions (submit, trigger activation, chip
+   * add/delete, paste, undo/redo, …) with a typed, content-free event —
+   * pipe it into your own analytics tool. See `PromptAreaAnalyticsEvent` for
+   * the taxonomy and emission semantics. The package never transmits
+   * anything itself; a throwing handler is caught and logged.
+   */
+  onAnalyticsEvent?: PromptAreaAnalyticsHandler
   /** Minimum height in pixels */
   minHeight?: number
   /** Maximum height in pixels */

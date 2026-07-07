@@ -233,6 +233,49 @@ function MentionsExample() {
 | `filePosition` | `'above' \| 'below'`            | `'above'`      | Where to render files relative to text       |
 | `onFileRemove` | `(file: PromptAreaFile) => void` | -             | Called when user removes a file              |
 | `onFileClick`  | `(file: PromptAreaFile) => void` | -             | Called when user clicks a file               |
+| `onAnalyticsEvent` | `(event: PromptAreaAnalyticsEvent) => void` | - | Typed, content-free usage event stream for your own analytics (see Analytics Events) |
+
+### Analytics Events (onAnalyticsEvent)
+
+Pass `onAnalyticsEvent` to receive a typed usage event stream and forward it to
+your own analytics tool (PostHog, GA4, Segment, …). The package never makes
+network calls; payloads carry metadata only — counts, lengths, trigger
+characters, methods — never user-typed text. Also available on
+`CompactPromptArea` (its send button emits `method: 'button'`).
+
+```tsx
+import { PromptArea, promptAreaEventName } from 'prompt-area'
+
+<PromptArea
+  value={value}
+  onChange={setValue}
+  onSubmit={send}
+  onAnalyticsEvent={(event) => posthog.capture(promptAreaEventName(event), event)}
+/>
+```
+
+`PromptAreaAnalyticsEvent` is a discriminated union on `type`. New event types
+arrive in minor releases — keep a default branch, don't match exhaustively.
+
+| Event type           | Payload                          | Emitted when                                  |
+| -------------------- | -------------------------------- | --------------------------------------------- |
+| `input_start`        | -                                | First input (typing or paste) of a compose session; re-armed after submit, `clear()`, or the value resetting to empty |
+| `submit`             | `method: 'enter' \| 'button'`, `textLength`, `chipCount`, `chipCountByTrigger`, `imageCount`, `fileCount`, `msSinceInputStart` | A submit gesture (only when `onSubmit` is wired); may fire with an empty value — filter on `textLength` |
+| `trigger_activate`   | `trigger`, `mode`                | A trigger became active — once per activation, not per keystroke |
+| `chip_add`           | `trigger`, `method: 'select' \| 'auto_resolve' \| 'activate' \| 'paste' \| 'programmatic'`, `value?`, `index?`, `queryLength?` | A chip was added. `value` is your suggestion ID — omitted for auto-resolved chips (user-typed text) |
+| `chip_delete`        | `trigger`, `method: 'delete' \| 'revert'`, `value?` | A chip was removed or reverted to text |
+| `search_empty`       | `trigger`, `queryLength`         | A completed suggestion search returned zero results — once per activation |
+| `search_error`       | `trigger`                        | A suggestion search threw or rejected (non-abort) |
+| `paste`              | `source`, `textLength`           | Content pasted; length of pasted content, not the document |
+| `undo` / `redo`      | -                                | A history snapshot was actually applied        |
+| `max_length_reached` | `maxLength`                      | Typing hit the cap — once per at-cap episode   |
+| `image_paste` / `image_remove` / `file_remove` | -      | Attachment interactions owned by the component |
+
+Helpers: `promptAreaEventName(event)` returns the conventional
+`prompt_area_${type}` name; `buildSubmitEvent(segments, options?)` builds a
+`submit` event for host-owned send buttons (e.g. in an `ActionBar` slot), so
+button submits reach your pipeline too. A throwing handler is caught and
+logged — it can never break the editor.
 
 ### PromptAreaHandle (ref methods)
 
@@ -670,7 +713,7 @@ npx shadcn@latest add https://prompt-area.com/r/compact-prompt-area.json
 
 #### CompactPromptArea Props
 
-Accepts all core PromptArea props (`value`, `onChange`, `triggers`, `placeholder`, `disabled`, `markdown`, `onSubmit`, `onEscape`, `onChipClick`, `onChipAdd`, `onChipDelete`, `onPaste`, `images`, `onImagePaste`, `onImageRemove`, `files`, `onFileRemove`), plus:
+Accepts all core PromptArea props (`value`, `onChange`, `triggers`, `placeholder`, `disabled`, `markdown`, `onSubmit`, `onEscape`, `onChipClick`, `onChipAdd`, `onChipDelete`, `onPaste`, `images`, `onImagePaste`, `onImageRemove`, `files`, `onFileRemove`, `onAnalyticsEvent`), plus:
 
 | Prop               | Type              | Default      | Description                                         |
 | ------------------ | ----------------- | ------------ | --------------------------------------------------- |

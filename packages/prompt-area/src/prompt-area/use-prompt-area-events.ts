@@ -2,7 +2,8 @@
 
 import { useCallback, useRef } from 'react'
 import type { Segment, ChipSegment, TriggerConfig } from './types'
-import { resolveTriggersInSegments } from './prompt-area-engine'
+import type { PromptAreaAnalyticsEvent } from './analytics'
+import { resolveTriggersInSegments, segmentsToPlainText } from './prompt-area-engine'
 import { normalizeEditorDOM, safeJsonStringify, getSelectionRange } from './dom-helpers'
 import {
   serializeFragmentToPlainText,
@@ -29,6 +30,12 @@ type EventHandlerDeps = {
   onChipAdd?: (chip: ChipSegment) => void
   onImagePaste?: (file: File) => void
   onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
+  /** Failure-isolated analytics emitter from `usePromptArea`; undefined when
+   * no `onAnalyticsEvent` handler is wired, so payloads short-circuit. */
+  emit?: (event: PromptAreaAnalyticsEvent) => void
+  /** Marks user-originated input for the 'input_start' state machine —
+   * pasting starts a compose session just like typing does. */
+  noteUserInput?: () => void
 }
 
 type PromptAreaEventHandlers = {
@@ -83,6 +90,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     onChipAdd,
     onImagePaste,
     onRawPaste,
+    emit,
+    noteUserInput,
   } = deps
 
   const isComposing = useRef(false)
@@ -126,6 +135,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       const editor = editorRef.current
       if (!editor) return
 
+      // Pasting starts a compose session just like typing.
+      noteUserInput?.()
+
       // Check for image files in clipboard before processing text
       // Some browsers/OSes provide pasted images via `items` instead of `files` (e.g. screenshots)
       const imageFile =
@@ -136,6 +148,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         })()
       if (imageFile) {
         onImagePaste?.(imageFile)
+        emit?.({ type: 'image_paste' })
         return
       }
 
@@ -162,9 +175,22 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
           // Notify: internal paste with chip data preserved
           onPasteCallback?.({ segments: merged, source: 'internal' })
+          emit?.({
+            type: 'paste',
+            source: 'internal',
+            textLength: segmentsToPlainText(parsed).length,
+          })
           for (const seg of parsed) {
             if (seg.type === 'chip') {
               onChipAdd?.(seg)
+              emit?.({
+                type: 'chip_add',
+                trigger: seg.trigger,
+                method: 'paste',
+                // Auto-resolved chips carry user-typed text as their value —
+                // never expose it (see PromptAreaAnalyticsEvent docs).
+                ...(seg.autoResolved ? {} : { value: seg.value }),
+              })
             }
           }
 
@@ -228,6 +254,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
             )
           ) {
             onChipAdd?.(seg)
+            // No `value`: these chips are derived from pasted user content.
+            emit?.({ type: 'chip_add', trigger: seg.trigger, method: 'paste' })
           }
         }
       } else {
@@ -235,6 +263,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       }
 
       onPasteCallback?.({ segments: resolvedSegments, source: 'external' })
+      emit?.({ type: 'paste', source: 'external', textLength: text.length })
       runTriggerDetection()
     },
     [
@@ -249,6 +278,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       onChipAdd,
       onImagePaste,
       onRawPaste,
+      emit,
+      noteUserInput,
     ],
   )
 
@@ -378,6 +409,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         onChange(segments)
         renderSegmentsToDOM(segments)
         onRedo?.(segments)
+        emit?.({ type: 'redo' })
       } else {
         // Undo: Ctrl+Z
         if (state.undoStack.length === 0) return true
@@ -391,11 +423,12 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         onChange(segments)
         renderSegmentsToDOM(segments)
         onUndo?.(segments)
+        emit?.({ type: 'undo' })
       }
 
       return true
     },
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onUndo, onRedo],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onUndo, onRedo, emit],
   )
 
   return {

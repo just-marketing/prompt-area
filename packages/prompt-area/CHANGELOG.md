@@ -3,6 +3,24 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.0
+
+### Added
+
+- **`onAnalyticsEvent` prop** on `PromptArea` and `CompactPromptArea` — a typed,
+  content-free usage event stream (`PromptAreaAnalyticsEvent`) for the host
+  app's own analytics: `input_start`, `submit` (with `textLength`, chip and
+  attachment counts, `msSinceInputStart`), `trigger_activate`, `chip_add`,
+  `chip_delete`, `search_empty`, `search_error`, `paste`, `undo`/`redo`,
+  `max_length_reached`, and attachment events. Payloads carry metadata only —
+  never user-typed text (auto-resolved chip values are omitted) — and the
+  package makes no network calls; events exist only inside the consumer's
+  callback. A throwing handler is caught and logged, never breaking the editor.
+  New event types arrive in minor releases — keep a default branch. Also
+  exported: `promptAreaEventName()` for conventional `prompt_area_*` names and
+  `buildSubmitEvent()` for emitting `method: 'button'` submits from host-owned
+  send buttons.
+
 ## 0.4.0
 
 ### Added

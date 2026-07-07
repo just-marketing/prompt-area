@@ -122,6 +122,7 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 - [IME Support](https://prompt-area.com/docs/components/prompt-area): Proper composition handling for Chinese, Japanese, and Korean input — defers trigger detection during active composition
 - [Accessibility](https://prompt-area.com/docs/components/prompt-area): ARIA labels, keyboard navigation, screen reader announcements, and role-based popover with listbox semantics
 - [Dark Mode](https://prompt-area.com/docs/components/prompt-area): Full light/dark theme support via CSS variables with no additional configuration
+- [Usage Analytics](https://prompt-area.com/docs/api/prompt-area#analytics): Pass `onAnalyticsEvent` to pipe a typed, content-free usage event stream (submit, trigger_activate, chip_add, paste, …) into your own PostHog/GA4/Segment — metadata only, zero phone-home
 
 ## Developer Experience
 

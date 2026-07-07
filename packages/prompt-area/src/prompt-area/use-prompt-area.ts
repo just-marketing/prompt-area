@@ -59,6 +59,8 @@ import {
 } from './cursor-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 import { useTriggerSearch } from './use-trigger-search'
+import { buildSubmitEvent } from './analytics'
+import type { PromptAreaAnalyticsEvent, PromptAreaAnalyticsHandler } from './analytics'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -83,6 +85,10 @@ type UsePromptAreaOptions = {
   normalizeBullets?: boolean
   submitOnEnter?: boolean
   maxLength?: number
+  /** Usage analytics handler — see the `onAnalyticsEvent` prop on
+   * `PromptAreaProps`. Attachment counts on 'submit' events are 0 here;
+   * `PromptArea` enriches them from its `images`/`files` props. */
+  onAnalyticsEvent?: PromptAreaAnalyticsHandler
 }
 
 type UsePromptAreaReturn = {
@@ -137,11 +143,81 @@ export function usePromptArea({
   normalizeBullets = true,
   submitOnEnter = true,
   maxLength,
+  onAnalyticsEvent,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(null)
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null)
+
+  // -----------------------------------------------------------------------
+  // Usage analytics
+  //
+  // The latest handler lives in a ref so `emitStable` never changes identity
+  // — an inline `onAnalyticsEvent` lambda can't churn the dep arrays below.
+  // `emit` is undefined when no handler is wired, so every call site's
+  // `emit?.({ ... })` short-circuits before building a payload; the hot
+  // paths pay a single undefined check.
+  // -----------------------------------------------------------------------
+
+  const analyticsHandlerRef = useRef(onAnalyticsEvent)
+  useEffect(() => {
+    analyticsHandlerRef.current = onAnalyticsEvent
+  })
+
+  const emitStable = useCallback((event: PromptAreaAnalyticsEvent) => {
+    const handler = analyticsHandlerRef.current
+    if (!handler) return
+    try {
+      handler(event)
+    } catch (error) {
+      console.error('[prompt-area] onAnalyticsEvent handler threw:', error)
+    }
+  }, [])
+  const emit = onAnalyticsEvent ? emitStable : undefined
+
+  // 'input_start' state machine: armed on mount, re-armed after a 'submit'
+  // emission, on clear(), and when the host resets `value` to empty. Fires
+  // once on the first user-originated input (typing or paste) while armed.
+  const inputStartArmed = useRef(true)
+  const inputStartAt = useRef<number | null>(null)
+  // Last emitted trigger activation (`char:startOffset`) — dedups the
+  // per-keystroke re-detection while a query is being typed.
+  const lastTriggerActivation = useRef<string | null>(null)
+  // One 'max_length_reached' per at-cap episode.
+  const atMaxLength = useRef(false)
+  // One 'search_empty' per trigger activation; re-armed by non-empty results.
+  const searchEmptyEmitted = useRef(false)
+
+  const rearmInputStart = useCallback(() => {
+    inputStartArmed.current = true
+    inputStartAt.current = null
+  }, [])
+
+  const noteUserInput = useCallback(() => {
+    if (!analyticsHandlerRef.current) return
+    if (!inputStartArmed.current) return
+    inputStartArmed.current = false
+    inputStartAt.current = Date.now()
+    emitStable({ type: 'input_start' })
+  }, [emitStable])
+
+  const handleSearchSettled = useCallback(
+    (query: string, config: TriggerConfig, result: number | 'error') => {
+      if (!analyticsHandlerRef.current) return
+      if (result === 'error') {
+        emitStable({ type: 'search_error', trigger: config.char })
+      } else if (result === 0) {
+        if (!searchEmptyEmitted.current) {
+          searchEmptyEmitted.current = true
+          emitStable({ type: 'search_empty', trigger: config.char, queryLength: query.length })
+        }
+      } else {
+        searchEmptyEmitted.current = false
+      }
+    },
+    [emitStable],
+  )
 
   const {
     suggestions,
@@ -149,7 +225,7 @@ export function usePromptArea({
     suggestionsError,
     search: runSearch,
     reset: resetSearch,
-  } = useTriggerSearch()
+  } = useTriggerSearch({ onSettled: handleSearchSettled })
 
   // Guard against circular DOM <-> model syncs
   const isSyncing = useRef(false)
@@ -298,10 +374,16 @@ export function usePromptArea({
         displayText: chip.displayText,
         ...(chip.data !== undefined ? { data: chip.data } : {}),
       })
+      emit?.({
+        type: 'chip_add',
+        trigger: trigger.config.char,
+        method: 'activate',
+        value: chip.value,
+      })
       const editor = editorRef.current
       if (editor) setCursorAtOffset(editor, chipResult.cursorOffset)
     },
-    [onChange, renderSegmentsToDOM, onChipAdd],
+    [onChange, renderSegmentsToDOM, onChipAdd, emit],
   )
 
   const runTriggerDetection = useCallback(() => {
@@ -319,6 +401,21 @@ export function usePromptArea({
     if (detected) {
       setActiveTrigger(detected)
       setSelectedSuggestionIndex(0)
+
+      // One 'trigger_activate' per activation — re-detection fires on every
+      // keystroke while the query is typed, so dedup on char + start offset.
+      if (emit) {
+        const activationKey = `${detected.config.char}:${detected.startOffset}`
+        if (lastTriggerActivation.current !== activationKey) {
+          lastTriggerActivation.current = activationKey
+          searchEmptyEmitted.current = false
+          emit({
+            type: 'trigger_activate',
+            trigger: detected.config.char,
+            mode: detected.config.mode,
+          })
+        }
+      }
 
       // Position the popover at the trigger character, not the cursor.
       // Build a range at detected.startOffset so the dropdown anchors to
@@ -349,8 +446,9 @@ export function usePromptArea({
     } else {
       setActiveTrigger(null)
       resetSearch()
+      lastTriggerActivation.current = null
     }
-  }, [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch])
+  }, [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch, emit])
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -360,6 +458,7 @@ export function usePromptArea({
     setActiveTrigger(null)
     setSelectedSuggestionIndex(0)
     resetSearch()
+    lastTriggerActivation.current = null
   }, [resetSearch])
 
   // -----------------------------------------------------------------------
@@ -380,6 +479,8 @@ export function usePromptArea({
     onRedo,
     onChipAdd,
     onImagePaste,
+    emit,
+    noteUserInput,
   })
 
   // -----------------------------------------------------------------------
@@ -389,6 +490,15 @@ export function usePromptArea({
   useEffect(() => {
     if (isSyncing.current) return
     if (segmentsEqual(value, lastRenderedValue.current)) return
+
+    // A host resetting the value to empty (the usual "message sent" pattern)
+    // starts a new compose session for 'input_start'.
+    if (
+      value.length === 0 ||
+      (value.length === 1 && value[0].type === 'text' && value[0].text === '')
+    ) {
+      rearmInputStart()
+    }
 
     // Normalize list prefixes (e.g., "- " → "• " when markdown is on)
     // so externally-provided segments render bullet characters correctly.
@@ -401,7 +511,7 @@ export function usePromptArea({
     }
 
     renderSegmentsToDOM(value)
-  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
+  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange, rearmInputStart])
 
   // Re-render when markdown mode changes to apply/strip decorations
   // Also convert bullet characters: • ↔ - in text segments
@@ -431,6 +541,8 @@ export function usePromptArea({
 
   const handleInput = useCallback(() => {
     if (isSyncing.current) return
+
+    noteUserInput()
 
     // During IME composition, sync model but skip trigger detection
     if (events.isComposing.current) {
@@ -463,9 +575,16 @@ export function usePromptArea({
       onChange(truncated)
       renderSegmentsToDOM(truncated)
       setCursorAtOffset(editor, caret != null ? Math.min(caret, maxLength) : maxLength)
+      // One event per at-cap episode, re-armed when the length drops below
+      // the cap — not one per truncated keystroke.
+      if (!atMaxLength.current) {
+        atMaxLength.current = true
+        emit?.({ type: 'max_length_reached', maxLength })
+      }
       runTriggerDetection()
       return
     }
+    atMaxLength.current = false
 
     // Check for list auto-formatting (e.g., "- " -> "bullet ")
     if (markdownEnabled && normalizeBullets && editor && savedCursorOffset !== null) {
@@ -516,6 +635,8 @@ export function usePromptArea({
     normalizeBullets,
     maxLength,
     events,
+    noteUserInput,
+    emit,
   ])
 
   // -----------------------------------------------------------------------
@@ -589,11 +710,18 @@ export function usePromptArea({
 
       if (deletedChip?.type === 'chip') {
         onChipDelete?.(deletedChip)
+        emit?.({
+          type: 'chip_delete',
+          trigger: deletedChip.trigger,
+          method: 'delete',
+          // Auto-resolved chip values are user-typed text — never expose.
+          ...(deletedChip.autoResolved ? {} : { value: deletedChip.value }),
+        })
       }
 
       return true
     },
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipDelete],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipDelete, emit],
   )
 
   // -----------------------------------------------------------------------
@@ -629,11 +757,13 @@ export function usePromptArea({
 
       if (revertedChip?.type === 'chip') {
         onChipDelete?.(revertedChip)
+        // Reverted chips are auto-resolved by definition — no `value`.
+        emit?.({ type: 'chip_delete', trigger: revertedChip.trigger, method: 'revert' })
       }
 
       return true
     },
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipDelete],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipDelete, emit],
   )
 
   // -----------------------------------------------------------------------
@@ -760,6 +890,8 @@ export function usePromptArea({
         trigger: trigger.config.char,
         ...chipData,
       })
+      // No `value`: an auto-resolved chip's value is the user's typed query.
+      emit?.({ type: 'chip_add', trigger: trigger.config.char, method: 'auto_resolve' })
 
       // Position cursor after the auto-resolved chip + trailing space
       const editor = editorRef.current
@@ -769,7 +901,7 @@ export function usePromptArea({
 
       dismissTrigger()
     },
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd, emit],
   )
 
   // -----------------------------------------------------------------------
@@ -798,6 +930,19 @@ export function usePromptArea({
         trigger: activeTrigger.config.char,
         ...chipData,
       })
+      if (emit) {
+        // Works for both keyboard (suggestions[selectedSuggestionIndex]) and
+        // popover clicks — the suggestion object comes from this array.
+        const index = suggestions.indexOf(suggestion)
+        emit({
+          type: 'chip_add',
+          trigger: activeTrigger.config.char,
+          method: 'select',
+          value: suggestion.value,
+          ...(index >= 0 ? { index } : {}),
+          queryLength: activeTrigger.query.length,
+        })
+      }
 
       // Position cursor after the chip + trailing space
       const editor = editorRef.current
@@ -812,7 +957,16 @@ export function usePromptArea({
         editorRef.current?.focus()
       }, 0)
     },
-    [activeTrigger, readSegmentsFromDOM, onChange, renderSegmentsToDOM, dismissTrigger, onChipAdd],
+    [
+      activeTrigger,
+      readSegmentsFromDOM,
+      onChange,
+      renderSegmentsToDOM,
+      dismissTrigger,
+      onChipAdd,
+      emit,
+      suggestions,
+    ],
   )
 
   const selectSuggestion = selectSuggestionInternal
@@ -908,6 +1062,9 @@ export function usePromptArea({
             const plainText = segmentsToPlainText(segments)
             if (isValidTriggerPosition(plainText, cursorPos, launcher.position)) {
               e.preventDefault()
+              // Launch triggers never set activeTrigger — each press is its
+              // own activation, so no transition dedup applies.
+              emit?.({ type: 'trigger_activate', trigger: launcher.char, mode: 'launch' })
               launcher.onActivate({
                 text: plainText,
                 cursorPosition: cursorPos,
@@ -1009,7 +1166,21 @@ export function usePromptArea({
         }
         if (submitOnEnter) {
           e.preventDefault()
-          onSubmit?.(readSegmentsFromDOM())
+          if (onSubmit) {
+            const submitted = readSegmentsFromDOM()
+            onSubmit(submitted)
+            // Emitted only when a submit handler is wired — Enter with no
+            // handler is not a submit gesture. Counts as a 'submit gesture',
+            // not an accepted message: the value may be empty.
+            emit?.(
+              buildSubmitEvent(submitted, {
+                method: 'enter',
+                msSinceInputStart:
+                  inputStartAt.current != null ? Date.now() - inputStartAt.current : null,
+              }),
+            )
+            rearmInputStart()
+          }
           return
         }
         e.preventDefault()
@@ -1090,6 +1261,8 @@ export function usePromptArea({
       events,
       triggers,
       buildInsertChip,
+      emit,
+      rearmInputStart,
     ],
   )
 
@@ -1108,6 +1281,12 @@ export function usePromptArea({
         onChange(newSegments)
         renderSegmentsToDOM(newSegments)
         onChipAdd?.(newChip)
+        emit?.({
+          type: 'chip_add',
+          trigger: newChip.trigger,
+          method: 'programmatic',
+          ...(newChip.autoResolved ? {} : { value: newChip.value }),
+        })
       },
       getPlainText: () => segmentsToPlainText(readSegmentsFromDOM()),
       clear: () => {
@@ -1122,6 +1301,7 @@ export function usePromptArea({
           undoTimer.current = null
         }
         undoBaseState.current = null
+        rearmInputStart()
       },
       setText: (text) => {
         events.pushUndo(readSegmentsFromDOM())
@@ -1167,7 +1347,7 @@ export function usePromptArea({
         if (editor) setSelectionAtOffsets(editor, start, end)
       },
     }),
-    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events],
+    [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onChipAdd, events, emit, rearmInputStart],
   )
 
   // -----------------------------------------------------------------------

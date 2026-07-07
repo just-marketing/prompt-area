@@ -5,6 +5,7 @@ import type {
   PromptAreaImage,
   PromptAreaFile,
 } from '../prompt-area/types'
+import type { PromptAreaAnalyticsHandler } from '../prompt-area/analytics'
 
 export type CompactPromptAreaProps = {
   /** The document segments (controlled) */
@@ -41,6 +42,12 @@ export type CompactPromptAreaProps = {
   files?: PromptAreaFile[]
   /** Called when the user removes a file */
   onFileRemove?: (file: PromptAreaFile) => void
+  /**
+   * Called for notable usage interactions with a typed, content-free event —
+   * see the `onAnalyticsEvent` prop on `PromptAreaProps`. Send-button submits
+   * are emitted with `method: 'button'`.
+   */
+  onAnalyticsEvent?: PromptAreaAnalyticsHandler
 
   // ---- Compact-specific props ----
 

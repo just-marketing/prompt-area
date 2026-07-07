@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import type { PromptAreaProps, PromptAreaHandle } from './types'
+import type { PromptAreaProps, PromptAreaHandle, PromptAreaImage, PromptAreaFile } from './types'
+import type { PromptAreaAnalyticsEvent } from './analytics'
 import { usePromptArea } from './use-prompt-area'
 import { BLUR_DELAY_MS } from './use-prompt-area-events'
 import { TriggerPopover } from './trigger-popover'
@@ -75,8 +76,62 @@ export function PromptArea({
   spellCheck,
   maxLength,
   'aria-describedby': ariaDescribedBy,
+  onAnalyticsEvent,
   ref,
 }: PromptAreaProps & { ref?: React.Ref<PromptAreaHandle> }) {
+  // Usage analytics: keep the latest handler in a ref (inline lambdas must
+  // not churn identities), enrich 'submit' events with the attachment counts
+  // only this component knows, and emit the strip-level remove events. The
+  // hook's emitter provides the try/catch failure isolation.
+  const analyticsRef = useRef(onAnalyticsEvent)
+  const attachmentsRef = useRef({ images: images.length, files: files.length })
+  useEffect(() => {
+    analyticsRef.current = onAnalyticsEvent
+    attachmentsRef.current = { images: images.length, files: files.length }
+  })
+
+  const hookAnalyticsHandler = useMemo(() => {
+    if (!onAnalyticsEvent) return undefined
+    return (event: PromptAreaAnalyticsEvent) => {
+      const handler = analyticsRef.current
+      if (!handler) return
+      if (event.type === 'submit') {
+        handler({
+          ...event,
+          imageCount: attachmentsRef.current.images,
+          fileCount: attachmentsRef.current.files,
+        })
+      } else {
+        handler(event)
+      }
+    }
+  }, [onAnalyticsEvent])
+
+  const emitStripEvent = useCallback((event: PromptAreaAnalyticsEvent) => {
+    const handler = analyticsRef.current
+    if (!handler) return
+    try {
+      handler(event)
+    } catch (error) {
+      console.error('[prompt-area] onAnalyticsEvent handler threw:', error)
+    }
+  }, [])
+
+  const handleImageRemove = useMemo(() => {
+    if (!onImageRemove) return undefined
+    return (image: PromptAreaImage) => {
+      onImageRemove(image)
+      emitStripEvent({ type: 'image_remove' })
+    }
+  }, [onImageRemove, emitStripEvent])
+
+  const handleFileRemove = useMemo(() => {
+    if (!onFileRemove) return undefined
+    return (file: PromptAreaFile) => {
+      onFileRemove(file)
+      emitStripEvent({ type: 'file_remove' })
+    }
+  }, [onFileRemove, emitStripEvent])
   const {
     editorRef,
     activeTrigger,
@@ -111,6 +166,7 @@ export function PromptArea({
     normalizeBullets,
     submitOnEnter,
     maxLength,
+    onAnalyticsEvent: hookAnalyticsHandler,
   })
 
   // Expose imperative handle via ref
@@ -261,7 +317,7 @@ export function PromptArea({
     images.length > 0 ? (
       <ImageStrip
         images={images}
-        onRemove={onImageRemove}
+        onRemove={handleImageRemove}
         onClick={onImageClick}
         className={imagePosition === 'above' ? 'pb-2' : 'pt-2'}
       />
@@ -271,7 +327,7 @@ export function PromptArea({
     files.length > 0 ? (
       <FileStrip
         files={files}
-        onRemove={onFileRemove}
+        onRemove={handleFileRemove}
         onClick={onFileClick}
         className={filePosition === 'above' ? 'pb-2' : 'pt-2'}
       />

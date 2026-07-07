@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useImperativeHandle, useRef, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { PromptArea } from '@/registry/new-york/blocks/prompt-area/prompt-area'
 import { BLUR_DELAY_MS } from '@/registry/new-york/blocks/prompt-area/use-prompt-area-events'
+import { buildSubmitEvent } from '@/registry/new-york/blocks/prompt-area/analytics'
 import type { PromptAreaHandle } from '@/registry/new-york/blocks/prompt-area/types'
 import type { CompactPromptAreaProps } from './types'
 
@@ -91,6 +92,7 @@ export function CompactPromptArea({
   onImageRemove,
   files,
   onFileRemove,
+  onAnalyticsEvent,
   plusButtonIcon,
   onPlusClick,
   submitButtonIcon,
@@ -148,6 +150,31 @@ export function CompactPromptArea({
     onSubmit?.(value)
   }, [onSubmit, value])
 
+  // Send-button submits bypass the inner PromptArea's Enter path, so the
+  // 'submit' analytics event is emitted here — and ONLY here for the button:
+  // `handleSubmit` above stays emit-free because the inner hook already
+  // emits `method: 'enter'` for keyboard submits before invoking it.
+  const analyticsRef = useRef(onAnalyticsEvent)
+  useEffect(() => {
+    analyticsRef.current = onAnalyticsEvent
+  })
+  const handleButtonSubmit = useCallback(() => {
+    handleSubmit()
+    const handler = analyticsRef.current
+    if (!handler || !onSubmit) return
+    try {
+      handler(
+        buildSubmitEvent(value, {
+          method: 'button',
+          imageCount: images?.length ?? 0,
+          fileCount: files?.length ?? 0,
+        }),
+      )
+    } catch (error) {
+      console.error('[prompt-area] onAnalyticsEvent handler threw:', error)
+    }
+  }, [handleSubmit, onSubmit, value, images, files])
+
   return (
     <div
       ref={containerRef}
@@ -180,7 +207,7 @@ export function CompactPromptArea({
           // controls (right) — wider when a slot sits before the submit button.
           // Expanded: roomy box with bottom space reserved for the toolbar.
           isExpanded
-            ? 'pb-14 pl-5 pr-5 pt-4'
+            ? 'pt-4 pr-5 pb-14 pl-5'
             : cn('py-3 pl-[3.25rem]', beforeSubmitSlot ? 'pr-[5.5rem]' : 'pr-[3.25rem]'),
         )}>
         <PromptArea
@@ -202,6 +229,7 @@ export function CompactPromptArea({
           onImageRemove={onImageRemove}
           files={files}
           onFileRemove={onFileRemove}
+          onAnalyticsEvent={onAnalyticsEvent}
           autoGrow
           minHeight={isExpanded ? 48 : 24}
           maxHeight={maxHeight}
@@ -226,11 +254,11 @@ export function CompactPromptArea({
       </button>
 
       {/* Right controls – pinned bottom-right in BOTH states (slot + submit). */}
-      <div className="absolute bottom-1.5 right-1.5 z-10 flex items-center gap-1.5">
+      <div className="absolute right-1.5 bottom-1.5 z-10 flex items-center gap-1.5">
         {beforeSubmitSlot}
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={handleButtonSubmit}
           disabled={disabled || isEmpty}
           className={cn(
             'flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors',
