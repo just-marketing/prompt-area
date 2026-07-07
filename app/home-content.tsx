@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Loader2, Sparkles, X } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
 import { track } from '@/lib/analytics'
+import { cn } from '@/lib/utils'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
@@ -79,7 +80,61 @@ const HERO_FILES: PromptAreaFile[] = [
 ]
 
 const TOAST_DURATION_MS = 3200
+const TOAST_EXIT_MS = 300
 const MAX_TOASTS = 4
+
+type HeroToastData = { id: number; title: string; description?: string; leaving?: boolean }
+
+/**
+ * One toast in the hero's mention-toast stack. Enter and exit both animate
+ * the same two things in sync: the card (opacity + slide) and its grid row
+ * (1fr ↔ 0fr), so the rest of the stack glides to its new position instead
+ * of jumping when a toast appears or leaves.
+ */
+function HeroToast({ toast }: { toast: HeroToastData }) {
+  // Mount collapsed, then open on the next frame so the entrance transitions.
+  const [entered, setEntered] = useState(false)
+  useEffect(() => {
+    let raf2: number | undefined
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setEntered(true))
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      if (raf2 !== undefined) cancelAnimationFrame(raf2)
+    }
+  }, [])
+  const open = entered && !toast.leaving
+
+  return (
+    <div
+      className="grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none"
+      style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
+      <div className="min-h-0 overflow-hidden">
+        {/* px/pt give the clipped box room for the card's shadow and act as
+            the spacing between stacked toasts, collapsing along with the row. */}
+        <div
+          role="status"
+          className={cn(
+            'px-4 pt-2 pb-1 transition-[opacity,translate] duration-300 ease-out motion-reduce:transition-none',
+            open ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
+          )}>
+          <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              @
+            </span>
+            <div className="min-w-0">
+              <div className="text-sm font-medium">{toast.title}</div>
+              {toast.description && (
+                <div className="text-muted-foreground text-xs">{toast.description}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function HomeContent() {
   // Fire `demo_interacted` once, the first time the visitor focuses or types in
@@ -99,9 +154,13 @@ export default function HomeContent() {
   // mock execution with a result card.
   //
   // Toasts stack: each mention click pushes its own toast with its own
-  // auto-dismiss timer, capped at the newest few so rapid clicking can't
-  // flood the corner.
-  const [toasts, setToasts] = useState<{ id: number; title: string; description?: string }[]>([])
+  // lifetime. A toast leaves in two phases — `leaving` plays the exit
+  // animation (fade + slide + row collapse, see HeroToast) and only then is
+  // it removed — so neighbors glide into place instead of jumping.
+  const [toasts, setToasts] = useState<HeroToastData[]>([])
+  // Ref mirror of `toasts` so push/dismiss can read the up-to-date list
+  // synchronously (e.g. to pick a cap-eviction victim) without effects.
+  const toastsRef = useRef<HeroToastData[]>([])
   const toastSeq = useRef(0)
   const toastTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
   const [command, setCommand] = useState<{
@@ -109,15 +168,39 @@ export default function HomeContent() {
     status: 'running' | 'done'
   } | null>(null)
 
-  const pushToast = useCallback((toast: { title: string; description?: string }) => {
-    const id = ++toastSeq.current
-    setToasts((prev) => [...prev, { id, ...toast }].slice(-MAX_TOASTS))
-    const timer = setTimeout(() => {
-      toastTimers.current.delete(timer)
-      setToasts((prev) => prev.filter((t) => t.id !== id))
-    }, TOAST_DURATION_MS)
-    toastTimers.current.add(timer)
+  const updateToasts = useCallback((updater: (prev: HeroToastData[]) => HeroToastData[]) => {
+    toastsRef.current = updater(toastsRef.current)
+    setToasts(toastsRef.current)
   }, [])
+
+  const beginToastDismiss = useCallback(
+    (id: number) => {
+      updateToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)))
+      const timer = setTimeout(() => {
+        toastTimers.current.delete(timer)
+        updateToasts((prev) => prev.filter((t) => t.id !== id))
+      }, TOAST_EXIT_MS)
+      toastTimers.current.add(timer)
+    },
+    [updateToasts],
+  )
+
+  const pushToast = useCallback(
+    (toast: { title: string; description?: string }) => {
+      const id = ++toastSeq.current
+      updateToasts((prev) => [...prev, { id, ...toast }])
+      // Over the cap: the oldest active toast leaves through the same
+      // animated exit instead of vanishing.
+      const active = toastsRef.current.filter((t) => !t.leaving)
+      if (active.length > MAX_TOASTS) beginToastDismiss(active[0].id)
+      const timer = setTimeout(() => {
+        toastTimers.current.delete(timer)
+        beginToastDismiss(id)
+      }, TOAST_DURATION_MS)
+      toastTimers.current.add(timer)
+    },
+    [updateToasts, beginToastDismiss],
+  )
 
   // Clear any in-flight toast timers on unmount.
   useEffect(() => {
@@ -280,24 +363,9 @@ export default function HomeContent() {
             {/* Mention toasts — each @mention chip click "notifies" that
                 teammate. Toasts stack bottom-up, newest nearest the edge. */}
             {toasts.length > 0 && (
-              <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2">
+              <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center">
                 {toasts.map((toast) => (
-                  <div
-                    key={toast.id}
-                    role="status"
-                    className="animate-in fade-in slide-in-from-bottom-3 duration-300">
-                    <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                        @
-                      </span>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium">{toast.title}</div>
-                        {toast.description && (
-                          <div className="text-muted-foreground text-xs">{toast.description}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <HeroToast key={toast.id} toast={toast} />
                 ))}
               </div>
             )}
