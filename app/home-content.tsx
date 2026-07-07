@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check, Loader2, Sparkles, X } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
 import { track } from '@/lib/analytics'
@@ -13,7 +13,12 @@ import { FeaturesGrid } from './sections/features-grid'
 import { ComponentsCascade } from './sections/components-cascade'
 import { StylesCarousel } from './sections/styles-carousel'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
-import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
+import {
+  type ChipSegment,
+  type Segment,
+  type TriggerConfig,
+  type PromptAreaFile,
+} from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
@@ -70,6 +75,8 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
+const TAG_MENU_WIDTH = 256
+
 export default function HomeContent() {
   // Fire `demo_interacted` once, the first time the visitor focuses or types in
   // the live hero composer — our best signal that they actually tried the
@@ -80,6 +87,94 @@ export default function HomeContent() {
     demoTracked.current = true
     track('demo_interacted', { location: 'hero' })
   }, [])
+
+  // Every chip in the hero composer does something when clicked, so visitors
+  // learn the chips are live objects, not styled text: #tags reopen the tag
+  // list (picking one swaps the chip), @mentions pop a "notified" toast, and
+  // /commands run a mock execution with a result card.
+  const demoRef = useRef<HTMLDivElement>(null)
+  const [tagMenu, setTagMenu] = useState<{
+    chip: ChipSegment
+    top: number
+    left: number
+    replaceChip: (next: Omit<ChipSegment, 'type'>) => void
+  } | null>(null)
+  const [toast, setToast] = useState<{ title: string; description?: string } | null>(null)
+  const [command, setCommand] = useState<{
+    chip: ChipSegment
+    status: 'running' | 'done'
+  } | null>(null)
+
+  const handleChipClick = useCallback(
+    (chip: ChipSegment, actions: { replaceChip: (next: Omit<ChipSegment, 'type'>) => void }) => {
+      track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
+
+      if (chip.trigger === '#') {
+        // Anchor the tag list right under the clicked chip, clamped so it
+        // never overflows the demo column on narrow screens.
+        const root = demoRef.current
+        const el = root?.querySelector<HTMLElement>(
+          `[data-chip-trigger="#"][data-chip-value="${CSS.escape(chip.value)}"]`,
+        )
+        if (!root || !el) return
+        const chipRect = el.getBoundingClientRect()
+        const rootRect = root.getBoundingClientRect()
+        setTagMenu({
+          chip,
+          top: chipRect.bottom - rootRect.top + 6,
+          left: Math.max(
+            0,
+            Math.min(chipRect.left - rootRect.left, rootRect.width - TAG_MENU_WIDTH),
+          ),
+          replaceChip: actions.replaceChip,
+        })
+      } else if (chip.trigger === '@') {
+        const user = USERS.find((u) => u.value === chip.value)
+        setToast({
+          title: `${chip.displayText} notified`,
+          description: user ? `${user.description} — looped in on this prompt.` : undefined,
+        })
+      } else if (chip.trigger === '/') {
+        setCommand({ chip, status: 'running' })
+      }
+    },
+    [],
+  )
+
+  // Auto-dismiss the mention toast.
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 3200)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  // Let the mock command "run" briefly before showing its result.
+  useEffect(() => {
+    if (command?.status !== 'running') return
+    const timer = setTimeout(
+      () => setCommand((cur) => (cur?.status === 'running' ? { ...cur, status: 'done' } : cur)),
+      1200,
+    )
+    return () => clearTimeout(timer)
+  }, [command])
+
+  // Close the tag list on outside click or Escape, like a real dropdown.
+  useEffect(() => {
+    if (!tagMenu) return
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-hero-tag-menu]')) setTagMenu(null)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setTagMenu(null)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [tagMenu])
 
   return (
     <div className="flex flex-col">
@@ -131,7 +226,8 @@ export default function HomeContent() {
               transformed ancestor. */}
           <div
             id="demo"
-            className="w-full min-w-0 scroll-mt-20"
+            ref={demoRef}
+            className="relative w-full min-w-0 scroll-mt-20"
             onFocusCapture={handleDemoInteract}
             onInputCapture={handleDemoInteract}>
             <Reveal lift={false} delay={0.15}>
@@ -141,8 +237,120 @@ export default function HomeContent() {
                 initialFiles={HERO_FILES}
                 markdown
                 minHeight={76}
+                onChipClick={handleChipClick}
               />
+
+              {/* Mock /command execution — proves slash-command chips are runnable. */}
+              {command && (
+                <div className="bg-muted/50 animate-in fade-in slide-in-from-bottom-2 mt-2 rounded-lg border p-3 text-sm duration-300">
+                  {command.status === 'running' ? (
+                    <div className="text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Running{' '}
+                      <span className="text-violet-700 dark:text-violet-400">
+                        /{command.chip.value}
+                      </span>{' '}
+                      on {HERO_FILES[0].name}…
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                          <Sparkles className="size-3.5 text-violet-700 dark:text-violet-400" />
+                          <span className="text-violet-700 dark:text-violet-400">
+                            /{command.chip.value}
+                          </span>
+                          · {HERO_FILES[0].name}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCommand(null)}
+                          className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1 transition-colors"
+                          aria-label="Dismiss summary">
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Key messages:</span> Q4 doubles down on
+                        enterprise buyers with an AI-assist angle; budget shifts 30% from paid
+                        social to lifecycle email.
+                      </div>
+                      <div>
+                        <span className="font-semibold">Action items:</span>{' '}
+                        <em>
+                          Strategist locks the channel plan by Friday; Copywriter drafts three hero
+                          variants.
+                        </em>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </Reveal>
+
+            {/* Tag picker — clicking a #tag chip reopens the tag list; picking
+                one swaps the chip in place. */}
+            {tagMenu && (
+              <div
+                data-hero-tag-menu
+                role="menu"
+                aria-label="Swap tag"
+                style={{ top: tagMenu.top, left: tagMenu.left, width: TAG_MENU_WIDTH }}
+                className="bg-popover animate-in fade-in zoom-in-95 absolute z-30 flex flex-col rounded-xl border p-1 shadow-md duration-150">
+                <div className="text-muted-foreground px-3 py-1.5 text-xs font-medium">
+                  Swap tag
+                </div>
+                {TAGS.map((tag) => {
+                  const active = tag.value === tagMenu.chip.value
+                  return (
+                    <button
+                      key={tag.value}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={active}
+                      onClick={() => {
+                        if (!active) {
+                          tagMenu.replaceChip({
+                            trigger: '#',
+                            value: tag.value,
+                            displayText: tag.label,
+                          })
+                          track('demo_tag_swapped', { location: 'hero', tag: tag.value })
+                        }
+                        setTagMenu(null)
+                      }}
+                      className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm transition-colors">
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        #{tag.label}
+                      </span>
+                      <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">
+                        {tag.description}
+                      </span>
+                      {active && <Check className="size-3.5 shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Mention toast — clicking an @mention chip "notifies" that teammate. */}
+            {toast && (
+              <div
+                role="status"
+                className="animate-in fade-in slide-in-from-bottom-3 fixed bottom-6 left-1/2 z-50 -translate-x-1/2 duration-300">
+                <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                    @
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium">{toast.title}</div>
+                    {toast.description && (
+                      <div className="text-muted-foreground text-xs">{toast.description}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
