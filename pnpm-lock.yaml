@@ -7846,10 +7846,6 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.5
 
-  fdir@6.5.0(picomatch@4.0.5):
-    optionalDependencies:
-      picomatch: 4.0.5
-
   fflate@0.4.8: {}
 
   fflate@0.8.3: {}
