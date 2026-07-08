@@ -193,12 +193,14 @@ export function indexOfChildNode(parent: HTMLElement, child: Node): number {
  * produces — decoration elements (the URL `<a>` from `decorateURLsInEditor`,
  * the markdown `<span data-md>` from `decorateMarkdownInEditor`) fall through
  * to the reader's "unknown element" branch and DO produce a text segment, so
- * they must count here too, not just chips/text/`<br>`.
+ * they must count here too, not just chips/text/`<br>`. A chip element only
+ * counts if `chipNodeToSegment` would actually accept it — the reader skips a
+ * chip missing a required attribute (trigger/value/display), so this must too.
  */
 export function childProducesSegment(child: Node): boolean {
   if (child.nodeType === Node.TEXT_NODE) return (child.textContent ?? '') !== ''
   if (isBRElement(child)) return !child.dataset.sentinel
-  if (isChipElement(child)) return true
+  if (isChipElement(child)) return chipNodeToSegment(child) !== null
   if (isHTMLElement(child)) return (child.textContent ?? '') !== ''
   return false
 }

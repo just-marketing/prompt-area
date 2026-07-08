@@ -1845,6 +1845,23 @@ describe('usePromptArea', () => {
       })
     }
 
+    /**
+     * Simulates a real mousedown on a chip. In the browser this always fires
+     * before the `click` event handleClick receives, and — for a chip whose
+     * dropdown is already open — before TriggerPopover's own document-level
+     * outside-mousedown dismiss too (bubble order: editor root, then document).
+     */
+    function mouseDownChip(
+      result: { handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void },
+      chip: HTMLElement,
+    ) {
+      const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true })
+      Object.defineProperty(mouseDownEvent, 'target', { value: chip })
+      act(() => {
+        result.handleMouseDown(mouseDownEvent as unknown as React.MouseEvent<HTMLDivElement>)
+      })
+    }
+
     it('opens the dropdown with the empty-query suggestions on chip click', () => {
       const trigger = makeReopenTrigger()
       const onChipClick = vi.fn()
@@ -2101,12 +2118,21 @@ describe('usePromptArea', () => {
       document.body.removeChild(editor)
     })
 
-    it('inserts a trailing space when the replaced chip is the last segment', () => {
+    it('inserts a trailing space when the replaced chip is the last segment, and lands the caret past it', () => {
+      // Uses the initialProps+rerender form (a stable `value` reference)
+      // rather than a fresh `defaultProps()` closure per render: the hook's
+      // own value-sync effect re-runs whenever `value`'s reference changes,
+      // and dismissTrigger's state updates (called internally by
+      // selectSuggestion) trigger exactly such a re-render — with a
+      // freshly-`[]`-per-render `value`, that effect would "correct" the DOM
+      // right back to empty after the replacement, which is a test-harness
+      // artifact, not real controlled-component behavior (a real consumer's
+      // `value` only changes when `onChange` actually updates it).
       const trigger = makeReopenTrigger()
       const onChange = vi.fn()
-      const { result } = renderHook(() =>
-        usePromptArea(defaultProps({ onChange, triggers: [trigger] })),
-      )
+      const { result } = renderHook((props) => usePromptArea(props), {
+        initialProps: defaultProps({ onChange, triggers: [trigger] }),
+      })
 
       const editor = attachEditor(result.current)
       const chip = createChipNode('#', 'campaign', 'campaign')
@@ -2122,6 +2148,160 @@ describe('usePromptArea', () => {
         expect.objectContaining({ type: 'chip', trigger: '#', value: 'lead-gen' }),
         { type: 'text', text: ' ' },
       ])
+
+      // The caret must land PAST the inserted space (matching resolveChip's
+      // "+1 accounts for the trailing space" convention) — landing exactly at
+      // the chip's end would put it right back at the bare element boundary
+      // the space exists to avoid. The trailing space text node's caret
+      // offset must be at its END (1), not its start (0).
+      const sel = window.getSelection()!
+      const range = sel.getRangeAt(0)
+      expect(range.collapsed).toBe(true)
+      const spaceNode = editor.lastChild!
+      expect(spaceNode.nodeType).toBe(Node.TEXT_NODE)
+      expect(spaceNode.textContent).toBe(' ')
+      expect(range.startContainer).toBe(spaceNode)
+      expect(range.startOffset).toBe(1)
+
+      document.body.removeChild(editor)
+    })
+
+    it('does not fire onChipDelete/onChipAdd when confirming the same value+displayText but different data', () => {
+      // The reverse of the "different data" case: same value/displayText,
+      // genuinely-different data SHOULD still be treated as a change.
+      const trigger = makeReopenTrigger()
+      const onChange = vi.fn()
+      const onChipAdd = vi.fn()
+      const onChipDelete = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChange, onChipAdd, onChipDelete, triggers: [trigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      chip.dataset.chipData = JSON.stringify({ id: 1 })
+      populateEditor(editor, 'tag ', chip, ' now')
+
+      clickChip(result.current, chip)
+      act(() => {
+        result.current.selectSuggestion({
+          value: 'campaign',
+          label: 'campaign',
+          data: { id: 2 },
+        })
+      })
+
+      // Same value/displayText but different `data` — this IS a real change,
+      // so the callbacks must still fire (not swallowed by the unchanged guard).
+      expect(onChipDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ trigger: '#', value: 'campaign', data: { id: 1 } }),
+      )
+      expect(onChipAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ trigger: '#', value: 'campaign', data: { id: 2 } }),
+      )
+
+      document.body.removeChild(editor)
+    })
+
+    it('truly unchanged (same value, displayText, and data) still skips onChipDelete/onChipAdd', () => {
+      const trigger = makeReopenTrigger()
+      const onChipAdd = vi.fn()
+      const onChipDelete = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChipAdd, onChipDelete, triggers: [trigger] })),
+      )
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      chip.dataset.chipData = JSON.stringify({ id: 1 })
+      populateEditor(editor, 'tag ', chip, ' now')
+
+      clickChip(result.current, chip)
+      act(() => {
+        result.current.selectSuggestion({ value: 'campaign', label: 'campaign', data: { id: 1 } })
+      })
+
+      expect(onChipDelete).not.toHaveBeenCalled()
+      expect(onChipAdd).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+
+    it('does not complete an in-progress replacement if disabled becomes true while the dropdown is open', () => {
+      const trigger = makeReopenTrigger()
+      const onChange = vi.fn()
+      const { result, rerender } = renderHook((props) => usePromptArea(props), {
+        initialProps: defaultProps({ onChange, triggers: [trigger] }),
+      })
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip, ' now')
+
+      clickChip(result.current, chip)
+      expect(result.current.activeTrigger).not.toBeNull()
+
+      // Composer becomes disabled while the dropdown is still open (e.g. the
+      // surrounding form starts submitting).
+      act(() => {
+        rerender(defaultProps({ onChange, disabled: true, triggers: [trigger] }))
+      })
+
+      act(() => {
+        result.current.selectSuggestion({ value: 'lead-gen', label: 'lead-gen' })
+      })
+
+      expect(onChange).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+
+    it('recovers via trigger+value search only when the match is unambiguous, and safely no-ops on duplicates', () => {
+      const trigger = makeReopenTrigger()
+      const onChange = vi.fn()
+      const initialValue: Segment[] = [
+        { type: 'text', text: 'a ' },
+        { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+        { type: 'text', text: ' b ' },
+        { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+        { type: 'text', text: ' c' },
+      ]
+      const { result, rerender } = renderHook((props) => usePromptArea(props), {
+        initialProps: defaultProps({ onChange, triggers: [trigger], value: initialValue }),
+      })
+
+      const editor = attachEditor(result.current)
+      const chipEls = [
+        createChipNode('#', 'campaign', 'campaign'),
+        createChipNode('#', 'campaign', 'campaign'),
+      ]
+      populateEditor(editor, 'a ', chipEls[0], ' b ', chipEls[1], ' c')
+
+      // Click the SECOND of the two identical chips.
+      clickChip(result.current, chipEls[1])
+      expect(result.current.activeTrigger).not.toBeNull()
+
+      // Model shifts underneath (both duplicate chips survive, just at new
+      // positions) — the click-time segIndex no longer holds the chip.
+      const shiftedValue: Segment[] = [
+        { type: 'text', text: 'EXTRA ' },
+        { type: 'text', text: 'a ' },
+        { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+        { type: 'text', text: ' b ' },
+        { type: 'chip', trigger: '#', value: 'campaign', displayText: 'campaign' },
+        { type: 'text', text: ' c' },
+      ]
+      act(() => {
+        rerender(defaultProps({ onChange, triggers: [trigger], value: shiftedValue }))
+      })
+
+      act(() => {
+        result.current.selectSuggestion({ value: 'lead-gen', label: 'lead-gen' })
+      })
+
+      // With two ambiguous candidates, the fix must NOT guess — no mutation,
+      // rather than silently editing the wrong instance.
+      expect(onChange).not.toHaveBeenCalled()
 
       document.body.removeChild(editor)
     })
@@ -2196,7 +2376,7 @@ describe('usePromptArea', () => {
       document.body.removeChild(editor)
     })
 
-    it('clicking the same chip again after its dropdown was dismissed toggles it closed instead of reopening', () => {
+    it('clicking the same chip again while its dropdown is open toggles it closed instead of reopening', () => {
       const trigger = makeReopenTrigger()
       const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
 
@@ -2208,16 +2388,48 @@ describe('usePromptArea', () => {
       expect(result.current.activeTrigger).not.toBeNull()
       expect(trigger.onSearch).toHaveBeenCalledTimes(1)
 
-      // Simulate TriggerPopover's outside-mousedown dismiss, which fires
-      // before the click event reaches handleClick in the real DOM sequence.
+      // Real second-click sequence: mousedown on the same chip (still open —
+      // handleMouseDown observes this before anything dismisses it), then
+      // TriggerPopover's own outside-mousedown dismiss (fires before the
+      // click event reaches handleClick), then the click itself.
+      mouseDownChip(result.current, chip)
       act(() => {
         result.current.dismissTrigger()
       })
-
       clickChip(result.current, chip)
 
       expect(result.current.activeTrigger).toBeNull()
       expect(trigger.onSearch).toHaveBeenCalledTimes(1)
+
+      document.body.removeChild(editor)
+    })
+
+    it('dismissing via Escape (not a click on the chip) does not suppress the next reopen', () => {
+      // A dismiss NOT caused by mousedown-on-this-chip (Escape, blur, a
+      // completed selection) must never poison a later, unrelated click on
+      // the same chip — only handleMouseDown observing the chip's OWN
+      // dropdown open at mousedown time may suppress a reopen.
+      const trigger = makeReopenTrigger()
+      const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+      const editor = attachEditor(result.current)
+      const chip = createChipNode('#', 'campaign', 'campaign')
+      populateEditor(editor, 'tag ', chip)
+
+      clickChip(result.current, chip)
+      expect(result.current.activeTrigger).not.toBeNull()
+
+      act(() => {
+        result.current.dismissTrigger()
+      })
+      expect(result.current.activeTrigger).toBeNull()
+
+      // A later click — with no matching mousedown-while-open in between —
+      // must reopen normally.
+      clickChip(result.current, chip)
+
+      expect(result.current.activeTrigger).not.toBeNull()
+      expect(trigger.onSearch).toHaveBeenCalledTimes(2)
 
       document.body.removeChild(editor)
     })

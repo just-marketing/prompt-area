@@ -1043,6 +1043,7 @@ describe('domChildIndexToSegmentIndex', () => {
   const chip = (): HTMLElement => {
     const el = document.createElement('span')
     el.dataset.chipTrigger = '@'
+    el.dataset.chipValue = 'alice'
     el.dataset.chipDisplay = 'Alice'
     el.textContent = '@Alice'
     return el
