@@ -114,6 +114,15 @@ export type AnalyticsEventMap = {
     /** Which demo, e.g. 'hero'. */
     location: string
   }
+  /** A chip (@mention, /command, #tag) in a live demo was clicked. */
+  demo_chip_clicked: {
+    /** Which demo, e.g. 'hero'. */
+    location: string
+    /** The chip's trigger character: '@' | '/' | '#'. */
+    trigger: string
+    /** The chip's resolved value, e.g. 'strategist', 'summarize', 'campaign'. */
+    value: string
+  }
   /** A built-in agent style was selected to preview in the styles carousel. */
   style_selected: {
     /** Style id, e.g. 'chatgpt', 'claude-code'. */

@@ -18,6 +18,7 @@ import {
   PromptArea,
   ActionBar,
   isSegmentsEmpty,
+  type ChipSegment,
   type Segment,
   type TriggerConfig,
   type PromptAreaFile,
@@ -151,12 +152,15 @@ export function CodexInputExample({
   triggers,
   markdown = true,
   minHeight = 40,
+  onChipClick,
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
   triggers?: TriggerConfig[]
   markdown?: boolean
   minHeight?: number
+  /** Forwarded to PromptArea — fires when a chip in the composer is clicked. */
+  onChipClick?: (chip: ChipSegment) => void
 } = {}) {
   const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
     useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles })
@@ -207,6 +211,7 @@ export function CodexInputExample({
               triggers={triggers}
               placeholder="Do anything"
               onSubmit={submit}
+              onChipClick={onChipClick}
               markdown={markdown}
               autoGrow
               minHeight={minHeight}

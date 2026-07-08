@@ -1,19 +1,25 @@
 'use client'
 
-import { Suspense, useCallback, useRef } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Loader2, Sparkles, X } from 'lucide-react'
 import { InstallMethodTabs } from '@/components/install-method-tabs'
 import { InstallCta } from '@/components/install-cta'
 import { track } from '@/lib/analytics'
+import { cn } from '@/lib/utils'
 import { Reveal, RevealGroup, RevealItem } from '@/components/reveal'
 import { RotatingTitle } from '@/components/rotating-title'
 import { FeaturesGrid } from './sections/features-grid'
 import { ComponentsCascade } from './sections/components-cascade'
 import { StylesCarousel } from './sections/styles-carousel'
 import { USERS, COMMANDS, TAGS } from './sections/mock-data'
-import { type Segment, type TriggerConfig, type PromptAreaFile } from 'prompt-area'
+import {
+  type ChipSegment,
+  type Segment,
+  type TriggerConfig,
+  type PromptAreaFile,
+} from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
   import('./examples/codex-input').then((m) => ({ default: m.CodexInputExample })),
@@ -55,6 +61,9 @@ const HERO_TRIGGERS: TriggerConfig[] = [
     position: 'any',
     mode: 'dropdown',
     resolveOnSpace: true,
+    // Clicking a #tag chip reopens the native tag dropdown anchored to the
+    // chip; picking a suggestion swaps the chip in place.
+    reopenOnChipClick: true,
     chipClassName: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
     accessibilityLabel: 'tag',
     onSearch: (q) => TAGS.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())),
@@ -70,6 +79,63 @@ const HERO_FILES: PromptAreaFile[] = [
   },
 ]
 
+const TOAST_DURATION_MS = 3200
+const TOAST_EXIT_MS = 300
+const MAX_TOASTS = 4
+
+type HeroToastData = { id: number; title: string; description?: string; leaving?: boolean }
+
+/**
+ * One toast in the hero's mention-toast stack. Enter and exit both animate
+ * the same two things in sync: the card (opacity + slide) and its grid row
+ * (1fr ↔ 0fr), so the rest of the stack glides to its new position instead
+ * of jumping when a toast appears or leaves.
+ */
+function HeroToast({ toast }: { toast: HeroToastData }) {
+  // Mount collapsed, then open on the next frame so the entrance transitions.
+  const [entered, setEntered] = useState(false)
+  useEffect(() => {
+    let raf2: number | undefined
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setEntered(true))
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      if (raf2 !== undefined) cancelAnimationFrame(raf2)
+    }
+  }, [])
+  const open = entered && !toast.leaving
+
+  return (
+    <div
+      className="grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none"
+      style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
+      <div className="min-h-0 overflow-hidden">
+        {/* px/pt give the clipped box room for the card's shadow and act as
+            the spacing between stacked toasts, collapsing along with the row. */}
+        <div
+          role="status"
+          className={cn(
+            'px-4 pt-2 pb-1 transition-[opacity,translate] duration-300 ease-out motion-reduce:transition-none',
+            open ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
+          )}>
+          <div className="bg-popover flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+              @
+            </span>
+            <div className="min-w-0">
+              <div className="text-sm font-medium">{toast.title}</div>
+              {toast.description && (
+                <div className="text-muted-foreground text-xs">{toast.description}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function HomeContent() {
   // Fire `demo_interacted` once, the first time the visitor focuses or types in
   // the live hero composer — our best signal that they actually tried the
@@ -80,6 +146,94 @@ export default function HomeContent() {
     demoTracked.current = true
     track('demo_interacted', { location: 'hero' })
   }, [])
+
+  // Every chip in the hero composer does something when clicked, so visitors
+  // learn the chips are live objects, not styled text: #tags reopen the native
+  // tag dropdown (via `reopenOnChipClick` on the trigger — picking one swaps
+  // the chip in place), @mentions pop a "notified" toast, and /commands run a
+  // mock execution with a result card.
+  //
+  // Toasts stack: each mention click pushes its own toast with its own
+  // lifetime. A toast leaves in two phases — `leaving` plays the exit
+  // animation (fade + slide + row collapse, see HeroToast) and only then is
+  // it removed — so neighbors glide into place instead of jumping.
+  const [toasts, setToasts] = useState<HeroToastData[]>([])
+  // Ref mirror of `toasts` so push/dismiss can read the up-to-date list
+  // synchronously (e.g. to pick a cap-eviction victim) without effects.
+  const toastsRef = useRef<HeroToastData[]>([])
+  const toastSeq = useRef(0)
+  const toastTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
+  const [command, setCommand] = useState<{
+    chip: ChipSegment
+    status: 'running' | 'done'
+  } | null>(null)
+
+  const updateToasts = useCallback((updater: (prev: HeroToastData[]) => HeroToastData[]) => {
+    toastsRef.current = updater(toastsRef.current)
+    setToasts(toastsRef.current)
+  }, [])
+
+  const beginToastDismiss = useCallback(
+    (id: number) => {
+      updateToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)))
+      const timer = setTimeout(() => {
+        toastTimers.current.delete(timer)
+        updateToasts((prev) => prev.filter((t) => t.id !== id))
+      }, TOAST_EXIT_MS)
+      toastTimers.current.add(timer)
+    },
+    [updateToasts],
+  )
+
+  const pushToast = useCallback(
+    (toast: { title: string; description?: string }) => {
+      const id = ++toastSeq.current
+      updateToasts((prev) => [...prev, { id, ...toast }])
+      // Over the cap: the oldest active toast leaves through the same
+      // animated exit instead of vanishing.
+      const active = toastsRef.current.filter((t) => !t.leaving)
+      if (active.length > MAX_TOASTS) beginToastDismiss(active[0].id)
+      const timer = setTimeout(() => {
+        toastTimers.current.delete(timer)
+        beginToastDismiss(id)
+      }, TOAST_DURATION_MS)
+      toastTimers.current.add(timer)
+    },
+    [updateToasts, beginToastDismiss],
+  )
+
+  // Clear any in-flight toast timers on unmount.
+  useEffect(() => {
+    const timers = toastTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
+  const handleChipClick = useCallback(
+    (chip: ChipSegment) => {
+      track('demo_chip_clicked', { location: 'hero', trigger: chip.trigger, value: chip.value })
+
+      if (chip.trigger === '@') {
+        const user = USERS.find((u) => u.value === chip.value)
+        pushToast({
+          title: `${chip.displayText} notified`,
+          description: user ? `${user.description} — looped in on this prompt.` : undefined,
+        })
+      } else if (chip.trigger === '/') {
+        setCommand({ chip, status: 'running' })
+      }
+    },
+    [pushToast],
+  )
+
+  // Let the mock command "run" briefly before showing its result.
+  useEffect(() => {
+    if (command?.status !== 'running') return
+    const timer = setTimeout(
+      () => setCommand((cur) => (cur?.status === 'running' ? { ...cur, status: 'done' } : cur)),
+      1200,
+    )
+    return () => clearTimeout(timer)
+  }, [command])
 
   return (
     <div className="flex flex-col">
@@ -154,9 +308,67 @@ export default function HomeContent() {
                   initialFiles={HERO_FILES}
                   markdown
                   minHeight={76}
+                  onChipClick={handleChipClick}
                 />
               </Suspense>
+
+              {/* Mock /command execution — proves slash-command chips are runnable. */}
+              {command && (
+                <div className="bg-muted/50 animate-in fade-in slide-in-from-bottom-2 mt-2 rounded-lg border p-3 text-sm duration-300">
+                  {command.status === 'running' ? (
+                    <div className="text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Running{' '}
+                      <span className="text-violet-700 dark:text-violet-400">
+                        /{command.chip.value}
+                      </span>{' '}
+                      on {HERO_FILES[0].name}…
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                          <Sparkles className="size-3.5 text-violet-700 dark:text-violet-400" />
+                          <span className="text-violet-700 dark:text-violet-400">
+                            /{command.chip.value}
+                          </span>
+                          · {HERO_FILES[0].name}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCommand(null)}
+                          className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1 transition-colors"
+                          aria-label="Dismiss summary">
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Key messages:</span> Q4 doubles down on
+                        enterprise buyers with an AI-assist angle; budget shifts 30% from paid
+                        social to lifecycle email.
+                      </div>
+                      <div>
+                        <span className="font-semibold">Action items:</span>{' '}
+                        <em>
+                          Strategist locks the channel plan by Friday; Copywriter drafts three hero
+                          variants.
+                        </em>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </Reveal>
+
+            {/* Mention toasts — each @mention chip click "notifies" that
+                teammate. Toasts stack bottom-up, newest nearest the edge. */}
+            {toasts.length > 0 && (
+              <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center">
+                {toasts.map((toast) => (
+                  <HeroToast key={toast.id} toast={toast} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

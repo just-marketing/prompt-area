@@ -87,6 +87,7 @@ export function PromptArea({
     handleInput,
     handleKeyDown,
     handleClick,
+    handleMouseDown,
     selectSuggestion,
     dismissTrigger,
     handle,
@@ -96,6 +97,7 @@ export function PromptArea({
     value,
     onChange,
     triggers,
+    disabled,
     onSubmit,
     onEscape,
     onChipClick,
@@ -307,6 +309,7 @@ export function PromptArea({
           onFocus={handleFocus}
           onInput={autoGrow ? handleInputWithGrow : handleInput}
           onKeyDown={handleKeyDownCombined}
+          onMouseDown={handleMouseDown}
           onClick={handleClick}
           onPaste={eventHandlers.onPaste}
           onCopy={eventHandlers.onCopy}
