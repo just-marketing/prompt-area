@@ -17,6 +17,7 @@ import {
   getDirectChildContaining,
   chipNodeTextLength,
   chipNodeToSegment,
+  childProducesSegment,
   domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateURLsInEditor,
@@ -1032,6 +1033,81 @@ describe('chipNodeTextLength', () => {
 
   it('treats missing trigger and display as zero length', () => {
     expect(chipNodeTextLength(makeChip())).toBe(0)
+  })
+})
+
+// ===========================================================================
+// childProducesSegment
+// ===========================================================================
+
+describe('childProducesSegment', () => {
+  it('returns true for a non-empty text node', () => {
+    expect(childProducesSegment(document.createTextNode('hi'))).toBe(true)
+  })
+
+  it('returns false for an empty text node', () => {
+    expect(childProducesSegment(document.createTextNode(''))).toBe(false)
+  })
+
+  it('returns true for a well-formed chip element', () => {
+    const chip = document.createElement('span')
+    chip.dataset.chipTrigger = '@'
+    chip.dataset.chipValue = 'alice'
+    chip.dataset.chipDisplay = 'Alice'
+    expect(childProducesSegment(chip)).toBe(true)
+  })
+
+  it('returns false for a chip element missing a required attribute', () => {
+    // Mirrors readSegmentsFromDOM's own chipNodeToSegment(node) check, which
+    // skips a chip missing trigger/value/displayText — childProducesSegment
+    // must agree, or a DOM index maps to the wrong segment index around it.
+    const missingValue = document.createElement('span')
+    missingValue.dataset.chipTrigger = '@'
+    missingValue.dataset.chipDisplay = 'Alice'
+    expect(childProducesSegment(missingValue)).toBe(false)
+
+    const missingDisplay = document.createElement('span')
+    missingDisplay.dataset.chipTrigger = '@'
+    missingDisplay.dataset.chipValue = 'alice'
+    missingDisplay.textContent = '' // getChipDisplay falls back to textContent
+    expect(childProducesSegment(missingDisplay)).toBe(false)
+
+    const missingTrigger = document.createElement('span')
+    missingTrigger.dataset.chipValue = 'alice'
+    missingTrigger.dataset.chipDisplay = 'Alice'
+    expect(childProducesSegment(missingTrigger)).toBe(false)
+  })
+
+  it('returns true for a regular <br>', () => {
+    expect(childProducesSegment(document.createElement('br'))).toBe(true)
+  })
+
+  it('returns false for a sentinel <br>', () => {
+    const sentinel = document.createElement('br')
+    sentinel.dataset.sentinel = 'true'
+    expect(childProducesSegment(sentinel)).toBe(false)
+  })
+
+  it('returns true for a decoration element with text content', () => {
+    const mdSpan = document.createElement('span')
+    mdSpan.dataset.md = 'true'
+    mdSpan.textContent = '**bold**'
+    expect(childProducesSegment(mdSpan)).toBe(true)
+
+    const link = document.createElement('a')
+    link.dataset.url = 'true'
+    link.textContent = 'https://example.com'
+    expect(childProducesSegment(link)).toBe(true)
+  })
+
+  it('returns false for a decoration element with no text content', () => {
+    const emptySpan = document.createElement('span')
+    emptySpan.dataset.md = 'true'
+    expect(childProducesSegment(emptySpan)).toBe(false)
+  })
+
+  it('returns false for a non-element, non-text node (e.g. a comment node)', () => {
+    expect(childProducesSegment(document.createComment('note'))).toBe(false)
   })
 })
 

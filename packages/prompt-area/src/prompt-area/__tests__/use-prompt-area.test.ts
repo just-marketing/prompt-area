@@ -2455,6 +2455,114 @@ describe('usePromptArea', () => {
 
       document.body.removeChild(editor)
     })
+
+    describe('handleMouseDown', () => {
+      it('mousedown on the currently-open chip suppresses the next click from reopening it', () => {
+        const trigger = makeReopenTrigger()
+        const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+        const editor = attachEditor(result.current)
+        const chip = createChipNode('#', 'campaign', 'campaign')
+        populateEditor(editor, 'tag ', chip)
+
+        clickChip(result.current, chip)
+        expect(result.current.activeTrigger).not.toBeNull()
+
+        mouseDownChip(result.current, chip)
+        act(() => {
+          result.current.dismissTrigger()
+        })
+        clickChip(result.current, chip)
+
+        expect(result.current.activeTrigger).toBeNull()
+
+        document.body.removeChild(editor)
+      })
+
+      it('mousedown on a chip whose dropdown is NOT open does not suppress its own click', () => {
+        const trigger = makeReopenTrigger()
+        const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+        const editor = attachEditor(result.current)
+        const chip = createChipNode('#', 'campaign', 'campaign')
+        populateEditor(editor, 'tag ', chip)
+
+        // No prior click opened this chip's dropdown — mousedown should find
+        // openChipNode unset and clear any suppression, not set one.
+        mouseDownChip(result.current, chip)
+        clickChip(result.current, chip)
+
+        expect(result.current.activeTrigger).not.toBeNull()
+
+        document.body.removeChild(editor)
+      })
+
+      it('mousedown elsewhere (not on a chip) clears any pending suppression', () => {
+        const trigger = makeReopenTrigger()
+        const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+        const editor = attachEditor(result.current)
+        const chip = createChipNode('#', 'campaign', 'campaign')
+        populateEditor(editor, 'tag ', chip)
+
+        clickChip(result.current, chip)
+        expect(result.current.activeTrigger).not.toBeNull()
+
+        // Mousedown on plain text, not the chip — this must NOT arm
+        // suppression for the chip.
+        const textMouseDown = new MouseEvent('mousedown', { bubbles: true })
+        Object.defineProperty(textMouseDown, 'target', { value: editor.firstChild })
+        act(() => {
+          result.current.handleMouseDown(
+            textMouseDown as unknown as React.MouseEvent<HTMLDivElement>,
+          )
+        })
+        act(() => {
+          result.current.dismissTrigger()
+        })
+
+        // A later click on the chip must reopen normally — it was never armed.
+        clickChip(result.current, chip)
+        expect(result.current.activeTrigger).not.toBeNull()
+
+        document.body.removeChild(editor)
+      })
+
+      it('does not crash when the editor ref is unattached', () => {
+        const trigger = makeReopenTrigger()
+        const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+        const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true })
+        Object.defineProperty(mouseDownEvent, 'target', { value: document.createElement('span') })
+
+        expect(() => {
+          act(() => {
+            result.current.handleMouseDown(
+              mouseDownEvent as unknown as React.MouseEvent<HTMLDivElement>,
+            )
+          })
+        }).not.toThrow()
+      })
+
+      it('does not crash when the event target is not a Node', () => {
+        const trigger = makeReopenTrigger()
+        const { result } = renderHook(() => usePromptArea(defaultProps({ triggers: [trigger] })))
+
+        const editor = attachEditor(result.current)
+        const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true })
+        Object.defineProperty(mouseDownEvent, 'target', { value: null })
+
+        expect(() => {
+          act(() => {
+            result.current.handleMouseDown(
+              mouseDownEvent as unknown as React.MouseEvent<HTMLDivElement>,
+            )
+          })
+        }).not.toThrow()
+
+        document.body.removeChild(editor)
+      })
+    })
   })
 
   // -------------------------------------------------------------------------
