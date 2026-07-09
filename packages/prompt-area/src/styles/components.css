@@ -60,11 +60,21 @@
     font-size: 0;
     display: inline;
   }
-  /* Enlarge the U+2022 list bullet, which renders small at the text size.
-     `line-height: 0` keeps the bigger glyph from stretching the line box. */
+  /* The raw U+2022 glyph only inks ~5px, so hide it and draw the bullet as a
+     precise CSS dot. The "•" character stays in the span (font-size: 0) so the
+     segment model and caret are unaffected. `--prompt-area-bullet-size` lets
+     consumers retune the diameter. */
   .prompt-area-list-bullet {
-    font-size: 1.4em;
-    line-height: 0;
+    font-size: 0;
+  }
+  .prompt-area-list-bullet::before {
+    content: '';
+    display: inline-block;
+    width: var(--prompt-area-bullet-size, 8px);
+    height: var(--prompt-area-bullet-size, 8px);
+    border-radius: 50%;
+    background: currentColor;
+    vertical-align: middle;
   }
   .prompt-area-chip--inline {
     padding: 0;
