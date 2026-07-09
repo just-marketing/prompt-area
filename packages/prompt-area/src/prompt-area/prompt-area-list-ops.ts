@@ -26,6 +26,54 @@ export type ListContext = {
 }
 
 /**
+ * Parsed shape of a single list line — the SINGLE source of truth for what
+ * counts as a list line (both `getListContext` and the renumber engine derive
+ * from this, so the bullet/number regexes live in exactly one place).
+ *
+ * Offsets (`numberStart`/`numberEnd`) are relative to the START of the line.
+ */
+type ParsedListLine =
+  | { kind: 'bullet'; indent: number; marker: string; prefixLen: number }
+  | {
+      kind: 'numbered'
+      indent: number
+      number: number
+      /** Offset of the first digit within the line. */
+      numberStart: number
+      /** Offset just past the last digit within the line (exclusive). */
+      numberEnd: number
+      prefixLen: number
+    }
+
+/** Classifies a single line as a bullet/numbered list item, or null. */
+function parseListLine(line: string): ParsedListLine | null {
+  const bulletMatch = line.match(/^(\s*)([•\-*]) /)
+  if (bulletMatch) {
+    return {
+      kind: 'bullet',
+      indent: Math.floor(bulletMatch[1].length / 2),
+      marker: bulletMatch[2],
+      prefixLen: bulletMatch[0].length,
+    }
+  }
+
+  const numberMatch = line.match(/^(\s*)(\d+)\. /)
+  if (numberMatch) {
+    const numberStart = numberMatch[1].length
+    return {
+      kind: 'numbered',
+      indent: Math.floor(numberMatch[1].length / 2),
+      number: parseInt(numberMatch[2], 10),
+      numberStart,
+      numberEnd: numberStart + numberMatch[2].length,
+      prefixLen: numberMatch[0].length,
+    }
+  }
+
+  return null
+}
+
+/**
  * Detects if the cursor is in a list line and returns context about it.
  *
  * @param text - The full plain text content
@@ -37,33 +85,17 @@ export function getListContext(text: string, cursorPos: number): ListContext | n
   const lineEnd = text.indexOf('\n', cursorPos)
   const line = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd)
 
-  const bulletMatch = line.match(/^(\s*)([•\-*]) /)
-  if (bulletMatch) {
-    const indentStr = bulletMatch[1]
-    return {
-      lineStart,
-      prefix: bulletMatch[0],
-      indent: Math.floor(indentStr.length / 2),
-      listType: 'bullet',
-      marker: bulletMatch[2],
-      contentStart: lineStart + bulletMatch[0].length,
-    }
-  }
+  const parsed = parseListLine(line)
+  if (!parsed) return null
 
-  const numberMatch = line.match(/^(\s*)(\d+)\. /)
-  if (numberMatch) {
-    const indentStr = numberMatch[1]
-    return {
-      lineStart,
-      prefix: numberMatch[0],
-      indent: Math.floor(indentStr.length / 2),
-      listType: 'numbered',
-      number: parseInt(numberMatch[2], 10),
-      contentStart: lineStart + numberMatch[0].length,
-    }
+  return {
+    lineStart,
+    prefix: line.slice(0, parsed.prefixLen),
+    indent: parsed.indent,
+    listType: parsed.kind,
+    ...(parsed.kind === 'bullet' ? { marker: parsed.marker } : { number: parsed.number }),
+    contentStart: lineStart + parsed.prefixLen,
   }
-
-  return null
 }
 
 /**
@@ -108,6 +140,15 @@ export function insertListContinuation(
   const lineContent = plainText.slice(ctx.contentStart, lineEnd === -1 ? plainText.length : lineEnd)
 
   if (lineContent.trim() === '') {
+    // Enter on an empty item: outdent one level if nested (Notion/Docs style),
+    // otherwise remove the prefix and exit the list to plain text.
+    if (ctx.indent > 0) {
+      const newSegments = replaceTextRange(segments, ctx.lineStart, ctx.lineStart + 2, '')
+      return {
+        segments: newSegments,
+        cursorOffset: Math.max(ctx.lineStart, cursorPos - 2),
+      }
+    }
     const newSegments = replaceTextRange(
       segments,
       ctx.lineStart,
@@ -137,8 +178,20 @@ export function insertListContinuation(
   }
 }
 
+/** Returns the indent level of the list line directly above `lineStart`, or null. */
+function getPrevListLineLevel(text: string, lineStart: number): number | null {
+  if (lineStart === 0) return null
+  const prevLineStart = text.lastIndexOf('\n', lineStart - 2) + 1
+  const parsed = parseListLine(text.slice(prevLineStart, lineStart - 1))
+  return parsed ? parsed.indent : null
+}
+
 /**
- * Indents a list item by one level (adds 2 spaces before the prefix).
+ * Indents a list item by one level (adds 2 spaces before the prefix), capped at
+ * one level deeper than the line above. An item can only nest under a preceding
+ * sibling, so the first item of a list — or an item already one level below its
+ * parent — cannot indent further (returns null). This keeps sub-items visually
+ * connected to a parent instead of drifting arbitrarily deep.
  */
 export function indentListItem(
   segments: Segment[],
@@ -147,6 +200,10 @@ export function indentListItem(
   const plainText = segmentsToPlainText(segments)
   const ctx = getListContext(plainText, cursorPos)
   if (!ctx) return null
+
+  const prevLevel = getPrevListLineLevel(plainText, ctx.lineStart)
+  const maxLevel = prevLevel === null ? 0 : prevLevel + 1
+  if (ctx.indent >= maxLevel) return null
 
   const newSegments = replaceTextRange(segments, ctx.lineStart, ctx.lineStart, '  ')
   return {
@@ -224,4 +281,121 @@ export function normalizeListPrefixes(segments: Segment[], markdownEnabled: bool
     return { ...seg, text: newText }
   })
   return changed ? result : segments
+}
+
+// ---------------------------------------------------------------------------
+// Ordered-list renumbering
+//
+// The visible number is a projection of position (like BlockNote/ProseMirror/
+// Notion), recomputed on every structural edit rather than trusted as stored
+// text. A per-indent-level counter STACK models nested lists: descending starts
+// a fresh counter at 1, ascending continues the shallower level and clears
+// deeper ones. Every run restarts at 1, so `1. 1. 1.` rebuilds to `1. 2. 3.`
+// and Tab-indenting an item restarts its sublist at 1.
+// ---------------------------------------------------------------------------
+
+/**
+ * A single rewritten number's digit run, in the INPUT text's coordinates.
+ * `[oldStart, oldEnd)` spans only the digits (never the indentation or `. `).
+ */
+export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
+
+/**
+ * Recomputes ordered-list numbering across the whole text. Returns the new text
+ * plus the list of changed digit runs (ascending by `oldStart`) for cursor
+ * remapping. When nothing changes, returns the SAME text reference and an empty
+ * `edits` array — the no-op guard that keeps this off the typing hot path.
+ */
+export function renumberOrderedListLines(text: string): { text: string; edits: NumberEdit[] } {
+  const counters = new Map<number, number>()
+  const edits: NumberEdit[] = []
+  const lines = text.split('\n')
+  let out = ''
+  let lineStart = 0
+
+  const clearDeeperThan = (level: number, inclusive: boolean) => {
+    for (const key of counters.keys()) {
+      if (inclusive ? key >= level : key > level) counters.delete(key)
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const parsed = parseListLine(line)
+
+    if (!parsed) {
+      // A blank or plain (non-list) line breaks every open list run.
+      counters.clear()
+      out += line
+    } else if (parsed.kind === 'bullet') {
+      // A bullet interrupts numbered runs at its level and deeper; a shallower
+      // numbered list continues across it.
+      clearDeeperThan(parsed.indent, true)
+      out += line
+    } else {
+      const level = parsed.indent
+      clearDeeperThan(level, false)
+      const current = counters.get(level)
+      const n = current === undefined ? 1 : current + 1
+      counters.set(level, n)
+
+      const newDigits = String(n)
+      if (newDigits === String(parsed.number)) {
+        out += line
+      } else {
+        edits.push({
+          oldStart: lineStart + parsed.numberStart,
+          oldEnd: lineStart + parsed.numberEnd,
+          newText: newDigits,
+        })
+        out += line.slice(0, parsed.numberStart) + newDigits + line.slice(parsed.numberEnd)
+      }
+    }
+
+    if (i < lines.length - 1) out += '\n'
+    lineStart += line.length + 1 // + 1 for the consumed '\n'
+  }
+
+  return edits.length === 0 ? { text, edits } : { text: out, edits }
+}
+
+/**
+ * Remaps a caret/selection offset (in the renumber INPUT's coordinates) across
+ * the digit-run edits. A single scalar delta is wrong: many spans each change
+ * width, so the shift depends on how many changed spans lie strictly before the
+ * offset, with a clamp when the offset sits inside a resized number.
+ */
+export function remapOffset(old: number, edits: NumberEdit[]): number {
+  let shift = 0
+  for (const e of edits) {
+    if (e.oldEnd <= old) {
+      shift += e.newText.length - (e.oldEnd - e.oldStart) // fully before
+    } else if (e.oldStart >= old) {
+      break // this and every later span is after the offset
+    } else {
+      return e.oldStart + shift + Math.min(old - e.oldStart, e.newText.length) // inside → clamp
+    }
+  }
+  return old + shift
+}
+
+/**
+ * Segment-level renumber used by the edit-commit path. Applies the digit-run
+ * edits to the segments (right-to-left so earlier offsets stay valid) and
+ * returns the changed spans for {@link remapOffset}. Digit runs are pure text at
+ * line starts, so chips are never touched.
+ */
+export function renumberOrderedListSegments(segments: Segment[]): {
+  segments: Segment[]
+  edits: NumberEdit[]
+} {
+  const { edits } = renumberOrderedListLines(segmentsToPlainText(segments))
+  if (edits.length === 0) return { segments, edits }
+
+  let result = segments
+  for (let i = edits.length - 1; i >= 0; i--) {
+    const e = edits[i]
+    result = replaceTextRange(result, e.oldStart, e.oldEnd, e.newText)
+  }
+  return { segments: result, edits }
 }

@@ -11,7 +11,7 @@ import {
   insertSegmentsAtCursor,
 } from './clipboard-helpers'
 import { htmlToMarkdown } from './html-to-markdown'
-import { normalizeListPrefixText } from './prompt-area-list-ops'
+import { normalizeListPrefixText, renumberOrderedListLines } from './prompt-area-list-ops'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -206,6 +206,13 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       // typed input. Applies to both the HTML→markdown and plain-text paths.
       if (markdownEnabled && normalizeBullets) {
         text = normalizeListPrefixText(text, true)
+      }
+
+      // Rebuild ordered-list numbering in the pasted block so a copied list with
+      // stale numbers lands sequential. Done at the raw-string level (the caret
+      // collapses to end-of-content after insertion, so no offset remap needed).
+      if (markdownEnabled) {
+        text = renumberOrderedListLines(text).text
       }
 
       // Insert plain text at cursor position using Selection API

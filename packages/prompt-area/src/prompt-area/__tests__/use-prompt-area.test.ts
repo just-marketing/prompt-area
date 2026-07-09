@@ -1495,8 +1495,10 @@ describe('usePromptArea', () => {
       document.body.appendChild(editor)
       ;(result.current.editorRef as React.MutableRefObject<HTMLDivElement>).current = editor
 
-      populateEditor(editor, '\u2022 item')
-      placeCursor(editor.firstChild!, 6)
+      // Two items: the second can nest under the first (indent is capped at one
+      // level below the preceding sibling, so a lone first item cannot indent).
+      populateEditor(editor, '\u2022 a', '\n', '\u2022 item')
+      placeCursor(editor.childNodes[2]!, 6)
 
       act(() => {
         result.current.handleKeyDown(makeKeyEvent('Tab'))
