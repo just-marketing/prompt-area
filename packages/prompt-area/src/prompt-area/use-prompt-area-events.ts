@@ -181,13 +181,23 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         }
       }
 
-      // Prefer rich HTML clipboard when markdown mode is on, so paste from
-      // web/Notion/Docs/GitHub keeps formatting as markdown source text.
-      // Otherwise (markdown off, or no html) fall back to plain-text paste.
+      // When markdown mode is on, prefer the richest clipboard flavor:
+      //   1. text/markdown — some apps (e.g. Slack) hand out markdown directly,
+      //      preserving nested lists that their text/plain flattens.
+      //   2. text/html     — convert web/Notion/Docs/GitHub HTML to markdown.
+      // Otherwise (markdown off, or neither present) fall back to plain text.
       let text = ''
       if (markdownEnabled) {
-        const html = e.clipboardData.getData('text/html')
-        if (html) text = htmlToMarkdown(html)
+        text = e.clipboardData.getData('text/markdown')
+        if (text) {
+          // Slack over-escapes inert punctuation (e.g. `\(` `\)`); unescape
+          // parentheses so the source reads cleanly. They carry no markdown
+          // meaning, unlike `\*` / `\.` / `\-` which are left intact.
+          text = text.replace(/\\([()])/g, '$1')
+        } else {
+          const html = e.clipboardData.getData('text/html')
+          if (html) text = htmlToMarkdown(html)
+        }
       }
       if (!text) text = e.clipboardData.getData('text/plain')
       if (!text) return

@@ -13,6 +13,7 @@ import { placeCursorAtEnd, placeCursor } from './test-helpers'
 type ClipboardPayload = {
   html?: string
   plain?: string
+  markdown?: string
   segments?: string
 }
 
@@ -22,6 +23,7 @@ function makeClipboard(payload: ClipboardPayload, files: File[] = []) {
     files,
     items: [],
     getData: (type: string): string => {
+      if (type === 'text/markdown') return payload.markdown ?? ''
       if (type === 'text/html') return payload.html ?? ''
       if (type === 'text/plain') return payload.plain ?? ''
       if (type === 'text/prompt-area-segments') return payload.segments ?? ''
@@ -94,6 +96,29 @@ describe('PromptArea rich HTML paste (markdown mode)', () => {
     const { editor, onChangeSpy } = renderEditor({ markdown: true })
     paste(editor, { plain: '# raw *markdown* stays' })
     expect(lastOnChange(onChangeSpy)).toBe('# raw *markdown* stays')
+  })
+
+  it('prefers text/markdown over the flat text/plain (e.g. Slack nested lists)', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, {
+      markdown: '1. Branding\n  1. present next step\n  2. build trust\n2. ICP',
+      plain: '1. Branding.\na. present next step.\nb. build trust.\n2. ICP.',
+    })
+    expect(lastOnChange(onChangeSpy)).toBe(
+      '1. Branding\n  1. present next step\n  2. build trust\n2. ICP',
+    )
+  })
+
+  it('unescapes over-escaped parentheses from text/markdown, keeps \\* intact', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { markdown: 'pointers \\(heavy process\\) and a literal \\*star\\*' })
+    expect(lastOnChange(onChangeSpy)).toBe('pointers (heavy process) and a literal \\*star\\*')
+  })
+
+  it('ignores text/markdown when markdown is off (uses text/plain)', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: false })
+    paste(editor, { markdown: '1. a\n  1. b', plain: 'flat plain' })
+    expect(lastOnChange(onChangeSpy)).toBe('flat plain')
   })
 
   it('converts an anchor to a markdown link without corrupting it', () => {
