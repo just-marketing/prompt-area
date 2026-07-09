@@ -23,6 +23,7 @@ import {
   decorateURLsInEditor,
   decorateMarkdownInEditor,
   decorateBulletsInEditor,
+  decorateListIndentInEditor,
   decorateEditor,
 } from '../dom-helpers'
 
@@ -983,10 +984,85 @@ describe('decorateBulletsInEditor', () => {
 })
 
 // ===========================================================================
+// decorateListIndentInEditor
+// ===========================================================================
+
+describe('decorateListIndentInEditor', () => {
+  it('wraps a 2-space nested indent in a per-level-sized indent span', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('1. a\n  2. b'))
+
+    const decorated = decorateListIndentInEditor(editor)
+
+    expect(decorated).toBe(true)
+    const span = editor.querySelector('span.prompt-area-list-indent')
+    expect(span).not.toBeNull()
+    // The original whitespace is preserved as textContent (model/caret unchanged).
+    expect(span?.textContent).toBe('  ')
+    // Level 1 → width scales the per-level custom property by 1.
+    expect((span as HTMLElement).style.width).toContain('* 1')
+  })
+
+  it('scales width by nesting level (4 spaces → level 2)', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('1. a\n    2. b'))
+
+    decorateListIndentInEditor(editor)
+
+    const span = editor.querySelector('span.prompt-area-list-indent') as HTMLElement
+    expect(span.textContent).toBe('    ')
+    expect(span.style.width).toContain('* 2')
+  })
+
+  it('does not wrap a top-level (unindented) list line', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('1. a\n2. b'))
+
+    expect(decorateListIndentInEditor(editor)).toBe(false)
+    expect(editor.querySelector('span.prompt-area-list-indent')).toBeNull()
+  })
+
+  it('round-trips through normalizeEditorDOM without corrupting the whitespace', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('1. a\n  2. b'))
+
+    decorateListIndentInEditor(editor)
+    normalizeEditorDOM(editor)
+
+    // Unwrapping the indent span restores the exact original text — no dup/loss.
+    expect(editor.textContent).toBe('1. a\n  2. b')
+    expect(editor.querySelector('span.prompt-area-list-indent')).toBeNull()
+  })
+
+  it('does NOT mis-indent mid-line whitespace before a number (regression: ordering vs splitters)', () => {
+    // A URL splits the line's text node; the tail fragment "   1. y" begins with
+    // whitespace. decorateListIndentInEditor must run BEFORE the URL/markdown
+    // splitters so its `^` anchor only ever sees a real line start, never the
+    // start of a mid-line fragment. Exercised through the composed decorateEditor.
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('see https://x.io   1. y'))
+
+    decorateEditor(editor, true)
+
+    expect(editor.querySelector('a')).not.toBeNull()
+    expect(editor.querySelector('span.prompt-area-list-indent')).toBeNull()
+  })
+})
+
+// ===========================================================================
 // decorateEditor (composed)
 // ===========================================================================
 
 describe('decorateEditor', () => {
+  it('indents a genuine nested list line', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('1. a\n  2. b'))
+
+    decorateEditor(editor, true)
+
+    expect(editor.querySelector('span.prompt-area-list-indent')).not.toBeNull()
+  })
+
   it('applies URL, markdown, and bullet decorations when markdown is on', () => {
     const editor = document.createElement('div')
     editor.appendChild(document.createTextNode('• **bold** see https://x.io'))

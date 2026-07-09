@@ -31,6 +31,8 @@ import {
   outdentListItem,
   removeListPrefix,
   normalizeListPrefixes,
+  renumberOrderedListSegments,
+  remapOffset,
 } from './prompt-area-list-ops'
 import {
   isHTMLElement,
@@ -1038,10 +1040,19 @@ export function usePromptArea({
         editor: HTMLDivElement,
         result: { segments: Segment[]; cursorOffset: number },
       ) => {
-        lastRenderedValue.current = result.segments
-        onChange(result.segments)
-        renderSegmentsToDOM(result.segments)
-        setCursorAtOffset(editor, result.cursorOffset)
+        // Ordered-list numbers are a projection of position: rebuild them on
+        // every structural edit and remap the caret across any digit-run width
+        // changes. No-op (same reference) when there are no ordered lists.
+        let { segments, cursorOffset } = result
+        if (markdownEnabled) {
+          const renumbered = renumberOrderedListSegments(segments)
+          segments = renumbered.segments
+          cursorOffset = remapOffset(cursorOffset, renumbered.edits)
+        }
+        lastRenderedValue.current = segments
+        onChange(segments)
+        renderSegmentsToDOM(segments)
+        setCursorAtOffset(editor, cursorOffset)
       }
 
       const tryListContinuation = (editor: HTMLDivElement): boolean => {

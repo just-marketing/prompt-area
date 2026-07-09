@@ -86,6 +86,14 @@
     border-radius: 50%;
     background: currentColor;
   }
+  /* Nested-list indentation: the original 2-space run stays inside the span (so
+     the model and caret are unaffected) while `width` renders a wide, Notion-
+     like gap that scales per level. `--prompt-area-indent-size` (per level) lets
+     consumers retune the depth. */
+  .prompt-area-list-indent {
+    display: inline-block;
+    white-space: pre;
+  }
   .prompt-area-chip--inline {
     padding: 0;
     border-radius: 0;

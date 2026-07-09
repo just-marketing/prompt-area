@@ -932,12 +932,22 @@ describe('insertListContinuation', () => {
 // ===========================================================================
 
 describe('indentListItem', () => {
-  it('indents a bullet item by 2 spaces', () => {
-    const segments: Segment[] = [{ type: 'text', text: '\u2022 item' }]
-    const result = indentListItem(segments, 6)
+  it('indents a bullet item by 2 spaces under a preceding sibling', () => {
+    const segments: Segment[] = [{ type: 'text', text: '\u2022 a\n\u2022 item' }]
+    const result = indentListItem(segments, 10) // cursor in the second item
     expect(result).not.toBeNull()
-    expect(segmentsToPlainText(result!.segments)).toBe('  \u2022 item')
-    expect(result!.cursorOffset).toBe(8) // original 6 + 2
+    expect(segmentsToPlainText(result!.segments)).toBe('\u2022 a\n  \u2022 item')
+    expect(result!.cursorOffset).toBe(12) // original 10 + 2
+  })
+
+  it('returns null for the first item of a list (nothing to nest under)', () => {
+    const segments: Segment[] = [{ type: 'text', text: '\u2022 item' }]
+    expect(indentListItem(segments, 6)).toBeNull()
+  })
+
+  it('returns null when already one level deeper than the parent', () => {
+    const segments: Segment[] = [{ type: 'text', text: '\u2022 a\n  \u2022 item' }]
+    expect(indentListItem(segments, 11)).toBeNull()
   })
 
   it('returns null for non-list line', () => {

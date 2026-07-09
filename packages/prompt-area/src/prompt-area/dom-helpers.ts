@@ -606,12 +606,95 @@ export function decorateBulletsInEditor(editor: HTMLElement): boolean {
 }
 
 /**
+ * Matches the line-leading whitespace run of an indented list line (bullet or
+ * numbered). The lookahead keeps the list prefix itself out of the capture, so
+ * only the indentation is wrapped.
+ */
+const LIST_INDENT_PATTERN = /(^|\n)([ \t]+)(?=(?:[•\-*] |\d+\. ))/g
+
+/**
+ * Wraps each list line's leading indentation in an inline-block
+ * `<span class="prompt-area-list-indent">` sized per nesting level, so nested
+ * items read with a wide, Notion-like indent instead of the raw 2-space gap.
+ *
+ * Like the other decorations this is display-only: the span keeps the original
+ * whitespace as its textContent (so plain-text length and caret offsets are
+ * unchanged) and is stripped by {@link normalizeEditorDOM} each input cycle.
+ * Must run BEFORE the node-splitting passes ({@link decorateURLsInEditor},
+ * {@link decorateMarkdownInEditor}, {@link decorateBulletsInEditor}) so every
+ * direct-child text node is still a whole line — otherwise a mid-line split
+ * fragment beginning with whitespace would let the `^` anchor false-match
+ * non-line-leading whitespace.
+ *
+ * @returns Whether any decorations were applied
+ */
+export function decorateListIndentInEditor(editor: HTMLElement): boolean {
+  let decorated = false
+
+  const textNodes: Text[] = []
+  for (let i = 0; i < editor.childNodes.length; i++) {
+    const node = editor.childNodes[i]
+    if (isTextNode(node)) textNodes.push(node)
+  }
+
+  for (const textNode of textNodes) {
+    const text = textNode.textContent ?? ''
+    LIST_INDENT_PATTERN.lastIndex = 0
+    const runs: { start: number; end: number }[] = []
+    let match: RegExpExecArray | null
+    while ((match = LIST_INDENT_PATTERN.exec(text)) !== null) {
+      const start = match.index + match[1].length
+      runs.push({ start, end: start + match[2].length })
+    }
+
+    if (runs.length === 0) continue
+
+    decorated = true
+    const parent = textNode.parentNode
+    if (!parent) continue
+
+    const fragment = document.createDocumentFragment()
+    let lastIndex = 0
+
+    for (const { start, end } of runs) {
+      if (start > lastIndex) {
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)))
+      }
+      const whitespace = text.slice(start, end)
+      const level = Math.floor(whitespace.length / 2)
+      const span = document.createElement('span')
+      span.dataset.md = 'true'
+      span.className = 'prompt-area-list-indent'
+      span.style.width = `calc(var(--prompt-area-indent-size, 1.5em) * ${level})`
+      span.textContent = whitespace
+      fragment.appendChild(span)
+      lastIndex = end
+    }
+
+    if (lastIndex < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)))
+    }
+
+    parent.replaceChild(fragment, textNode)
+  }
+
+  return decorated
+}
+
+/**
  * Applies every display-only decoration to the editor in one pass: URL links
- * always, plus markdown emphasis and list bullets when markdown mode is on.
- * Each decoration is stripped by {@link normalizeEditorDOM} on the next input
- * cycle and re-applied here, so the segment model is never mutated.
+ * always, plus markdown emphasis, list indentation, and list bullets when
+ * markdown mode is on. Each decoration is stripped by {@link normalizeEditorDOM}
+ * on the next input cycle and re-applied here, so the segment model is never
+ * mutated.
+ *
+ * List indentation runs FIRST, while each direct-child text node is still a
+ * whole line: the URL and markdown passes split text nodes mid-line, and a tail
+ * fragment starting with whitespace would let the indent regex's `^` anchor
+ * false-match non-line-leading whitespace (e.g. `see http://x   1. y`).
  */
 export function decorateEditor(editor: HTMLElement, markdownEnabled: boolean): void {
+  if (markdownEnabled) decorateListIndentInEditor(editor)
   decorateURLsInEditor(editor)
   if (markdownEnabled) {
     decorateMarkdownInEditor(editor)
