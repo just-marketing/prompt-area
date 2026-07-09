@@ -43,9 +43,7 @@ import {
   indexOfChildNode,
   domChildIndexToSegmentIndex,
   normalizeEditorDOM,
-  decorateURLsInEditor,
-  decorateMarkdownInEditor,
-  decorateBulletsInEditor,
+  decorateEditor,
   safeJsonStringify,
   getSelectionRange,
 } from './dom-helpers'
@@ -299,12 +297,8 @@ export function usePromptArea({
         editor.appendChild(sentinel)
       }
 
-      // Decorate URLs and markdown formatting in text nodes
-      decorateURLsInEditor(editor)
-      if (markdownEnabled) {
-        decorateMarkdownInEditor(editor)
-        decorateBulletsInEditor(editor)
-      }
+      // Decorate URLs, markdown formatting, and list bullets in text nodes
+      decorateEditor(editor, markdownEnabled)
 
       if (savedCursor) {
         restoreCursorPosition(editor, savedCursor)
@@ -546,13 +540,9 @@ export function usePromptArea({
       undoTimer.current = null
     }, UNDO_DEBOUNCE_MS)
 
-    // Decorate URLs and markdown formatting in text nodes
+    // Decorate URLs, markdown formatting, and list bullets in text nodes
     if (editor) {
-      decorateURLsInEditor(editor)
-      if (markdownEnabled) {
-        decorateMarkdownInEditor(editor)
-        decorateBulletsInEditor(editor)
-      }
+      decorateEditor(editor, markdownEnabled)
       if (savedCursorOffset !== null) {
         setCursorAtOffset(editor, savedCursorOffset)
       }

@@ -605,6 +605,20 @@ export function decorateBulletsInEditor(editor: HTMLElement): boolean {
   return decorated
 }
 
+/**
+ * Applies every display-only decoration to the editor in one pass: URL links
+ * always, plus markdown emphasis and list bullets when markdown mode is on.
+ * Each decoration is stripped by {@link normalizeEditorDOM} on the next input
+ * cycle and re-applied here, so the segment model is never mutated.
+ */
+export function decorateEditor(editor: HTMLElement, markdownEnabled: boolean): void {
+  decorateURLsInEditor(editor)
+  if (markdownEnabled) {
+    decorateMarkdownInEditor(editor)
+    decorateBulletsInEditor(editor)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Selection helpers
 // ---------------------------------------------------------------------------

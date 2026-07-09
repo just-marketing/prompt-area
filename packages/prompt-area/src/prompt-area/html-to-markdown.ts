@@ -211,7 +211,7 @@ function serializeNode(node: Node, depth: number): string {
     case 'H4':
     case 'H5':
     case 'H6':
-      return `\n\n${'#'.repeat(tag.charCodeAt(1) - 48)} ${serializeChildren(node, depth).trim()}\n\n`
+      return `\n\n${'#'.repeat(Number(tag[1]))} ${serializeChildren(node, depth).trim()}\n\n`
     case 'P':
       return `\n\n${serializeChildren(node, depth).trim()}\n\n`
     case 'DIV':
