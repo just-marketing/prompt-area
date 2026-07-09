@@ -23,6 +23,7 @@ import {
   outdentListItem,
   removeListPrefix,
   normalizeListPrefixes,
+  normalizeListPrefixText,
 } from '../prompt-area-list-ops'
 
 // ---------------------------------------------------------------------------
@@ -1455,6 +1456,28 @@ describe('normalizeListPrefixes', () => {
       type: 'text',
       text: 'format as:\n\u2022 **Key messages**\n\u2022 *Action items*',
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// normalizeListPrefixText
+// ---------------------------------------------------------------------------
+
+describe('normalizeListPrefixText', () => {
+  it('converts line-start dashes to bullets when markdown is enabled', () => {
+    expect(normalizeListPrefixText('- a\n- b', true)).toBe('• a\n• b')
+  })
+
+  it('preserves indentation for nested list markers', () => {
+    expect(normalizeListPrefixText('- a\n    - b', true)).toBe('• a\n    • b')
+  })
+
+  it('converts bullets back to dashes when markdown is disabled', () => {
+    expect(normalizeListPrefixText('• a\n• b', false)).toBe('- a\n- b')
+  })
+
+  it('leaves mid-line dashes untouched', () => {
+    expect(normalizeListPrefixText('a - b', true)).toBe('a - b')
   })
 })
 

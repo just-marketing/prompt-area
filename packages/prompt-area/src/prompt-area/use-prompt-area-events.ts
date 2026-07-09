@@ -10,6 +10,8 @@ import {
   parseSegmentsFromClipboard,
   insertSegmentsAtCursor,
 } from './clipboard-helpers'
+import { htmlToMarkdown } from './html-to-markdown'
+import { normalizeListPrefixText } from './prompt-area-list-ops'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,6 +25,10 @@ type EventHandlerDeps = {
   runTriggerDetection: () => void
   dismissTrigger: () => void
   triggers: TriggerConfig[]
+  /** When true, rich `text/html` on the clipboard is converted to markdown. */
+  markdownEnabled: boolean
+  /** When true, pasted list markers ("- ") are normalized to the "•" glyph. */
+  normalizeBullets: boolean
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
@@ -77,6 +83,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     runTriggerDetection,
     dismissTrigger,
     triggers,
+    markdownEnabled,
+    normalizeBullets,
     onPaste: onPasteCallback,
     onUndo,
     onRedo,
@@ -173,9 +181,32 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         }
       }
 
-      // Fall back to plain text paste
-      const text = e.clipboardData.getData('text/plain')
+      // When markdown mode is on, prefer the richest clipboard flavor:
+      //   1. text/markdown — some apps (e.g. Slack) hand out markdown directly,
+      //      preserving nested lists that their text/plain flattens.
+      //   2. text/html     — convert web/Notion/Docs/GitHub HTML to markdown.
+      // Otherwise (markdown off, or neither present) fall back to plain text.
+      let text = ''
+      if (markdownEnabled) {
+        text = e.clipboardData.getData('text/markdown')
+        if (text) {
+          // Slack over-escapes inert punctuation (e.g. `\(` `\)`); unescape
+          // parentheses so the source reads cleanly. They carry no markdown
+          // meaning, unlike `\*` / `\.` / `\-` which are left intact.
+          text = text.replace(/\\([()])/g, '$1')
+        } else {
+          const html = e.clipboardData.getData('text/html')
+          if (html) text = htmlToMarkdown(html)
+        }
+      }
+      if (!text) text = e.clipboardData.getData('text/plain')
       if (!text) return
+
+      // Normalize pasted list markers ("- " → "•") so pasted bullets match
+      // typed input. Applies to both the HTML→markdown and plain-text paths.
+      if (markdownEnabled && normalizeBullets) {
+        text = normalizeListPrefixText(text, true)
+      }
 
       // Insert plain text at cursor position using Selection API
       const range = getSelectionRange()
@@ -245,6 +276,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       runTriggerDetection,
       renderSegmentsToDOM,
       triggers,
+      markdownEnabled,
+      normalizeBullets,
       onPasteCallback,
       onChipAdd,
       onImagePaste,

@@ -196,6 +196,32 @@
     font-size: 0;
     display: inline;
   }
+  /* The raw U+2022 glyph only inks ~5px, so hide it and draw the bullet as a
+     precise CSS dot. The "•" character stays in the span (font-size: 0) so the
+     segment model and caret are unaffected. `--prompt-area-bullet-size` (default
+     8px) lets consumers retune the diameter. */
+  .prompt-area-list-bullet {
+    font-size: 0;
+    /* Center the dot on the text: inline-flex keeps `align-items` referencing
+       the real line box, while `vertical-align: middle` positions the span
+       against the editor's x-height (not the span's own zeroed font). The small
+       upward nudge optically seats it on the text's midline. */
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    transform: translateY(-1.5px);
+    /* Extra breathing room between the dot and the text (on top of the space
+       character that follows the "•" in the model). Uses px, not em, because
+       the span's font-size is 0 (which would collapse any em value). */
+    margin-right: 4px;
+  }
+  .prompt-area-list-bullet::before {
+    content: '';
+    width: var(--prompt-area-bullet-size, 6px);
+    height: var(--prompt-area-bullet-size, 6px);
+    border-radius: 50%;
+    background: currentColor;
+  }
 
   /* Blinking caret for the Prompt Area cover preview on the homepage. Idle
      animation, so it only runs when the user hasn't asked to reduce motion. */

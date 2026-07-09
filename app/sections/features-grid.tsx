@@ -25,9 +25,9 @@ const FEATURES = [
   },
   {
     icon: Type,
-    title: 'Inline Markdown',
+    title: 'Inline Markdown & Rich Paste',
     description:
-      'Bold, italic, lists, and auto-linked URLs render live as you type. Keyboard shortcuts included.',
+      'Bold, italic, lists, and auto-linked URLs render live as you type. Paste from Slack, Notion, or Google Docs and it converts to clean markdown.',
   },
   {
     icon: RotateCcw,

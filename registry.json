@@ -27,6 +27,10 @@
           "type": "registry:component"
         },
         {
+          "path": "packages/prompt-area/src/prompt-area/html-to-markdown.ts",
+          "type": "registry:component"
+        },
+        {
           "path": "packages/prompt-area/src/prompt-area/prompt-area-engine.ts",
           "type": "registry:component"
         },

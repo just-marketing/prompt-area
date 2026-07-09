@@ -199,17 +199,26 @@ export function removeListPrefix(
 }
 
 /**
- * Normalizes markdown list prefixes in segments:
+ * Normalizes markdown list prefixes in a raw text string (single source of
+ * truth for the bullet-glyph swap, shared by segment normalization and paste):
  * - When markdown is enabled, converts "- " at line starts to "• "
  * - When markdown is disabled, converts "• " at line starts to "- "
+ */
+export function normalizeListPrefixText(text: string, markdownEnabled: boolean): string {
+  return markdownEnabled
+    ? text.replace(/(^|\n)(\s*)- /g, '$1$2• ')
+    : text.replace(/(^|\n)(\s*)• /g, '$1$2- ')
+}
+
+/**
+ * Normalizes markdown list prefixes across text segments. See
+ * {@link normalizeListPrefixText} for the per-line rule.
  */
 export function normalizeListPrefixes(segments: Segment[], markdownEnabled: boolean): Segment[] {
   let changed = false
   const result = segments.map((seg) => {
     if (seg.type !== 'text') return seg
-    const newText = markdownEnabled
-      ? seg.text.replace(/(^|\n)(\s*)- /g, '$1$2• ')
-      : seg.text.replace(/(^|\n)(\s*)• /g, '$1$2- ')
+    const newText = normalizeListPrefixText(seg.text, markdownEnabled)
     if (newText === seg.text) return seg
     changed = true
     return { ...seg, text: newText }

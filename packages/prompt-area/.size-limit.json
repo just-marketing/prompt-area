@@ -4,7 +4,7 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom", "react/jsx-runtime", "clsx", "tailwind-merge"],
-    "limit": "16 KB"
+    "limit": "17 KB"
   },
   {
     "name": "prompt-area (component)",
