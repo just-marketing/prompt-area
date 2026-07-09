@@ -202,15 +202,19 @@
      8px) lets consumers retune the diameter. */
   .prompt-area-list-bullet {
     font-size: 0;
+    /* Center the dot on the text: inline-flex keeps `align-items` referencing
+       the real line box, while `vertical-align: middle` positions the span
+       against the editor's x-height (not the span's own zeroed font). */
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
   }
   .prompt-area-list-bullet::before {
     content: '';
-    display: inline-block;
     width: var(--prompt-area-bullet-size, 8px);
     height: var(--prompt-area-bullet-size, 8px);
     border-radius: 50%;
     background: currentColor;
-    vertical-align: middle;
   }
 
   /* Blinking caret for the Prompt Area cover preview on the homepage. Idle
