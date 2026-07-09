@@ -10,6 +10,8 @@ import {
   parseSegmentsFromClipboard,
   insertSegmentsAtCursor,
 } from './clipboard-helpers'
+import { htmlToMarkdown } from './html-to-markdown'
+import { normalizeListPrefixText } from './prompt-area-list-ops'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,6 +25,10 @@ type EventHandlerDeps = {
   runTriggerDetection: () => void
   dismissTrigger: () => void
   triggers: TriggerConfig[]
+  /** When true, rich `text/html` on the clipboard is converted to markdown. */
+  markdownEnabled: boolean
+  /** When true, pasted list markers ("- ") are normalized to the "•" glyph. */
+  normalizeBullets: boolean
   onPaste?: (data: { segments: Segment[]; source: 'internal' | 'external' }) => void
   onUndo?: (segments: Segment[]) => void
   onRedo?: (segments: Segment[]) => void
@@ -77,6 +83,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     runTriggerDetection,
     dismissTrigger,
     triggers,
+    markdownEnabled,
+    normalizeBullets,
     onPaste: onPasteCallback,
     onUndo,
     onRedo,
@@ -173,9 +181,22 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
         }
       }
 
-      // Fall back to plain text paste
-      const text = e.clipboardData.getData('text/plain')
+      // Prefer rich HTML clipboard when markdown mode is on, so paste from
+      // web/Notion/Docs/GitHub keeps formatting as markdown source text.
+      // Otherwise (markdown off, or no html) fall back to plain-text paste.
+      let text = ''
+      if (markdownEnabled) {
+        const html = e.clipboardData.getData('text/html')
+        if (html) text = htmlToMarkdown(html)
+      }
+      if (!text) text = e.clipboardData.getData('text/plain')
       if (!text) return
+
+      // Normalize pasted list markers ("- " → "•") so pasted bullets match
+      // typed input. Applies to both the HTML→markdown and plain-text paths.
+      if (markdownEnabled && normalizeBullets) {
+        text = normalizeListPrefixText(text, true)
+      }
 
       // Insert plain text at cursor position using Selection API
       const range = getSelectionRange()
@@ -245,6 +266,8 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       runTriggerDetection,
       renderSegmentsToDOM,
       triggers,
+      markdownEnabled,
+      normalizeBullets,
       onPasteCallback,
       onChipAdd,
       onImagePaste,

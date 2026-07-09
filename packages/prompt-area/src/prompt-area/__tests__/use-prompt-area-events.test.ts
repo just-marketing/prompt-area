@@ -22,6 +22,8 @@ function createDeps(overrides: Partial<Parameters<typeof usePromptAreaEvents>[0]
     runTriggerDetection: vi.fn(),
     dismissTrigger: vi.fn(),
     triggers: [] as TriggerConfig[],
+    markdownEnabled: true,
+    normalizeBullets: true,
     ...overrides,
     _editor: editor, // for cleanup
   }

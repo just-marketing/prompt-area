@@ -417,6 +417,8 @@ export function usePromptArea({
     runTriggerDetection,
     dismissTrigger,
     triggers,
+    markdownEnabled,
+    normalizeBullets,
     onPaste,
     onRawPaste,
     onUndo,
