@@ -22,6 +22,7 @@ import {
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
+  decorateBulletsInEditor,
 } from '../dom-helpers'
 
 // ===========================================================================
@@ -930,6 +931,53 @@ describe('decorateMarkdownInEditor edge cases', () => {
 
     expect(decorated).toBe(false)
     expect(editor.querySelector('span[data-md]')).toBeNull()
+  })
+})
+
+// ===========================================================================
+// decorateBulletsInEditor
+// ===========================================================================
+
+describe('decorateBulletsInEditor', () => {
+  it('wraps a leading "•" bullet in a sizing span', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• item'))
+
+    expect(decorateBulletsInEditor(editor)).toBe(true)
+    const span = editor.querySelector('span.prompt-area-list-bullet')
+    expect(span).not.toBeNull()
+    expect(span?.textContent).toBe('•')
+    // The rest of the line stays plain text.
+    expect(editor.textContent).toBe('• item')
+  })
+
+  it('wraps bullets at every line start, including indented nesting', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• a\n• b\n    • c'))
+
+    decorateBulletsInEditor(editor)
+    const spans = editor.querySelectorAll('span.prompt-area-list-bullet')
+    expect(spans.length).toBe(3)
+    expect(editor.textContent).toBe('• a\n• b\n    • c')
+  })
+
+  it('ignores a "•" that is not at a line start', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('a • b'))
+
+    expect(decorateBulletsInEditor(editor)).toBe(false)
+    expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
+  })
+
+  it('is reverted by normalizeEditorDOM (display-only, model keeps "•")', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• item'))
+
+    decorateBulletsInEditor(editor)
+    normalizeEditorDOM(editor)
+
+    expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
+    expect(editor.textContent).toBe('• item')
   })
 })
 

@@ -196,6 +196,12 @@
     font-size: 0;
     display: inline;
   }
+  /* Enlarge the U+2022 list bullet, which renders small at the text size.
+     `line-height: 0` keeps the bigger glyph from stretching the line box. */
+  .prompt-area-list-bullet {
+    font-size: 1.4em;
+    line-height: 0;
+  }
 
   /* Blinking caret for the Prompt Area cover preview on the homepage. Idle
      animation, so it only runs when the user hasn't asked to reduce motion. */

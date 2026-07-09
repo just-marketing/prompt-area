@@ -45,6 +45,7 @@ import {
   normalizeEditorDOM,
   decorateURLsInEditor,
   decorateMarkdownInEditor,
+  decorateBulletsInEditor,
   safeJsonStringify,
   getSelectionRange,
 } from './dom-helpers'
@@ -300,7 +301,10 @@ export function usePromptArea({
 
       // Decorate URLs and markdown formatting in text nodes
       decorateURLsInEditor(editor)
-      if (markdownEnabled) decorateMarkdownInEditor(editor)
+      if (markdownEnabled) {
+        decorateMarkdownInEditor(editor)
+        decorateBulletsInEditor(editor)
+      }
 
       if (savedCursor) {
         restoreCursorPosition(editor, savedCursor)
@@ -545,7 +549,10 @@ export function usePromptArea({
     // Decorate URLs and markdown formatting in text nodes
     if (editor) {
       decorateURLsInEditor(editor)
-      if (markdownEnabled) decorateMarkdownInEditor(editor)
+      if (markdownEnabled) {
+        decorateMarkdownInEditor(editor)
+        decorateBulletsInEditor(editor)
+      }
       if (savedCursorOffset !== null) {
         setCursorAtOffset(editor, savedCursorOffset)
       }

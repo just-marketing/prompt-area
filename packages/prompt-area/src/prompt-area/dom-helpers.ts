@@ -539,6 +539,72 @@ export function decorateMarkdownInEditor(editor: HTMLElement): boolean {
   return decorated
 }
 
+/** Matches a `•` bullet glyph at the start of a line (optionally indented). */
+const LIST_BULLET_PATTERN = /(^|\n)([ \t]*)•/g
+
+/**
+ * Walks direct-child text nodes and wraps each line-leading `•` bullet glyph in
+ * a `<span class="prompt-area-list-bullet">` so CSS can size it up (the raw
+ * U+2022 glyph renders much smaller than the surrounding text).
+ *
+ * Like {@link decorateMarkdownInEditor}, this is a DOM-only decoration: the span
+ * is stripped by {@link normalizeEditorDOM} on every input cycle, so the `•`
+ * stays a plain character in the segment model and is re-decorated each render.
+ *
+ * @param editor - The contentEditable root element
+ * @returns Whether any decorations were applied
+ */
+export function decorateBulletsInEditor(editor: HTMLElement): boolean {
+  let decorated = false
+
+  const textNodes: Text[] = []
+  for (let i = 0; i < editor.childNodes.length; i++) {
+    const node = editor.childNodes[i]
+    if (isTextNode(node) && node.textContent?.includes('•')) {
+      textNodes.push(node)
+    }
+  }
+
+  for (const textNode of textNodes) {
+    const text = textNode.textContent ?? ''
+    LIST_BULLET_PATTERN.lastIndex = 0
+    const bulletIndices: number[] = []
+    let match: RegExpExecArray | null
+    while ((match = LIST_BULLET_PATTERN.exec(text)) !== null) {
+      bulletIndices.push(match.index + match[1].length + match[2].length)
+    }
+
+    if (bulletIndices.length === 0) continue
+
+    decorated = true
+    const parent = textNode.parentNode
+    if (!parent) continue
+
+    const fragment = document.createDocumentFragment()
+    let lastIndex = 0
+
+    for (const index of bulletIndices) {
+      if (index > lastIndex) {
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex, index)))
+      }
+      const span = document.createElement('span')
+      span.dataset.md = 'true'
+      span.className = 'prompt-area-list-bullet'
+      span.textContent = '•'
+      fragment.appendChild(span)
+      lastIndex = index + 1 // the bullet is a single character
+    }
+
+    if (lastIndex < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)))
+    }
+
+    parent.replaceChild(fragment, textNode)
+  }
+
+  return decorated
+}
+
 // ---------------------------------------------------------------------------
 // Selection helpers
 // ---------------------------------------------------------------------------
