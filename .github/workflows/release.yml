@@ -82,7 +82,10 @@ jobs:
           pnpm --filter prompt-area lint:exports
 
       - name: Update npm (OIDC trusted publishing needs >= 11.5.1)
-        run: npm install -g npm@latest
+        # Pinned: npm@latest moved to 12.0.0, whose global self-install ships a
+        # broken tree (Cannot find module 'sigstore') that breaks `npm publish`.
+        # 11.x installs cleanly and still satisfies the >= 11.5.1 OIDC floor.
+        run: npm install -g npm@11.18.0
 
       - name: Publish to npm
         run: npm publish --access public
