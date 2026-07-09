@@ -264,26 +264,25 @@ function swapListPrefixLine(line: string, markdownEnabled: boolean): string {
 }
 
 /**
- * Line-based list-prefix normalizer with fenced-code awareness, threading the
- * "inside a code fence" state through so callers can carry it across segments.
- * Lines inside a ```…``` block are left verbatim, so a pasted code snippet whose
- * line starts with "- " (a diff, YAML, a Markdown list-in-code) is not rewritten
- * to "• ". Returns the transformed text plus the fence state at its end.
+ * Returns the set of line indices that sit inside a *balanced* fenced code
+ * block (a ```…``` pair), so their leading "- "/"• " markers are preserved
+ * verbatim. An unterminated (unpaired) fence marker is NOT protective — its
+ * following lines still normalize — so a stray "```" in prose does not silently
+ * suppress bullet normalization for the rest of the text.
  */
-function normalizeListLines(
-  text: string,
-  markdownEnabled: boolean,
-  startInFence: boolean,
-): { text: string; inFence: boolean } {
-  let inFence = startInFence
-  const lines = text.split('\n').map((line) => {
-    if (FENCE_LINE.test(line)) {
-      inFence = !inFence
-      return line
+function fenceProtectedLineIndices(lines: string[]): Set<number> {
+  const protectedLines = new Set<number>()
+  let openIndex = -1
+  lines.forEach((line, i) => {
+    if (!FENCE_LINE.test(line)) return
+    if (openIndex === -1) {
+      openIndex = i
+    } else {
+      for (let k = openIndex; k <= i; k++) protectedLines.add(k)
+      openIndex = -1
     }
-    return inFence ? line : swapListPrefixLine(line, markdownEnabled)
   })
-  return { text: lines.join('\n'), inFence }
+  return protectedLines
 }
 
 /**
@@ -292,29 +291,44 @@ function normalizeListLines(
  * - When markdown is enabled, converts "- " at line starts to "• "
  * - When markdown is disabled, converts "• " at line starts to "- "
  *
- * Fenced code blocks (```…```) are preserved verbatim.
+ * Lines inside a balanced ```…``` block are preserved verbatim.
  */
 export function normalizeListPrefixText(text: string, markdownEnabled: boolean): string {
-  return normalizeListLines(text, markdownEnabled, false).text
+  const lines = text.split('\n')
+  const protectedLines = fenceProtectedLineIndices(lines)
+  return lines
+    .map((line, i) => (protectedLines.has(i) ? line : swapListPrefixLine(line, markdownEnabled)))
+    .join('\n')
 }
 
 /**
  * Normalizes markdown list prefixes across text segments. See
- * {@link normalizeListPrefixText} for the per-line rule. Fence state is carried
- * across segments, so a code block split into per-line text segments on paste
- * still has its "- " lines preserved.
+ * {@link normalizeListPrefixText} for the per-line rule. Fence detection spans
+ * the whole document (text segments flattened to a global line sequence), so a
+ * code block split into per-line text segments on paste still has its "- " lines
+ * preserved, while an unterminated fence does not suppress later bullets.
  */
 export function normalizeListPrefixes(segments: Segment[], markdownEnabled: boolean): Segment[] {
+  const globalLines: string[] = []
+  segments.forEach((seg) => {
+    if (seg.type === 'text') globalLines.push(...seg.text.split('\n'))
+  })
+  const protectedLines = fenceProtectedLineIndices(globalLines)
+
+  let globalIndex = 0
   let changed = false
-  let inFence = false
   const result = segments.map((seg) => {
     if (seg.type !== 'text') return seg
-    const { text: newText, inFence: nextInFence } = normalizeListLines(
-      seg.text,
-      markdownEnabled,
-      inFence,
-    )
-    inFence = nextInFence
+    const newText = seg.text
+      .split('\n')
+      .map((line) => {
+        const out = protectedLines.has(globalIndex)
+          ? line
+          : swapListPrefixLine(line, markdownEnabled)
+        globalIndex++
+        return out
+      })
+      .join('\n')
     if (newText === seg.text) return seg
     changed = true
     return { ...seg, text: newText }

@@ -1499,6 +1499,13 @@ describe('normalizeListPrefixText', () => {
     const input = '• outside\n```\n• inside code\n```'
     expect(normalizeListPrefixText(input, false)).toBe('- outside\n```\n• inside code\n```')
   })
+
+  it('still normalizes list lines after an unbalanced (unclosed) fence marker', () => {
+    // A stray "```" without a matching close must NOT suppress bullets for the
+    // rest of the text — only a balanced pair protects its content.
+    const input = 'Example syntax:\n```\n- one\n- two'
+    expect(normalizeListPrefixText(input, true)).toBe('Example syntax:\n```\n• one\n• two')
+  })
 })
 
 // ---------------------------------------------------------------------------
