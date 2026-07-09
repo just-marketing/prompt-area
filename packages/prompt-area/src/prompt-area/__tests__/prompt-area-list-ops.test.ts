@@ -4,6 +4,7 @@ import {
   renumberOrderedListLines,
   renumberOrderedListSegments,
   remapOffset,
+  hasOrderedListRun,
   indentListItem,
   outdentListItem,
   insertListContinuation,
@@ -110,6 +111,37 @@ describe('renumberOrderedListSegments', () => {
     const changed = renumberOrderedListSegments(text('1. a\n1. b'))
     expect(changed.segments).toEqual(text('1. a\n2. b'))
     expect(changed.edits).toHaveLength(1)
+  })
+})
+
+describe('hasOrderedListRun — paste renumber gate', () => {
+  it('true for a copied fragment already sequential (3,4,5)', () => {
+    expect(hasOrderedListRun('3. a\n4. b\n5. c')).toBe(true)
+  })
+
+  it('true for a broken list that starts at 1 (1,1,1 / 1,2,4)', () => {
+    expect(hasOrderedListRun('1. a\n1. b\n1. c')).toBe(true)
+    expect(hasOrderedListRun('1. a\n2. b\n4. d')).toBe(true)
+  })
+
+  it('false for non-sequential numeric prose not starting at 1 (years)', () => {
+    expect(hasOrderedListRun('1985. Born\n2020. Died')).toBe(false)
+  })
+
+  it('false for a non-sequential reference list not starting at 1 (5,10,15)', () => {
+    expect(hasOrderedListRun('5. Foo\n10. Bar\n15. Baz')).toBe(false)
+  })
+
+  it('false for a single isolated numbered line', () => {
+    expect(hasOrderedListRun('42. The answer')).toBe(false)
+  })
+
+  it('false for plain text with no numbered lines', () => {
+    expect(hasOrderedListRun('hello\nworld')).toBe(false)
+  })
+
+  it('a plain line between numbers breaks the run', () => {
+    expect(hasOrderedListRun('3. a\nplain\n4. b')).toBe(false)
   })
 })
 

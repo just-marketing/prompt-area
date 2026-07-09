@@ -11,7 +11,11 @@ import {
   insertSegmentsAtCursor,
 } from './clipboard-helpers'
 import { htmlToMarkdown } from './html-to-markdown'
-import { normalizeListPrefixText, renumberOrderedListLines } from './prompt-area-list-ops'
+import {
+  normalizeListPrefixText,
+  renumberOrderedListLines,
+  hasOrderedListRun,
+} from './prompt-area-list-ops'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -209,9 +213,11 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       }
 
       // Rebuild ordered-list numbering in the pasted block so a copied list with
-      // stale numbers lands sequential. Done at the raw-string level (the caret
-      // collapses to end-of-content after insertion, so no offset remap needed).
-      if (markdownEnabled) {
+      // stale numbers lands sequential. Gated on `hasOrderedListRun` so incidental
+      // numeric-leading prose (e.g. `1985. Born / 2020. Died`) is left untouched.
+      // Done at the raw-string level (the caret collapses to end-of-content after
+      // insertion, so no offset remap needed).
+      if (markdownEnabled && hasOrderedListRun(text)) {
         text = renumberOrderedListLines(text).text
       }
 

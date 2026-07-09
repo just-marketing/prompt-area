@@ -301,12 +301,57 @@ export function normalizeListPrefixes(segments: Segment[], markdownEnabled: bool
 export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
 
 /**
+ * Whether the text holds a genuine ordered-list run worth renumbering — a run
+ * of 2+ consecutive same-level numbered lines that either starts at 1 or is
+ * already a contiguous `n, n+1, …` sequence. Used to gate the paste path so a
+ * copied list fragment (`3. 4. 5.` → renumber, or a broken `1. 1. 1.`) is
+ * rebuilt, while incidental numeric-leading prose that `parseListLine` would
+ * otherwise treat as a list — `1985. Born / 2020. Died`, `5. / 10. / 15.` — is
+ * left untouched.
+ */
+export function hasOrderedListRun(text: string): boolean {
+  let runLevel: number | null = null
+  let runStart = 0
+  let prevNumber = 0
+  let runLength = 0
+  let sequential = true
+
+  for (const line of text.split('\n')) {
+    const parsed = parseListLine(line)
+    if (parsed?.kind === 'numbered' && parsed.indent === runLevel) {
+      sequential = sequential && parsed.number === prevNumber + 1
+      prevNumber = parsed.number
+      runLength++
+      if (runLength >= 2 && (runStart === 1 || sequential)) return true
+    } else if (parsed?.kind === 'numbered') {
+      // Start a fresh run at this line's level.
+      runLevel = parsed.indent
+      runStart = parsed.number
+      prevNumber = parsed.number
+      runLength = 1
+      sequential = true
+    } else {
+      runLevel = null
+      runLength = 0
+    }
+  }
+
+  return false
+}
+
+/**
  * Recomputes ordered-list numbering across the whole text. Returns the new text
  * plus the list of changed digit runs (ascending by `oldStart`) for cursor
  * remapping. When nothing changes, returns the SAME text reference and an empty
  * `edits` array — the no-op guard that keeps this off the typing hot path.
  */
 export function renumberOrderedListLines(text: string): { text: string; edits: NumberEdit[] } {
+  // Cheap pre-gate: with no ordered-list line there is nothing to renumber, so
+  // skip the per-line scan and throwaway rebuild. This runs on every structural
+  // edit (Enter, Tab, bold/italic wrap) and each paste, most of which never
+  // touch a numbered list.
+  if (!/^[ \t]*\d+\. /m.test(text)) return { text, edits: [] }
+
   const counters = new Map<number, number>()
   const edits: NumberEdit[] = []
   const lines = text.split('\n')

@@ -620,8 +620,11 @@ const LIST_INDENT_PATTERN = /(^|\n)([ \t]+)(?=(?:[•\-*] |\d+\. ))/g
  * Like the other decorations this is display-only: the span keeps the original
  * whitespace as its textContent (so plain-text length and caret offsets are
  * unchanged) and is stripped by {@link normalizeEditorDOM} each input cycle.
- * Must run BEFORE {@link decorateBulletsInEditor} while line-leading whitespace
- * is still intact in the raw text nodes.
+ * Must run BEFORE the node-splitting passes ({@link decorateURLsInEditor},
+ * {@link decorateMarkdownInEditor}, {@link decorateBulletsInEditor}) so every
+ * direct-child text node is still a whole line — otherwise a mid-line split
+ * fragment beginning with whitespace would let the `^` anchor false-match
+ * non-line-leading whitespace.
  *
  * @returns Whether any decorations were applied
  */
@@ -684,12 +687,17 @@ export function decorateListIndentInEditor(editor: HTMLElement): boolean {
  * markdown mode is on. Each decoration is stripped by {@link normalizeEditorDOM}
  * on the next input cycle and re-applied here, so the segment model is never
  * mutated.
+ *
+ * List indentation runs FIRST, while each direct-child text node is still a
+ * whole line: the URL and markdown passes split text nodes mid-line, and a tail
+ * fragment starting with whitespace would let the indent regex's `^` anchor
+ * false-match non-line-leading whitespace (e.g. `see http://x   1. y`).
  */
 export function decorateEditor(editor: HTMLElement, markdownEnabled: boolean): void {
+  if (markdownEnabled) decorateListIndentInEditor(editor)
   decorateURLsInEditor(editor)
   if (markdownEnabled) {
     decorateMarkdownInEditor(editor)
-    decorateListIndentInEditor(editor)
     decorateBulletsInEditor(editor)
   }
 }
