@@ -210,6 +210,10 @@
     align-items: center;
     vertical-align: middle;
     transform: translateY(-1.5px);
+    /* Extra breathing room between the dot and the text (on top of the space
+       character that follows the "•" in the model). Uses px, not em, because
+       the span's font-size is 0 (which would collapse any em value). */
+    margin-right: 4px;
   }
   .prompt-area-list-bullet::before {
     content: '';
