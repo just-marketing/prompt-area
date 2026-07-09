@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { usePromptArea } from '../use-prompt-area'
+import { segmentsToPlainText } from '../prompt-area-engine'
 import type { Segment, TriggerConfig, ChipSegment } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -249,6 +250,51 @@ describe('usePromptArea', () => {
         { type: 'text', text: '\n' },
         { type: 'text', text: 'line2' },
       ])
+
+      document.body.removeChild(editor)
+    })
+
+    it('renumbers an ordered list after a native delete (1,2,4 -> 1,2,3)', () => {
+      const onChange = vi.fn()
+      const { result } = renderHook(() => usePromptArea(defaultProps({ onChange, markdown: true })))
+
+      const editor = document.createElement('div')
+      editor.contentEditable = 'true'
+      document.body.appendChild(editor)
+      ;(result.current.editorRef as React.MutableRefObject<HTMLDivElement>).current = editor
+
+      // Simulate the DOM state after a plain Backspace/Delete removed row 3.
+      populateEditor(editor, '1. one', '\n', '2. two', '\n', '4. four')
+      placeCursor(editor.lastChild!, 7) // end of "4. four"
+
+      act(() => {
+        result.current.handleInput()
+      })
+
+      const lastCall = onChange.mock.calls.at(-1)?.[0] as Segment[]
+      expect(segmentsToPlainText(lastCall)).toBe('1. one\n2. two\n3. four')
+
+      document.body.removeChild(editor)
+    })
+
+    it('does not renumber incidental numeric prose (1985. / 2020.)', () => {
+      const onChange = vi.fn()
+      const { result } = renderHook(() => usePromptArea(defaultProps({ onChange, markdown: true })))
+
+      const editor = document.createElement('div')
+      editor.contentEditable = 'true'
+      document.body.appendChild(editor)
+      ;(result.current.editorRef as React.MutableRefObject<HTMLDivElement>).current = editor
+
+      populateEditor(editor, '1985. Born', '\n', '2020. Died')
+      placeCursor(editor.lastChild!, 10)
+
+      act(() => {
+        result.current.handleInput()
+      })
+
+      const lastCall = onChange.mock.calls.at(-1)?.[0] as Segment[]
+      expect(segmentsToPlainText(lastCall)).toBe('1985. Born\n2020. Died')
 
       document.body.removeChild(editor)
     })

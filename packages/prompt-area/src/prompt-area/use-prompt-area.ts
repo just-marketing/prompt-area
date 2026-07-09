@@ -33,6 +33,7 @@ import {
   normalizeListPrefixes,
   renumberOrderedListSegments,
   remapOffset,
+  hasOrderedListRun,
 } from './prompt-area-list-ops'
 import {
   isHTMLElement,
@@ -525,14 +526,33 @@ export function usePromptArea({
       }
     }
 
+    // Native structural edits (e.g. a Backspace that deleted or merged a list
+    // row) bypass applyEditResult, so rebuild ordered-list numbering here too.
+    // handleInput fires on every keystroke, so gate on a genuine ordered-list
+    // run — this renumbers a real list (1,2,4 → 1,2,3) but leaves incidental
+    // numeric prose ("1985. Born / 2020. Died") untouched.
+    let nextSegments = segments
+    let renumberedCursor: number | null = null
+    if (
+      markdownEnabled &&
+      savedCursorOffset !== null &&
+      hasOrderedListRun(segmentsToPlainText(segments))
+    ) {
+      const renumbered = renumberOrderedListSegments(segments)
+      if (renumbered.edits.length > 0) {
+        nextSegments = renumbered.segments
+        renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
+      }
+    }
+
     // Debounced undo: capture the pre-edit state at the start of a typing
     // session and push it to the undo stack after UNDO_DEBOUNCE_MS of idle.
     if (!undoBaseState.current) {
       undoBaseState.current = lastRenderedValue.current
     }
 
-    lastRenderedValue.current = segments
-    onChange(segments)
+    lastRenderedValue.current = nextSegments
+    onChange(nextSegments)
     if (undoTimer.current) clearTimeout(undoTimer.current)
     undoTimer.current = setTimeout(() => {
       if (undoBaseState.current) {
@@ -542,11 +562,18 @@ export function usePromptArea({
       undoTimer.current = null
     }, UNDO_DEBOUNCE_MS)
 
-    // Decorate URLs, markdown formatting, and list bullets in text nodes
+    // Apply the recomputed model to the DOM. A renumber rewrites text nodes, so
+    // it needs a full re-render (which also re-decorates); otherwise just
+    // re-decorate the existing DOM in place.
     if (editor) {
-      decorateEditor(editor, markdownEnabled)
-      if (savedCursorOffset !== null) {
-        setCursorAtOffset(editor, savedCursorOffset)
+      if (renumberedCursor !== null) {
+        renderSegmentsToDOM(nextSegments)
+        setCursorAtOffset(editor, renumberedCursor)
+      } else {
+        decorateEditor(editor, markdownEnabled)
+        if (savedCursorOffset !== null) {
+          setCursorAtOffset(editor, savedCursorOffset)
+        }
       }
     }
 
