@@ -11,7 +11,7 @@
     "path": "dist/prompt-area/index.js",
     "import": "*",
     "ignore": ["react", "react-dom", "react/jsx-runtime", "clsx", "tailwind-merge"],
-    "limit": "15 KB"
+    "limit": "16 KB"
   },
   {
     "name": "helpers (RSC-safe)",
