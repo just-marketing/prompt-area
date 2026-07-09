@@ -137,6 +137,29 @@ describe('htmlToMarkdown', () => {
     expect(htmlToMarkdown(html)).toBe('1. a\n\n1. b')
   })
 
+  it('nests ordered lists with two-space indent and per-level numbering', () => {
+    const html = '<ol><li>a<ol><li>a1</li><li>a2</li></ol></li><li>b</li></ol>'
+    expect(htmlToMarkdown(html)).toBe('1. a\n  1. a1\n  2. a2\n2. b')
+  })
+
+  it('nests ordered lists three levels deep (Slack "Copy message" shape)', () => {
+    const html =
+      '<ol><li>Branding<ol><li>present</li><li>pitch<ol><li>warm intro</li><li>outreach</li></ol></li></ol></li><li>ICP</li></ol>'
+    expect(htmlToMarkdown(html)).toBe(
+      '1. Branding\n  1. present\n  2. pitch\n    1. warm intro\n    2. outreach\n2. ICP',
+    )
+  })
+
+  it('nests an unordered list inside an ordered item (mixed markers)', () => {
+    const html = '<ol><li>a<ul><li>x</li><li>y</li></ul></li><li>b</li></ol>'
+    expect(htmlToMarkdown(html)).toBe('1. a\n  - x\n  - y\n2. b')
+  })
+
+  it('keeps a link inside a nested list item intact', () => {
+    const html = '<ol><li>a<ol><li>see <a href="https://x.io">x</a></li></ol></li></ol>'
+    expect(htmlToMarkdown(html)).toBe('1. a\n  1. see [x](https://x.io)')
+  })
+
   // -------------------------------------------------------------------------
   // Code
   // -------------------------------------------------------------------------

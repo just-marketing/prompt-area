@@ -23,6 +23,7 @@ import {
   decorateURLsInEditor,
   decorateMarkdownInEditor,
   decorateBulletsInEditor,
+  decorateEditor,
 } from '../dom-helpers'
 
 // ===========================================================================
@@ -978,6 +979,34 @@ describe('decorateBulletsInEditor', () => {
 
     expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
     expect(editor.textContent).toBe('• item')
+  })
+})
+
+// ===========================================================================
+// decorateEditor (composed)
+// ===========================================================================
+
+describe('decorateEditor', () => {
+  it('applies URL, markdown, and bullet decorations when markdown is on', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• **bold** see https://x.io'))
+
+    decorateEditor(editor, true)
+
+    expect(editor.querySelector('a')).not.toBeNull()
+    expect(editor.querySelector('span[data-md] .font-bold')).not.toBeNull()
+    expect(editor.querySelector('span.prompt-area-list-bullet')).not.toBeNull()
+  })
+
+  it('applies only URL decoration when markdown is off', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• **bold** see https://x.io'))
+
+    decorateEditor(editor, false)
+
+    expect(editor.querySelector('a')).not.toBeNull()
+    expect(editor.querySelector('span[data-md]')).toBeNull()
+    expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
   })
 })
 
