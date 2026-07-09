@@ -200,7 +200,16 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
           text = text.replace(/\\([()])/g, '$1')
         } else {
           const html = e.clipboardData.getData('text/html')
-          if (html) text = htmlToMarkdown(html)
+          // A converter failure (e.g. stack overflow on pathologically deep
+          // nesting) must not drop the paste — leave text empty so the
+          // text/plain fallback below still runs.
+          if (html) {
+            try {
+              text = htmlToMarkdown(html)
+            } catch {
+              text = ''
+            }
+          }
         }
       }
       if (!text) text = e.clipboardData.getData('text/plain')

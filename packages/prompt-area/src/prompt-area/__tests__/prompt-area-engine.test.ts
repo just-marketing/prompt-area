@@ -1489,6 +1489,23 @@ describe('normalizeListPrefixText', () => {
   it('leaves mid-line dashes untouched', () => {
     expect(normalizeListPrefixText('a - b', true)).toBe('a - b')
   })
+
+  it('does not rewrite "- " lines inside a fenced code block', () => {
+    const input = '- outside\n```\n- inside code\n```\n- after'
+    expect(normalizeListPrefixText(input, true)).toBe('• outside\n```\n- inside code\n```\n• after')
+  })
+
+  it('does not rewrite "• " lines inside a fenced code block (markdown off)', () => {
+    const input = '• outside\n```\n• inside code\n```'
+    expect(normalizeListPrefixText(input, false)).toBe('- outside\n```\n• inside code\n```')
+  })
+
+  it('still normalizes list lines after an unbalanced (unclosed) fence marker', () => {
+    // A stray "```" without a matching close must NOT suppress bullets for the
+    // rest of the text — only a balanced pair protects its content.
+    const input = 'Example syntax:\n```\n- one\n- two'
+    expect(normalizeListPrefixText(input, true)).toBe('Example syntax:\n```\n• one\n• two')
+  })
 })
 
 // ---------------------------------------------------------------------------

@@ -62,8 +62,8 @@
   }
   /* The raw U+2022 glyph only inks ~5px, so hide it and draw the bullet as a
      precise CSS dot. The "•" character stays in the span (font-size: 0) so the
-     segment model and caret are unaffected. `--prompt-area-bullet-size` lets
-     consumers retune the diameter. */
+     segment model and caret are unaffected. `--prompt-area-bullet-size` (default
+     6px) lets consumers retune the diameter. */
   .prompt-area-list-bullet {
     font-size: 0;
     /* Center the dot on the text: inline-flex keeps `align-items` referencing

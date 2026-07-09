@@ -112,7 +112,10 @@ function serializeAnchor(node: HTMLElement, depth: number): string {
 
 function serializeImage(node: HTMLElement): string {
   const src = node.getAttribute('src') ?? ''
-  if (!src || src.startsWith('data:')) return ''
+  // Gate the src through the same allow-list as anchors: only http(s)/mailto
+  // survive, so a `javascript:`/`vbscript:`/`data:` src never reaches the
+  // emitted markdown (defense-in-depth for consumers that render it as HTML).
+  if (!src || !isSafeHref(src)) return ''
   return `![${node.getAttribute('alt') ?? ''}](${src})`
 }
 

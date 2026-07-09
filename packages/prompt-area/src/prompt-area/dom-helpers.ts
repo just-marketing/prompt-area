@@ -694,12 +694,16 @@ export function decorateListIndentInEditor(editor: HTMLElement): boolean {
  * false-match non-line-leading whitespace (e.g. `see http://x   1. y`).
  */
 export function decorateEditor(editor: HTMLElement, markdownEnabled: boolean): void {
-  if (markdownEnabled) decorateListIndentInEditor(editor)
-  decorateURLsInEditor(editor)
+  // Whole-line passes run FIRST, while each direct-child text node is still a
+  // full line. The URL and markdown passes split text nodes mid-line, so a tail
+  // fragment beginning with "•" would let the bullet regex's `^` anchor
+  // false-match a mid-line separator (e.g. `**bold** • middle`).
   if (markdownEnabled) {
-    decorateMarkdownInEditor(editor)
+    decorateListIndentInEditor(editor)
     decorateBulletsInEditor(editor)
   }
+  decorateURLsInEditor(editor)
+  if (markdownEnabled) decorateMarkdownInEditor(editor)
 }
 
 // ---------------------------------------------------------------------------
