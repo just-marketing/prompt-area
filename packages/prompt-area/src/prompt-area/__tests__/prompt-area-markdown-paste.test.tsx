@@ -128,7 +128,7 @@ describe('PromptArea rich HTML paste (markdown mode)', () => {
 
   it('auto-resolves trigger patterns in converted html text', () => {
     const triggers: TriggerConfig[] = [
-      { char: '#', mode: 'dropdown', resolveOnSpace: true, onSearch: () => [] },
+      { char: '#', position: 'any', mode: 'dropdown', resolveOnSpace: true, onSearch: () => [] },
     ]
     const { editor, onChangeSpy } = renderEditor({ markdown: true, triggers })
     paste(editor, { html: '<p>ping #campaign now</p>' })
