@@ -49,7 +49,15 @@ export default function PromptAreaApiPage() {
           {
             name: 'markdown',
             type: 'boolean',
-            description: 'Render inline markdown (bold, italic, URLs, lists).',
+            description:
+              'Render inline markdown (bold, italic, URLs, lists). Also enables rich paste: content from Slack, Notion, Google Docs, GitHub, or the web is converted to markdown source (preferring text/markdown, then text/html), and pasted list bullets normalize to •.',
+          },
+          {
+            name: 'normalizeBullets',
+            type: 'boolean',
+            default: 'true',
+            description:
+              'When markdown is on, rewrite list markers ("- ") to the "•" glyph in the value, for typed and pasted lists alike. Set false to keep "- " in the value (e.g. when the host renders the output as real markdown).',
           },
           {
             name: 'disabled',
