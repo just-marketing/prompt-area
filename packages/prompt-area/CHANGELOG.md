@@ -3,7 +3,37 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## 0.4.0
+## 0.6.0
+
+### Added
+
+- **Rich paste — markdown, HTML & Notion.** Pasting formatted content now
+  converts it into the editor's own format instead of dropping it as plain
+  text. The editor reads `text/markdown` when a source provides it (e.g. Slack
+  nested lists) and otherwise converts `text/html` to markdown, so bold,
+  italics, links, headings, code, and nested bullet/ordered lists survive a
+  paste from Notion, Slack, Google Docs, and the web.
+- **`reopenOnChipClick` trigger option.** For `'dropdown'` triggers, set
+  `reopenOnChipClick: true` so clicking an existing chip reopens the suggestion
+  dropdown anchored to that chip, with its current value preselected; picking a
+  suggestion replaces the chip in place. `onChipClick` still fires, so existing
+  side effects (analytics, etc.) keep working.
+
+### Changed
+
+- **Rebuilt list numbering, nesting & indentation.** Ordered- and unordered-list
+  handling was reworked for correct numbering across nested levels and
+  Notion-style Tab / Shift+Tab indentation. The `•` bullet is now drawn as a
+  precise, vertically centered CSS dot.
+
+### Fixed
+
+- **Ordered lists renumber on native delete.** Deleting a list item with
+  Backspace/Delete now renumbers the remaining items instead of leaving a gap.
+- **Fence-aware bullet normalization is now balanced-only**, so `- ` inside an
+  unterminated code fence is no longer rewritten to `• `.
+
+## 0.5.0
 
 ### Added
 
@@ -29,6 +59,8 @@ project adheres to [Semantic Versioning](https://semver.org/).
   the suggestion list stays on-screen.
 - **ActionBar `leftClassName` / `rightClassName`** for styling the left and
   right slot wrappers.
+
+## 0.4.0
 
 ### Changed
 
