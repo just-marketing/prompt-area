@@ -255,27 +255,66 @@ export function removeListPrefix(
   }
 }
 
+/** A line that opens or closes a fenced code block (```), optionally indented. */
+const FENCE_LINE = /^\s*```/
+
+/** Swaps the leading list marker on a single line ("- " ↔ "• "). */
+function swapListPrefixLine(line: string, markdownEnabled: boolean): string {
+  return markdownEnabled ? line.replace(/^(\s*)- /, '$1• ') : line.replace(/^(\s*)• /, '$1- ')
+}
+
+/**
+ * Line-based list-prefix normalizer with fenced-code awareness, threading the
+ * "inside a code fence" state through so callers can carry it across segments.
+ * Lines inside a ```…``` block are left verbatim, so a pasted code snippet whose
+ * line starts with "- " (a diff, YAML, a Markdown list-in-code) is not rewritten
+ * to "• ". Returns the transformed text plus the fence state at its end.
+ */
+function normalizeListLines(
+  text: string,
+  markdownEnabled: boolean,
+  startInFence: boolean,
+): { text: string; inFence: boolean } {
+  let inFence = startInFence
+  const lines = text.split('\n').map((line) => {
+    if (FENCE_LINE.test(line)) {
+      inFence = !inFence
+      return line
+    }
+    return inFence ? line : swapListPrefixLine(line, markdownEnabled)
+  })
+  return { text: lines.join('\n'), inFence }
+}
+
 /**
  * Normalizes markdown list prefixes in a raw text string (single source of
  * truth for the bullet-glyph swap, shared by segment normalization and paste):
  * - When markdown is enabled, converts "- " at line starts to "• "
  * - When markdown is disabled, converts "• " at line starts to "- "
+ *
+ * Fenced code blocks (```…```) are preserved verbatim.
  */
 export function normalizeListPrefixText(text: string, markdownEnabled: boolean): string {
-  return markdownEnabled
-    ? text.replace(/(^|\n)(\s*)- /g, '$1$2• ')
-    : text.replace(/(^|\n)(\s*)• /g, '$1$2- ')
+  return normalizeListLines(text, markdownEnabled, false).text
 }
 
 /**
  * Normalizes markdown list prefixes across text segments. See
- * {@link normalizeListPrefixText} for the per-line rule.
+ * {@link normalizeListPrefixText} for the per-line rule. Fence state is carried
+ * across segments, so a code block split into per-line text segments on paste
+ * still has its "- " lines preserved.
  */
 export function normalizeListPrefixes(segments: Segment[], markdownEnabled: boolean): Segment[] {
   let changed = false
+  let inFence = false
   const result = segments.map((seg) => {
     if (seg.type !== 'text') return seg
-    const newText = normalizeListPrefixText(seg.text, markdownEnabled)
+    const { text: newText, inFence: nextInFence } = normalizeListLines(
+      seg.text,
+      markdownEnabled,
+      inFence,
+    )
+    inFence = nextInFence
     if (newText === seg.text) return seg
     changed = true
     return { ...seg, text: newText }

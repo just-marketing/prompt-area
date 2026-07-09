@@ -5,6 +5,14 @@ import { PromptArea } from '../prompt-area'
 import { segmentsToPlainText } from '../prompt-area-engine'
 import type { Segment, TriggerConfig } from '../types'
 import { placeCursorAtEnd, placeCursor } from './test-helpers'
+import { htmlToMarkdown } from '../html-to-markdown'
+
+// Wrap the converter so a single test can force it to throw via
+// mockImplementationOnce; every other test runs the real implementation.
+vi.mock('../html-to-markdown', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../html-to-markdown')>()
+  return { ...actual, htmlToMarkdown: vi.fn(actual.htmlToMarkdown) }
+})
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -199,5 +207,22 @@ describe('PromptArea rich HTML paste (markdown mode)', () => {
       fireEvent.paste(editor, { clipboardData: makeClipboard({ html: '<b>mid</b>' }) })
     })
     expect(lastOnChange(onChangeSpy)).toBe('start **mid**END')
+  })
+
+  it('does not bullet-normalize "- " lines inside a pasted code fence', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { html: '<pre><code>- old line\n+ new line</code></pre>' })
+    // The dash inside the fenced code block must survive verbatim (not become "•").
+    expect(lastOnChange(onChangeSpy)).toBe('```\n- old line\n+ new line\n```')
+  })
+
+  it('falls back to text/plain when the html→markdown converter throws', () => {
+    vi.mocked(htmlToMarkdown).mockImplementationOnce(() => {
+      throw new Error('converter blew up')
+    })
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { html: '<b>bold</b>', plain: 'plain fallback' })
+    // A converter throw must not drop the paste — the plain-text flavor is used.
+    expect(lastOnChange(onChangeSpy)).toBe('plain fallback')
   })
 })

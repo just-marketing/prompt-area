@@ -1489,6 +1489,16 @@ describe('normalizeListPrefixText', () => {
   it('leaves mid-line dashes untouched', () => {
     expect(normalizeListPrefixText('a - b', true)).toBe('a - b')
   })
+
+  it('does not rewrite "- " lines inside a fenced code block', () => {
+    const input = '- outside\n```\n- inside code\n```\n- after'
+    expect(normalizeListPrefixText(input, true)).toBe('• outside\n```\n- inside code\n```\n• after')
+  })
+
+  it('does not rewrite "• " lines inside a fenced code block (markdown off)', () => {
+    const input = '• outside\n```\n• inside code\n```'
+    expect(normalizeListPrefixText(input, false)).toBe('- outside\n```\n• inside code\n```')
+  })
 })
 
 // ---------------------------------------------------------------------------

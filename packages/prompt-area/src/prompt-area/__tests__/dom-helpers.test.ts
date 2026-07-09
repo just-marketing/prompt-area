@@ -1084,6 +1084,28 @@ describe('decorateEditor', () => {
     expect(editor.querySelector('span[data-md]')).toBeNull()
     expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
   })
+
+  it('does not decorate a mid-line "•" (after bold splits the text node) as a list bullet', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('**bold** • middle'))
+
+    decorateEditor(editor, true)
+
+    // The "•" is a mid-line separator, not a line-leading bullet — it must not
+    // get the enlarged list-bullet dot even though the bold decoration splits
+    // the text node right before it.
+    expect(editor.querySelector('span.prompt-area-list-bullet')).toBeNull()
+    expect(editor.querySelector('span[data-md] .font-bold')).not.toBeNull()
+  })
+
+  it('still decorates a genuine line-leading "•" bullet after reordering', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('• real\n• bullet'))
+
+    decorateEditor(editor, true)
+
+    expect(editor.querySelectorAll('span.prompt-area-list-bullet').length).toBe(2)
+  })
 })
 
 // ===========================================================================

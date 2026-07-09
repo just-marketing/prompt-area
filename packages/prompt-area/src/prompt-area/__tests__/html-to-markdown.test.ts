@@ -81,6 +81,11 @@ describe('htmlToMarkdown', () => {
     expect(htmlToMarkdown('<img src="https://x.com/a.png">')).toBe('![](https://x.com/a.png)')
   })
 
+  it('drops an image with an unsafe src (javascript:, bare #)', () => {
+    expect(htmlToMarkdown('<img src="javascript:alert(1)" alt="x">')).toBe('')
+    expect(htmlToMarkdown('<img src="#">')).toBe('')
+  })
+
   // -------------------------------------------------------------------------
   // Block-level
   // -------------------------------------------------------------------------
