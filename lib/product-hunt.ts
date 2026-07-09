@@ -38,10 +38,10 @@ export const PRODUCT_HUNT = {
 } as const
 
 /**
- * Canonical launch-day URL. The PH campaign links here on the day; our own CTAs
+ * Canonical Product Hunt product URL. The PH campaign links here; our own CTAs
  * link back to it.
  */
-export const productHuntUrl = `https://www.producthunt.com/products/${PRODUCT_HUNT.productSlug}/${PRODUCT_HUNT.launchSlug}/launch-day`
+export const productHuntUrl = `https://www.producthunt.com/products/${PRODUCT_HUNT.productSlug}`
 
 /** True once a real post id is configured, so the official badge can render. */
 export const hasOfficialBadge = PRODUCT_HUNT.postId > 0
