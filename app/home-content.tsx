@@ -26,7 +26,7 @@ const CodexInputExample = dynamic(() =>
 )
 
 // Seed the hero composer with a realistic prompt so it shows off mentions,
-// commands, tags, markdown, and a file attachment — fully interactive.
+// commands, tags, markdown, and file attachments — fully interactive.
 const HERO_SEGMENTS: Segment[] = [
   { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
   { type: 'text', text: ' the brief from ' },
@@ -73,9 +73,15 @@ const HERO_TRIGGERS: TriggerConfig[] = [
 const HERO_FILES: PromptAreaFile[] = [
   {
     id: 'hero-file-1',
-    name: 'Q4-2025-campaign-brief.pdf',
+    name: 'Q3-2026-campaign-brief.pdf',
     size: 3_420_000,
     type: 'application/pdf',
+  },
+  {
+    id: 'hero-file-2',
+    name: 'brand-moodboard.png',
+    size: 1_280_000,
+    type: 'image/png',
   },
 ]
 
