@@ -22,6 +22,7 @@ import {
   type Segment,
   type TriggerConfig,
   type PromptAreaFile,
+  type PromptAreaImage,
 } from 'prompt-area'
 import { useSubmittablePrompt } from './use-submittable-prompt'
 import { SubmittedPreview } from './submitted-preview'
@@ -149,6 +150,7 @@ function Menu<T>({
 export function CodexInputExample({
   initialSegments = [],
   initialFiles = [],
+  initialImages = [],
   triggers,
   markdown = true,
   minHeight = 40,
@@ -156,14 +158,25 @@ export function CodexInputExample({
 }: {
   initialSegments?: Segment[]
   initialFiles?: PromptAreaFile[]
+  initialImages?: PromptAreaImage[]
   triggers?: TriggerConfig[]
   markdown?: boolean
   minHeight?: number
   /** Forwarded to PromptArea — fires when a chip in the composer is clicked. */
   onChipClick?: (chip: ChipSegment) => void
 } = {}) {
-  const { segments, setSegments, files, setFiles, submitted, promptRef, submit, reset } =
-    useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles })
+  const {
+    segments,
+    setSegments,
+    files,
+    setFiles,
+    images,
+    setImages,
+    submitted,
+    promptRef,
+    submit,
+    reset,
+  } = useSubmittablePrompt<PromptAreaFile>({ initialSegments, initialFiles, initialImages })
 
   const [permission, setPermission] = useState<Permission>(PERMISSIONS[0])
   const [model, setModel] = useState<Model>(MODELS[0])
@@ -219,6 +232,9 @@ export function CodexInputExample({
               files={files}
               filePosition="above"
               onFileRemove={(f) => setFiles((prev) => prev.filter((x) => x.id !== f.id))}
+              images={images}
+              imagePosition="above"
+              onImageRemove={(img) => setImages((prev) => prev.filter((x) => x.id !== img.id))}
             />
             <ActionBar
               className="flex-wrap gap-y-2 pt-2"

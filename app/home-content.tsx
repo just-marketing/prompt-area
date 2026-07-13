@@ -19,6 +19,7 @@ import {
   type Segment,
   type TriggerConfig,
   type PromptAreaFile,
+  type PromptAreaImage,
 } from 'prompt-area'
 
 const CodexInputExample = dynamic(() =>
@@ -26,7 +27,7 @@ const CodexInputExample = dynamic(() =>
 )
 
 // Seed the hero composer with a realistic prompt so it shows off mentions,
-// commands, tags, markdown, and file attachments — fully interactive.
+// commands, tags, markdown, and file + image attachments — fully interactive.
 const HERO_SEGMENTS: Segment[] = [
   { type: 'chip', trigger: '/', value: 'summarize', displayText: 'summarize' },
   { type: 'text', text: ' the brief from ' },
@@ -77,11 +78,16 @@ const HERO_FILES: PromptAreaFile[] = [
     size: 3_420_000,
     type: 'application/pdf',
   },
+]
+
+// Rendered as a real thumbnail (not a file-card icon) in the attachment area
+// alongside the PDF, so the hero shows the composer's image-preview support
+// next to plain file attachments.
+const HERO_IMAGES: PromptAreaImage[] = [
   {
-    id: 'hero-file-2',
-    name: 'brand-moodboard.png',
-    size: 1_280_000,
-    type: 'image/png',
+    id: 'hero-image-1',
+    url: '/brand-moodboard.png',
+    alt: 'Brand moodboard',
   },
 ]
 
@@ -312,6 +318,7 @@ export default function HomeContent() {
                   initialSegments={HERO_SEGMENTS}
                   triggers={HERO_TRIGGERS}
                   initialFiles={HERO_FILES}
+                  initialImages={HERO_IMAGES}
                   markdown
                   minHeight={76}
                   onChipClick={handleChipClick}
