@@ -3,6 +3,18 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.1
+
+### Fixed
+
+- **Placeholder reappears after the editor is cleared.** Typing into the editor
+  and then deleting everything left a browser filler `<br>`, which was read as a
+  `"\n"` text segment. That kept `value` from returning to empty, so the
+  placeholder (including animated placeholders) stayed hidden permanently. The
+  filler-only DOM is now detected as genuinely empty, restoring the placeholder
+  once the field is cleared. A rendered trailing newline (a content `<br>` paired
+  with a trailing sentinel `<br>`) still counts as real content.
+
 ## 0.6.0
 
 ### Added
