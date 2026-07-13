@@ -206,6 +206,11 @@ export function usePromptArea({
     if (!editor) return []
 
     const segments: Segment[] = []
+    // Track whether the editor holds any real content (text/chip) or a sentinel
+    // <br> that renderSegmentsToDOM added. When it holds neither, any <br> nodes
+    // present are the browser's filler <br> (see the empty-editor check below).
+    let hasRealContent = false
+    let hasSentinel = false
 
     for (let i = 0; i < editor.childNodes.length; i++) {
       const node = editor.childNodes[i]
@@ -214,21 +219,38 @@ export function usePromptArea({
         const text = node.textContent ?? ''
         if (text) {
           segments.push({ type: 'text', text })
+          hasRealContent = true
         }
       } else if (isChipElement(node)) {
         const chip = chipNodeToSegment(node)
-        if (chip) segments.push(chip)
+        if (chip) {
+          segments.push(chip)
+          hasRealContent = true
+        }
       } else if (isBRElement(node)) {
-        if (node.dataset.sentinel) continue // skip sentinel <br>
+        if (node.dataset.sentinel) {
+          hasSentinel = true
+          continue // skip sentinel <br>
+        }
         segments.push({ type: 'text', text: '\n' })
       } else if (isHTMLElement(node)) {
         // Unknown element — extract text content
         const text = node.textContent ?? ''
         if (text) {
           segments.push({ type: 'text', text })
+          hasRealContent = true
         }
       }
     }
+
+    // When the user empties the editor (types something, then deletes it all),
+    // the browser leaves a lone filler <br> so the contentEditable block stays
+    // visible and focusable. Reading that <br> as a "\n" text segment would make
+    // `value` permanently non-empty and keep the placeholder hidden forever.
+    // A newline we actually rendered always carries surrounding text/chip
+    // content or a trailing sentinel <br>, so when neither is present the only
+    // <br> nodes are filler and the editor is genuinely empty.
+    if (!hasRealContent && !hasSentinel) return []
 
     return segments
   }, [])
