@@ -6,7 +6,9 @@ A production-grade `contentEditable` rich text input. Install it **two ways from
 
 ![Prompt Area](public/opengraph-image.png)
 
-[![Prompt Area is on Product Hunt — if it's been useful, an upvote means a lot](public/product-hunt-banner.svg)](https://www.producthunt.com/products/prompt-area)
+<a href="https://www.producthunt.com/products/prompt-area?utm_source=badge-featured&utm_medium=badge" target="_blank">
+  <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1190356&theme=light" alt="Prompt Area — a production-grade rich text input for AI chat interfaces | Product Hunt" width="250" height="54" />
+</a>
 
 ## Why Prompt Area?
 

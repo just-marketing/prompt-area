@@ -27,7 +27,7 @@ export const PRODUCT_HUNT = {
   live: process.env.NEXT_PUBLIC_PH_LIVE === 'true',
 
   /** Numeric PH post id (from the launch's "Promote → Embed" snippet). 0 = unset. */
-  postId: Number(process.env.NEXT_PUBLIC_PH_POST_ID) || 0,
+  postId: Number(process.env.NEXT_PUBLIC_PH_POST_ID) || 1190356,
 
   /** Slugs for producthunt.com/products/<productSlug>/<launchSlug>/launch-day. */
   productSlug: process.env.NEXT_PUBLIC_PH_PRODUCT_SLUG || 'prompt-area',
