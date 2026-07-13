@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createRef } from 'react'
+import { createRef, useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import type { PromptAreaHandle, PromptAreaImage, PromptAreaFile, Segment } from '../types'
 
@@ -519,6 +519,76 @@ describe('PromptArea', () => {
           placeholder="Type here..."
         />,
       )
+      expect(screen.queryByText('Type here...')).not.toBeInTheDocument()
+    })
+
+    // Regression: after the user types into the editor and then deletes it all,
+    // the browser leaves a lone filler <br> in the contentEditable. That <br>
+    // must be read as an empty document (not a "\n" text segment) so the
+    // placeholder reappears instead of staying hidden forever.
+    it('restores the placeholder after the editor is typed into and fully cleared', () => {
+      const onChange = vi.fn()
+      function Controlled() {
+        const [value, setValue] = useState<Segment[]>([])
+        return (
+          <PromptArea
+            value={value}
+            onChange={(next) => {
+              onChange(next)
+              setValue(next)
+            }}
+            placeholder="Type here..."
+          />
+        )
+      }
+      render(<Controlled />)
+      const editor = screen.getByRole('textbox')
+
+      expect(screen.getByText('Type here...')).toBeInTheDocument()
+
+      // Simulate typing "hello": the browser adds a text node.
+      editor.appendChild(document.createTextNode('hello'))
+      fireEvent.input(editor)
+      expect(screen.queryByText('Type here...')).not.toBeInTheDocument()
+
+      // Simulate deleting everything: the browser leaves a lone filler <br>.
+      while (editor.firstChild) editor.removeChild(editor.firstChild)
+      editor.appendChild(document.createElement('br'))
+      fireEvent.input(editor)
+
+      // The model returns to empty and the placeholder comes back.
+      expect(onChange).toHaveBeenLastCalledWith([])
+      expect(screen.getByText('Type here...')).toBeInTheDocument()
+    })
+
+    // Guard the fix's boundary: a newline we actually rendered is a content <br>
+    // paired with a trailing sentinel <br>. That is real content and must NOT be
+    // collapsed to empty, so the placeholder stays hidden.
+    it('keeps a rendered trailing newline (with sentinel <br>) as content', () => {
+      const onChange = vi.fn()
+      function Controlled() {
+        const [value, setValue] = useState<Segment[]>([])
+        return (
+          <PromptArea
+            value={value}
+            onChange={(next) => {
+              onChange(next)
+              setValue(next)
+            }}
+            placeholder="Type here..."
+          />
+        )
+      }
+      render(<Controlled />)
+      const editor = screen.getByRole('textbox')
+
+      editor.appendChild(document.createElement('br'))
+      const sentinel = document.createElement('br')
+      sentinel.dataset.sentinel = 'true'
+      editor.appendChild(sentinel)
+      fireEvent.input(editor)
+
+      expect(onChange).toHaveBeenLastCalledWith([{ type: 'text', text: '\n' }])
       expect(screen.queryByText('Type here...')).not.toBeInTheDocument()
     })
   })
