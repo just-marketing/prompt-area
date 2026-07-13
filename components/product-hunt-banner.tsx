@@ -47,8 +47,10 @@ export function ProductHuntBanner({ initialLive = false }: { initialLive?: boole
             🎉
           </span>
           <span className="truncate">
-            We&apos;re live on Product Hunt today
-            <span className="hidden sm:inline">. Come say hi and tell us what to build next.</span>
+            Prompt Area is on Product Hunt
+            <span className="hidden sm:inline">
+              . If it&apos;s been useful, an upvote means a lot.
+            </span>
           </span>
         </p>
 

@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="60" viewBox="0 0 1200 60" fill="none" role="img" aria-label="Prompt Area is on Product Hunt. Come say hi and tell us what to build next. Support us.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="60" viewBox="0 0 1200 60" fill="none" role="img" aria-label="Prompt Area is on Product Hunt. If it's been useful, an upvote means a lot. Support us.">
   <rect width="1200" height="60" rx="8" fill="#ff6154"/>
   <style>
     .txt { font-family: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
   </style>
   <!-- Left: message -->
   <text class="txt" x="32" y="30" font-size="20" dominant-baseline="central">🎉</text>
-  <text class="txt" x="64" y="30" font-size="16" font-weight="500" fill="#ffffff" dominant-baseline="central">Prompt Area is on Product Hunt. Come say hi and tell us what to build next.</text>
+  <text class="txt" x="64" y="30" font-size="16" font-weight="500" fill="#ffffff" dominant-baseline="central">Prompt Area is on Product Hunt. If it&apos;s been useful, an upvote means a lot.</text>
   <!-- Right: Support us pill -->
   <g>
     <rect x="1008" y="13" width="160" height="34" rx="17" fill="#ffffff"/>

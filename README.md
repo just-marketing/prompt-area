@@ -6,7 +6,7 @@ A production-grade `contentEditable` rich text input. Install it **two ways from
 
 ![Prompt Area](public/opengraph-image.png)
 
-[![Prompt Area is on Product Hunt — come say hi and tell us what to build next](public/product-hunt-banner.svg)](https://www.producthunt.com/products/prompt-area)
+[![Prompt Area is on Product Hunt — if it's been useful, an upvote means a lot](public/product-hunt-banner.svg)](https://www.producthunt.com/products/prompt-area)
 
 ## Why Prompt Area?
 
