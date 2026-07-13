@@ -85,7 +85,7 @@
     "tailwind-merge": ">=2"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.4",
+    "@arethetypeswrong/cli": "^0.18.5",
     "@size-limit/preset-small-lib": "^12.1.0",
     "@tailwindcss/cli": "^4.3.2",
     "@types/react": "19.2.17",
