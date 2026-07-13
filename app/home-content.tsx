@@ -86,8 +86,8 @@ const HERO_FILES: PromptAreaFile[] = [
 const HERO_IMAGES: PromptAreaImage[] = [
   {
     id: 'hero-image-1',
-    url: '/brand-moodboard.png',
-    alt: 'Brand moodboard',
+    url: '/strawberry.png',
+    alt: 'Strawberry',
   },
 ]
 
