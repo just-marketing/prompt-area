@@ -1,6 +1,6 @@
 {
   "name": "prompt-area",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "An opinionated, dependency-light React rich-text prompt input with trigger-based chips (@mentions, /commands, #tags), inline markdown, undo/redo, file & image attachments, and a complete chat-input layout. Ships as an npm package or a shadcn registry.",
   "keywords": [
     "react",
