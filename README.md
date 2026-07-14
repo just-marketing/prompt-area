@@ -295,6 +295,22 @@ function ChatInput() {
 }
 ```
 
+`useMarkdownMode()` toggles the input between its markdown and plain-text variants — spread its `markdown` boolean onto `<PromptArea>` and wire `toggle` to a button (the `a-large-small` / `ALargeSmall` icon is the conventional control). Switching is non-destructive: the text is kept, only its rendering changes.
+
+```tsx
+import { useMarkdownMode } from '@/components/use-markdown-mode'
+import { ALargeSmall } from 'lucide-react'
+
+const { bind } = usePromptAreaState()
+const { markdown, mode, toggle } = useMarkdownMode()
+
+<PromptArea {...bind} markdown={markdown} />
+<button onClick={toggle} aria-pressed={markdown}>
+  <ALargeSmall className="size-4" />
+  {mode === 'markdown' ? 'Markdown' : 'Plain text'}
+</button>
+```
+
 Also available: `callbackTrigger()` for callback-mode triggers, and segment helpers — `text()`, `chip()`, `isSegmentsEmpty()`, `hasChips()`, `getChips()`, `segmentsToPlainText()`, `plainTextToSegments()`. See [llms-full.txt](https://prompt-area.com/llms-full.txt) for the complete reference.
 
 ## Chip Customization

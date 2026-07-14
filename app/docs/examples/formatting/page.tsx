@@ -4,6 +4,8 @@ import { DocsExample } from '@/components/docs/docs-example'
 import {
   MarkdownExample,
   markdownCode,
+  MarkdownModeExample,
+  markdownModeCode,
   RichPasteExample,
   richPasteCode,
   RotatingPlaceholdersExample,
@@ -15,7 +17,7 @@ const SITE_URL = 'https://prompt-area.com'
 export const metadata: Metadata = {
   title: 'Formatting',
   description:
-    'Live examples of inline markdown formatting (bold, italic, URLs, lists), rich paste to markdown from Slack / Notion / Google Docs, and animated rotating placeholders in Prompt Area.',
+    'Live examples of inline markdown formatting (bold, italic, URLs, lists), a markdown / plain-text toggle with useMarkdownMode, rich paste to markdown from Slack / Notion / Google Docs, and animated rotating placeholders in Prompt Area.',
   alternates: { canonical: `${SITE_URL}/docs/examples/formatting` },
 }
 
@@ -32,6 +34,13 @@ export default function FormattingExamplesPage() {
         description="Wrap text in **bold**, *italic*, or ***both***, use Cmd+B / Cmd+I, and start a line with - or * for auto-formatted lists."
         code={markdownCode}>
         <MarkdownExample />
+      </DocsExample>
+      <DocsExample
+        id="markdown-mode"
+        title="Markdown / plain-text toggle"
+        description="Switch the input between its markdown and plain-text variants with useMarkdownMode. Toggling is non-destructive — the text is kept, only its rendering changes (decoration on, list bullets normalize to •). The a-large-small (ALargeSmall) icon is the conventional control."
+        code={markdownModeCode}>
+        <MarkdownModeExample />
       </DocsExample>
       <DocsExample
         id="rich-paste"

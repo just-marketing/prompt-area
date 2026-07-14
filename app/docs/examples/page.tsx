@@ -21,7 +21,7 @@ const EXAMPLES = [
   {
     href: '/docs/examples/formatting',
     title: 'Formatting',
-    description: 'Inline markdown and rotating placeholders.',
+    description: 'Inline markdown, a markdown / plain-text toggle, and rotating placeholders.',
   },
   {
     href: '/docs/examples/attachments',

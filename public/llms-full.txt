@@ -512,6 +512,52 @@ function ChatInput() {
 
 For advanced cases, a lower-level `usePromptArea(options)` hook is also exported. It drives the editor's internal segment state and ref wiring directly. Most apps should prefer `usePromptAreaState` (above) or the controlled `value` / `onChange` props; reach for `usePromptArea` only when you need fine-grained control over the editor internals.
 
+## useMarkdownMode Hook
+
+Toggles PromptArea between its markdown and plain-text variants. It owns the `markdown` prop as a named mode (`'markdown'` | `'plain'`) and returns a `markdown` boolean to spread onto the component plus a `toggle`. Switching is non-destructive: the segment value is kept, only its rendering changes (inline decoration on/off, and list bullets convert `•` ↔ `-` when `normalizeBullets` is on). The `a-large-small` / `ALargeSmall` (lucide) icon is the conventional toggle control.
+
+```tsx
+import { ALargeSmall } from 'lucide-react'
+import { PromptArea } from '@/components/prompt-area'
+import { usePromptAreaState } from '@/components/use-prompt-area-state'
+import { useMarkdownMode } from '@/components/use-markdown-mode'
+
+function Composer() {
+  const { bind } = usePromptAreaState()
+  const { markdown, mode, toggle } = useMarkdownMode()
+
+  return (
+    <>
+      <PromptArea {...bind} markdown={markdown} />
+      <button type="button" onClick={toggle} aria-pressed={markdown}>
+        <ALargeSmall className="size-4" />
+        {mode === 'markdown' ? 'Markdown' : 'Plain text'}
+      </button>
+    </>
+  )
+}
+```
+
+### Options
+
+| Field          | Type                       | Default        | Description                                             |
+| -------------- | -------------------------- | -------------- | ------------------------------------------------------ |
+| `initialMode`  | `'markdown' \| 'plain'`    | `'markdown'`   | Starting mode for the uncontrolled hook                |
+| `mode`         | `'markdown' \| 'plain'`    | —              | Controlled mode; drive changes via `onModeChange`      |
+| `onModeChange` | `(mode) => void`           | —              | Called with the next mode on `toggle` / `setMode`      |
+
+### Return Type: MarkdownModeState
+
+| Field         | Type                       | Description                                             |
+| ------------- | -------------------------- | ------------------------------------------------------ |
+| `mode`        | `'markdown' \| 'plain'`    | The active variant                                     |
+| `markdown`    | `boolean`                  | True in markdown mode — spread as the `markdown` prop  |
+| `isPlainText` | `boolean`                  | True in plain-text mode (inverse of `markdown`)        |
+| `setMode`     | `(mode) => void`           | Switch to an explicit mode (no-op if already in it)    |
+| `toggle()`    | `() => void`               | Flip between markdown and plain text                   |
+
+The pure helper `oppositeMode(mode)` is also exported for building custom toggles.
+
 ## Server Components (prompt-area/helpers)
 
 All framework-agnostic helpers — segment factories, predicates, serialization, trigger presets, and the engine functions — are also exported from a dedicated `prompt-area/helpers` entry point, built without a `'use client'` boundary so it can run on the server. Import from there when you need them in a React Server Component or other server context (e.g. converting stored segments to text in a route handler, or parsing markdown on the server):
