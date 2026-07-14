@@ -3,6 +3,20 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.2
+
+### Added
+
+- **`useMarkdownMode` hook.** Toggles a PromptArea between its markdown and
+  plain-text variants by owning the `markdown` prop as a named mode
+  (`'markdown' | 'plain'`). Switching is non-destructive: the segment value is
+  kept and only the rendering changes, so inline decoration turns on and off and
+  list bullets convert between `•` and `-` when `normalizeBullets` is on. Returns
+  `markdown`, `mode`, `isPlainText`, `toggle` and `setMode`, and supports both
+  uncontrolled use via `initialMode` and controlled use via `mode` /
+  `onModeChange`. The pure `oppositeMode()` helper is exported for building
+  custom toggles.
+
 ## 0.6.1
 
 ### Fixed
