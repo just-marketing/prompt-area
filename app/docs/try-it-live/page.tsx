@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 // We override the Sandpack vite-react-ts template's `index.html` so Vite uses
 // the example's own `/src/main.tsx` entry (the template otherwise boots its own
 // root-level `/App.tsx`).
-const PROMPT_AREA_VERSION = '0.6.0'
+const PROMPT_AREA_VERSION = '0.6.2'
 // Sandpack's in-browser bundler doesn't reliably process the `prompt-area/styles.css`
 // import (it resolves through the package `exports` map), so we also load the
 // published stylesheet via a <link>. `examples/basic` itself keeps the canonical
