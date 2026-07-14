@@ -24,6 +24,9 @@ export type {
   PromptAreaState,
 } from './use-prompt-area-state'
 
+export { useMarkdownMode, oppositeMode } from './use-markdown-mode'
+export type { PromptAreaMode, UseMarkdownModeOptions, MarkdownModeState } from './use-markdown-mode'
+
 export {
   text,
   chip,

@@ -85,6 +85,10 @@
         {
           "path": "packages/prompt-area/src/prompt-area/use-prompt-area-state.ts",
           "type": "registry:component"
+        },
+        {
+          "path": "packages/prompt-area/src/prompt-area/use-markdown-mode.ts",
+          "type": "registry:component"
         }
       ]
     },

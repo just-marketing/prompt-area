@@ -7,7 +7,7 @@ const SITE_URL = 'https://prompt-area.com'
 export const metadata: Metadata = {
   title: 'Hooks & Helpers',
   description:
-    'API reference for usePromptAreaState, the trigger presets (mentionTrigger, commandTrigger, hashtagTrigger, callbackTrigger), and segment helpers like getChipsByTrigger.',
+    'API reference for usePromptAreaState, useMarkdownMode (markdown / plain-text toggle), the trigger presets (mentionTrigger, commandTrigger, hashtagTrigger, callbackTrigger), and segment helpers like getChipsByTrigger.',
   alternates: { canonical: `${SITE_URL}/docs/api/hooks` },
 }
 
@@ -59,6 +59,60 @@ export default function HooksApiPage() {
           },
         ]}
       />
+
+      <DocsH2 id="use-markdown-mode">useMarkdownMode()</DocsH2>
+      <DocsP>
+        Owns the markdown / plain-text variant as a named mode and returns a{' '}
+        <code className="font-mono">markdown</code> boolean to spread onto the component, plus{' '}
+        <code className="font-mono">toggle</code>. Switching is non-destructive — the text is kept,
+        only its rendering changes. The <code className="font-mono">a-large-small</code> (
+        <code className="font-mono">ALargeSmall</code>) icon is the conventional toggle control.
+      </DocsP>
+      <CodeBlock
+        code={`const { bind } = usePromptAreaState()
+const { markdown, mode, toggle } = useMarkdownMode()
+
+<PromptArea {...bind} markdown={markdown} />
+<button onClick={toggle} aria-pressed={markdown}>
+  <ALargeSmall className="size-4" />
+</button>`}
+      />
+      <PropTable
+        rows={[
+          {
+            name: 'mode',
+            type: "'markdown' | 'plain'",
+            description: 'The active variant.',
+          },
+          {
+            name: 'markdown',
+            type: 'boolean',
+            description: 'True in markdown mode — spread as the markdown prop.',
+          },
+          {
+            name: 'isPlainText',
+            type: 'boolean',
+            description: 'True in plain-text mode (inverse of markdown).',
+          },
+          {
+            name: 'toggle()',
+            type: '() => void',
+            description: 'Flip between markdown and plain text.',
+          },
+          {
+            name: 'setMode(mode)',
+            type: "(mode: 'markdown' | 'plain') => void",
+            description: 'Switch to an explicit mode.',
+          },
+        ]}
+      />
+      <DocsP>
+        Options: <code className="font-mono">initialMode</code> (default{' '}
+        <code className="font-mono">&apos;markdown&apos;</code>),{' '}
+        <code className="font-mono">mode</code> for controlled use, and{' '}
+        <code className="font-mono">onModeChange</code>. The pure{' '}
+        <code className="font-mono">oppositeMode(mode)</code> helper is exported for custom toggles.
+      </DocsP>
 
       <DocsH2 id="trigger-presets">Trigger presets</DocsH2>
       <DocsP>

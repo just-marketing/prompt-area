@@ -126,6 +126,7 @@ A: Yes. Prompt Area is designed for Next.js and React projects and is a drop-in 
 ## Developer Experience
 
 - [usePromptAreaState Hook](https://prompt-area.com/docs/examples/dx-helpers): Convenience hook that manages segments, ref, and derived state (plainText, isEmpty, hasChips, chips) with a single `bind` spread
+- [useMarkdownMode Hook](https://prompt-area.com/docs/examples/formatting): Toggles PromptArea between its markdown and plain-text variants (non-destructive); returns `markdown`, `mode`, `toggle` — pair with the `a-large-small` (ALargeSmall) icon
 - [Trigger Presets](https://prompt-area.com/docs/examples/dx-helpers): Pre-built factories — mentionTrigger(), commandTrigger(), hashtagTrigger(), callbackTrigger() — for common trigger patterns
 - [Segment Helpers](https://prompt-area.com/docs/examples/dx-helpers): Utility functions — text(), chip(), isSegmentsEmpty(), hasChips(), getChips(), getChipsByTrigger(), segmentsToPlainText()
 - [Imperative API](https://prompt-area.com/docs/components/prompt-area): Ref methods — focus(), blur(), insertChip(), getPlainText(), clear() — for programmatic control
