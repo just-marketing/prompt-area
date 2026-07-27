@@ -180,7 +180,7 @@ export function CompactPromptArea({
           // controls (right) — wider when a slot sits before the submit button.
           // Expanded: roomy box with bottom space reserved for the toolbar.
           isExpanded
-            ? 'pb-14 pl-5 pr-5 pt-4'
+            ? 'pt-4 pr-5 pb-14 pl-5'
             : cn('py-3 pl-[3.25rem]', beforeSubmitSlot ? 'pr-[5.5rem]' : 'pr-[3.25rem]'),
         )}>
         <PromptArea
@@ -226,7 +226,7 @@ export function CompactPromptArea({
       </button>
 
       {/* Right controls – pinned bottom-right in BOTH states (slot + submit). */}
-      <div className="absolute bottom-1.5 right-1.5 z-10 flex items-center gap-1.5">
+      <div className="absolute right-1.5 bottom-1.5 z-10 flex items-center gap-1.5">
         {beforeSubmitSlot}
         <button
           type="button"
