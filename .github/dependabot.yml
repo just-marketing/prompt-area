@@ -82,6 +82,17 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # Catch-all for majors. Every group above is scoped to minor/patch, so
+      # without this a major update matches no group and is never opened at
+      # all — that is how jest-dom 7 and jest-axe 11 sat unnoticed. Grouping
+      # them into one weekly PR keeps them visible without reintroducing the
+      # pnpm-lock.yaml conflict pileup that individual PRs cause. Entries in
+      # `ignore` below still win over this group.
+      majors:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
     ignore:
       # lucide-react v1 dropped brand icons (Github) used in nav-sidebar.
       # Lift once those icons are replaced or brand support returns.
