@@ -64,7 +64,7 @@ export function StatusBarBelowExample() {
           <button
             type="button"
             className="text-muted-foreground hover:text-foreground flex items-center gap-1">
-            Opus 4.8
+            Opus 5
             <ChevronDown className="size-3" />
           </button>
         }
@@ -111,7 +111,7 @@ export function StatusBarBothExample() {
             <button
               type="button"
               className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs">
-              Opus 4.8
+              Opus 5
               <ChevronDown className="size-3" />
             </button>
           }
@@ -188,7 +188,7 @@ function StatusBarBelowExample() {
         }
         right={
           <button className="text-muted-foreground flex items-center gap-1">
-            Opus 4.8 <ChevronDown className="size-3" />
+            Opus 5 <ChevronDown className="size-3" />
           </button>
         }
       />
@@ -234,7 +234,7 @@ function StatusBarBothExample() {
           left={<span className="text-muted-foreground text-xs">+ &lt;/&gt; Auto accept edits</span>}
           right={
             <button className="text-muted-foreground flex items-center gap-1 text-xs">
-              Opus 4.8 <ChevronDown className="size-3" />
+              Opus 5 <ChevronDown className="size-3" />
             </button>
           }
         />

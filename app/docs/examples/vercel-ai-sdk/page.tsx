@@ -30,7 +30,7 @@ function handleSubmit() {
       body: {
         mentions: mentions.map((c) => c.value),
         command: commands[0]?.value,
-        model: 'claude-opus-4-8',
+        model: 'claude-opus-5',
       },
     },
   )
@@ -44,7 +44,7 @@ import { z } from 'zod'
 // Allowlist everything you accept — the request body is untrusted input.
 const bodySchema = z.object({
   messages: z.array(z.custom<UIMessage>()),
-  model: z.enum(['claude-opus-4-8', 'claude-haiku-4-5']).default('claude-opus-4-8'),
+  model: z.enum(['claude-opus-5', 'claude-haiku-4-5']).default('claude-opus-5'),
   command: z.enum(['summarize', 'translate']).optional(),
   mentions: z.array(z.string().max(64)).max(10).default([]),
 })

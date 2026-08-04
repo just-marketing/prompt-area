@@ -42,8 +42,8 @@ type ClaudeModel = {
 
 const MODELS: ClaudeModel[] = [
   { id: 'fable-5', name: 'Fable 5', desc: 'For your toughest challenges', unavailable: true },
-  { id: 'opus-4.8', name: 'Opus 4.8', desc: 'For complex tasks' },
-  { id: 'sonnet-4.6', name: 'Sonnet 4.6', desc: 'Most efficient for everyday tasks' },
+  { id: 'opus-5', name: 'Opus 5', desc: 'For complex tasks' },
+  { id: 'sonnet-5', name: 'Sonnet 5', desc: 'Most efficient for everyday tasks' },
   { id: 'haiku-4.5', name: 'Haiku 4.5', desc: 'Fastest for quick answers' },
 ]
 
@@ -381,8 +381,8 @@ import type { Segment, PromptAreaHandle } from '@/components/types'
 type ClaudeModel = { id: string; name: string; desc: string; unavailable?: boolean }
 const MODELS: ClaudeModel[] = [
   { id: 'fable-5', name: 'Fable 5', desc: 'For your toughest challenges', unavailable: true },
-  { id: 'opus-4.8', name: 'Opus 4.8', desc: 'For complex tasks' },
-  { id: 'sonnet-4.6', name: 'Sonnet 4.6', desc: 'Most efficient for everyday tasks' },
+  { id: 'opus-5', name: 'Opus 5', desc: 'For complex tasks' },
+  { id: 'sonnet-5', name: 'Sonnet 5', desc: 'Most efficient for everyday tasks' },
   { id: 'haiku-4.5', name: 'Haiku 4.5', desc: 'Fastest for quick answers' },
 ]
 const EFFORTS = ['High', 'Medium', 'Low'] as const

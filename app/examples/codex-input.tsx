@@ -34,10 +34,10 @@ const PERMISSIONS = ['Default permissions', 'Read only', 'Full access'] as const
 type Permission = (typeof PERMISSIONS)[number]
 
 const MODELS = [
-  { id: 'gpt-5.5-xhigh', version: '5.5', effort: 'Extra High' },
-  { id: 'gpt-5.5-high', version: '5.5', effort: 'High' },
-  { id: 'gpt-5.5-medium', version: '5.5', effort: 'Medium' },
-  { id: 'gpt-5.1-high', version: '5.1', effort: 'High' },
+  { id: 'gpt-5.6-sol-xhigh', version: '5.6 Sol', effort: 'Extra High' },
+  { id: 'gpt-5.6-sol-high', version: '5.6 Sol', effort: 'High' },
+  { id: 'gpt-5.6-terra-medium', version: '5.6 Terra', effort: 'Medium' },
+  { id: 'gpt-5.6-luna-low', version: '5.6 Luna', effort: 'Low' },
 ] as const
 type Model = (typeof MODELS)[number]
 
@@ -358,7 +358,7 @@ function CodexInputExample() {
   const [segments, setSegments] = useState<Segment[]>([])
   // Snapshot of the last submission so Reset can restore it for another send.
   const [submitted, setSubmitted] = useState<Segment[] | null>(null)
-  const [model, setModel] = useState({ version: '5.5', effort: 'Extra High' })
+  const [model, setModel] = useState({ version: '5.6 Sol', effort: 'Extra High' })
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const promptRef = useRef<PromptAreaHandle>(null)
@@ -436,7 +436,7 @@ function CodexInputExample() {
                   </button>
                   {openMenu === 'model' && (
                     <div className={cn(MENU, 'right-0 bottom-full mb-1.5 w-52')}>
-                      {[{ version: '5.5', effort: 'Extra High' }, { version: '5.5', effort: 'High' }, { version: '5.1', effort: 'High' }].map((m, i) => (
+                      {[{ version: '5.6 Sol', effort: 'Extra High' }, { version: '5.6 Terra', effort: 'Medium' }, { version: '5.6 Luna', effort: 'Low' }].map((m, i) => (
                         <button key={i} className={MENU_ITEM} onClick={() => { setModel(m); setOpenMenu(null) }}>
                           <Zap className="size-4" />
                           <span className="text-foreground font-semibold">{m.version}</span>

@@ -54,19 +54,19 @@ type ModelRow = { id: string; name: string; icon: LucideIcon; badge?: 'Max' | 'N
 // provider gets an evocative monochrome glyph; rows are locked behind an upgrade.
 const SEARCH_MODELS: ModelRow[] = [
   { id: 'sonar-2', name: 'Sonar 2', icon: Radar },
-  { id: 'gpt-5.4', name: 'GPT-5.4', icon: Atom },
-  { id: 'gpt-5.5', name: 'GPT-5.5', icon: Atom, badge: 'Max' },
+  { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', icon: Atom },
+  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom, badge: 'Max' },
   { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', icon: Sparkles },
-  { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', icon: Asterisk },
-  { id: 'claude-opus-4.8', name: 'Claude Opus 4.8', icon: Asterisk, badge: 'Max' },
+  { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
+  { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk, badge: 'Max' },
   { id: 'nemotron-3-ultra', name: 'Nemotron 3 Ultra', icon: Hexagon, badge: 'New' },
 ]
 
 // The shorter Computer-mode list, surfaced under the "Orchestrator" picker.
 const COMPUTER_MODELS: ModelRow[] = [
-  { id: 'gpt-5.5', name: 'GPT-5.5', icon: Atom },
-  { id: 'claude-opus-4.8', name: 'Claude Opus 4.8', icon: Asterisk },
-  { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', icon: Asterisk },
+  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom },
+  { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk },
+  { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
 ]
 
 const STARTERS: { label: string; icon: LucideIcon }[] = [
@@ -515,17 +515,17 @@ type ModelRow = { id: string; name: string; icon: LucideIcon; badge?: 'Max' | 'N
 
 const SEARCH_MODELS: ModelRow[] = [
   { id: 'sonar-2', name: 'Sonar 2', icon: Radar },
-  { id: 'gpt-5.4', name: 'GPT-5.4', icon: Atom },
-  { id: 'gpt-5.5', name: 'GPT-5.5', icon: Atom, badge: 'Max' },
+  { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', icon: Atom },
+  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom, badge: 'Max' },
   { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', icon: Sparkles },
-  { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', icon: Asterisk },
-  { id: 'claude-opus-4.8', name: 'Claude Opus 4.8', icon: Asterisk, badge: 'Max' },
+  { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
+  { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk, badge: 'Max' },
   { id: 'nemotron-3-ultra', name: 'Nemotron 3 Ultra', icon: Hexagon, badge: 'New' },
 ]
 const COMPUTER_MODELS: ModelRow[] = [
-  { id: 'gpt-5.5', name: 'GPT-5.5', icon: Atom },
-  { id: 'claude-opus-4.8', name: 'Claude Opus 4.8', icon: Asterisk },
-  { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', icon: Asterisk },
+  { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom },
+  { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk },
+  { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
 ]
 const STARTERS: { label: string; icon: LucideIcon }[] = [
   { label: 'Build an app', icon: Smartphone },

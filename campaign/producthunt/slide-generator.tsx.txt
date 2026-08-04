@@ -286,7 +286,7 @@ function ComposerCard({
           right={
             <div className="flex items-center gap-3">
               <span className="text-muted-foreground inline-flex items-center gap-1 text-xs font-medium">
-                <Sparkles className="size-3.5" /> Opus 4.8 <ChevronDown className="size-3" />
+                <Sparkles className="size-3.5" /> Opus 5 <ChevronDown className="size-3" />
               </span>
               <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-full">
                 <ArrowUp className="size-4" />

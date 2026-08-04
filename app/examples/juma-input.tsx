@@ -145,12 +145,12 @@ type JumaModel = { id: string; name: string; desc: string; advanced?: boolean }
 
 const MODELS: JumaModel[] = [
   { id: 'juma-agent', name: 'Juma Agent', desc: 'Most optimized for Juma' },
-  { id: 'gpt-5.5', name: 'GPT-5.5', desc: "Free during World Cup '26" },
+  { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', desc: "Free during World Cup '26" },
 ]
 // Tucked behind the "Advanced" disclosure at the bottom of the model menu.
 const ADVANCED_MODELS: JumaModel[] = [
-  { id: 'opus-4.8', name: 'Claude Opus 4.8', desc: 'For your hardest tasks', advanced: true },
-  { id: 'gemini-3-pro', name: 'Gemini 3 Pro', desc: 'Long-context research', advanced: true },
+  { id: 'opus-5', name: 'Claude Opus 5', desc: 'For your hardest tasks', advanced: true },
+  { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', desc: 'Long-context research', advanced: true },
 ]
 
 // Representative placeholder names — not real workspaces or brands.
@@ -697,7 +697,7 @@ function ModelMenu({
   )
 }
 
-// Each model's leading glyph: Juma Agent wears the brand spark, GPT-5.5 a World
+// Each model's leading glyph: Juma Agent wears the brand spark, GPT-5.6 Terra a World
 // Cup ball (its "Free during World Cup" promo), and the Advanced models their
 // real vendor marks — so the selector button reflects the picked vendor, just
 // like the product (whose button showed the Anthropic mark for Claude).
@@ -705,7 +705,7 @@ function ModelGlyph({ id, className }: { id: string; className?: string }) {
   if (id === 'juma-agent') {
     return <JumaSpark className={cn('text-[#0f8bab] dark:text-[#40c4d3]', className)} />
   }
-  if (id === 'gpt-5.5') {
+  if (id === 'gpt-5.6-terra') {
     return (
       <span
         aria-hidden
@@ -717,10 +717,10 @@ function ModelGlyph({ id, className }: { id: string; className?: string }) {
       </span>
     )
   }
-  if (id === 'opus-4.8') {
+  if (id === 'opus-5') {
     return <AnthropicMark className={cn('text-[#d97757]', className)} />
   }
-  if (id === 'gemini-3-pro') {
+  if (id === 'gemini-3.1-pro') {
     return <GeminiMark className={className} />
   }
   return (
@@ -1031,11 +1031,11 @@ function CursorIcon({ className }: { className?: string }) {
 type JumaModel = { id: string; name: string; desc: string }
 const MODELS: JumaModel[] = [
   { id: 'juma-agent', name: 'Juma Agent', desc: 'Most optimized for Juma' },
-  { id: 'gpt-5.5', name: 'GPT-5.5', desc: "Free during World Cup '26" },
+  { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', desc: "Free during World Cup '26" },
 ]
 const ADVANCED_MODELS: JumaModel[] = [
-  { id: 'opus-4.8', name: 'Claude Opus 4.8', desc: 'For your hardest tasks' },
-  { id: 'gemini-3-pro', name: 'Gemini 3 Pro', desc: 'Long-context research' },
+  { id: 'opus-5', name: 'Claude Opus 5', desc: 'For your hardest tasks' },
+  { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', desc: 'Long-context research' },
 ]
 const PROJECTS = ['Spring Campaign', 'Newsletter Revamp', 'Website Refresh', 'Social Calendar', 'Product Launch']
 type Brand = { id: string; name: string; colors: string[] }
