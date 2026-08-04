@@ -197,7 +197,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: anthropic('claude-opus-4-8'),
+    model: anthropic('claude-opus-5'),
     system: 'You are a helpful assistant.',
     messages: convertToModelMessages(parsed.data.messages),
   })

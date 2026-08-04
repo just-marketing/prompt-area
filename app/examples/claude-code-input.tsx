@@ -36,8 +36,8 @@ type CcModel = { id: string; name: string; shortcut?: string; unavailable?: bool
 
 const MODELS: CcModel[] = [
   { id: 'fable-5', name: 'Fable 5', unavailable: true },
-  { id: 'opus-4.8', name: 'Opus 4.8', shortcut: '1' },
-  { id: 'sonnet-4.6', name: 'Sonnet 4.6', shortcut: '2' },
+  { id: 'opus-5', name: 'Opus 5', shortcut: '1' },
+  { id: 'sonnet-5', name: 'Sonnet 5', shortcut: '2' },
   { id: 'haiku-4.5', name: 'Haiku 4.5', shortcut: '3' },
 ]
 
@@ -590,8 +590,8 @@ import type { Segment, PromptAreaHandle } from '@/components/types'
 type CcModel = { id: string; name: string; shortcut?: string; unavailable?: boolean }
 const MODELS: CcModel[] = [
   { id: 'fable-5', name: 'Fable 5', unavailable: true },
-  { id: 'opus-4.8', name: 'Opus 4.8', shortcut: '1' },
-  { id: 'sonnet-4.6', name: 'Sonnet 4.6', shortcut: '2' },
+  { id: 'opus-5', name: 'Opus 5', shortcut: '1' },
+  { id: 'sonnet-5', name: 'Sonnet 5', shortcut: '2' },
   { id: 'haiku-4.5', name: 'Haiku 4.5', shortcut: '3' },
 ]
 const PERMISSION_MODES = ['Ask each time', 'Accept edits', 'Plan mode', 'Bypass permissions'] as const

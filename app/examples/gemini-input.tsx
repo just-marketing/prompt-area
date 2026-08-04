@@ -42,8 +42,8 @@ type GeminiModel = { id: string; name: string; desc: string; tier: string }
 // The pill shows the short `tier`; the menu lists the full name over a
 // one-line description, with a check on the active model.
 const MODELS: GeminiModel[] = [
-  { id: 'flash-lite', name: '3.1 Flash-Lite', desc: 'Fastest answers', tier: 'Flash-Lite' },
-  { id: 'flash', name: '3.5 Flash', desc: 'All-around help', tier: 'Flash' },
+  { id: 'flash-lite', name: '3.5 Flash-Lite', desc: 'Fastest answers', tier: 'Flash-Lite' },
+  { id: 'flash', name: '3.6 Flash', desc: 'All-around help', tier: 'Flash' },
   { id: 'pro', name: '3.1 Pro', desc: 'Advanced math and code', tier: 'Pro' },
 ]
 
@@ -546,8 +546,8 @@ import type { Segment, PromptAreaHandle } from '@/components/types'
 
 type GeminiModel = { id: string; name: string; desc: string; tier: string }
 const MODELS: GeminiModel[] = [
-  { id: 'flash-lite', name: '3.1 Flash-Lite', desc: 'Fastest answers', tier: 'Flash-Lite' },
-  { id: 'flash', name: '3.5 Flash', desc: 'All-around help', tier: 'Flash' },
+  { id: 'flash-lite', name: '3.5 Flash-Lite', desc: 'Fastest answers', tier: 'Flash-Lite' },
+  { id: 'flash', name: '3.6 Flash', desc: 'All-around help', tier: 'Flash' },
   { id: 'pro', name: '3.1 Pro', desc: 'Advanced math and code', tier: 'Pro' },
 ]
 type Thinking = { id: string; label: string; desc: string }
