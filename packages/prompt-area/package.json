@@ -86,7 +86,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@size-limit/preset-small-lib": "^13.0.1",
+    "@size-limit/preset-small-lib": "^13.0.3",
     "@tailwindcss/cli": "^4.3.3",
     "@types/react": "19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -94,7 +94,7 @@
     "publint": "^0.3.22",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "size-limit": "^13.0.1",
+    "size-limit": "^13.0.3",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
     "tsup": "^8.5.0",
