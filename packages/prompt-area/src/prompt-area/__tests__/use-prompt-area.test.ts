@@ -1183,6 +1183,7 @@ describe('usePromptArea', () => {
       act(() => {
         result.current.eventHandlers.onCompositionEnd()
       })
+      expect(onChange).toHaveBeenCalledTimes(1)
       expect(mentionTrigger.onSearch).toHaveBeenCalled()
 
       document.body.removeChild(editor)
@@ -1271,6 +1272,7 @@ describe('usePromptArea', () => {
       // Firefox may emit one more input with the same committed value.
       act(() => result.current.handleInput())
       act(() => vi.advanceTimersByTime(300))
+      expect(onChange).toHaveBeenCalledTimes(1)
       onChange.mockClear()
 
       act(() => {
@@ -3226,15 +3228,15 @@ describe('usePromptArea', () => {
       populateEditor(editor, 'local')
       placeCursor(editor.firstChild!, 5)
       act(() => result.current.handleInput())
+      onChange.mockClear()
 
       const externalValue: Segment[] = [{ type: 'text', text: 'remote' }]
       rerender({ value: externalValue })
       expect(editor.textContent).toBe('remote')
 
       act(() => result.current.eventHandlers.onCompositionEnd())
-      expect(onChange).toHaveBeenLastCalledWith(externalValue)
+      expect(onChange).not.toHaveBeenCalled()
 
-      onChange.mockClear()
       act(() => {
         result.current.handleKeyDown({
           key: 'z',
