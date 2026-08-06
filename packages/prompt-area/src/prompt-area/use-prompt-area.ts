@@ -196,6 +196,7 @@ export function usePromptArea({
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoBaseState = useRef<Segment[] | null>(null)
+  const compositionBaseState = useRef<Segment[] | null>(null)
 
   // -----------------------------------------------------------------------
   // DOM -> Model: read segments from the contentEditable DOM
@@ -469,7 +470,8 @@ export function usePromptArea({
     }
 
     renderSegmentsToDOM(value)
-  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
+    if (events.isComposing.current) compositionBaseState.current = value
+  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange, events.isComposing])
 
   // Re-render when markdown mode changes to apply/strip decorations
   // Also convert bullet characters: • ↔ - in text segments
@@ -569,20 +571,23 @@ export function usePromptArea({
 
     // Debounced undo: capture the pre-edit state at the start of a typing
     // session and push it to the undo stack after UNDO_DEBOUNCE_MS of idle.
-    if (!undoBaseState.current) {
+    const contentChanged = !segmentsEqual(nextSegments, lastRenderedValue.current)
+    if (contentChanged && !undoBaseState.current) {
       undoBaseState.current = lastRenderedValue.current
     }
 
     lastRenderedValue.current = nextSegments
     onChange(nextSegments)
-    if (undoTimer.current) clearTimeout(undoTimer.current)
-    undoTimer.current = setTimeout(() => {
-      if (undoBaseState.current) {
-        events.pushUndo(undoBaseState.current)
-        undoBaseState.current = null
-      }
-      undoTimer.current = null
-    }, UNDO_DEBOUNCE_MS)
+    if (contentChanged) {
+      if (undoTimer.current) clearTimeout(undoTimer.current)
+      undoTimer.current = setTimeout(() => {
+        if (undoBaseState.current) {
+          events.pushUndo(undoBaseState.current)
+          undoBaseState.current = null
+        }
+        undoTimer.current = null
+      }, UNDO_DEBOUNCE_MS)
+    }
 
     // Apply the recomputed model to the DOM. A renumber rewrites text nodes, so
     // it needs a full re-render (which also re-decorates); otherwise just
@@ -1085,6 +1090,14 @@ export function usePromptArea({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        events.isComposing.current ||
+        e.nativeEvent.isComposing ||
+        e.nativeEvent.keyCode === 229
+      ) {
+        return
+      }
+
       const applyEditResult = (
         editor: HTMLDivElement,
         result: { segments: Segment[]; cursorOffset: number },
@@ -1163,13 +1176,7 @@ export function usePromptArea({
       // the typed key actually matching a launch char, so it stays off the hot
       // path. insertChip still inserts a chip at the cursor if the consumer
       // wants one after the external selection.
-      if (
-        !e.metaKey &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.nativeEvent.isComposing &&
-        e.key.length === 1
-      ) {
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
         const launcher = triggers.find((t) => t.mode === 'launch' && t.char === e.key)
         const editor = editorRef.current
         if (launcher?.onActivate && editor) {
@@ -1280,7 +1287,7 @@ export function usePromptArea({
       }
 
       // 2.8 Shift+Enter always inserts a newline (after a list-continuation check).
-      if (e.key === 'Enter' && e.shiftKey && !e.nativeEvent.isComposing) {
+      if (e.key === 'Enter' && e.shiftKey) {
         e.preventDefault()
         const editor = editorRef.current
         if (editor && !tryListContinuation(editor)) insertPlainNewline(editor)
@@ -1289,7 +1296,7 @@ export function usePromptArea({
 
       // 3. Enter without Shift (skipping IME): continue a list, else submit when
       // `submitOnEnter` is set, else insert a newline.
-      if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      if (e.key === 'Enter' && !e.shiftKey) {
         const editor = editorRef.current
         if (editor && tryListContinuation(editor)) {
           e.preventDefault()
@@ -1312,7 +1319,7 @@ export function usePromptArea({
       }
 
       // 4.5 Non-collapsed selection delete (Backspace/Delete across <a> boundaries)
-      if ((e.key === 'Backspace' || e.key === 'Delete') && !e.nativeEvent.isComposing) {
+      if (e.key === 'Backspace' || e.key === 'Delete') {
         const editor = editorRef.current
         if (editor) {
           const offsets = getSelectionOffsets(editor)
@@ -1464,6 +1471,33 @@ export function usePromptArea({
   // Compose event handlers
   // -----------------------------------------------------------------------
 
+  const handleCompositionStart = useCallback(() => {
+    if (undoTimer.current) {
+      clearTimeout(undoTimer.current)
+      undoTimer.current = null
+    }
+    if (undoBaseState.current) {
+      events.pushUndo(undoBaseState.current)
+      undoBaseState.current = null
+    }
+    compositionBaseState.current = readSegmentsFromDOM()
+    events.handleCompositionStart()
+  }, [events, readSegmentsFromDOM])
+
+  const handleCompositionEnd = useCallback(() => {
+    events.handleCompositionEnd()
+    handleInput()
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    undoTimer.current = null
+    undoBaseState.current = null
+
+    const before = compositionBaseState.current
+    compositionBaseState.current = null
+    if (before && !segmentsEqual(before, readSegmentsFromDOM())) {
+      events.pushUndo(before)
+    }
+  }, [events, handleInput, readSegmentsFromDOM])
+
   const eventHandlers = useMemo(
     () => ({
       onPaste: events.handlePaste,
@@ -1471,8 +1505,8 @@ export function usePromptArea({
       onCut: events.handleCut,
       onDrop: events.handleDrop,
       onDragOver: events.handleDragOver,
-      onCompositionStart: events.handleCompositionStart,
-      onCompositionEnd: events.handleCompositionEnd,
+      onCompositionStart: handleCompositionStart,
+      onCompositionEnd: handleCompositionEnd,
       onBlur: events.handleBlur,
     }),
     [
@@ -1481,8 +1515,8 @@ export function usePromptArea({
       events.handleCut,
       events.handleDrop,
       events.handleDragOver,
-      events.handleCompositionStart,
-      events.handleCompositionEnd,
+      handleCompositionStart,
+      handleCompositionEnd,
       events.handleBlur,
     ],
   )

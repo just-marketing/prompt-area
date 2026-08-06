@@ -386,9 +386,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
   const handleCompositionEnd = useCallback(() => {
     isComposing.current = false
-    // Run trigger detection after composition ends
-    runTriggerDetection()
-  }, [runTriggerDetection])
+  }, [])
 
   // -----------------------------------------------------------------------
   // Blur: dismiss trigger dropdown with delay (so popover clicks work)
