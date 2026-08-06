@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+import { useState } from 'react'
 import { usePromptArea } from '../use-prompt-area'
 import { segmentsToPlainText } from '../prompt-area-engine'
-import type { Segment, TriggerConfig, ChipSegment } from '../types'
+import type { Segment, TriggerConfig } from '../types'
 
 // ---------------------------------------------------------------------------
 // jsdom polyfill: Range.getBoundingClientRect is not implemented
@@ -1182,8 +1183,111 @@ describe('usePromptArea', () => {
       act(() => {
         result.current.eventHandlers.onCompositionEnd()
       })
+      expect(mentionTrigger.onSearch).toHaveBeenCalled()
 
       document.body.removeChild(editor)
+    })
+
+    it('does not handle Enter while composition is active', () => {
+      const onChange = vi.fn()
+      const onSubmit = vi.fn()
+      const { result } = renderHook(() =>
+        usePromptArea(defaultProps({ onChange, onSubmit, triggers: [mentionTrigger] })),
+      )
+      const editor = attachEditor(result.current)
+
+      populateEditor(editor, '@a')
+      placeCursor(editor.firstChild!, 2)
+      act(() => result.current.handleInput())
+      expect(result.current.activeTrigger).not.toBeNull()
+      onChange.mockClear()
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      const preventDefault = vi.fn()
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Enter',
+          preventDefault,
+          metaKey: false,
+          ctrlKey: false,
+          altKey: false,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 13 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(preventDefault).not.toHaveBeenCalled()
+      expect(onChange).not.toHaveBeenCalled()
+      expect(onSubmit).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+
+    it('ignores legacy IME keyCode 229 even when isComposing is false', () => {
+      const onSubmit = vi.fn()
+      const { result } = renderHook(() => usePromptArea(defaultProps({ onSubmit })))
+      const editor = attachEditor(result.current)
+      populateEditor(editor, 'draft')
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Enter',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: false,
+          altKey: false,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 229 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onSubmit).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+
+    it('undoes one completed composition after a trailing duplicate input', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'hello')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      // Firefox may emit one more input with the same committed value.
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onChange).toHaveBeenCalledWith([])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
     })
   })
 
@@ -3109,6 +3213,44 @@ describe('usePromptArea', () => {
 
       document.body.removeChild(editor)
     })
+
+    it('keeps an external value update received during composition out of undo history', () => {
+      const onChange = vi.fn()
+      const { result, rerender } = renderHook(
+        ({ value }: { value: Segment[] }) => usePromptArea(defaultProps({ onChange, value })),
+        { initialProps: { value: [] as Segment[] } },
+      )
+      const editor = attachEditor(result.current)
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'local')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+
+      const externalValue: Segment[] = [{ type: 'text', text: 'remote' }]
+      rerender({ value: externalValue })
+      expect(editor.textContent).toBe('remote')
+
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      expect(onChange).toHaveBeenLastCalledWith(externalValue)
+
+      onChange.mockClear()
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onChange).not.toHaveBeenCalled()
+      expect(editor.textContent).toBe('remote')
+
+      document.body.removeChild(editor)
+    })
   })
 
   // -------------------------------------------------------------------------
@@ -3469,6 +3611,7 @@ describe('usePromptArea', () => {
         result.current.handleKeyDown(e)
       })
 
+      expect(preventDefault).toHaveBeenCalled()
       // Should not have called onChange for formatting (may have been called by other logic)
       // The key check: preventDefault should have been called but toggleMarkdownWrap returns null
       // for collapsed selections, so onChange should NOT be called for formatting

@@ -167,7 +167,7 @@ describe('usePromptAreaEvents', () => {
   })
 
   describe('handleCompositionEnd', () => {
-    it('sets isComposing to false and runs trigger detection', () => {
+    it('sets isComposing to false', () => {
       const deps = createDeps()
       editorEl = deps._editor
       const { result } = renderHook(() => usePromptAreaEvents(deps))
@@ -182,7 +182,6 @@ describe('usePromptAreaEvents', () => {
       })
 
       expect(result.current.isComposing.current).toBe(false)
-      expect(deps.runTriggerDetection).toHaveBeenCalled()
     })
   })
 
