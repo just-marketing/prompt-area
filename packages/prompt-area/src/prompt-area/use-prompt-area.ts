@@ -577,7 +577,7 @@ export function usePromptArea({
     }
 
     lastRenderedValue.current = nextSegments
-    onChange(nextSegments)
+    if (contentChanged) onChange(nextSegments)
     if (contentChanged) {
       if (undoTimer.current) clearTimeout(undoTimer.current)
       undoTimer.current = setTimeout(() => {
