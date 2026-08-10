@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   saveCursorPosition,
   restoreCursorPosition,
@@ -9,6 +9,7 @@ import {
   setSelectionAtOffsets,
   getTextLengthInRange,
   findDOMPosition,
+  scrollCaretIntoView,
 } from '../cursor-helpers'
 
 // ---------------------------------------------------------------------------
@@ -436,6 +437,153 @@ describe('setSelectionAtOffsets', () => {
     expect(range?.endContainer).toBe(text)
     expect(range?.startOffset).toBe(2)
     expect(range?.endOffset).toBe(7)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// scrollCaretIntoView
+// ---------------------------------------------------------------------------
+
+describe('scrollCaretIntoView', () => {
+  const originalRangeRect = Range.prototype.getBoundingClientRect
+
+  afterEach(() => {
+    Range.prototype.getBoundingClientRect = originalRangeRect
+  })
+
+  /**
+   * jsdom has no layout, so fake the geometry: the editor is a scroll box at
+   * viewport top 0 holding `scrollHeight` px of content, and the caret line
+   * lives at `caretTop` (content coordinates, 20px tall). Ranges anchored in
+   * a text node report the caret line translated by the current scrollTop;
+   * ranges at element boundaries report the zero rect, like real engines do.
+   */
+  function mockGeometry(
+    editor: HTMLElement,
+    opts: { caretTop: number; scrollHeight?: number; clientHeight?: number; scrollTop?: number },
+  ) {
+    const clientHeight = opts.clientHeight ?? 100
+    let scrollTop = opts.scrollTop ?? 0
+    Object.defineProperty(editor, 'scrollHeight', {
+      value: opts.scrollHeight ?? 400,
+      configurable: true,
+    })
+    Object.defineProperty(editor, 'clientHeight', { value: clientHeight, configurable: true })
+    Object.defineProperty(editor, 'scrollTop', {
+      get: () => scrollTop,
+      set: (v: number) => {
+        scrollTop = v
+      },
+      configurable: true,
+    })
+    editor.getBoundingClientRect = () => new DOMRect(0, 0, 300, clientHeight)
+    Range.prototype.getBoundingClientRect = function (this: Range) {
+      return this.startContainer.nodeType === Node.TEXT_NODE
+        ? new DOMRect(0, opts.caretTop - scrollTop, 0, 20)
+        : new DOMRect(0, 0, 0, 0)
+    }
+    return {
+      get scrollTop() {
+        return scrollTop
+      },
+    }
+  }
+
+  it('scrolls down when the caret is below the visible box', () => {
+    const editor = makeEditor()
+    const text = document.createTextNode('hello')
+    editor.appendChild(text)
+    placeCursor(text, 5)
+    // Visible box is 0..100; the caret line sits at 150..170.
+    const box = mockGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(70)
+  })
+
+  it('scrolls up when the caret is above the visible box', () => {
+    const editor = makeEditor()
+    const text = document.createTextNode('hello')
+    editor.appendChild(text)
+    placeCursor(text, 0)
+    // Scrolled to 200, caret line at 170..190 → 30px above the fold.
+    const box = mockGeometry(editor, { caretTop: 170, scrollTop: 200 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(170)
+  })
+
+  it('leaves scrollTop alone when the caret is already visible', () => {
+    const editor = makeEditor()
+    const text = document.createTextNode('hello')
+    editor.appendChild(text)
+    placeCursor(text, 3)
+    // Scrolled to 50, caret line at 90..110 in content space → 40..60 on screen.
+    const box = mockGeometry(editor, { caretTop: 90, scrollTop: 50 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(50)
+  })
+
+  it('does nothing when content does not overflow', () => {
+    const editor = makeEditor()
+    const text = document.createTextNode('hello')
+    editor.appendChild(text)
+    placeCursor(text, 5)
+    const box = mockGeometry(editor, { caretTop: 150, scrollHeight: 100, clientHeight: 100 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(0)
+  })
+
+  it('does nothing when the selection is outside the editor', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('hello'))
+    const outside = document.createElement('div')
+    const outsideText = document.createTextNode('x')
+    outside.appendChild(outsideText)
+    document.body.appendChild(outside)
+    placeCursor(outsideText, 0)
+    const box = mockGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(0)
+  })
+
+  it('measures an element-boundary caret via a temporary marker and cleans it up', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('line1'))
+    editor.appendChild(document.createElement('br'))
+    // Caret after the <br> — an element-boundary position with a zero rect.
+    placeCursor(editor, 2)
+    const box = mockGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(box.scrollTop).toBe(70)
+    // The zero-width-space marker is gone and the selection is untouched.
+    expect(editor.textContent).toBe('line1')
+    expect(editor.childNodes.length).toBe(2)
+    const range = window.getSelection()?.getRangeAt(0)
+    expect(range?.startContainer).toBe(editor)
+    expect(range?.startOffset).toBe(2)
+  })
+
+  it('runs when setCursorAtOffset places the caret', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('hello'))
+    const box = mockGeometry(editor, { caretTop: 150 })
+    setCursorAtOffset(editor, 5)
+    expect(box.scrollTop).toBe(70)
+  })
+
+  it('runs when restoreCursorPosition places the caret', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('hello'))
+    const box = mockGeometry(editor, { caretTop: 150 })
+    restoreCursorPosition(editor, { nodeIndex: 0, offset: 5 })
+    expect(box.scrollTop).toBe(70)
+  })
+
+  it('scrolls to the selection end when setSelectionAtOffsets sets a range', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('hello world'))
+    const box = mockGeometry(editor, { caretTop: 150 })
+    setSelectionAtOffsets(editor, 2, 7)
+    expect(box.scrollTop).toBe(70)
   })
 })
 

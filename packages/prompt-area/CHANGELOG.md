@@ -3,6 +3,21 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.3
+
+### Fixed
+
+- **Caret stays visible when content overflows the editor.** Once content grew
+  past `maxHeight` (e.g. after pasting long text), Shift+Enter newlines — and
+  the caret itself right after the paste — landed below the visible box,
+  forcing a manual scroll. Browsers only auto-scroll the caret into view for
+  native editing, never for selections placed via the Selection API, and the
+  editor's model→DOM re-render additionally reset `scrollTop` to 0. Every
+  programmatic caret placement (paste, newlines, list edits, chip insertion,
+  undo/redo, imperative moves) now ends by scrolling the editor's own scroll
+  box so the caret is visible. Only the editor's `scrollTop` is adjusted —
+  ancestor scroll containers and the page never move.
+
 ## 0.6.2
 
 ### Added

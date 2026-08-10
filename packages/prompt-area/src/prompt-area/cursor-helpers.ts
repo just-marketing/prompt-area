@@ -73,6 +73,7 @@ export function restoreCursorPosition(editor: HTMLElement, saved: SavedCursor): 
   range.collapse(true)
   sel.removeAllRanges()
   sel.addRange(range)
+  scrollCaretIntoView(editor)
 }
 
 export function getCursorOffset(editor: HTMLElement): number | null {
@@ -112,15 +113,16 @@ export function setCursorAtOffset(editor: HTMLElement, targetOffset: number): vo
     range.collapse(true)
     sel.removeAllRanges()
     sel.addRange(range)
-    return
+  } else {
+    // Fallback: place cursor at end
+    const range = document.createRange()
+    range.selectNodeContents(editor)
+    range.collapse(false)
+    sel.removeAllRanges()
+    sel.addRange(range)
   }
 
-  // Fallback: place cursor at end
-  const range = document.createRange()
-  range.selectNodeContents(editor)
-  range.collapse(false)
-  sel.removeAllRanges()
-  sel.addRange(range)
+  scrollCaretIntoView(editor)
 }
 
 export function getTextLengthInRange(range: Range): number {
@@ -194,6 +196,69 @@ export function setSelectionAtOffsets(
   range.setEnd(endPos.node, endPos.offset)
   sel.removeAllRanges()
   sel.addRange(range)
+  scrollCaretIntoView(editor)
+}
+
+/**
+ * Scrolls the editor's own scroll box so the caret (the selection's end) is
+ * visible.
+ *
+ * Browsers only auto-scroll the caret into view for native editing (typing,
+ * arrow keys) — never for selections placed via the Selection API. Every
+ * model-level edit here re-renders the DOM and re-places the selection
+ * programmatically (newlines, paste, chips, undo/redo, imperative moves), and
+ * the re-render clear additionally collapses scrollHeight, clamping scrollTop
+ * to 0. Without this correction, once content overflows maxHeight the caret
+ * lands outside the visible box (e.g. Shift+Enter after pasting long text).
+ *
+ * Only the editor's own scrollTop is adjusted — never ancestor scroll
+ * containers or the page — so placing a caret in a blurred editor can't jump
+ * the viewport.
+ */
+export function scrollCaretIntoView(editor: HTMLElement): void {
+  if (editor.scrollHeight <= editor.clientHeight) return
+
+  const selRange = getSelectionRange()
+  if (!selRange || !editor.contains(selRange.startContainer)) return
+
+  // Measure the selection end (where the caret sits after all placements).
+  const caretRange = selRange.cloneRange()
+  caretRange.collapse(false)
+
+  let rect = caretRange.getBoundingClientRect()
+  if (isZeroRect(rect)) {
+    // A collapsed range at an element boundary (e.g. right after a <br>)
+    // reports a zero rect, so measure a temporary zero-width space inserted at
+    // the caret instead. The insertion cannot split a text node (a caret
+    // inside a text node always has a real rect, so this path only runs at
+    // element boundaries) and doesn't shift the live selection (boundaries
+    // only move for nodes inserted strictly before them), so removing the
+    // marker restores the exact DOM and selection.
+    const marker = document.createTextNode('\u200b')
+    caretRange.insertNode(marker)
+    const markerRange = document.createRange()
+    markerRange.selectNodeContents(marker)
+    rect = markerRange.getBoundingClientRect()
+    marker.remove()
+    if (isZeroRect(rect)) return
+  }
+
+  const editorRect = editor.getBoundingClientRect()
+  const visibleTop = editorRect.top + editor.clientTop
+  const visibleBottom = visibleTop + editor.clientHeight
+
+  // Assignments beyond the scrollable extent are clamped by the browser, so
+  // over-asking near the edges is safe.
+  if (rect.bottom > visibleBottom) {
+    editor.scrollTop += rect.bottom - visibleBottom
+  } else if (rect.top < visibleTop) {
+    editor.scrollTop -= visibleTop - rect.top
+  }
+}
+
+/** All-zero rects mean "geometry unavailable" (element-boundary caret, jsdom). */
+function isZeroRect(rect: DOMRect): boolean {
+  return rect.top === 0 && rect.bottom === 0 && rect.left === 0 && rect.right === 0
 }
 
 /**
