@@ -1,54 +1,26 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import type { Segment } from '../types'
-import { placeCursorAtEnd } from './test-helpers'
+import { placeCursorAtEnd, mockEditorGeometry, restoreRangeRect } from './test-helpers'
 
 // Regression: paste content taller than maxHeight, then press Shift+Enter —
 // the newline (and caret) landed below the editor's visible box because
 // programmatic selection placement never auto-scrolls, and the model→DOM
-// re-render resets scrollTop to 0. jsdom has no layout, so these tests fake
-// the scroll geometry and assert the editor is scrolled down to the caret.
+// re-render reset scrollTop to 0. The shared geometry mock fakes the scroll
+// box (jsdom has no layout) and simulates the real-browser clamp-to-0 when
+// the editor is emptied, so these tests prove the post-render scroll
+// machinery runs — not just the pre-render call.
 
 const LONG_TEXT = Array.from({ length: 30 }, (_, i) => `line ${i + 1}`).join('\n')
 
+// A 200px-tall scroll box holding 600px of content whose caret line sits on
+// the content's last line (560..580 in content coordinates).
+const OVERFLOWING_BOX = { caretTop: 560, scrollHeight: 600, clientHeight: 200 }
+
 describe('caret stays visible in an overflowing editor', () => {
-  const originalRangeRect = Range.prototype.getBoundingClientRect
-
-  afterEach(() => {
-    Range.prototype.getBoundingClientRect = originalRangeRect
-  })
-
-  /**
-   * A 200px-tall scroll box holding 600px of content whose caret line sits on
-   * the content's last line (560..580). Text-node-anchored ranges report that
-   * line translated by the live scrollTop; element-boundary ranges report the
-   * zero rect, like real engines do.
-   */
-  function mockOverflowingBox(editor: HTMLElement) {
-    let scrollTop = 0
-    Object.defineProperty(editor, 'scrollHeight', { value: 600, configurable: true })
-    Object.defineProperty(editor, 'clientHeight', { value: 200, configurable: true })
-    Object.defineProperty(editor, 'scrollTop', {
-      get: () => scrollTop,
-      set: (v: number) => {
-        scrollTop = v
-      },
-      configurable: true,
-    })
-    editor.getBoundingClientRect = () => new DOMRect(0, 0, 300, 200)
-    Range.prototype.getBoundingClientRect = function (this: Range) {
-      return this.startContainer.nodeType === Node.TEXT_NODE
-        ? new DOMRect(0, 560 - scrollTop, 0, 20)
-        : new DOMRect(0, 0, 0, 0)
-    }
-    return {
-      get scrollTop() {
-        return scrollTop
-      },
-    }
-  }
+  afterEach(restoreRangeRect)
 
   function renderEditor(initial: Segment[] = []) {
     function Wrap() {
@@ -61,9 +33,10 @@ describe('caret stays visible in an overflowing editor', () => {
 
   it('scrolls to the caret after pasting long text', () => {
     const editor = renderEditor()
-    const box = mockOverflowingBox(editor)
+    mockEditorGeometry(editor, OVERFLOWING_BOX)
 
     act(() => {
+      editor.focus()
       placeCursorAtEnd(editor)
       fireEvent.paste(editor, {
         clipboardData: {
@@ -75,18 +48,47 @@ describe('caret stays visible in an overflowing editor', () => {
     })
 
     // Caret line bottom (580) minus visible box bottom (200).
-    expect(box.scrollTop).toBe(380)
+    expect(editor.scrollTop).toBe(380)
   })
 
   it('keeps a Shift+Enter newline in view', () => {
     const editor = renderEditor([{ type: 'text', text: LONG_TEXT }])
-    const box = mockOverflowingBox(editor)
+    mockEditorGeometry(editor, OVERFLOWING_BOX)
 
     act(() => {
+      editor.focus()
       placeCursorAtEnd(editor)
       fireEvent.keyDown(editor, { key: 'Enter', shiftKey: true })
     })
 
-    expect(box.scrollTop).toBe(380)
+    expect(editor.scrollTop).toBe(380)
+  })
+
+  it('preserves scrollTop across a re-render of a blurred editor', () => {
+    // An external value update re-renders the DOM; the clear clamps scrollTop
+    // to 0 and, with no selection in the editor to follow, no caret nudge can
+    // recover it — renderSegmentsToDOM must put the saved viewport back.
+    const onChange = vi.fn()
+    const { rerender } = render(
+      <PromptArea
+        value={[{ type: 'text', text: LONG_TEXT }]}
+        onChange={onChange}
+        maxHeight={200}
+      />,
+    )
+    const editor = screen.getByRole('textbox') as HTMLDivElement
+    mockEditorGeometry(editor, { ...OVERFLOWING_BOX, scrollTop: 250 })
+
+    act(() => {
+      rerender(
+        <PromptArea
+          value={[{ type: 'text', text: `${LONG_TEXT}\nappended externally` }]}
+          onChange={onChange}
+          maxHeight={200}
+        />,
+      )
+    })
+
+    expect(editor.scrollTop).toBe(250)
   })
 })

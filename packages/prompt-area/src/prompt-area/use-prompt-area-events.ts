@@ -4,7 +4,7 @@ import { useCallback, useRef } from 'react'
 import type { Segment, ChipSegment, TriggerConfig } from './types'
 import { resolveTriggersInSegments } from './prompt-area-engine'
 import { normalizeEditorDOM, safeJsonStringify, getSelectionRange } from './dom-helpers'
-import { scrollCaretIntoView } from './cursor-helpers'
+import { applySelectionRange } from './cursor-helpers'
 import {
   serializeFragmentToPlainText,
   serializeFragmentToSegments,
@@ -252,14 +252,12 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
       range.insertNode(fragment)
 
-      // Move cursor to end of pasted content. The Selection API never
-      // auto-scrolls, so bring the caret into view when the paste overflows
-      // the editor's scroll box.
+      // Move cursor to end of pasted content, committed through
+      // applySelectionRange so the caret scrolls into view when the paste
+      // overflows the editor's scroll box (the Selection API never
+      // auto-scrolls on its own).
       range.collapse(false)
-      const sel = window.getSelection()
-      sel?.removeAllRanges()
-      sel?.addRange(range)
-      scrollCaretIntoView(editor)
+      applySelectionRange(editor, range)
 
       // Normalize DOM, sync model, detect triggers
       normalizeEditorDOM(editor)
