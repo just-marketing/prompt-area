@@ -19,7 +19,7 @@ import { SubmittedPreview } from './submitted-preview'
 
 const MODELS = ['Instant', 'Thinking', 'Pro'] as const
 type Model = (typeof MODELS)[number]
-const LATEST_VERSION = '5.5'
+const LATEST_VERSION = '5.6'
 
 // The vivid blue ChatGPT uses for the voice / primary affordance.
 const ACCENT = '#0b84ff'
@@ -206,7 +206,7 @@ import { PromptArea, isSegmentsEmpty } from '@/components/prompt-area'
 import type { Segment, PromptAreaHandle } from '@/components/types'
 
 const MODELS = ['Instant', 'Thinking', 'Pro'] as const
-const LATEST_VERSION = '5.5'
+const LATEST_VERSION = '5.6'
 const ACCENT = '#0b84ff'
 
 const ICON_BTN = 'flex size-9 shrink-0 items-center justify-center rounded-full text-[#5d5d5d] transition-colors hover:bg-black/6 dark:text-[#b4b4b4] dark:hover:bg-white/10'

@@ -3,6 +3,41 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.3
+
+### Fixed
+
+- **Caret stays visible when content overflows the editor.** Once content grew
+  past `maxHeight` (e.g. after pasting long text), Shift+Enter newlines — and
+  the caret itself right after the paste — landed below the visible box,
+  forcing a manual scroll. Browsers only auto-scroll the caret into view for
+  native editing, never for selections placed via the Selection API, and the
+  editor's model→DOM re-render additionally reset `scrollTop` to 0. Every
+  programmatic caret placement in a focused editor (paste, newlines, list
+  edits, chip insertion, undo/redo, imperative moves) now commits through a
+  single primitive that ends by scrolling the editor's own scroll box so the
+  caret is visible. Only the editor's `scrollTop` is adjusted — ancestor
+  scroll containers and the page never move — and blurred editors are left
+  alone, so imperative `setText`/`appendText` from a toolbar button can't pan
+  a collapsed auto-grow preview. The correction is transform-aware, so it
+  scrolls correctly inside scaled ancestors (zoomed canvases, animated
+  dialogs).
+- **Scroll position survives re-renders.** The model→DOM re-render clears the
+  editor, which collapsed `scrollHeight` and clamped `scrollTop` to 0 — so any
+  re-render of an overflowing editor (external value updates, undo/redo,
+  markdown toggling, formatting) silently jumped the view to the top, and
+  mid-document edits re-anchored the caret line to the box edge. The viewport
+  is now preserved across the rebuild and the caret correction only nudges
+  when the caret genuinely left the visible box. Restored range selections
+  (Cmd+B/Cmd+I) keep the viewport instead of jumping to the selection's end.
+- **Trigger popover anchors correctly after chips and line breaks.** A trigger
+  character typed at an element boundary (right after a chip or `<br>`)
+  reports no geometry, so the suggestion popover kept a stale anchor from a
+  previous position. The caret measurement now falls back to a temporary
+  zero-width-space probe — inserted and removed synchronously without
+  disturbing the DOM or selection — and the popover anchors at the real
+  trigger position.
+
 ## 0.6.2
 
 ### Added

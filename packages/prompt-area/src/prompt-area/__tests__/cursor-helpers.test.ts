@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   saveCursorPosition,
   restoreCursorPosition,
@@ -9,7 +9,9 @@ import {
   setSelectionAtOffsets,
   getTextLengthInRange,
   findDOMPosition,
+  scrollCaretIntoView,
 } from '../cursor-helpers'
+import { mockEditorGeometry, restoreRangeRect } from './test-helpers'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -17,7 +19,9 @@ import {
 
 function makeEditor(): HTMLDivElement {
   const editor = document.createElement('div')
-  editor.contentEditable = 'true'
+  // The attribute (not the property): jsdom's focusable-area check only sees
+  // the attribute, and the scroll tests below rely on editor.focus() working.
+  editor.setAttribute('contenteditable', 'true')
   document.body.appendChild(editor)
   return editor
 }
@@ -434,6 +438,172 @@ describe('setSelectionAtOffsets', () => {
     expect(range?.collapsed).toBe(false)
     expect(range?.startContainer).toBe(text)
     expect(range?.endContainer).toBe(text)
+    expect(range?.startOffset).toBe(2)
+    expect(range?.endOffset).toBe(7)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// scrollCaretIntoView
+// ---------------------------------------------------------------------------
+
+describe('scrollCaretIntoView', () => {
+  afterEach(restoreRangeRect)
+
+  function makeFocusedEditor(content = 'hello'): { editor: HTMLDivElement; textNode: Text } {
+    const editor = makeEditor()
+    const textNode = document.createTextNode(content)
+    editor.appendChild(textNode)
+    editor.focus()
+    return { editor, textNode }
+  }
+
+  it('scrolls down when the caret is below the visible box', () => {
+    const { editor, textNode } = makeFocusedEditor()
+    placeCursor(textNode, 5)
+    // Visible box is 0..100; the caret line sits at 150..170.
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(70)
+  })
+
+  it('scrolls up when the caret is above the visible box', () => {
+    const { editor, textNode } = makeFocusedEditor()
+    placeCursor(textNode, 0)
+    // Scrolled to 200, caret line at 170..190 → 30px above the fold.
+    mockEditorGeometry(editor, { caretTop: 170, scrollTop: 200 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(170)
+  })
+
+  it('leaves scrollTop alone when the caret is already visible', () => {
+    const { editor, textNode } = makeFocusedEditor()
+    placeCursor(textNode, 3)
+    // Scrolled to 50, caret line at 90..110 in content space → 40..60 on screen.
+    mockEditorGeometry(editor, { caretTop: 90, scrollTop: 50 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(50)
+  })
+
+  it('does nothing when content does not overflow', () => {
+    const { editor, textNode } = makeFocusedEditor()
+    placeCursor(textNode, 5)
+    mockEditorGeometry(editor, { caretTop: 150, scrollHeight: 100, clientHeight: 100 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(0)
+  })
+
+  it('does nothing when the selection is outside the editor', () => {
+    const { editor } = makeFocusedEditor()
+    const outside = document.createElement('div')
+    const outsideText = document.createTextNode('x')
+    outside.appendChild(outsideText)
+    document.body.appendChild(outside)
+    placeCursor(outsideText, 0)
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(0)
+  })
+
+  it('does nothing when the editor is not focused', () => {
+    // An imperative placement into a blurred editor (handle.appendText from a
+    // toolbar button) must not pan the collapsed preview.
+    const editor = makeEditor()
+    const textNode = document.createTextNode('hello')
+    editor.appendChild(textNode)
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+    button.focus()
+    placeCursor(textNode, 5)
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(0)
+  })
+
+  it('does nothing for a non-collapsed selection', () => {
+    // A range selection has no single caret; restored selections (Cmd+B) must
+    // not yank the viewport to the range's document-order end.
+    const { editor, textNode } = makeFocusedEditor('hello world')
+    placeSelection(textNode, 2, textNode, 7)
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(0)
+  })
+
+  it('measures an element-boundary caret via a temporary marker and cleans it up', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('line1'))
+    editor.appendChild(document.createElement('br'))
+    editor.focus()
+    // Caret after the <br> — an element-boundary position with a zero rect.
+    placeCursor(editor, 2)
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(70)
+    // The zero-width-space marker is gone and the selection is untouched.
+    expect(editor.textContent).toBe('line1')
+    expect(editor.childNodes.length).toBe(2)
+    const range = window.getSelection()?.getRangeAt(0)
+    expect(range?.startContainer).toBe(editor)
+    expect(range?.startOffset).toBe(2)
+  })
+
+  it('never splits a text node when measuring a caret inside one', () => {
+    // A caret in an EMPTY text node (browser editing residue between chips)
+    // also reports a zero rect. Range.insertNode into a Text container always
+    // splits it and removal would not re-merge — the marker must go to the
+    // parent boundary instead, leaving the very same node intact.
+    const editor = makeEditor()
+    const before = makeChip('@', 'Alice')
+    const emptyText = document.createTextNode('')
+    const after = makeChip('#', 'docs')
+    editor.append(before, emptyText, after)
+    editor.focus()
+    placeCursor(emptyText, 0)
+    mockEditorGeometry(editor, { caretTop: 150 })
+    scrollCaretIntoView(editor)
+    expect(editor.scrollTop).toBe(70)
+    expect(editor.childNodes.length).toBe(3)
+    expect(editor.childNodes[1]).toBe(emptyText)
+    expect(emptyText.textContent).toBe('')
+    expect(editor.textContent).toBe('@Alice#docs')
+    const range = window.getSelection()?.getRangeAt(0)
+    expect(range?.startContainer).toBe(emptyText)
+    expect(range?.startOffset).toBe(0)
+  })
+
+  it('runs when setCursorAtOffset places the caret', () => {
+    const { editor } = makeFocusedEditor()
+    mockEditorGeometry(editor, { caretTop: 150 })
+    setCursorAtOffset(editor, 5)
+    expect(editor.scrollTop).toBe(70)
+  })
+
+  it('is skipped when setCursorAtOffset is called with scroll: false', () => {
+    const { editor } = makeFocusedEditor()
+    mockEditorGeometry(editor, { caretTop: 150 })
+    setCursorAtOffset(editor, 5, { scroll: false })
+    expect(editor.scrollTop).toBe(0)
+    // The placement itself still happened.
+    const range = window.getSelection()?.getRangeAt(0)
+    expect(range?.startOffset).toBe(5)
+  })
+
+  it('runs when restoreCursorPosition places the caret', () => {
+    const { editor } = makeFocusedEditor()
+    mockEditorGeometry(editor, { caretTop: 150 })
+    restoreCursorPosition(editor, { nodeIndex: 0, offset: 5 })
+    expect(editor.scrollTop).toBe(70)
+  })
+
+  it('does not scroll when setSelectionAtOffsets sets a range selection', () => {
+    const { editor, textNode } = makeFocusedEditor('hello world')
+    mockEditorGeometry(editor, { caretTop: 150 })
+    setSelectionAtOffsets(editor, 2, 7)
+    expect(editor.scrollTop).toBe(0)
+    // The selection itself is still applied.
+    const range = window.getSelection()?.getRangeAt(0)
+    expect(range?.startContainer).toBe(textNode)
     expect(range?.startOffset).toBe(2)
     expect(range?.endOffset).toBe(7)
   })

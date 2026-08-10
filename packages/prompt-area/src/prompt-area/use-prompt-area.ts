@@ -58,6 +58,7 @@ import {
   createRangeAtOffset,
   getSelectionOffsets,
   setSelectionAtOffsets,
+  caretLineRect,
 } from './cursor-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 import { useTriggerSearch } from './use-trigger-search'
@@ -267,6 +268,7 @@ export function usePromptArea({
       isSyncing.current = true
 
       const savedCursor = saveCursorPosition(editor)
+      const savedScrollTop = editor.scrollTop
 
       // Clear DOM safely (no innerHTML assignment)
       while (editor.firstChild) {
@@ -324,6 +326,14 @@ export function usePromptArea({
 
       // Decorate URLs, markdown formatting, and list bullets in text nodes
       decorateEditor(editor, markdownEnabled)
+
+      // The child-clear above collapsed scrollHeight, which clamped scrollTop
+      // to 0. Put the viewport back before the caret restore so an in-view
+      // caret keeps its screen position (the restore then only nudges when
+      // the caret genuinely left the box) — and so re-renders without a
+      // selection to follow (blurred editor, external value updates) don't
+      // silently reset the user's scroll.
+      editor.scrollTop = savedScrollTop
 
       if (savedCursor) {
         restoreCursorPosition(editor, savedCursor)
@@ -389,10 +399,13 @@ export function usePromptArea({
       // the trigger char even when the cursor has moved past it.
       const triggerRange = createRangeAtOffset(editor, detected.startOffset)
       if (triggerRange) {
-        const rect = triggerRange.getBoundingClientRect()
-        // A zero rect means the range couldn't be mapped (e.g. after DOM
-        // re-render). Skip updating triggerRect so we keep the last valid one.
-        if (rect.height > 0 || rect.left > 0 || rect.top > 0) {
+        // caretLineRect measures element-boundary positions too (a trigger
+        // typed right after a chip or <br>), so the popover anchors at the
+        // real trigger position instead of skipping the update. It returns
+        // null only when no geometry exists at all (jsdom) — keep the last
+        // valid rect rather than anchoring at the origin.
+        const rect = caretLineRect(triggerRange)
+        if (rect) {
           setTriggerRect(rect)
         }
       }
@@ -594,7 +607,10 @@ export function usePromptArea({
       } else {
         decorateEditor(editor, markdownEnabled)
         if (savedCursorOffset !== null) {
-          setCursorAtOffset(editor, savedCursorOffset)
+          // scroll: false — this placement only re-establishes the caret that
+          // native editing just revealed, and the correction's layout read
+          // would force a reflow on every keystroke.
+          setCursorAtOffset(editor, savedCursorOffset, { scroll: false })
         }
       }
     }
