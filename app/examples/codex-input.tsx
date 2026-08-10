@@ -436,7 +436,7 @@ function CodexInputExample() {
                   </button>
                   {openMenu === 'model' && (
                     <div className={cn(MENU, 'right-0 bottom-full mb-1.5 w-52')}>
-                      {[{ version: '5.6 Sol', effort: 'Extra High' }, { version: '5.6 Terra', effort: 'Medium' }, { version: '5.6 Luna', effort: 'Low' }].map((m, i) => (
+                      {[{ version: '5.6 Sol', effort: 'Extra High' }, { version: '5.6 Sol', effort: 'High' }, { version: '5.6 Terra', effort: 'Medium' }, { version: '5.6 Luna', effort: 'Low' }].map((m, i) => (
                         <button key={i} className={MENU_ITEM} onClick={() => { setModel(m); setOpenMenu(null) }}>
                           <Zap className="size-4" />
                           <span className="text-foreground font-semibold">{m.version}</span>
