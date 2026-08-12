@@ -357,6 +357,15 @@ export function findDOMPosition(
       }
       remaining -= len
     } else if (isChipElement(child)) {
+      // A remaining of 0 means the caret belongs BEFORE this node. Text nodes
+      // express that for free (offset 0 inside the node), but atomic children
+      // have to say it explicitly — otherwise offset 0 collapses into the same
+      // "after the node" answer as offset === its length, landing the caret in
+      // a spot normal editing never produces. On the filler <br> the browser
+      // leaves in an emptied contentEditable, that spot is also unstable: the
+      // filler is dropped as soon as real content arrives, so an IME
+      // composition anchored there loses its node mid-flight and is cancelled.
+      if (remaining === 0) return { node: container, offset: i }
       const chipLen = chipNodeTextLength(child)
       if (remaining <= chipLen) {
         // Position after the chip element
@@ -364,6 +373,10 @@ export function findDOMPosition(
       }
       remaining -= chipLen
     } else if (isBRElement(child)) {
+      // Checked ahead of the sentinel skip: a lone sentinel is still a node the
+      // caret can sit before, and skipping it would fall through to the
+      // end-of-container fallback, i.e. after it.
+      if (remaining === 0) return { node: container, offset: i }
       if (child.dataset.sentinel) continue // skip sentinel <br>
       if (remaining <= 1) {
         return { node: container, offset: i + 1 }

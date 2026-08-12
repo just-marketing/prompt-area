@@ -166,6 +166,48 @@ describe('findDOMPosition', () => {
     expect(pos).toEqual({ node: editor, offset: editor.childNodes.length })
   })
 
+  it('positions before the filler BR of an emptied editor', () => {
+    // What the browser leaves behind after the last character is deleted.
+    const editor = makeEditor()
+    editor.appendChild(document.createElement('br'))
+    const pos = findDOMPosition(editor, 0)
+    expect(pos).toEqual({ node: editor, offset: 0 })
+  })
+
+  it('positions before a leading BR rather than after it', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createElement('br'))
+    editor.appendChild(document.createTextNode('b'))
+    const pos = findDOMPosition(editor, 0)
+    expect(pos).toEqual({ node: editor, offset: 0 })
+  })
+
+  it('positions before a lone sentinel BR', () => {
+    const editor = makeEditor()
+    editor.appendChild(makeSentinelBr())
+    const pos = findDOMPosition(editor, 0)
+    expect(pos).toEqual({ node: editor, offset: 0 })
+  })
+
+  it('positions before a leading chip rather than after it', () => {
+    const editor = makeEditor()
+    editor.appendChild(makeChip('@', 'Bob'))
+    editor.appendChild(document.createTextNode(' hi'))
+    const pos = findDOMPosition(editor, 0)
+    expect(pos).toEqual({ node: editor, offset: 0 })
+  })
+
+  it('round-trips offset 0 on an emptied editor through getTextLengthInRange', () => {
+    const editor = makeEditor()
+    editor.appendChild(document.createElement('br'))
+    const pos = findDOMPosition(editor, 0)
+    if (!pos) throw new Error('expected a position')
+    const range = document.createRange()
+    range.selectNodeContents(editor)
+    range.setEnd(pos.node, pos.offset)
+    expect(getTextLengthInRange(range)).toBe(0)
+  })
+
   it('positions after a chip when offset falls inside it', () => {
     const editor = makeEditor()
     const before = document.createTextNode('a ')
