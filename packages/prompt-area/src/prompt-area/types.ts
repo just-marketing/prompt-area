@@ -227,6 +227,14 @@ export type PromptAreaProps = {
   /** Whether to render simple inline markdown (bold, italic, URLs, lists) */
   markdown?: boolean
   /**
+   * Also render ATX headings — `# ` through `###### ` — at their real size,
+   * with the hashes hidden. Requires `markdown`; off by default because a
+   * comment box is prose, and silently turning a typed `## ` into a display
+   * heading there would surprise rather than help. Turn it on for editors that
+   * hold a document. Default `false`.
+   */
+  markdownHeadings?: boolean
+  /**
    * When markdown is on, the editor rewrites typed list markers (`- ` / `* `)
    * to a `•` bullet glyph in the model. Set to `false` to keep the original
    * marker in the value/`onChange` text — needed when a host renders the output

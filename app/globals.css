@@ -196,6 +196,39 @@
     font-size: 0;
     display: inline;
   }
+  /* Headings. The "## " stays in the model inside a zero-size marker, so only
+     the text after it is sized up. inline-block gives the line its own box, so
+     consecutive headings don't collide the way bare inline spans would, and
+     `--prompt-area-heading-*` lets consumers retune the scale. */
+  .prompt-area-md-heading {
+    display: inline-block;
+    padding-top: 0.35em;
+  }
+  .prompt-area-md-heading-text {
+    font-weight: var(--prompt-area-heading-weight, 600);
+    line-height: 1.25;
+  }
+  [data-md-heading='1'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-1, 1.5rem);
+  }
+  [data-md-heading='2'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-2, 1.25rem);
+  }
+  [data-md-heading='3'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-3, 1.125rem);
+  }
+  [data-md-heading='4'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-4, 1rem);
+  }
+  [data-md-heading='5'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-5, 0.9375rem);
+  }
+  /* H6 is conventionally the quiet one — same size as body, set apart by
+     colour rather than scale. */
+  [data-md-heading='6'] .prompt-area-md-heading-text {
+    font-size: var(--prompt-area-heading-6, 0.875rem);
+    color: var(--muted-foreground);
+  }
   /* The raw U+2022 glyph only inks ~5px, so hide it and draw the bullet as a
      precise CSS dot. The "•" character stays in the span (font-size: 0) so the
      segment model and caret are unaffected. `--prompt-area-bullet-size` (default
