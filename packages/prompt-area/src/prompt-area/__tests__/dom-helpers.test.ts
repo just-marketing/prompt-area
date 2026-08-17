@@ -23,6 +23,7 @@ import {
   decorateURLsInEditor,
   decorateMarkdownInEditor,
   decorateBulletsInEditor,
+  decorateHeadingsInEditor,
   decorateListIndentInEditor,
   decorateEditor,
 } from '../dom-helpers'
@@ -1105,6 +1106,149 @@ describe('decorateEditor', () => {
     decorateEditor(editor, true)
 
     expect(editor.querySelectorAll('span.prompt-area-list-bullet').length).toBe(2)
+  })
+
+  it('leaves headings alone unless they are opted in', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## Risks'))
+
+    decorateEditor(editor, true)
+
+    expect(editor.querySelector('[data-md-heading]')).toBeNull()
+  })
+
+  it('decorates headings when opted in, without disturbing inline markdown', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## Risks\nSomething **bold**.'))
+
+    decorateEditor(editor, true, true)
+
+    expect(editor.querySelector('[data-md-heading="2"]')).not.toBeNull()
+    expect(editor.querySelector('span[data-md] .font-bold')).not.toBeNull()
+    expect(editor.textContent).toBe('## Risks\nSomething **bold**.')
+  })
+
+  it('does not decorate headings when markdown itself is off', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## Risks'))
+
+    decorateEditor(editor, false, true)
+
+    expect(editor.querySelector('[data-md-heading]')).toBeNull()
+  })
+
+  it('styles inline emphasis inside a heading', () => {
+    // The heading pass takes the line's text node for itself, so the
+    // editor-level inline pass can't see it. Without the follow-up pass the
+    // asterisks would sit there raw in the middle of a heading.
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## Risks and *caveats*'))
+
+    decorateEditor(editor, true, true)
+
+    const heading = editor.querySelector('[data-md-heading="2"]')
+    expect(heading?.querySelector('.italic')?.textContent).toBe('caveats')
+    expect(editor.textContent).toBe('## Risks and *caveats*')
+  })
+})
+
+// ===========================================================================
+// decorateHeadingsInEditor
+// ===========================================================================
+
+describe('decorateHeadingsInEditor', () => {
+  it('hides the hashes and sizes the line, leaving the text intact', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## Risks'))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(true)
+    // The invariant every decoration shares: the model's text is untouched, so
+    // caret offsets still land on the character the user meant.
+    expect(editor.textContent).toBe('## Risks')
+    expect(editor.querySelector('.prompt-area-md-marker')?.textContent).toBe('## ')
+    expect(editor.querySelector('.prompt-area-md-heading-text')?.textContent).toBe('Risks')
+  })
+
+  it('records the level so CSS can scale each one', () => {
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+      const editor = document.createElement('div')
+      editor.appendChild(document.createTextNode(`${'#'.repeat(level)} Title`))
+      decorateHeadingsInEditor(editor)
+      expect(editor.querySelector('[data-md-heading]')?.getAttribute('data-md-heading')).toBe(
+        String(level),
+      )
+    }
+  })
+
+  it('ignores seven hashes, which markdown does not define as a heading', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('####### too deep'))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(false)
+  })
+
+  it('requires the space, so a hashtag stays a hashtag', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('#tag'))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(false)
+  })
+
+  it('only matches at a line start', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('see issue #4 and ## not a heading'))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(false)
+  })
+
+  it('finds a heading after a newline and after a <br>', () => {
+    const withNewline = document.createElement('div')
+    withNewline.appendChild(document.createTextNode('intro\n## Risks\nbody'))
+    expect(decorateHeadingsInEditor(withNewline)).toBe(true)
+    expect(withNewline.querySelectorAll('[data-md-heading]').length).toBe(1)
+    expect(withNewline.textContent).toBe('intro\n## Risks\nbody')
+
+    const withBr = document.createElement('div')
+    withBr.appendChild(document.createTextNode('intro'))
+    withBr.appendChild(document.createElement('br'))
+    withBr.appendChild(document.createTextNode('## Risks'))
+    expect(decorateHeadingsInEditor(withBr)).toBe(true)
+    expect(withBr.querySelectorAll('[data-md-heading]').length).toBe(1)
+  })
+
+  it('leaves a mid-line continuation alone', () => {
+    // A text node following a chip continues that line, so "## " in it is
+    // literal text rather than a heading.
+    const editor = document.createElement('div')
+    const chip = document.createElement('span')
+    chip.dataset.chipTrigger = '@'
+    chip.textContent = '@ada'
+    editor.appendChild(chip)
+    editor.appendChild(document.createTextNode('## same line'))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(false)
+  })
+
+  it('handles a heading opened but not yet typed into', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('## '))
+
+    expect(decorateHeadingsInEditor(editor)).toBe(true)
+    // The trailing space is where the caret sits — losing it would move it.
+    expect(editor.textContent).toBe('## ')
+  })
+
+  it('round-trips through normalizeEditorDOM unchanged', () => {
+    const source = '# Title\n\n## Sub\n\nbody'
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode(source))
+
+    for (let i = 0; i < 5; i++) {
+      decorateHeadingsInEditor(editor)
+      normalizeEditorDOM(editor)
+    }
+
+    expect(editor.textContent).toBe(source)
   })
 })
 

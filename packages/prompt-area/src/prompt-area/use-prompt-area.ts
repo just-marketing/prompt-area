@@ -84,6 +84,7 @@ type UsePromptAreaOptions = {
   onRedo?: (segments: Segment[]) => void
   onImagePaste?: (file: File) => void
   markdown?: boolean
+  markdownHeadings?: boolean
   normalizeBullets?: boolean
   submitOnEnter?: boolean
   maxLength?: number
@@ -140,6 +141,7 @@ export function usePromptArea({
   onRedo,
   onImagePaste,
   markdown: markdownEnabled = true,
+  markdownHeadings: headingsEnabled = false,
   normalizeBullets = true,
   submitOnEnter = true,
   maxLength,
@@ -325,7 +327,7 @@ export function usePromptArea({
       }
 
       // Decorate URLs, markdown formatting, and list bullets in text nodes
-      decorateEditor(editor, markdownEnabled)
+      decorateEditor(editor, markdownEnabled, headingsEnabled)
 
       // The child-clear above collapsed scrollHeight, which clamped scrollTop
       // to 0. Put the viewport back before the caret restore so an in-view
@@ -342,7 +344,7 @@ export function usePromptArea({
       lastRenderedValue.current = segments
       isSyncing.current = false
     },
-    [triggers, markdownEnabled],
+    [triggers, markdownEnabled, headingsEnabled],
   )
 
   // -----------------------------------------------------------------------
@@ -605,7 +607,7 @@ export function usePromptArea({
         renderSegmentsToDOM(nextSegments)
         setCursorAtOffset(editor, renumberedCursor)
       } else {
-        decorateEditor(editor, markdownEnabled)
+        decorateEditor(editor, markdownEnabled, headingsEnabled)
         if (savedCursorOffset !== null) {
           // scroll: false — this placement only re-establishes the caret that
           // native editing just revealed, and the correction's layout read
@@ -622,6 +624,7 @@ export function usePromptArea({
     runTriggerDetection,
     renderSegmentsToDOM,
     markdownEnabled,
+    headingsEnabled,
     normalizeBullets,
     maxLength,
     events,

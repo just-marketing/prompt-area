@@ -53,6 +53,13 @@ export default function PromptAreaApiPage() {
               'Render inline markdown (bold, italic, URLs, lists). Also enables rich paste: content from Slack, Notion, Google Docs, GitHub, or the web is converted to markdown source (preferring text/markdown, then text/html), and pasted list bullets normalize to •.',
           },
           {
+            name: 'markdownHeadings',
+            type: 'boolean',
+            default: 'false',
+            description:
+              'When markdown is on, also render ATX headings ("# " through "###### ") at heading size, with the hashes hidden. Off by default: a comment box is prose, and turning a typed "## " into a display heading there would surprise rather than help. Turn it on for editors that hold a document. Retune the scale with the --prompt-area-heading-1…6 CSS variables.',
+          },
+          {
             name: 'normalizeBullets',
             type: 'boolean',
             default: 'true',

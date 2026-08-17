@@ -605,6 +605,98 @@ export function decorateBulletsInEditor(editor: HTMLElement): boolean {
   return decorated
 }
 
+/** An ATX heading — `# ` through `###### ` — at the start of a line. */
+const HEADING_PATTERN = /^(#{1,6}) (.*)$/
+
+/**
+ * Renders markdown headings at their real size: `## Risks` becomes a heading
+ * line, with the hashes collapsed to nothing rather than left on screen.
+ *
+ * Like the other decorations this is display-only. The `#` characters stay in
+ * the DOM inside a zero-size `.prompt-area-md-marker`, so `textContent` — and
+ * therefore the segment model and every caret offset — is unchanged, and
+ * {@link normalizeEditorDOM} unwraps the whole thing back to plain text on the
+ * next input cycle.
+ *
+ * Must run BEFORE the node-splitting passes ({@link decorateURLsInEditor},
+ * {@link decorateMarkdownInEditor}), which need whole-line text nodes. That
+ * puts the heading's text out of their reach, so {@link decorateEditor} runs
+ * the inline pass over each heading's content span afterwards — otherwise
+ * `## Risks and *caveats*` would show its asterisks raw.
+ *
+ * A heading is only recognised at a true line start — the first text node, one
+ * following a `<br>`, or just after a `\n`. A text node that merely continues a
+ * line (after a chip, say) is left alone, so `see #4 and ## notes` stays prose.
+ *
+ * @param editor - The contentEditable root element
+ * @returns Whether any decorations were applied
+ */
+export function decorateHeadingsInEditor(editor: HTMLElement): boolean {
+  let decorated = false
+
+  const textNodes: Text[] = []
+  for (let i = 0; i < editor.childNodes.length; i++) {
+    const node = editor.childNodes[i]
+    if (isTextNode(node) && node.textContent?.includes('#')) {
+      textNodes.push(node)
+    }
+  }
+
+  for (const textNode of textNodes) {
+    const text = textNode.textContent ?? ''
+    const previous = textNode.previousSibling
+    const opensLine = previous === null || isBRElement(previous)
+
+    const lines = text.split('\n')
+    const fragment = document.createDocumentFragment()
+    let touched = false
+
+    lines.forEach((line, index) => {
+      if (index > 0) fragment.appendChild(document.createTextNode('\n'))
+
+      const atLineStart = index === 0 ? opensLine : true
+      const match = atLineStart ? HEADING_PATTERN.exec(line) : null
+      if (!match) {
+        fragment.appendChild(document.createTextNode(line))
+        return
+      }
+
+      const hashes = match[1] ?? ''
+      const content = match[2] ?? ''
+      touched = true
+
+      const wrapper = document.createElement('span')
+      wrapper.dataset.md = 'true'
+      wrapper.dataset.mdHeading = String(hashes.length)
+      wrapper.className = 'prompt-area-md-heading'
+
+      const marker = document.createElement('span')
+      marker.className = 'prompt-area-md-marker'
+      // The trailing space belongs to the marker: it's syntax, and leaving it
+      // visible would indent every heading by a space.
+      marker.textContent = `${hashes} `
+
+      const body = document.createElement('span')
+      body.className = 'prompt-area-md-heading-text'
+      body.textContent = content
+
+      wrapper.appendChild(marker)
+      wrapper.appendChild(body)
+      fragment.appendChild(wrapper)
+    })
+
+    if (!touched) continue
+
+    const parent = textNode.parentNode
+    if (!parent) continue
+
+    decorated = true
+    parent.replaceChild(fragment, textNode)
+  }
+
+  return decorated
+}
+
 /**
  * Matches the line-leading whitespace run of an indented list line (bullet or
  * numbered). The lookahead keeps the list prefix itself out of the capture, so
@@ -692,18 +784,39 @@ export function decorateListIndentInEditor(editor: HTMLElement): boolean {
  * whole line: the URL and markdown passes split text nodes mid-line, and a tail
  * fragment starting with whitespace would let the indent regex's `^` anchor
  * false-match non-line-leading whitespace (e.g. `see http://x   1. y`).
+ *
+ * @param headingsEnabled - Also render `# ` … `###### ` as sized headings.
+ *   Separate from `markdownEnabled` and off by default: a comment box is prose,
+ *   and silently turning someone's `## ` into a display heading there would be
+ *   a surprise rather than a feature.
  */
-export function decorateEditor(editor: HTMLElement, markdownEnabled: boolean): void {
+export function decorateEditor(
+  editor: HTMLElement,
+  markdownEnabled: boolean,
+  headingsEnabled = false,
+): void {
   // Whole-line passes run FIRST, while each direct-child text node is still a
   // full line. The URL and markdown passes split text nodes mid-line, so a tail
   // fragment beginning with "•" would let the bullet regex's `^` anchor
   // false-match a mid-line separator (e.g. `**bold** • middle`).
   if (markdownEnabled) {
+    if (headingsEnabled) decorateHeadingsInEditor(editor)
     decorateListIndentInEditor(editor)
     decorateBulletsInEditor(editor)
   }
   decorateURLsInEditor(editor)
   if (markdownEnabled) decorateMarkdownInEditor(editor)
+
+  // Inline emphasis *inside* a heading. The heading pass consumed the line's
+  // text node into its own span, so the editor-level pass above can't reach it
+  // — without this, `## Risks and *caveats*` would show its asterisks raw.
+  if (markdownEnabled && headingsEnabled) {
+    const headingTexts = editor.querySelectorAll('.prompt-area-md-heading-text')
+    for (let i = 0; i < headingTexts.length; i++) {
+      const body = headingTexts[i]
+      if (isHTMLElement(body)) decorateMarkdownInEditor(body)
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
