@@ -3,7 +3,7 @@
  *
  * Used by the paste handler: when the editor is in markdown mode and the
  * clipboard carries rich `text/html` (web pages, Notion, Google Docs, GitHub,
- * Slack, etc.), we convert it to markdown SOURCE text so the paste keeps its
+ * Slack, Word, etc.), we convert it to markdown SOURCE text so the paste keeps its
  * formatting. The resulting string flows through the same insertion path as a
  * plain-text paste, and the editor's inline decorators render `*`/`**`/`***`
  * and bare URLs automatically.
@@ -70,6 +70,98 @@ function collapseWhitespace(text: string): string {
 /** Escapes literal `*` from HTML text so prose isn't re-read as emphasis. */
 function escapeText(text: string): string {
   return text.replace(/\*/g, '\\*')
+}
+
+// ---------------------------------------------------------------------------
+// Microsoft Office clipboard HTML (Word / Outlook / Excel)
+// ---------------------------------------------------------------------------
+
+/**
+ * Office fingerprints: `urn:schemas-microsoft-com:office` xmlns declarations,
+ * `<meta name=ProgId content=Word.Document>`, `Mso*` class names (quoted or
+ * Word's unquoted `class=MsoNormal`), and `mso-*` style declarations.
+ */
+const OFFICE_HTML_MARKER =
+  /urn:schemas-microsoft-com:office|name=["']?ProgId|class=["']?Mso|\bmso-[\w-]+\s*:/i
+
+/**
+ * Whether clipboard HTML came from a Microsoft Office app. Office apps put a
+ * bitmap RENDERING of the copied selection on the clipboard alongside the
+ * HTML (macOS Word especially), so the paste handler uses this to keep a
+ * text copy from being mistaken for an image paste.
+ */
+export function isOfficeHtml(html: string): boolean {
+  return OFFICE_HTML_MARKER.test(html)
+}
+
+/** Word's inline list metadata: `mso-list:l0 level2 lfo1` → nesting level 2. */
+const MSO_LIST_LEVEL = /mso-list:\s*l\d+\s+level(\d+)/i
+/** `1.` / `12)` — numeric ordered marker; captures the digits. */
+const NUMERIC_MARKER = /^(\d+)[.)]/
+/** `a.` / `B)` / `iv.` — alphabetic/roman ordered marker. */
+const ALPHA_MARKER = /^[a-z]{1,5}[.)]/i
+
+type WordListItem = { p: HTMLElement; level: number }
+
+/**
+ * Classifies a `<p>` as a Word list paragraph. Word clipboard HTML has no
+ * `<ul>/<ol>`: each item is a paragraph whose inline style carries
+ * `mso-list:l<id> level<n> lfo<id>`, with the visible marker glyph in a
+ * `<span style='mso-list:Ignore'>` behind conditional comments. The class
+ * (`MsoListParagraph*`) is deliberately NOT a signal — Word puts it on
+ * marker-less continuation paragraphs too.
+ */
+function wordListLevel(p: HTMLElement): number | null {
+  const match = MSO_LIST_LEVEL.exec(p.getAttribute('style') ?? '')
+  return match ? Number(match[1]) : null
+}
+
+/**
+ * Detaches the `mso-list:Ignore` marker span and returns its text (`·`, `o`,
+ * `§`, `1.`, `a.` …) for classification, keeping the glyph out of the item's
+ * serialized content. Returns '' when no marker span is revealed (the
+ * downlevel-hidden conditional-comment variant).
+ */
+function takeWordListMarker(p: HTMLElement): string {
+  for (const span of Array.from(p.querySelectorAll('span'))) {
+    if (getStyleValue(span.getAttribute('style') ?? '', 'mso-list') === 'ignore') {
+      span.remove()
+      return (span.textContent ?? '').trim()
+    }
+  }
+  return ''
+}
+
+/**
+ * Serializes a run of consecutive Word list paragraphs as markdown list lines —
+ * single-newline separated, 2-space indent per level, the exact shape
+ * `serializeList` emits for real `<ul>/<ol>`. Numeric markers seed the
+ * per-level counter from their own digits (so a list continued after an
+ * interrupting paragraph keeps Word's numbering); alpha/roman markers count
+ * from 1; anything else (`·`, `o`, `§`, Wingdings, or a hidden marker) is a
+ * bullet.
+ */
+function serializeWordListRun(items: WordListItem[], depth: number): string {
+  const counters = new Map<number, number>()
+  const lines: string[] = []
+  for (const { p, level } of items) {
+    // Returning to a shallower level ends its deeper sublists.
+    for (const key of Array.from(counters.keys())) {
+      if (key > level) counters.delete(key)
+    }
+    const markerText = takeWordListMarker(p)
+    const numeric = NUMERIC_MARKER.exec(markerText)
+    let marker = '- '
+    if (numeric || ALPHA_MARKER.test(markerText)) {
+      const n = (counters.get(level) ?? (numeric ? Number(numeric[1]) - 1 : 0)) + 1
+      counters.set(level, n)
+      marker = `${n}. `
+    } else {
+      counters.delete(level)
+    }
+    lines.push(`${'  '.repeat(depth + level - 1)}${marker}${serializeChildren(p, depth).trim()}`)
+  }
+  return lines.join('\n')
 }
 
 // ---------------------------------------------------------------------------
@@ -186,9 +278,34 @@ function serializeTable(table: HTMLElement, depth: number): string {
 
 function serializeChildren(node: Node, depth: number): string {
   let out = ''
-  node.childNodes.forEach((child) => {
+  const children = Array.from(node.childNodes)
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+    if (isHTMLElement(child) && child.tagName === 'P') {
+      const level = wordListLevel(child)
+      if (level !== null) {
+        // Consume the whole run of consecutive Word list items, skipping the
+        // whitespace text nodes and comments Word puts between them, and
+        // serialize it as one list block (same `\n\n…\n\n` contract as UL/OL).
+        const run: WordListItem[] = [{ p: child, level }]
+        let j = i + 1
+        for (; j < children.length; j++) {
+          const next = children[j]
+          if (isHTMLElement(next)) {
+            const nextLevel = next.tagName === 'P' ? wordListLevel(next) : null
+            if (nextLevel === null) break
+            run.push({ p: next, level: nextLevel })
+          } else if (isTextNode(next) && (next.textContent ?? '').trim() !== '') {
+            break
+          }
+        }
+        out += `\n\n${serializeWordListRun(run, depth)}\n\n`
+        i = j - 1
+        continue
+      }
+    }
     out += serializeNode(child, depth)
-  })
+  }
   return out
 }
 
@@ -203,6 +320,8 @@ function serializeNode(node: Node, depth: number): string {
     case 'NOSCRIPT':
     case 'HEAD':
     case 'TITLE':
+    case 'XML': // Word <xml> data island — the parser reparents it out of <head>
+    case 'O:P': // Word paragraph-mark placeholder (often wraps a lone &nbsp;)
       return ''
     case 'BR':
       return '\n'

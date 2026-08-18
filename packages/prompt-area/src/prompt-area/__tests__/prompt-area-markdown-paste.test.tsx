@@ -25,11 +25,17 @@ type ClipboardPayload = {
   segments?: string
 }
 
+type ClipboardItemMock = { type: string; getAsFile: () => File | null }
+
 /** Builds the plain-object clipboardData mock the paste handler reads. */
-function makeClipboard(payload: ClipboardPayload, files: File[] = []) {
+function makeClipboard(
+  payload: ClipboardPayload,
+  files: File[] = [],
+  items: ClipboardItemMock[] = [],
+) {
   return {
     files,
-    items: [],
+    items,
     getData: (type: string): string => {
       if (type === 'text/markdown') return payload.markdown ?? ''
       if (type === 'text/html') return payload.html ?? ''
@@ -76,10 +82,15 @@ const lastOnChange = (spy: ReturnType<typeof vi.fn>) =>
 
 const lastSegments = (spy: ReturnType<typeof vi.fn>) => spy.mock.calls.at(-1)?.[0] as Segment[]
 
-function paste(editor: HTMLDivElement, payload: ClipboardPayload, files: File[] = []) {
+function paste(
+  editor: HTMLDivElement,
+  payload: ClipboardPayload,
+  files: File[] = [],
+  items: ClipboardItemMock[] = [],
+) {
   act(() => {
     placeCursorAtEnd(editor)
-    fireEvent.paste(editor, { clipboardData: makeClipboard(payload, files) })
+    fireEvent.paste(editor, { clipboardData: makeClipboard(payload, files, items) })
   })
 }
 
@@ -224,5 +235,92 @@ describe('PromptArea rich HTML paste (markdown mode)', () => {
     paste(editor, { html: '<b>bold</b>', plain: 'plain fallback' })
     // A converter throw must not drop the paste — the plain-text flavor is used.
     expect(lastOnChange(onChangeSpy)).toBe('plain fallback')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Word clipboard pastes (JUMA-762)
+// ---------------------------------------------------------------------------
+
+/**
+ * Abridged Word clipboard HTML: no <ul>/<ol> — each item is an mso-list
+ * paragraph with the marker glyph in an `mso-list:Ignore` span behind
+ * conditional comments. Word (macOS especially) additionally puts a bitmap
+ * RENDERING of the copied selection on the clipboard, which used to win over
+ * the text flavors and silently drop the paste.
+ */
+function wordListHtml(items: Array<{ level: number; marker: string; text: string }>): string {
+  const paragraphs = items
+    .map(
+      ({ level, marker, text }) =>
+        `<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;mso-list:l0 level${level} lfo1'>` +
+        `<![if !supportLists]><span style='mso-list:Ignore'>${marker}<span ` +
+        `style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><![endif]>` +
+        `${text}<o:p></o:p></p>`,
+    )
+    .join('\n')
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office"><head><meta name=ProgId content=Word.Document></head><body><!--StartFragment-->${paragraphs}<!--EndFragment--></body></html>`
+}
+
+const WORD_BULLETS = wordListHtml([
+  { level: 1, marker: '·', text: 'Alpha' },
+  { level: 2, marker: 'o', text: 'Beta' },
+  { level: 1, marker: '·', text: 'Gamma' },
+])
+
+describe('PromptArea Word clipboard pastes', () => {
+  it('pastes the Word text instead of the bitmap flavor Word also puts on the clipboard', () => {
+    const onImagePaste = vi.fn()
+    const { editor, onChangeSpy } = renderEditor({ markdown: true, onImagePaste })
+    const bitmap = new File(['pixels'], 'rendering.png', { type: 'image/png' })
+    paste(editor, { html: WORD_BULLETS, plain: 'Alpha\nBeta\nGamma' }, [bitmap])
+    expect(onImagePaste).not.toHaveBeenCalled()
+    expect(lastOnChange(onChangeSpy)).toBe('• Alpha\n  • Beta\n• Gamma')
+  })
+
+  it('pastes the Word text when the bitmap arrives via clipboard items', () => {
+    const onImagePaste = vi.fn()
+    const { editor, onChangeSpy } = renderEditor({ markdown: true, onImagePaste })
+    const bitmap = new File(['pixels'], 'rendering.png', { type: 'image/png' })
+    paste(
+      editor,
+      { html: WORD_BULLETS, plain: 'Alpha\nBeta\nGamma' },
+      [],
+      [{ type: 'image/png', getAsFile: () => bitmap }],
+    )
+    expect(onImagePaste).not.toHaveBeenCalled()
+    expect(lastOnChange(onChangeSpy)).toBe('• Alpha\n  • Beta\n• Gamma')
+  })
+
+  it('renumbers a pasted Word ordered list sequentially', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    const html = wordListHtml([
+      { level: 1, marker: '3.', text: 'First' },
+      { level: 1, marker: '4.', text: 'Second' },
+    ])
+    paste(editor, { html })
+    expect(lastOnChange(onChangeSpy)).toBe('1. First\n2. Second')
+  })
+
+  it('falls back to text/plain for a Word paste when markdown is off', () => {
+    const onImagePaste = vi.fn()
+    const { editor, onChangeSpy } = renderEditor({ markdown: false, onImagePaste })
+    const bitmap = new File(['pixels'], 'rendering.png', { type: 'image/png' })
+    paste(editor, { html: WORD_BULLETS, plain: 'Alpha\nBeta\nGamma' }, [bitmap])
+    // The Office sniff is independent of markdown mode: the text still wins.
+    expect(onImagePaste).not.toHaveBeenCalled()
+    expect(lastOnChange(onChangeSpy)).toBe('Alpha\nBeta\nGamma')
+  })
+
+  it('delivers the image when an Office clipboard yields no text', () => {
+    // An image/drawing object copied inside Word: Office-flagged html whose
+    // content converts to nothing, no text/plain — the bypassed image flavor
+    // must still reach onImagePaste (deferred, not suppressed).
+    const onImagePaste = vi.fn()
+    const { editor, onChangeSpy } = renderEditor({ markdown: true, onImagePaste })
+    const bitmap = new File(['pixels'], 'drawing.png', { type: 'image/png' })
+    paste(editor, { html: '<p class=MsoNormal><o:p></o:p></p>' }, [bitmap])
+    expect(onImagePaste).toHaveBeenCalledWith(bitmap)
+    expect(onChangeSpy).not.toHaveBeenCalled()
   })
 })

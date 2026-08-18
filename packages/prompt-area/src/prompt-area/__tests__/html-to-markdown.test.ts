@@ -1,5 +1,53 @@
 import { describe, it, expect } from 'vitest'
-import { htmlToMarkdown } from '../html-to-markdown'
+import { htmlToMarkdown, isOfficeHtml } from '../html-to-markdown'
+
+/**
+ * Abridged but structurally faithful Word-for-Mac clipboard HTML: office xmlns
+ * declarations, ProgId meta, an `<xml>` data island (which the HTML parser
+ * reparents out of `<head>` into `<body>`), a `<style>` block, StartFragment
+ * markers, and an mso-list paragraph run — levels 1/2/1 with the `·` (Symbol)
+ * and `o` (Courier New) marker glyphs inside `mso-list:Ignore` spans behind
+ * downlevel-revealed `<![if !supportLists]>` conditional comments, plus `<o:p>`
+ * placeholders. Word emits unquoted classes and single-quoted styles.
+ */
+const WORD_MAC_BULLETS = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<xml><w:WordDocument><w:View>Normal</w:View><w:Zoom>0</w:Zoom></w:WordDocument></xml>
+<style><!--
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst
+\t{mso-style-priority:34;margin-bottom:0in;mso-add-space:auto;text-indent:-.25in;}
+--></style>
+</head>
+<body lang=EN-US style='tab-interval:.5in'>
+<!--StartFragment-->
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in;mso-list:l0 level1 lfo1'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
+style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Alpha<o:p></o:p></p>
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;mso-add-space:auto;text-indent:-.25in;mso-list:l0 level2 lfo1'><![if !supportLists]><span
+style='font-family:"Courier New";mso-fareast-font-family:"Courier New"'><span
+style='mso-list:Ignore'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+</span></span></span><![endif]>Beta<o:p></o:p></p>
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in;mso-list:l0 level1 lfo1'><![if !supportLists]><span
+style='font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Gamma<o:p></o:p></p>
+<!--EndFragment-->
+</body>
+</html>`
+
+/** Word list item in the Windows form: normal-comment-wrapped Ignore span. */
+function wordItem(level: number, marker: string, text: string): string {
+  return (
+    `<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;mso-list:l0 level${level} lfo1'>` +
+    `<!--[if !supportLists]--><span style='mso-list:Ignore'>${marker}<span ` +
+    `style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><!--[endif]-->` +
+    `${text}<o:p></o:p></p>`
+  )
+}
 
 describe('htmlToMarkdown', () => {
   // -------------------------------------------------------------------------
@@ -211,6 +259,81 @@ describe('htmlToMarkdown', () => {
   })
 
   // -------------------------------------------------------------------------
+  // Microsoft Word clipboard HTML (mso-list paragraphs — no <ul>/<ol>)
+  // -------------------------------------------------------------------------
+
+  it('converts a Word bullet list (mso-list paragraphs) to markdown bullets', () => {
+    // Also proves: no blank lines between items, marker glyphs (·/o) and their
+    // nbsp runs removed, level 2 → 2-space indent, <xml>/<o:p> junk excluded.
+    expect(htmlToMarkdown(WORD_MAC_BULLETS)).toBe('- Alpha\n  - Beta\n- Gamma')
+  })
+
+  it('converts a Word ordered list with per-level numbering (1. / a. markers)', () => {
+    const html =
+      wordItem(1, '1.', 'First') +
+      wordItem(2, 'a.', 'Sub one') +
+      wordItem(2, 'b.', 'Sub two') +
+      wordItem(1, '2.', 'Second')
+    expect(htmlToMarkdown(html)).toBe('1. First\n  1. Sub one\n  2. Sub two\n2. Second')
+  })
+
+  it('separates a Word list from surrounding paragraphs by one blank line', () => {
+    const html =
+      '<p class=MsoNormal>Intro:</p>' +
+      wordItem(1, '·', 'A') +
+      wordItem(1, '·', 'B') +
+      '<p class=MsoNormal>After</p>'
+    expect(htmlToMarkdown(html)).toBe('Intro:\n\n- A\n- B\n\nAfter')
+  })
+
+  it("restarts a Word list run after an interrupting paragraph, keeping Word's numbers", () => {
+    const html =
+      wordItem(1, '1.', 'a') +
+      wordItem(1, '2.', 'b') +
+      '<p class=MsoNormal>para</p>' +
+      wordItem(1, '3.', 'c') +
+      wordItem(1, '4.', 'd')
+    expect(htmlToMarkdown(html)).toBe('1. a\n2. b\n\npara\n\n3. c\n4. d')
+  })
+
+  it('handles the bogus-comment <![if !supportLists]> form (Word for Mac)', () => {
+    const html =
+      "<p class=MsoListParagraph style='mso-list:l0 level1 lfo1'><![if !supportLists]>" +
+      "<span style='mso-list:Ignore'>·&nbsp;&nbsp;</span><![endif]>Item</p>"
+    expect(htmlToMarkdown(html)).toBe('- Item')
+  })
+
+  it('handles the commented <!--[if !supportLists]--> form (Word for Windows)', () => {
+    expect(htmlToMarkdown(wordItem(1, '·', 'Item'))).toBe('- Item')
+  })
+
+  it('falls back to a bullet when the marker is hidden inside one conditional comment', () => {
+    // Filtered/Outlook HTML hides the whole marker span in a single comment,
+    // so no marker text is available for ordered/bullet classification.
+    const html =
+      "<p class=MsoListParagraph style='mso-list:l0 level1 lfo1'>" +
+      "<!--[if !supportLists]><span style='mso-list:Ignore'>1.</span><![endif]-->Item</p>"
+    expect(htmlToMarkdown(html)).toBe('- Item')
+  })
+
+  it('does not treat a marker-less MsoListParagraph continuation as a list item', () => {
+    // Word puts the MsoListParagraph class (without mso-list metadata) on
+    // wrapped continuation paragraphs under a bullet — those are prose.
+    const html =
+      wordItem(1, '·', 'One') +
+      '<p class=MsoListParagraph>continued text</p>' +
+      wordItem(1, '·', 'Two')
+    expect(htmlToMarkdown(html)).toBe('- One\n\ncontinued text\n\n- Two')
+  })
+
+  it('drops Word <o:p> placeholders and <xml> islands', () => {
+    const html =
+      '<xml><w:Data>junk</w:Data></xml>' +
+      '<p class=MsoNormal>Hi<o:p></o:p></p><p class=MsoNormal><o:p>&nbsp;</o:p></p>'
+    expect(htmlToMarkdown(html)).toBe('Hi')
+  })
+
+  // -------------------------------------------------------------------------
   // Unwrapping, entities, whitespace, escaping
   // -------------------------------------------------------------------------
 
@@ -250,5 +373,28 @@ describe('htmlToMarkdown', () => {
 
   it('caps consecutive blank lines at one between blocks', () => {
     expect(htmlToMarkdown('<p>a</p>\n\n\n<p>b</p>')).toBe('a\n\nb')
+  })
+})
+
+describe('isOfficeHtml', () => {
+  it('detects the Word clipboard fingerprints', () => {
+    expect(isOfficeHtml(WORD_MAC_BULLETS)).toBe(true)
+    expect(isOfficeHtml('<meta name=ProgId content=Word.Document><p>x</p>')).toBe(true)
+    expect(isOfficeHtml('<p class=MsoNormal>x</p>')).toBe(true)
+    expect(isOfficeHtml('<p class="MsoNormal">x</p>')).toBe(true)
+    expect(isOfficeHtml('<span style="mso-bidi-font-weight:bold">x</span>')).toBe(true)
+    expect(isOfficeHtml('<html xmlns:o="urn:schemas-microsoft-com:office:office">x</html>')).toBe(
+      true,
+    )
+  })
+
+  it('does not flag non-Office html', () => {
+    expect(isOfficeHtml('')).toBe(false)
+    expect(isOfficeHtml('<p>plain</p>')).toBe(false)
+    expect(isOfficeHtml('<img src="https://x.com/a.png">')).toBe(false)
+    // Google-Docs-shaped clipboard html must keep its current image-vs-text behavior.
+    expect(isOfficeHtml('<b style="font-weight:normal" id="docs-internal-guid-abc">x</b>')).toBe(
+      false,
+    )
   })
 })

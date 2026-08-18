@@ -3,6 +3,29 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.5
+
+### Fixed
+
+- **Pasting from Microsoft Word inserts the text instead of silently dropping
+  it.** Word (macOS especially) puts a bitmap rendering of the copied selection
+  on the clipboard next to its HTML; the image branch of the paste handler
+  consumed it and returned before any text flavor was read, so with no
+  `onImagePaste` consumer wired nothing happened at all. Office clipboards
+  (detected via their `mso-`/`Mso`/ProgId/office-xmlns fingerprints) now let
+  the text path win; the bitmap is only delivered to `onImagePaste` when the
+  clipboard yields no text — e.g. an image or drawing object copied inside
+  Word. Non-Office pastes are unchanged: a copied image still takes precedence
+  over incidental `<img>` HTML.
+- **Word lists convert to real markdown lists.** Word's clipboard HTML has no
+  `<ul>`/`<ol>` — each item is an `mso-list` paragraph carrying its marker
+  glyph (`·`, `o`, `1.`, `a.`, …) in a hidden `mso-list:Ignore` span behind
+  conditional comments. Runs of those paragraphs now become nested markdown
+  lists (2-space indent per level, per-level numbering seeded from Word's own
+  digits, bullets normalizing to `•`) instead of literal `·` lines separated by
+  blank lines, and Word's `<o:p>` placeholders and `<xml>` data islands no
+  longer leak junk text into the paste.
+
 ## 0.6.3
 
 ### Fixed

@@ -13,7 +13,7 @@ export function RichPasteExample() {
           value={segments}
           onChange={setSegments}
           markdown
-          placeholder="Paste from Slack, Notion, Google Docs, GitHub, or any web page — rich text becomes clean markdown..."
+          placeholder="Paste from Word, Slack, Notion, Google Docs, GitHub, or any web page — rich text becomes clean markdown..."
           minHeight={110}
         />
       </div>
@@ -36,7 +36,7 @@ function RichPasteExample() {
 
   // With \`markdown\` on, paste reads the richest clipboard flavor available:
   //   1. text/markdown — e.g. Slack "Copy message" (keeps nested lists)
-  //   2. text/html     — Notion, Google Docs, GitHub, web pages
+  //   2. text/html     — Word, Notion, Google Docs, GitHub, web pages
   //   3. text/plain    — fallback
   // The result is stored as markdown source, so \`value\` is ready to send.
   const markdown = segmentsToPlainText(segments)
@@ -47,7 +47,7 @@ function RichPasteExample() {
         value={segments}
         onChange={setSegments}
         markdown
-        placeholder="Paste from Slack, Notion, Google Docs, GitHub, or any web page..."
+        placeholder="Paste from Word, Slack, Notion, Google Docs, GitHub, or any web page..."
         minHeight={110}
       />
       <pre>{markdown}</pre>
