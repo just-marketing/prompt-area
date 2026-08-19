@@ -26,6 +26,24 @@ project adheres to [Semantic Versioning](https://semver.org/).
   blank lines, and Word's `<o:p>` placeholders and `<xml>` data islands no
   longer leak junk text into the paste.
 
+## 0.6.4
+
+### Added
+
+- **`markdownHeadings` renders ATX headings at their real size.** With
+  `markdown` on, `## Risks` showed its hashes and sat at body size, so an
+  editor holding a document looked like a textarea with syntax in it. The new
+  opt-in `markdownHeadings` prop renders `# ` through `###### ` as headings
+  with the hashes collapsed, the same way `**bold**` already works. It is
+  display-only: the `#` characters stay in the DOM inside a zero-size
+  `.prompt-area-md-marker`, so `textContent`, the segment model and every caret
+  offset are unchanged, and the markdown stays the source of truth. A heading
+  is only recognised at a real line start, so `see #4` stays prose, and inline
+  decoration still applies inside the heading text. Scale is retunable via
+  `--prompt-area-heading-1` through `--prompt-area-heading-6`. Off by default,
+  because a comment box is prose and silently turning a typed `## ` into a
+  display heading there would surprise rather than help.
+
 ## 0.6.3
 
 ### Fixed
