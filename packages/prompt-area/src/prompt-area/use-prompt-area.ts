@@ -40,6 +40,7 @@ import {
   isChipElement,
   isLinkElement,
   isBRElement,
+  isTextNode,
   chipNodeToSegment,
   getChipAutoResolved,
   getDirectChildContaining,
@@ -119,6 +120,110 @@ type UsePromptAreaReturn = {
 
 /** Debounce interval for grouping typed characters into a single undo snapshot */
 const UNDO_DEBOUNCE_MS = 300
+
+// ---------------------------------------------------------------------------
+// Single-pass editor scan (typing hot path)
+// ---------------------------------------------------------------------------
+
+export type EditorScan = {
+  segments: Segment[]
+  plainText: string
+  /**
+   * A direct child the scan cannot model: a block wrapper (div/p) or an
+   * unknown inline element. Those change the plain text when unwrapped, so
+   * the caller must fall back to `normalizeEditorDOM` + `readSegmentsFromDOM`.
+   */
+  sawForeignElement: boolean
+  /**
+   * Some text run contains a literal newline. Our own render paths only ever
+   * represent newlines as `<br>`, so this flags DOM states where `<br>`-based
+   * line scoping cannot be trusted.
+   */
+  sawNewlineInText: boolean
+}
+
+/**
+ * Reads the editor's direct children into the segment model in one pass,
+ * producing exactly what `normalizeEditorDOM(editor)` followed by
+ * `readSegmentsFromDOM()` produces — without mutating the DOM and without
+ * a second serialization for the plain text.
+ *
+ * Decoration elements (the markdown/bullet/indent/heading `<span data-md>`s
+ * and URL `<a data-url>`s) contribute their textContent to the surrounding
+ * text run, mirroring how `normalizeEditorDOM` inlines them to text nodes and
+ * `editor.normalize()` merges the results. Chips and `<br>`s break runs the
+ * same way real elements break `editor.normalize()`'s merging.
+ */
+export function scanEditorDOM(editor: HTMLElement): EditorScan {
+  const segments: Segment[] = []
+  let plainText = ''
+  let buffer = ''
+  let hasRealContent = false
+  let hasSentinel = false
+  let sawForeignElement = false
+  let sawNewlineInText = false
+
+  const flushBuffer = (): void => {
+    if (!buffer) return
+    segments.push({ type: 'text', text: buffer })
+    plainText += buffer
+    hasRealContent = true
+    buffer = ''
+  }
+
+  const children = editor.childNodes
+  for (let i = 0; i < children.length; i++) {
+    const node = children[i]
+
+    if (isTextNode(node)) {
+      const text = node.textContent ?? ''
+      if (text) {
+        if (text.includes('\n')) sawNewlineInText = true
+        buffer += text
+      }
+    } else if (isChipElement(node)) {
+      // A chip breaks the text run even when malformed (chipNodeToSegment
+      // null): normalize skips chip elements, so the element still separates
+      // its neighboring text nodes.
+      flushBuffer()
+      const chip = chipNodeToSegment(node)
+      if (chip) {
+        segments.push(chip)
+        plainText += `${chip.trigger}${chip.displayText}`
+        hasRealContent = true
+      }
+    } else if (isBRElement(node)) {
+      flushBuffer()
+      if (node.dataset.sentinel) {
+        hasSentinel = true
+      } else {
+        segments.push({ type: 'text', text: '\n' })
+        plainText += '\n'
+      }
+    } else if (
+      isHTMLElement(node) &&
+      ((node.tagName === 'SPAN' && node.dataset.md !== undefined) || isLinkElement(node))
+    ) {
+      const text = node.textContent ?? ''
+      if (text) {
+        if (text.includes('\n')) sawNewlineInText = true
+        buffer += text
+      }
+    } else {
+      sawForeignElement = true
+    }
+  }
+  flushBuffer()
+
+  // Same emptiness rule as readSegmentsFromDOM: without real content or our
+  // sentinel, any <br>s present are the browser's filler for an emptied
+  // editor and must not read back as newline content.
+  if (!hasRealContent && !hasSentinel) {
+    return { segments: [], plainText: '', sawForeignElement, sawNewlineInText }
+  }
+
+  return { segments, plainText, sawForeignElement, sawNewlineInText }
+}
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -375,61 +480,67 @@ export function usePromptArea({
     [onChange, renderSegmentsToDOM, onChipAdd],
   )
 
-  const runTriggerDetection = useCallback(() => {
-    const editor = editorRef.current
-    if (!editor) return
+  const runTriggerDetection = useCallback(
+    // The typing hot path passes the segments/plainText/cursor it already
+    // computed; zero-arg callers (paste, chip ops, composition end) let the
+    // detection read the DOM itself.
+    (ctx?: { segments: Segment[]; plainText: string; cursorPos: number | null }) => {
+      const editor = editorRef.current
+      if (!editor) return
 
-    const segments = readSegmentsFromDOM()
-    const plainText = segmentsToPlainText(segments)
-    const cursorPos = getCursorOffset(editor)
+      const segments = ctx ? ctx.segments : readSegmentsFromDOM()
+      const plainText = ctx ? ctx.plainText : segmentsToPlainText(segments)
+      const cursorPos = ctx ? ctx.cursorPos : getCursorOffset(editor)
 
-    if (cursorPos === null) return
+      if (cursorPos === null) return
 
-    const detected = detectActiveTrigger(plainText, cursorPos, triggers)
+      const detected = detectActiveTrigger(plainText, cursorPos, triggers)
 
-    // Typing supersedes a chip-click dropdown: whichever branch we take next,
-    // the popover no longer edits the clicked chip.
-    editingChip.current = null
-    openChipNode.current = null
+      // Typing supersedes a chip-click dropdown: whichever branch we take next,
+      // the popover no longer edits the clicked chip.
+      editingChip.current = null
+      openChipNode.current = null
 
-    if (detected) {
-      setActiveTrigger(detected)
-      setSelectedSuggestionIndex(0)
+      if (detected) {
+        setActiveTrigger(detected)
+        setSelectedSuggestionIndex(0)
 
-      // Position the popover at the trigger character, not the cursor.
-      // Build a range at detected.startOffset so the dropdown anchors to
-      // the trigger char even when the cursor has moved past it.
-      const triggerRange = createRangeAtOffset(editor, detected.startOffset)
-      if (triggerRange) {
-        // caretLineRect measures element-boundary positions too (a trigger
-        // typed right after a chip or <br>), so the popover anchors at the
-        // real trigger position instead of skipping the update. It returns
-        // null only when no geometry exists at all (jsdom) — keep the last
-        // valid rect rather than anchoring at the origin.
-        const rect = caretLineRect(triggerRange)
-        if (rect) {
-          setTriggerRect(rect)
+        // Position the popover at the trigger character, not the cursor.
+        // Build a range at detected.startOffset so the dropdown anchors to
+        // the trigger char even when the cursor has moved past it.
+        const triggerRange = createRangeAtOffset(editor, detected.startOffset)
+        if (triggerRange) {
+          // caretLineRect measures element-boundary positions too (a trigger
+          // typed right after a chip or <br>), so the popover anchors at the
+          // real trigger position instead of skipping the update. It returns
+          // null only when no geometry exists at all (jsdom) — keep the last
+          // valid rect rather than anchoring at the origin.
+          const rect = caretLineRect(triggerRange)
+          if (rect) {
+            setTriggerRect(rect)
+          }
         }
-      }
 
-      // Fetch suggestions for dropdown mode
-      if (detected.config.mode === 'dropdown' && detected.config.onSearch) {
-        runSearch(detected.query, detected.config)
-      }
+        // Fetch suggestions for dropdown mode
+        if (detected.config.mode === 'dropdown' && detected.config.onSearch) {
+          runSearch(detected.query, detected.config)
+        }
 
-      // Fire callback for callback mode
-      if (detected.config.mode === 'callback' && detected.config.onActivate) {
-        detected.config.onActivate({
-          text: plainText,
-          cursorPosition: cursorPos,
-          insertChip: buildInsertChip(segments, detected),
-        })
+        // Fire callback for callback mode
+        if (detected.config.mode === 'callback' && detected.config.onActivate) {
+          detected.config.onActivate({
+            text: plainText,
+            cursorPosition: cursorPos,
+            insertChip: buildInsertChip(segments, detected),
+          })
+        }
+      } else {
+        setActiveTrigger(null)
+        resetSearch()
       }
-    } else {
-      setActiveTrigger(null)
-      resetSearch()
-    }
-  }, [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch])
+    },
+    [triggers, readSegmentsFromDOM, buildInsertChip, resetSearch, runSearch],
+  )
 
   // -----------------------------------------------------------------------
   // Dismiss trigger
@@ -525,40 +636,65 @@ export function usePromptArea({
 
     const editor = editorRef.current
 
-    // Capture cursor offset BEFORE normalizeEditorDOM strips <a> elements,
-    // otherwise the anchor node becomes detached and we lose the position.
+    // Capture cursor offset BEFORE any DOM mutation below — stripping the
+    // decoration elements detaches the selection's anchor node and would
+    // lose the position.
     const savedCursorOffset = editor ? getCursorOffset(editor) : null
 
+    // One scan produces the segment model and the plain text every branch
+    // below needs. Only when the browser inserted an element the scan cannot
+    // model (a block wrapper, an unknown inline tag) does the legacy
+    // normalize-then-read path run — it rewrites the DOM to the flat shape
+    // first, because unwrapping those elements changes the plain text.
+    let segments: Segment[] = []
+    let plainText = ''
+    let domNormalized = false
     if (editor) {
-      // Normalize browser-inserted block elements (div, p, font, a, etc.)
-      normalizeEditorDOM(editor)
+      const scan = scanEditorDOM(editor)
+      if (scan.sawForeignElement) {
+        normalizeEditorDOM(editor)
+        domNormalized = true
+        segments = readSegmentsFromDOM()
+        plainText = segmentsToPlainText(segments)
+      } else {
+        segments = scan.segments
+        plainText = scan.plainText
+      }
     }
-
-    const segments = readSegmentsFromDOM()
 
     // Enforce maxLength: if the edit pushed the editor past the cap, truncate
     // back to maxLength characters and keep the caret where the user was
-    // editing (clamped to the cap) rather than forcing it to the end.
-    if (maxLength != null && editor && segmentsToPlainText(segments).length > maxLength) {
-      const caret = getCursorOffset(editor)
+    // editing (clamped to the cap) rather than forcing it to the end. The
+    // selection hasn't moved since savedCursorOffset was captured, so re-
+    // reading it here would return the same offset.
+    if (maxLength != null && editor && plainText.length > maxLength) {
       const truncated = truncateSegmentsToLength(segments, maxLength)
       lastRenderedValue.current = truncated
       onChange(truncated)
       renderSegmentsToDOM(truncated)
-      setCursorAtOffset(editor, caret != null ? Math.min(caret, maxLength) : maxLength)
-      runTriggerDetection()
+      const clamped = savedCursorOffset != null ? Math.min(savedCursorOffset, maxLength) : maxLength
+      setCursorAtOffset(editor, clamped)
+      runTriggerDetection({
+        segments: truncated,
+        plainText: segmentsToPlainText(truncated),
+        cursorPos: clamped,
+      })
       return
     }
 
     // Check for list auto-formatting (e.g., "- " -> "bullet ")
     if (markdownEnabled && normalizeBullets && editor && savedCursorOffset !== null) {
-      const formatted = autoFormatListPrefix(segments, savedCursorOffset)
+      const formatted = autoFormatListPrefix(segments, savedCursorOffset, plainText)
       if (formatted) {
         lastRenderedValue.current = formatted.segments
         onChange(formatted.segments)
         renderSegmentsToDOM(formatted.segments)
         setCursorAtOffset(editor, formatted.cursorOffset)
-        runTriggerDetection()
+        runTriggerDetection({
+          segments: formatted.segments,
+          plainText: segmentsToPlainText(formatted.segments),
+          cursorPos: formatted.cursorOffset,
+        })
         return
       }
     }
@@ -569,15 +705,13 @@ export function usePromptArea({
     // run — this renumbers a real list (1,2,4 → 1,2,3) but leaves incidental
     // numeric prose ("1985. Born / 2020. Died") untouched.
     let nextSegments = segments
+    let nextPlainText = plainText
     let renumberedCursor: number | null = null
-    if (
-      markdownEnabled &&
-      savedCursorOffset !== null &&
-      hasOrderedListRun(segmentsToPlainText(segments))
-    ) {
-      const renumbered = renumberOrderedListSegments(segments)
+    if (markdownEnabled && savedCursorOffset !== null && hasOrderedListRun(plainText)) {
+      const renumbered = renumberOrderedListSegments(segments, plainText)
       if (renumbered.edits.length > 0) {
         nextSegments = renumbered.segments
+        nextPlainText = segmentsToPlainText(renumbered.segments)
         renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
       }
     }
@@ -600,13 +734,18 @@ export function usePromptArea({
     }, UNDO_DEBOUNCE_MS)
 
     // Apply the recomputed model to the DOM. A renumber rewrites text nodes, so
-    // it needs a full re-render (which also re-decorates); otherwise just
-    // re-decorate the existing DOM in place.
+    // it needs a full re-render (which also re-decorates); otherwise strip the
+    // stale decorations and re-decorate the existing DOM in place.
+    let finalCursor = savedCursorOffset
     if (editor) {
       if (renumberedCursor !== null) {
         renderSegmentsToDOM(nextSegments)
         setCursorAtOffset(editor, renumberedCursor)
+        finalCursor = renumberedCursor
       } else {
+        if (!domNormalized) {
+          normalizeEditorDOM(editor)
+        }
         decorateEditor(editor, markdownEnabled, headingsEnabled)
         if (savedCursorOffset !== null) {
           // scroll: false — this placement only re-establishes the caret that
@@ -617,7 +756,11 @@ export function usePromptArea({
       }
     }
 
-    runTriggerDetection()
+    runTriggerDetection({
+      segments: nextSegments,
+      plainText: nextPlainText,
+      cursorPos: finalCursor,
+    })
   }, [
     onChange,
     readSegmentsFromDOM,
