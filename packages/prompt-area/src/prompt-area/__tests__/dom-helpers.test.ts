@@ -829,6 +829,35 @@ describe('decorateURLsInEditor edge cases', () => {
     expect(anchors[0]?.textContent).toBe('https://a.com')
     expect(anchors[1]?.textContent).toBe('https://b.com')
   })
+
+  it('decorates a URL with a comma in its path', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(
+      document.createTextNode(
+        'read https://en.wikipedia.org/wiki/Dominic_Johnson,_Baron_Johnson_of_Lainston now',
+      ),
+    )
+
+    decorateURLsInEditor(editor)
+
+    const anchor = editor.querySelector('a')
+    expect(anchor).not.toBeNull()
+    expect(anchor?.textContent).toBe(
+      'https://en.wikipedia.org/wiki/Dominic_Johnson,_Baron_Johnson_of_Lainston',
+    )
+  })
+
+  it('strips a trailing comma after a URL', () => {
+    const editor = document.createElement('div')
+    editor.appendChild(document.createTextNode('see https://example.com/page, then continue'))
+
+    decorateURLsInEditor(editor)
+
+    const anchor = editor.querySelector('a')
+    expect(anchor).not.toBeNull()
+    expect(anchor?.textContent).toBe('https://example.com/page')
+    expect(editor.textContent).toBe('see https://example.com/page, then continue')
+  })
 })
 
 // ===========================================================================

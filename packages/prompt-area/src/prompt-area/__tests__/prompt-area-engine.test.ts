@@ -477,6 +477,30 @@ describe('parseInlineMarkdown', () => {
     ])
   })
 
+  it('keeps commas inside a URL path', () => {
+    const result = parseInlineMarkdown(
+      'read https://en.wikipedia.org/wiki/Dominic_Johnson,_Baron_Johnson_of_Lainston now',
+    )
+    expect(result).toEqual([
+      { type: 'plain', text: 'read ' },
+      {
+        type: 'url',
+        text: 'https://en.wikipedia.org/wiki/Dominic_Johnson,_Baron_Johnson_of_Lainston',
+      },
+      { type: 'plain', text: ' now' },
+    ])
+  })
+
+  it('strips trailing punctuation after a URL', () => {
+    const result = parseInlineMarkdown('see https://example.com/page, then continue')
+    expect(result).toEqual([
+      { type: 'plain', text: 'see ' },
+      { type: 'url', text: 'https://example.com/page' },
+      { type: 'plain', text: ',' },
+      { type: 'plain', text: ' then continue' },
+    ])
+  })
+
   it('returns plain text when no markdown', () => {
     const result = parseInlineMarkdown('hello world')
     expect(result).toEqual([{ type: 'plain', text: 'hello world' }])
