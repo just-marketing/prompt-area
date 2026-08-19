@@ -159,6 +159,28 @@ describe('getTextOffsetAtPoint parity with the cloneContents oracle', () => {
     }
   })
 
+  it('ignores text inside non-HTML subtrees, matching the clone walk', () => {
+    const editor = document.createElement('div')
+    document.body.appendChild(editor)
+    editor.appendChild(document.createTextNode('hi '))
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const svgText = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    svgText.appendChild(document.createTextNode('svgtext'))
+    svg.appendChild(svgText)
+    editor.appendChild(svg)
+    editor.appendChild(document.createTextNode(' bye'))
+
+    // The legacy walk recursed only through HTMLElements, so the svg subtree
+    // contributed nothing — a boundary inside it maps to the subtree's start.
+    const inner = svgText.firstChild as Text
+    expect(getTextOffsetAtPoint(editor, inner, 3)).toBe(oracleOffsetAtPoint(editor, inner, 3))
+    expect(getTextOffsetAtPoint(editor, inner, 3)).toBe('hi '.length)
+    expect(getTextOffsetAtPoint(editor, svg, 1)).toBe(oracleOffsetAtPoint(editor, svg, 1))
+    // Sibling positions after the svg are unaffected.
+    const bye = editor.lastChild as Text
+    expect(getTextOffsetAtPoint(editor, bye, 2)).toBe(oracleOffsetAtPoint(editor, bye, 2))
+  })
+
   it('returns null for a container outside the editor', () => {
     const editor = document.createElement('div')
     document.body.appendChild(editor)

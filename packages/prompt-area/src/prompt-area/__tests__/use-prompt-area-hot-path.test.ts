@@ -198,6 +198,51 @@ describe('typing hot path', () => {
     expect(editor.textContent).toContain('junk')
   })
 
+  it('repairs an IME-composed line with a full decorate on the next input, wherever the caret is', () => {
+    const { result, editor } = setup()
+    const { line2Text, brs } = seedThreeLines(editor)
+
+    // Compose "**ime**" into line 2 (decoration cycle is skipped mid-composition).
+    act(() => {
+      result.current.eventHandlers.onCompositionStart()
+    })
+    line2Text.textContent = 'edit me **ime**'
+    placeCursor(line2Text, 'edit me **ime**'.length)
+    act(() => {
+      result.current.handleInput()
+    })
+    act(() => {
+      result.current.eventHandlers.onCompositionEnd()
+    })
+    expect(editor.querySelector('span[data-md]')?.textContent).not.toBe('**ime**')
+
+    // Next regular keystroke lands on line 3 — the composed line 2 must still
+    // get its decoration (full pass), exactly like the pre-scoping behavior.
+    const line3 = brs[1].nextSibling as Text
+    line3.textContent = (line3.textContent ?? '') + 'x'
+    placeCursor(line3, (line3.textContent ?? '').length)
+    act(() => {
+      result.current.handleInput()
+    })
+
+    const decorated = Array.from(editor.querySelectorAll('span[data-md]')).some(
+      (s) => s.textContent === '**ime**',
+    )
+    expect(decorated).toBe(true)
+
+    // And scoping resumes afterwards: an edit on line 3 leaves line 1's
+    // decoration node untouched by identity. (Re-locate line 3's text node —
+    // the repair pass split the original around its URL anchor.)
+    const line1Span = editor.querySelector('span[data-md]')!
+    const line3Fresh = brs[1].nextSibling as Text
+    line3Fresh.textContent = (line3Fresh.textContent ?? '') + 'y'
+    placeCursor(line3Fresh, (line3Fresh.textContent ?? '').length)
+    act(() => {
+      result.current.handleInput()
+    })
+    expect(editor.contains(line1Span)).toBe(true)
+  })
+
   it('falls back to a full decorate when a text node contains a literal newline', () => {
     const { result, editor } = setup()
 

@@ -63,6 +63,7 @@ import {
   setSelectionAtOffsets,
   caretLineRect,
   findDOMPosition,
+  getTextOffsetAtPoint,
 } from './cursor-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 import { useTriggerSearch } from './use-trigger-search'
@@ -350,6 +351,13 @@ export function usePromptArea({
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
 
+  // IME-composed input skips the decoration cycle entirely (mutating the DOM
+  // mid-composition breaks the composition), so the composed line is stale
+  // until a decorate reaches it. The baseline repaired it because the next
+  // keystroke re-decorated the whole document; with line scoping, this flag
+  // forces that next decorate to be a full pass wherever the caret is.
+  const imeDirty = useRef(false)
+
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoBaseState = useRef<Segment[] | null>(null)
@@ -482,6 +490,7 @@ export function usePromptArea({
 
       // Decorate URLs, markdown formatting, and list bullets in text nodes
       decorateEditor(editor, markdownEnabled, headingsEnabled)
+      imeDirty.current = false
 
       // The child-clear above collapsed scrollHeight, which clamped scrollTop
       // to 0. Put the viewport back before the caret restore so an in-view
@@ -677,6 +686,7 @@ export function usePromptArea({
 
     // During IME composition, sync model but skip trigger detection
     if (events.isComposing.current) {
+      imeDirty.current = true
       const segments = readSegmentsFromDOM()
       lastRenderedValue.current = segments
       onChange(segments)
@@ -718,15 +728,19 @@ export function usePromptArea({
 
     // Enforce maxLength: if the edit pushed the editor past the cap, truncate
     // back to maxLength characters and keep the caret where the user was
-    // editing (clamped to the cap) rather than forcing it to the end. The
-    // selection hasn't moved since savedCursorOffset was captured, so re-
-    // reading it here would return the same offset.
+    // editing (clamped to the cap) rather than forcing it to the end. On the
+    // clean-scan path the selection hasn't moved since savedCursorOffset was
+    // captured, so re-reading it would return the same offset; after the
+    // foreign-element normalize, the DOM (and possibly the text, via block
+    // unwrapping) changed, so measure the caret fresh — as the pre-scan
+    // implementation did.
     if (maxLength != null && editor && plainText.length > maxLength) {
+      const caret = domNormalized ? getCursorOffset(editor) : savedCursorOffset
       const truncated = truncateSegmentsToLength(segments, maxLength)
       lastRenderedValue.current = truncated
       onChange(truncated)
       renderSegmentsToDOM(truncated)
-      const clamped = savedCursorOffset != null ? Math.min(savedCursorOffset, maxLength) : maxLength
+      const clamped = caret != null ? Math.min(caret, maxLength) : maxLength
       setCursorAtOffset(editor, clamped)
       runTriggerDetection({
         segments: truncated,
@@ -804,7 +818,7 @@ export function usePromptArea({
         finalCursor = renumberedCursor
       } else {
         let scoped = false
-        if (scopedEligible) {
+        if (scopedEligible && !imeDirty.current) {
           const selRange = getSelectionRange()
           if (selRange && selRange.collapsed && editor.contains(selRange.startContainer)) {
             const bounds = findLineBounds(editor, selRange.startContainer, selRange.startOffset)
@@ -820,6 +834,7 @@ export function usePromptArea({
             normalizeEditorDOM(editor)
           }
           decorateEditor(editor, markdownEnabled, headingsEnabled)
+          imeDirty.current = false
         }
         if (savedCursorOffset !== null) {
           // scroll: false — this placement only re-establishes the caret that
@@ -1522,11 +1537,20 @@ export function usePromptArea({
         // provably a no-op, the same end state is reachable by splitting the
         // caret's text node, inserting one <br>, and re-decorating only that
         // line's range.
-        if (cleanScan && offsets.start === offsets.end && scan.segments.length > 0) {
+        if (
+          cleanScan &&
+          offsets.start === offsets.end &&
+          scan.segments.length > 0 &&
+          !imeDirty.current
+        ) {
           const plainAfter =
             scan.plainText.slice(0, offsets.start) + '\n' + scan.plainText.slice(offsets.start)
+          // Exact parity with applyEditResult, which renumbers unconditionally:
+          // the fast path is only taken when that renumber provably does
+          // nothing (renumberOrderedListLines has its own cheap no-list
+          // pre-gate, so this is string work only).
           let renumberNoop = true
-          if (markdownEnabled && hasOrderedListRun(plainAfter)) {
+          if (markdownEnabled) {
             renumberNoop = renumberOrderedListSegments(newSegments, plainAfter).edits.length === 0
           }
           if (renumberNoop && insertNewlineSurgically(editor, offsets.start)) {
@@ -1558,6 +1582,13 @@ export function usePromptArea({
 
         const pos = findDOMPosition(editor, offset)
         if (!pos) return false
+        // findDOMPosition resolves boundary offsets with a caret bias: an
+        // offset at the start of a chip (or of a <br> on an empty line) maps
+        // to the position AFTER that element. Fine for placing a caret, wrong
+        // for structural insertion — the model puts the newline BEFORE the
+        // element. Only proceed when the mapping round-trips to the exact
+        // offset; otherwise the full re-render handles it.
+        if (getTextOffsetAtPoint(editor, pos.node, pos.offset) !== offset) return false
 
         const br = document.createElement('br')
         if (pos.node === editor) {
@@ -1578,7 +1609,12 @@ export function usePromptArea({
           return false
         }
 
-        if (editor.lastChild === br) {
+        // renderSegmentsToDOM's rule: a trailing real <br> needs the sentinel
+        // so the final newline stays visible. Checking the actual last child
+        // (not just the inserted one) also repairs a bare trailing <br> the
+        // user exposed by deleting a previous sentinel.
+        const last = editor.lastChild
+        if (last && isBRElement(last) && !last.dataset.sentinel) {
           const sentinel = document.createElement('br')
           sentinel.dataset.sentinel = 'true'
           editor.appendChild(sentinel)
@@ -1680,6 +1716,7 @@ export function usePromptArea({
       onChange,
       renderSegmentsToDOM,
       markdownEnabled,
+      headingsEnabled,
       dismissTrigger,
       handleChipBackspace,
       handleChipForwardDelete,

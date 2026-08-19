@@ -161,7 +161,13 @@ export function PromptArea({
 
   useEffect(() => {
     return () => {
-      if (heightRaf.current !== null) cancelAnimationFrame(heightRaf.current)
+      if (heightRaf.current !== null) {
+        cancelAnimationFrame(heightRaf.current)
+        // Clear the guard too: StrictMode's dev double-mount runs this
+        // cleanup and re-runs the effect on the same component instance, and
+        // a stale id would latch scheduleSyncHeight closed forever.
+        heightRaf.current = null
+      }
     }
   }, [])
 

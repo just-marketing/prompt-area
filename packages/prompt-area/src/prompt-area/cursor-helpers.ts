@@ -142,6 +142,12 @@ export function getTextOffsetAtPoint(
     if (isChipElement(pathChild)) {
       return length + chipNodeTextLength(pathChild)
     }
+    // Non-HTML subtrees (svg, MathML) contribute nothing in the clone walk —
+    // it only recurses through HTMLElements — so a boundary inside one maps
+    // to the subtree's start rather than counting its internal text.
+    if (!isHTMLElement(pathChild) && !isTextNode(pathChild)) {
+      return length
+    }
     parent = pathChild
   }
 

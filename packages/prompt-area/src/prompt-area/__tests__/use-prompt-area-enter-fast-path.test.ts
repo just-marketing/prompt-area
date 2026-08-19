@@ -231,6 +231,95 @@ describe('Shift+Enter surgical newline', () => {
     expect(editor.querySelector('b')).toBeNull()
   })
 
+  it('inserts before a document-leading chip, keeping DOM and model in agreement', () => {
+    const { result, editor, onChange } = setup()
+    const chip = document.createElement('span')
+    chip.contentEditable = 'false'
+    chip.dataset.chipTrigger = '@'
+    chip.dataset.chipValue = 'u1'
+    chip.dataset.chipDisplay = 'alice'
+    chip.textContent = '@alice'
+    editor.append(chip, document.createTextNode(' tail'))
+    placeCursor(editor, 0)
+
+    act(() => {
+      result.current.handleKeyDown(shiftEnter())
+    })
+
+    // findDOMPosition maps offset 0 to AFTER a leading chip (caret bias); the
+    // surgical path must detect that and fall back so the <br> lands where
+    // the model put the newline — before the chip.
+    expect(lastChangeText(onChange)).toBe('\n@alice tail')
+    expect(editor.firstChild?.nodeName).toBe('BR')
+    const domText = Array.from(editor.childNodes)
+      .map((n) =>
+        n.nodeName === 'BR'
+          ? (n as HTMLElement).dataset.sentinel
+            ? ''
+            : '\n'
+          : (n.textContent ?? ''),
+      )
+      .join('')
+    expect(domText).toBe('\n@alice tail')
+    expect(getCursorOffset(editor)).toBe(1)
+  })
+
+  it('falls back and renumbers when the document holds a single misnumbered list line', () => {
+    const { result, editor, onChange } = setup()
+    editor.append(
+      document.createTextNode('5. solo item'),
+      document.createElement('br'),
+      document.createTextNode('prose line'),
+    )
+    const prose = editor.childNodes[2] as Text
+    placeCursor(prose, 'prose'.length)
+
+    act(() => {
+      result.current.handleKeyDown(shiftEnter())
+    })
+
+    // applyEditResult renumbers unconditionally; the fast path must not skip
+    // that just because the single line is not a "run".
+    expect(lastChangeText(onChange)).toBe('1. solo item\nprose\n line')
+  })
+
+  it('repairs a missing sentinel when the document ends with a bare <br>', () => {
+    const { result, editor, onChange } = setup()
+    // A user can delete the sentinel with Backspace, leaving a bare trailing
+    // <br> that reads as a final "\n" with nothing keeping it visible.
+    editor.append(document.createTextNode('ab'), document.createElement('br'))
+    placeCursor(editor.firstChild!, 1)
+
+    act(() => {
+      result.current.handleKeyDown(shiftEnter())
+    })
+
+    expect(lastChangeText(onChange)).toBe('a\nb\n')
+    const brs = editor.querySelectorAll('br')
+    expect(brs).toHaveLength(3)
+    expect((brs[2] as HTMLElement).dataset.sentinel).toBe('true')
+  })
+
+  it('inserts on an empty line correctly via the round-trip fallback', () => {
+    const { result, editor, onChange } = setup()
+    editor.append(
+      document.createTextNode('a'),
+      document.createElement('br'),
+      document.createElement('br'),
+      document.createTextNode('b'),
+    )
+    // Caret on the empty line: between the two <br>s.
+    placeCursor(editor, 2)
+    expect(getCursorOffset(editor)).toBe(2)
+
+    act(() => {
+      result.current.handleKeyDown(shiftEnter())
+    })
+
+    expect(lastChangeText(onChange)).toBe('a\n\n\nb')
+    expect(getCursorOffset(editor)).toBe(3)
+  })
+
   it('handles an empty editor through the full path', () => {
     const { result, editor, onChange } = setup()
     placeCursor(editor, 0)

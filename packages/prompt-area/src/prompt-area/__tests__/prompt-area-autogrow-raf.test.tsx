@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+import { StrictMode } from 'react'
 import { PromptArea } from '../prompt-area'
 import type { Segment } from '../types'
 
@@ -82,6 +83,26 @@ describe('autoGrow rAF coalescing', () => {
       vi.advanceTimersToNextFrame()
     })
     expect(reads.count()).toBe(beforeUnmount)
+  })
+
+  it('keeps measuring under StrictMode double-mount (guard is not latched by cleanup)', () => {
+    render(
+      <StrictMode>
+        <PromptArea {...defaultProps} autoGrow />
+      </StrictMode>,
+    )
+    const editor = screen.getByRole('textbox')
+    const reads = instrumentScrollHeight(editor)
+
+    fireEvent.focus(editor)
+    fireEvent.input(editor)
+    const before = reads.count()
+    act(() => {
+      vi.advanceTimersToNextFrame()
+    })
+    // The pending-rAF cleanup of the StrictMode remount must not leave the
+    // scheduler thinking a frame is still pending.
+    expect(reads.count()).toBeGreaterThan(before)
   })
 
   it('does not measure at all while blurred', () => {
