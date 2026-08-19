@@ -32,6 +32,12 @@ project adheres to [Semantic Versioning](https://semver.org/).
   newline is now inserted surgically — split the caret's text node, insert one
   `<br>`, re-decorate just that line — halving the cost; every other case
   keeps the full re-render.
+- **URLs keep their commas.** The URL matcher excluded commas outright, so a
+  link like
+  `https://en.wikipedia.org/wiki/Dominic_Johnson,_Baron_Johnson_of_Lainston`
+  was cut short at the first comma. Commas now count as part of a URL, and a
+  trailing one is trimmed along with the other trailing punctuation, in both
+  the editor decoration pass and inline markdown parsing.
 
 ## 0.6.5
 
