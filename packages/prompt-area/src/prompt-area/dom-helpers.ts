@@ -314,8 +314,9 @@ export function normalizeEditorDOM(editor: HTMLElement): boolean {
 // URL decoration
 // ---------------------------------------------------------------------------
 
-/** URL pattern for detecting URLs in text content */
-const URL_PATTERN = /https?:\/\/[^\s),]+/g
+/** URL pattern for detecting URLs in text content. Commas are allowed
+ * mid-URL (e.g. Wikipedia paths); trailing punctuation is trimmed below. */
+const URL_PATTERN = /https?:\/\/[^\s)]+/g
 
 /**
  * Walks direct-child text nodes in the editor and wraps URL text in
@@ -349,7 +350,7 @@ export function decorateURLsInEditor(editor: HTMLElement): boolean {
     while ((match = URL_PATTERN.exec(text)) !== null) {
       // Trim trailing punctuation that's likely not part of the URL
       let url = match[0]
-      while (url.length > 0 && /[.;:!?]$/.test(url)) {
+      while (url.length > 0 && /[.,;:!?]$/.test(url)) {
         url = url.slice(0, -1)
       }
       if (url.length > 0) {

@@ -609,7 +609,7 @@ export function parseInlineMarkdown(text: string): MarkdownToken[] {
   // 2. **text** or __text__   -> bold
   // 3. *text* or _text_       -> italic
   // 4. https://... or http://... -> URL
-  const pattern = /(\*{3}(.+?)\*{3})|(\*{2}(.+?)\*{2})|(\*(.+?)\*)|(https?:\/\/[^\s),]+)/g
+  const pattern = /(\*{3}(.+?)\*{3})|(\*{2}(.+?)\*{2})|(\*(.+?)\*)|(https?:\/\/[^\s)]+)/g
 
   let lastIndex = 0
   let match: RegExpExecArray | null
@@ -630,8 +630,18 @@ export function parseInlineMarkdown(text: string): MarkdownToken[] {
       // *italic*
       tokens.push({ type: 'italic', text: match[6] })
     } else if (match[7]) {
-      // URL
-      tokens.push({ type: 'url', text: match[7] })
+      // URL — trim trailing punctuation that's likely not part of the URL
+      let url = match[7]
+      while (url.length > 0 && /[.,;:!?]$/.test(url)) {
+        url = url.slice(0, -1)
+      }
+      if (url.length > 0) {
+        tokens.push({ type: 'url', text: url })
+      }
+      const trimmed = match[7].slice(url.length)
+      if (trimmed) {
+        tokens.push({ type: 'plain', text: trimmed })
+      }
     }
 
     lastIndex = match.index + match[0].length
