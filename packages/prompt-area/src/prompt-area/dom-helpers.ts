@@ -311,6 +311,86 @@ export function normalizeEditorDOM(editor: HTMLElement): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Decoration bounds (line scoping)
+// ---------------------------------------------------------------------------
+
+/**
+ * Exclusive boundaries limiting decoration work to one `<br>`-delimited line.
+ * `after`/`before` are the `<br>` nodes on either side (null = document edge).
+ * `<br>` is the one node kind no decoration pass ever replaces, so the
+ * boundary nodes stay valid across every pass of a decorate cycle.
+ */
+export type DecorateBounds = {
+  after: Node | null
+  before: Node | null
+}
+
+/** Iterates the direct children strictly inside `bounds` (all children when undefined). */
+function forEachChildInBounds(
+  root: HTMLElement,
+  bounds: DecorateBounds | undefined,
+  callback: (node: Node) => void,
+): void {
+  let node = bounds?.after ? bounds.after.nextSibling : root.firstChild
+  const stop = bounds?.before ?? null
+  while (node && node !== stop) {
+    callback(node)
+    node = node.nextSibling
+  }
+}
+
+/**
+ * Scoped stand-in for {@link normalizeEditorDOM}'s decoration strip and
+ * `editor.normalize()`: unwraps decoration elements (markdown `<span data-md>`,
+ * URL `<a data-url>`) strictly inside the bounds back to plain text, drops the
+ * empty ones, and merges the resulting adjacent text nodes — leaving every
+ * node outside the bounds untouched. Only safe when the surrounding DOM holds
+ * no foreign elements (the caller establishes that via scanEditorDOM).
+ */
+export function stripDecorationsInRange(editor: HTMLElement, bounds: DecorateBounds): void {
+  const stop = bounds.before
+
+  let node: Node | null = bounds.after ? bounds.after.nextSibling : editor.firstChild
+  while (node && node !== stop) {
+    const next: Node | null = node.nextSibling
+    // Chips carry data-chip-trigger and are never decorations — leave them.
+    if (isHTMLElement(node) && node.dataset.chipTrigger === undefined) {
+      if ((node.tagName === 'SPAN' && node.dataset.md !== undefined) || isLinkElement(node)) {
+        const text = node.textContent ?? ''
+        if (text) {
+          editor.replaceChild(document.createTextNode(text), node)
+        } else {
+          editor.removeChild(node)
+        }
+      }
+    }
+    node = next
+  }
+
+  // Bounded equivalent of editor.normalize(): drop empty text nodes, merge
+  // adjacent ones.
+  node = bounds.after ? bounds.after.nextSibling : editor.firstChild
+  while (node && node !== stop) {
+    if (isTextNode(node)) {
+      if ((node.textContent ?? '') === '') {
+        const next: Node | null = node.nextSibling
+        editor.removeChild(node)
+        node = next
+        continue
+      }
+      let sibling: Node | null = node.nextSibling
+      while (sibling && sibling !== stop && isTextNode(sibling)) {
+        node.textContent = (node.textContent ?? '') + (sibling.textContent ?? '')
+        const nextSibling: Node | null = sibling.nextSibling
+        editor.removeChild(sibling)
+        sibling = nextSibling
+      }
+    }
+    node = node.nextSibling
+  }
+}
+
+// ---------------------------------------------------------------------------
 // URL decoration
 // ---------------------------------------------------------------------------
 
@@ -328,17 +408,18 @@ const URL_PATTERN = /https?:\/\/[^\s),]+/g
  * @param editor - The contentEditable root element
  * @returns Whether any decorations were applied
  */
-export function decorateURLsInEditor(editor: HTMLElement): boolean {
+export function decorateURLsInEditor(editor: HTMLElement, bounds?: DecorateBounds): boolean {
   let decorated = false
 
-  // Collect text nodes first (avoid modifying while iterating)
+  // Collect text nodes first (avoid modifying while iterating). The includes
+  // check is a cheap pre-gate: URL_PATTERN can only match text containing
+  // "http", so everything else skips the regex entirely.
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
-    if (isTextNode(node) && node.textContent) {
+  forEachChildInBounds(editor, bounds, (node) => {
+    if (isTextNode(node) && node.textContent && node.textContent.includes('http')) {
       textNodes.push(node)
     }
-  }
+  })
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
@@ -431,17 +512,17 @@ const MARKDOWN_INLINE_PATTERN = /(\*{3})(.+?)\*{3}|(\*{2})(.+?)\*{2}|(\*)(.+?)\*
  * @param editor - The contentEditable root element
  * @returns Whether any decorations were applied
  */
-export function decorateMarkdownInEditor(editor: HTMLElement): boolean {
+export function decorateMarkdownInEditor(editor: HTMLElement, bounds?: DecorateBounds): boolean {
   let decorated = false
 
-  // Collect text nodes first (avoid modifying while iterating)
+  // Collect text nodes first (avoid modifying while iterating). Emphasis
+  // needs at least one asterisk, so plain text skips the regex.
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
-    if (isTextNode(node) && node.textContent) {
+  forEachChildInBounds(editor, bounds, (node) => {
+    if (isTextNode(node) && node.textContent && node.textContent.includes('*')) {
       textNodes.push(node)
     }
-  }
+  })
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
@@ -554,16 +635,15 @@ const LIST_BULLET_PATTERN = /(^|\n)([ \t]*)•/g
  * @param editor - The contentEditable root element
  * @returns Whether any decorations were applied
  */
-export function decorateBulletsInEditor(editor: HTMLElement): boolean {
+export function decorateBulletsInEditor(editor: HTMLElement, bounds?: DecorateBounds): boolean {
   let decorated = false
 
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
+  forEachChildInBounds(editor, bounds, (node) => {
     if (isTextNode(node) && node.textContent?.includes('•')) {
       textNodes.push(node)
     }
-  }
+  })
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
@@ -631,16 +711,15 @@ const HEADING_PATTERN = /^(#{1,6}) (.*)$/
  * @param editor - The contentEditable root element
  * @returns Whether any decorations were applied
  */
-export function decorateHeadingsInEditor(editor: HTMLElement): boolean {
+export function decorateHeadingsInEditor(editor: HTMLElement, bounds?: DecorateBounds): boolean {
   let decorated = false
 
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
+  forEachChildInBounds(editor, bounds, (node) => {
     if (isTextNode(node) && node.textContent?.includes('#')) {
       textNodes.push(node)
     }
-  }
+  })
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
@@ -720,14 +799,20 @@ const LIST_INDENT_PATTERN = /(^|\n)([ \t]+)(?=(?:[•\-*] |\d+\. ))/g
  *
  * @returns Whether any decorations were applied
  */
-export function decorateListIndentInEditor(editor: HTMLElement): boolean {
+export function decorateListIndentInEditor(editor: HTMLElement, bounds?: DecorateBounds): boolean {
   let decorated = false
 
+  // Pre-gate: the indent pattern only matches leading whitespace at the node
+  // start or after an embedded newline, so unindented single-line nodes (the
+  // overwhelming majority) skip the regex.
   const textNodes: Text[] = []
-  for (let i = 0; i < editor.childNodes.length; i++) {
-    const node = editor.childNodes[i]
-    if (isTextNode(node)) textNodes.push(node)
-  }
+  forEachChildInBounds(editor, bounds, (node) => {
+    if (!isTextNode(node)) return
+    const text = node.textContent
+    if (text && (text[0] === ' ' || text[0] === '\t' || text.includes('\n'))) {
+      textNodes.push(node)
+    }
+  })
 
   for (const textNode of textNodes) {
     const text = textNode.textContent ?? ''
@@ -794,27 +879,39 @@ export function decorateEditor(
   editor: HTMLElement,
   markdownEnabled: boolean,
   headingsEnabled = false,
+  bounds?: DecorateBounds,
 ): void {
   // Whole-line passes run FIRST, while each direct-child text node is still a
   // full line. The URL and markdown passes split text nodes mid-line, so a tail
   // fragment beginning with "•" would let the bullet regex's `^` anchor
   // false-match a mid-line separator (e.g. `**bold** • middle`).
   if (markdownEnabled) {
-    if (headingsEnabled) decorateHeadingsInEditor(editor)
-    decorateListIndentInEditor(editor)
-    decorateBulletsInEditor(editor)
+    if (headingsEnabled) decorateHeadingsInEditor(editor, bounds)
+    decorateListIndentInEditor(editor, bounds)
+    decorateBulletsInEditor(editor, bounds)
   }
-  decorateURLsInEditor(editor)
-  if (markdownEnabled) decorateMarkdownInEditor(editor)
+  decorateURLsInEditor(editor, bounds)
+  if (markdownEnabled) decorateMarkdownInEditor(editor, bounds)
 
   // Inline emphasis *inside* a heading. The heading pass consumed the line's
   // text node into its own span, so the editor-level pass above can't reach it
   // — without this, `## Risks and *caveats*` would show its asterisks raw.
   if (markdownEnabled && headingsEnabled) {
-    const headingTexts = editor.querySelectorAll('.prompt-area-md-heading-text')
-    for (let i = 0; i < headingTexts.length; i++) {
-      const body = headingTexts[i]
-      if (isHTMLElement(body)) decorateMarkdownInEditor(body)
+    if (bounds) {
+      // Scoped cycle: the only heading wrappers needing the inline pass are
+      // the ones the bounded heading pass just created inside this line.
+      forEachChildInBounds(editor, bounds, (node) => {
+        if (isHTMLElement(node) && node.dataset.mdHeading !== undefined) {
+          const body = node.querySelector('.prompt-area-md-heading-text')
+          if (body && isHTMLElement(body)) decorateMarkdownInEditor(body)
+        }
+      })
+    } else {
+      const headingTexts = editor.querySelectorAll('.prompt-area-md-heading-text')
+      for (let i = 0; i < headingTexts.length; i++) {
+        const body = headingTexts[i]
+        if (isHTMLElement(body)) decorateMarkdownInEditor(body)
+      }
     }
   }
 }

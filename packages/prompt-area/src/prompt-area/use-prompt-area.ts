@@ -48,9 +48,11 @@ import {
   domChildIndexToSegmentIndex,
   normalizeEditorDOM,
   decorateEditor,
+  stripDecorationsInRange,
   safeJsonStringify,
   getSelectionRange,
 } from './dom-helpers'
+import type { DecorateBounds } from './dom-helpers'
 import {
   saveCursorPosition,
   restoreCursorPosition,
@@ -223,6 +225,52 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
   }
 
   return { segments, plainText, sawForeignElement, sawNewlineInText }
+}
+
+/**
+ * The `<br>`-delimited line around a caret boundary point, as exclusive
+ * {@link DecorateBounds} over the editor's flat child list. This is the range
+ * a native single-caret edit can have touched: typing lands in one line, and
+ * a deletion that merged lines leaves all mutated content on the caret's
+ * single merged line. Returns null when the container isn't anchored in the
+ * editor's direct-child structure.
+ */
+export function findLineBounds(
+  editor: HTMLElement,
+  container: Node,
+  offset: number,
+): DecorateBounds | null {
+  let leftFrom: Node | null
+  let rightFrom: Node | null
+
+  if (container === editor) {
+    const index = Math.min(offset, editor.childNodes.length)
+    leftFrom = index > 0 ? editor.childNodes[index - 1] : null
+    rightFrom = index < editor.childNodes.length ? editor.childNodes[index] : null
+  } else {
+    const direct = getDirectChildContaining(editor, container)
+    if (!direct) return null
+    leftFrom = direct.previousSibling
+    rightFrom = direct
+  }
+
+  let after: Node | null = null
+  for (let node = leftFrom; node; node = node.previousSibling) {
+    if (isBRElement(node)) {
+      after = node
+      break
+    }
+  }
+
+  let before: Node | null = null
+  for (let node = rightFrom; node; node = node.nextSibling) {
+    if (isBRElement(node)) {
+      before = node
+      break
+    }
+  }
+
+  return { after, before }
 }
 
 // ---------------------------------------------------------------------------
@@ -649,6 +697,10 @@ export function usePromptArea({
     let segments: Segment[] = []
     let plainText = ''
     let domNormalized = false
+    // Line scoping is only trustworthy when the DOM holds nothing but our own
+    // flat shapes and every newline is a real <br> (a literal "\n" inside a
+    // text node would put line content out of the caret line's node range).
+    let scopedEligible = false
     if (editor) {
       const scan = scanEditorDOM(editor)
       if (scan.sawForeignElement) {
@@ -659,6 +711,7 @@ export function usePromptArea({
       } else {
         segments = scan.segments
         plainText = scan.plainText
+        scopedEligible = !scan.sawNewlineInText
       }
     }
 
@@ -733,9 +786,15 @@ export function usePromptArea({
       undoTimer.current = null
     }, UNDO_DEBOUNCE_MS)
 
-    // Apply the recomputed model to the DOM. A renumber rewrites text nodes, so
-    // it needs a full re-render (which also re-decorates); otherwise strip the
-    // stale decorations and re-decorate the existing DOM in place.
+    // Apply the recomputed model to the DOM. A renumber rewrites text nodes,
+    // so it needs a full re-render (which also re-decorates). Otherwise the
+    // decoration cycle — strip stale decorations, re-apply fresh ones — runs
+    // scoped to the caret's <br>-delimited line: a native single-caret edit
+    // can only have touched that line, and every decoration is line-local, so
+    // the other lines' decorations are still exactly what a full pass would
+    // produce. Anything that makes the scope uncertain (foreign elements,
+    // literal newlines in text, no collapsed in-editor selection) falls back
+    // to the full normalize + decorate.
     let finalCursor = savedCursorOffset
     if (editor) {
       if (renumberedCursor !== null) {
@@ -743,10 +802,24 @@ export function usePromptArea({
         setCursorAtOffset(editor, renumberedCursor)
         finalCursor = renumberedCursor
       } else {
-        if (!domNormalized) {
-          normalizeEditorDOM(editor)
+        let scoped = false
+        if (scopedEligible) {
+          const selRange = getSelectionRange()
+          if (selRange && selRange.collapsed && editor.contains(selRange.startContainer)) {
+            const bounds = findLineBounds(editor, selRange.startContainer, selRange.startOffset)
+            if (bounds) {
+              stripDecorationsInRange(editor, bounds)
+              decorateEditor(editor, markdownEnabled, headingsEnabled, bounds)
+              scoped = true
+            }
+          }
         }
-        decorateEditor(editor, markdownEnabled, headingsEnabled)
+        if (!scoped) {
+          if (!domNormalized) {
+            normalizeEditorDOM(editor)
+          }
+          decorateEditor(editor, markdownEnabled, headingsEnabled)
+        }
         if (savedCursorOffset !== null) {
           // scroll: false — this placement only re-establishes the caret that
           // native editing just revealed, and the correction's layout read
