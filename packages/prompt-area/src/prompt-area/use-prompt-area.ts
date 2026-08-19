@@ -62,6 +62,7 @@ import {
   getSelectionOffsets,
   setSelectionAtOffsets,
   caretLineRect,
+  findDOMPosition,
 } from './cursor-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 import { useTriggerSearch } from './use-trigger-search'
@@ -1508,10 +1509,83 @@ export function usePromptArea({
       const insertPlainNewline = (editor: HTMLDivElement): void => {
         const offsets = getSelectionOffsets(editor)
         if (!offsets) return
-        const currentSegments = readSegmentsFromDOM()
+        const scan = scanEditorDOM(editor)
+        const cleanScan = !scan.sawForeignElement && !scan.sawNewlineInText
+        const currentSegments = cleanScan ? scan.segments : readSegmentsFromDOM()
         events.pushUndo(currentSegments)
         const newSegments = replaceTextRange(currentSegments, offsets.start, offsets.end, '\n')
+
+        // Surgical fast path: a full renderSegmentsToDOM tears down and
+        // rebuilds (and re-decorates) the entire document, which makes every
+        // newline stutter on large content. When the edit is a collapsed
+        // caret in a clean flat DOM with real content, and renumbering is
+        // provably a no-op, the same end state is reachable by splitting the
+        // caret's text node, inserting one <br>, and re-decorating only that
+        // line's range.
+        if (cleanScan && offsets.start === offsets.end && scan.segments.length > 0) {
+          const plainAfter =
+            scan.plainText.slice(0, offsets.start) + '\n' + scan.plainText.slice(offsets.start)
+          let renumberNoop = true
+          if (markdownEnabled && hasOrderedListRun(plainAfter)) {
+            renumberNoop = renumberOrderedListSegments(newSegments, plainAfter).edits.length === 0
+          }
+          if (renumberNoop && insertNewlineSurgically(editor, offsets.start)) {
+            lastRenderedValue.current = newSegments
+            onChange(newSegments)
+            setCursorAtOffset(editor, offsets.start + 1)
+            return
+          }
+        }
+
         applyEditResult(editor, { segments: newSegments, cursorOffset: offsets.start + 1 })
+      }
+
+      // The DOM half of the fast path above. Strips the caret line's
+      // decorations (so the plain-text offset maps into a direct-child text
+      // node), inserts the <br>, mirrors renderSegmentsToDOM's sentinel rule
+      // for a trailing newline, and re-decorates the original line's range —
+      // which now spans both halves of the split. Returns false to make the
+      // caller fall back to the full re-render.
+      const insertNewlineSurgically = (editor: HTMLDivElement, offset: number): boolean => {
+        const selRange = getSelectionRange()
+        if (!selRange || !selRange.collapsed || !editor.contains(selRange.startContainer)) {
+          return false
+        }
+        const bounds = findLineBounds(editor, selRange.startContainer, selRange.startOffset)
+        if (!bounds) return false
+
+        stripDecorationsInRange(editor, bounds)
+
+        const pos = findDOMPosition(editor, offset)
+        if (!pos) return false
+
+        const br = document.createElement('br')
+        if (pos.node === editor) {
+          editor.insertBefore(br, editor.childNodes[pos.offset] ?? null)
+        } else if (isTextNode(pos.node) && pos.node.parentNode === editor) {
+          const text = pos.node.textContent ?? ''
+          if (pos.offset <= 0) {
+            editor.insertBefore(br, pos.node)
+          } else if (pos.offset >= text.length) {
+            editor.insertBefore(br, pos.node.nextSibling)
+          } else {
+            const tail = pos.node.splitText(pos.offset)
+            editor.insertBefore(br, tail)
+          }
+        } else {
+          // A position inside a nested element — shouldn't happen after the
+          // strip, so let the full re-render canonicalize instead.
+          return false
+        }
+
+        if (editor.lastChild === br) {
+          const sentinel = document.createElement('br')
+          sentinel.dataset.sentinel = 'true'
+          editor.appendChild(sentinel)
+        }
+
+        decorateEditor(editor, markdownEnabled, headingsEnabled, bounds)
+        return true
       }
 
       // 2.8 Shift+Enter always inserts a newline (after a list-continuation check).
