@@ -11,7 +11,7 @@ import {
   parseSegmentsFromClipboard,
   insertSegmentsAtCursor,
 } from './clipboard-helpers'
-import { htmlToMarkdown } from './html-to-markdown'
+import { htmlToMarkdown, isOfficeHtml } from './html-to-markdown'
 import {
   normalizeListPrefixText,
   renumberOrderedListLines,
@@ -140,14 +140,19 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       if (!editor) return
 
       // Check for image files in clipboard before processing text
-      // Some browsers/OSes provide pasted images via `items` instead of `files` (e.g. screenshots)
+      // Some browsers/OSes provide pasted images via `items` instead of `files` (e.g. screenshots).
+      // Exception: Office apps (Word especially, on macOS) put a bitmap RENDERING
+      // of the copied selection on the clipboard alongside text/html; treating
+      // that as an image paste silently dropped the text, so for Office
+      // clipboards the text path wins and the image is only a last resort below.
+      const html = e.clipboardData.getData('text/html')
       const imageFile =
         Array.from(e.clipboardData.files).find((f) => f.type.startsWith('image/')) ??
         (() => {
           const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'))
           return item?.getAsFile() ?? null
         })()
-      if (imageFile) {
+      if (imageFile && !isOfficeHtml(html)) {
         onImagePaste?.(imageFile)
         return
       }
@@ -189,7 +194,7 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       // When markdown mode is on, prefer the richest clipboard flavor:
       //   1. text/markdown — some apps (e.g. Slack) hand out markdown directly,
       //      preserving nested lists that their text/plain flattens.
-      //   2. text/html     — convert web/Notion/Docs/GitHub HTML to markdown.
+      //   2. text/html     — convert web/Notion/Docs/GitHub/Word HTML to markdown.
       // Otherwise (markdown off, or neither present) fall back to plain text.
       let text = ''
       if (markdownEnabled) {
@@ -199,22 +204,26 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
           // parentheses so the source reads cleanly. They carry no markdown
           // meaning, unlike `\*` / `\.` / `\-` which are left intact.
           text = text.replace(/\\([()])/g, '$1')
-        } else {
-          const html = e.clipboardData.getData('text/html')
+        } else if (html) {
           // A converter failure (e.g. stack overflow on pathologically deep
           // nesting) must not drop the paste — leave text empty so the
           // text/plain fallback below still runs.
-          if (html) {
-            try {
-              text = htmlToMarkdown(html)
-            } catch {
-              text = ''
-            }
+          try {
+            text = htmlToMarkdown(html)
+          } catch {
+            text = ''
           }
         }
       }
       if (!text) text = e.clipboardData.getData('text/plain')
-      if (!text) return
+      if (!text) {
+        // An Office clipboard whose html/plain flavors produced no text — e.g.
+        // an image or drawing object copied inside Word (its HTML is a file:///
+        // <img> that converts to nothing). Fall back to the image flavor
+        // bypassed above so image-only Office copies still reach onImagePaste.
+        if (imageFile) onImagePaste?.(imageFile)
+        return
+      }
 
       // Normalize pasted list markers ("- " → "•") so pasted bullets match
       // typed input. Applies to both the HTML→markdown and plain-text paths.

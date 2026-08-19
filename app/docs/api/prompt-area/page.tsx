@@ -50,7 +50,7 @@ export default function PromptAreaApiPage() {
             name: 'markdown',
             type: 'boolean',
             description:
-              'Render inline markdown (bold, italic, URLs, lists). Also enables rich paste: content from Slack, Notion, Google Docs, GitHub, or the web is converted to markdown source (preferring text/markdown, then text/html), and pasted list bullets normalize to •.',
+              'Render inline markdown (bold, italic, URLs, lists). Also enables rich paste: content from Word, Slack, Notion, Google Docs, GitHub, or the web is converted to markdown source (preferring text/markdown, then text/html), and pasted list bullets normalize to •.',
           },
           {
             name: 'markdownHeadings',
