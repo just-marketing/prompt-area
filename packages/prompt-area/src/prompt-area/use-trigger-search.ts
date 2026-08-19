@@ -43,7 +43,10 @@ export function useTriggerSearch(): UseTriggerSearchReturn {
   const reset = useCallback(() => {
     abortController.current?.abort()
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
-    setSuggestions([])
+    // Keep the previous array when already empty: reset runs on every
+    // trigger-less keystroke, and a fresh [] would defeat React's setState
+    // bailout and force a render of the whole PromptArea per keystroke.
+    setSuggestions((prev) => (prev.length === 0 ? prev : []))
     setSuggestionsLoading(false)
     setSuggestionsError(null)
   }, [])
