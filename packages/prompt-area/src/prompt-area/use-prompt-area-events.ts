@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import type { Segment, ChipSegment, TriggerConfig } from './types'
 import { resolveTriggersInSegments } from './prompt-area-engine'
 import { normalizeEditorDOM, safeJsonStringify, getSelectionRange } from './dom-helpers'
@@ -464,18 +464,38 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
     [readSegmentsFromDOM, onChange, renderSegmentsToDOM, onUndo, onRedo],
   )
 
-  return {
-    handlePaste,
-    handleCopy,
-    handleCut,
-    handleDrop,
-    handleDragOver,
-    handleCompositionStart,
-    handleCompositionEnd,
-    handleBlur,
-    handleKeyDownForUndoRedo,
-    pushUndo,
-    resetUndoHistory,
-    isComposing,
-  }
+  // A stable object: every member is a stable useCallback (or a ref), and
+  // downstream hooks — handleInput, the imperative handle, the eventHandlers
+  // memo — list `events` in their deps. A fresh literal here would rebuild all
+  // of them (and re-run useImperativeHandle) on every keystroke's render.
+  return useMemo(
+    () => ({
+      handlePaste,
+      handleCopy,
+      handleCut,
+      handleDrop,
+      handleDragOver,
+      handleCompositionStart,
+      handleCompositionEnd,
+      handleBlur,
+      handleKeyDownForUndoRedo,
+      pushUndo,
+      resetUndoHistory,
+      isComposing,
+    }),
+    [
+      handlePaste,
+      handleCopy,
+      handleCut,
+      handleDrop,
+      handleDragOver,
+      handleCompositionStart,
+      handleCompositionEnd,
+      handleBlur,
+      handleKeyDownForUndoRedo,
+      pushUndo,
+      resetUndoHistory,
+      isComposing,
+    ],
+  )
 }

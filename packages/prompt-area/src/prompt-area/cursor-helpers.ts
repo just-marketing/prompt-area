@@ -77,11 +77,95 @@ export function getCursorOffset(editor: HTMLElement): number | null {
   if (!range) return null
   if (!editor.contains(range.startContainer)) return null
 
-  const preRange = document.createRange()
-  preRange.selectNodeContents(editor)
-  preRange.setEnd(range.startContainer, range.startOffset)
+  return getTextOffsetAtPoint(editor, range.startContainer, range.startOffset)
+}
 
-  return getTextLengthInRange(preRange)
+/**
+ * Plain-text length a whole node contributes to cursor offsets. Counting rules
+ * are shared with {@link getTextLengthInRange}'s fragment walk: text nodes by
+ * length, chips atomically via {@link chipNodeTextLength}, `<br>` as one
+ * character (sentinel `<br>` as zero), other elements by their children.
+ */
+function nodeTextContribution(node: Node): number {
+  if (isTextNode(node)) return (node.textContent ?? '').length
+  if (isChipElement(node)) return chipNodeTextLength(node)
+  if (isHTMLElement(node)) {
+    if (node.tagName === 'BR') return node.dataset.sentinel ? 0 : 1
+    let length = 0
+    const children = node.childNodes
+    for (let i = 0; i < children.length; i++) {
+      length += nodeTextContribution(children[i])
+    }
+    return length
+  }
+  return 0
+}
+
+/**
+ * Plain-text offset of the DOM boundary point `(container, offset)` inside the
+ * editor — the length of everything before the point, under the same counting
+ * rules as {@link getTextLengthInRange}, without the `Range.cloneContents()`
+ * that function needs. Cloning allocates a deep copy of the whole document
+ * prefix, which made every caret-offset query on the typing hot path cost
+ * O(document) in allocations; this walk only reads.
+ *
+ * Returns null when `container` is not inside the editor.
+ */
+export function getTextOffsetAtPoint(
+  editor: HTMLElement,
+  container: Node,
+  offset: number,
+): number | null {
+  // Ancestor path container → … → direct child of editor (empty when the
+  // container is the editor itself).
+  const path: Node[] = []
+  let ancestor: Node | null = container
+  while (ancestor && ancestor !== editor) {
+    path.push(ancestor)
+    ancestor = ancestor.parentNode
+  }
+  if (!ancestor) return null
+
+  let length = 0
+  let parent: Node = editor
+  for (let depth = path.length - 1; depth >= 0; depth--) {
+    const pathChild = path[depth]
+    const siblings = parent.childNodes
+    for (let i = 0; i < siblings.length; i++) {
+      const sibling = siblings[i]
+      if (sibling === pathChild) break
+      length += nodeTextContribution(sibling)
+    }
+    // Chips are atomic: a boundary inside a chip subtree counts the whole chip,
+    // matching the clone walk (a partial clone keeps the chip shell and its
+    // data attributes, so chipNodeTextLength reads the full length).
+    if (isChipElement(pathChild)) {
+      return length + chipNodeTextLength(pathChild)
+    }
+    // Non-HTML subtrees (svg, MathML) contribute nothing in the clone walk —
+    // it only recurses through HTMLElements — so a boundary inside one maps
+    // to the subtree's start rather than counting its internal text.
+    if (!isHTMLElement(pathChild) && !isTextNode(pathChild)) {
+      return length
+    }
+    parent = pathChild
+  }
+
+  if (isTextNode(container)) {
+    return length + Math.min(offset, (container.textContent ?? '').length)
+  }
+  if (isHTMLElement(container) && container.tagName === 'BR') {
+    // setEnd(<br>, 0) partially includes the <br>, whose cloned shell the
+    // clone walk counts as one character (zero for the sentinel).
+    return length + (container.dataset.sentinel ? 0 : 1)
+  }
+  // Element container: children before the offset index are fully included.
+  const children = container.childNodes
+  const limit = Math.min(offset, children.length)
+  for (let i = 0; i < limit; i++) {
+    length += nodeTextContribution(children[i])
+  }
+  return length
 }
 
 /**
@@ -146,17 +230,15 @@ export function getSelectionOffsets(editor: HTMLElement): { start: number; end: 
   if (!range) return null
   if (!editor.contains(range.startContainer)) return null
 
-  const startRange = document.createRange()
-  startRange.selectNodeContents(editor)
-  startRange.setEnd(range.startContainer, range.startOffset)
-  const start = getTextLengthInRange(startRange)
+  const start = getTextOffsetAtPoint(editor, range.startContainer, range.startOffset)
+  if (start === null) return null
 
   if (range.collapsed) return { start, end: start }
 
-  const endRange = document.createRange()
-  endRange.selectNodeContents(editor)
-  endRange.setEnd(range.endContainer, range.endOffset)
-  const end = getTextLengthInRange(endRange)
+  // A selection dragged past the editor's edge has its end outside; treat it
+  // as collapsed rather than mapping a foreign node to an arbitrary offset.
+  const end = getTextOffsetAtPoint(editor, range.endContainer, range.endOffset)
+  if (end === null) return { start, end: start }
 
   return { start, end }
 }

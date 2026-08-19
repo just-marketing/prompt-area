@@ -144,6 +144,33 @@ export function PromptArea({
     setEditorHeight(contentHeight)
   }, [editorRef])
 
+  // One height measurement per frame: the input handler and the value-change
+  // effect both request a sync on every keystroke, and each measurement is a
+  // forced reflow of the whole editor (the height:auto dance invalidates
+  // layout, then scrollHeight reads it). Coalescing them into a single
+  // pre-paint rAF callback halves the per-keystroke reflows without a
+  // visible frame at a stale height.
+  const heightRaf = useRef<number | null>(null)
+  const scheduleSyncHeight = useCallback(() => {
+    if (heightRaf.current !== null) return
+    heightRaf.current = requestAnimationFrame(() => {
+      heightRaf.current = null
+      syncHeight()
+    })
+  }, [syncHeight])
+
+  useEffect(() => {
+    return () => {
+      if (heightRaf.current !== null) {
+        cancelAnimationFrame(heightRaf.current)
+        // Clear the guard too: StrictMode's dev double-mount runs this
+        // cleanup and re-runs the effect on the same component instance, and
+        // a stale id would latch scheduleSyncHeight closed forever.
+        heightRaf.current = null
+      }
+    }
+  }, [])
+
   const handleFocus = useCallback(() => {
     if (!autoGrow) return
     setIsFocused(true)
@@ -167,16 +194,16 @@ export function PromptArea({
   const handleInputWithGrow = useCallback(() => {
     handleInput()
     if (autoGrow && isFocused) {
-      syncHeight()
+      scheduleSyncHeight()
     }
-  }, [handleInput, autoGrow, isFocused, syncHeight])
+  }, [handleInput, autoGrow, isFocused, scheduleSyncHeight])
 
   // Re-measure on value changes (chip insertion, undo/redo, programmatic updates)
   useEffect(() => {
     if (autoGrow && isFocused) {
-      requestAnimationFrame(() => syncHeight())
+      scheduleSyncHeight()
     }
-  }, [value, autoGrow, isFocused, syncHeight])
+  }, [value, autoGrow, isFocused, scheduleSyncHeight])
 
   // -----------------------------------------------------------------------
   // Overflow indicator: detect when collapsed content is clipped

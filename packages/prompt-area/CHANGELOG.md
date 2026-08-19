@@ -3,6 +3,36 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.6
+
+### Fixed
+
+- **Typing stays fast when the editor holds pages of text.** Every keystroke
+  used to do work proportional to the whole document: the caret offset was
+  measured by deep-cloning everything before it (`Range.cloneContents`, two to
+  three times per keystroke), the DOM was read and serialized to plain text up
+  to four separate times, all decorations (bold/italic, URLs, bullets,
+  indents, headings) were stripped and rebuilt across every line, autoGrow
+  forced two full layout reflows, and a fresh empty suggestions array forced a
+  React re-render even when nothing changed. On a multi-page document a single
+  keystroke blocked the frame for 40–80 ms. Offsets are now computed by
+  walking the live tree without cloning, one scan produces the segments and
+  plain text for the whole keystroke, the decoration cycle runs only on the
+  caret's `<br>`-delimited line (decorations are line-local; anything
+  ambiguous — foreign elements, literal newlines in text nodes, no collapsed
+  caret — still takes the full pass), height syncs coalesce into one
+  pre-paint `requestAnimationFrame`, and idle keystrokes no longer re-render.
+  Measured at 600 seeded lines with markdown and autoGrow: median keystroke
+  handler time dropped from 39.8 ms to 7.5 ms and input-to-frame latency from
+  45 ms to 8 ms, with p95 under one 60 Hz frame.
+- **Newlines insert without rebuilding the document.** Shift+Enter (and Enter
+  with `submitOnEnter` off) re-rendered and re-decorated the entire editor to
+  insert one `\n`, a ~37 ms stutter at 600 lines. When the caret is collapsed
+  in a clean flat DOM and ordered-list renumbering is provably a no-op, the
+  newline is now inserted surgically — split the caret's text node, insert one
+  `<br>`, re-decorate just that line — halving the cost; every other case
+  keeps the full re-render.
+
 ## 0.6.5
 
 ### Fixed

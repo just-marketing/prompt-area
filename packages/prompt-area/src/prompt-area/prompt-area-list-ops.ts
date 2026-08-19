@@ -105,8 +105,10 @@ export function getListContext(text: string, cursorPos: number): ListContext | n
 export function autoFormatListPrefix(
   segments: Segment[],
   cursorPos: number,
+  // Callers on the typing hot path pass the plain text they already built so
+  // this doesn't re-serialize the whole document per keystroke.
+  plainText: string = segmentsToPlainText(segments),
 ): { segments: Segment[]; cursorOffset: number } | null {
-  const plainText = segmentsToPlainText(segments)
   const lineStart = plainText.lastIndexOf('\n', cursorPos - 1) + 1
   const lineText = plainText.slice(lineStart, cursorPos)
 
@@ -483,11 +485,15 @@ export function remapOffset(old: number, edits: NumberEdit[]): number {
  * returns the changed spans for {@link remapOffset}. Digit runs are pure text at
  * line starts, so chips are never touched.
  */
-export function renumberOrderedListSegments(segments: Segment[]): {
+export function renumberOrderedListSegments(
+  segments: Segment[],
+  // Optional precomputed serialization, same rationale as autoFormatListPrefix.
+  plainText: string = segmentsToPlainText(segments),
+): {
   segments: Segment[]
   edits: NumberEdit[]
 } {
-  const { edits } = renumberOrderedListLines(segmentsToPlainText(segments))
+  const { edits } = renumberOrderedListLines(plainText)
   if (edits.length === 0) return { segments, edits }
 
   let result = segments
