@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
-  saveCursorPosition,
-  restoreCursorPosition,
   getCursorOffset,
   setCursorAtOffset,
   createRangeAtOffset,
@@ -206,96 +204,6 @@ describe('findDOMPosition', () => {
     editor.appendChild(span)
     const pos = findDOMPosition(editor, 2)
     expect(pos).toEqual({ node: inner, offset: 2 })
-  })
-})
-
-// ---------------------------------------------------------------------------
-// saveCursorPosition / restoreCursorPosition
-// ---------------------------------------------------------------------------
-
-describe('saveCursorPosition / restoreCursorPosition', () => {
-  it('returns null when there is no selection', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('hello'))
-    window.getSelection()?.removeAllRanges()
-    expect(saveCursorPosition(editor)).toBeNull()
-  })
-
-  it('returns null when selection is outside the editor', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('hello'))
-    const outside = document.createElement('div')
-    const outsideText = document.createTextNode('nope')
-    outside.appendChild(outsideText)
-    document.body.appendChild(outside)
-    placeCursor(outsideText, 2)
-    expect(saveCursorPosition(editor)).toBeNull()
-  })
-
-  it('round-trips cursor through a text node', () => {
-    const editor = makeEditor()
-    const text = document.createTextNode('hello')
-    editor.appendChild(text)
-    placeCursor(text, 3)
-
-    const saved = saveCursorPosition(editor)
-    if (!saved) throw new Error('saveCursorPosition returned null')
-
-    // Move the cursor elsewhere
-    placeCursor(text, 0)
-
-    restoreCursorPosition(editor, saved)
-    const range = window.getSelection()?.getRangeAt(0)
-    expect(range?.startContainer).toBe(text)
-    expect(range?.startOffset).toBe(3)
-  })
-
-  it('clamps restore offset to the target node length', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('short'))
-    restoreCursorPosition(editor, { nodeIndex: 0, offset: 999 })
-    const range = window.getSelection()?.getRangeAt(0)
-    expect(range?.startOffset).toBe(5)
-  })
-
-  it('places cursor at end when nodeIndex is out of range', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('abc'))
-    restoreCursorPosition(editor, { nodeIndex: 99, offset: 0 })
-    const range = window.getSelection()?.getRangeAt(0)
-    expect(range?.startContainer.nodeType).toBe(Node.TEXT_NODE)
-    expect(range?.startOffset).toBe(3)
-  })
-
-  it('no-ops when editor has no children', () => {
-    const editor = makeEditor()
-    restoreCursorPosition(editor, { nodeIndex: 0, offset: 0 })
-    // no throw = success
-    expect(editor.childNodes.length).toBe(0)
-  })
-
-  it('places cursor after a non-text child when targetNode is not a text node', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('before'))
-    const chip = document.createElement('span')
-    chip.dataset.chipTrigger = '@'
-    chip.dataset.chipDisplay = 'Alice'
-    chip.textContent = '@Alice'
-    editor.appendChild(chip) // childNodes[1] — not a text node
-    restoreCursorPosition(editor, { nodeIndex: 1, offset: 0 })
-    const range = window.getSelection()?.getRangeAt(0)
-    // setStartAfter(chip) places the cursor right after the chip element.
-    expect(range?.startContainer).toBe(editor)
-    expect(range?.startOffset).toBe(2)
-  })
-
-  it('saves nodeIndex when selection is on the editor itself', () => {
-    const editor = makeEditor()
-    editor.appendChild(document.createTextNode('a'))
-    editor.appendChild(document.createTextNode('b'))
-    placeCursor(editor, 1)
-    const saved = saveCursorPosition(editor)
-    expect(saved).toEqual({ nodeIndex: 1, offset: 0 })
   })
 })
 
@@ -589,13 +497,6 @@ describe('scrollCaretIntoView', () => {
     expect(range?.startOffset).toBe(5)
   })
 
-  it('runs when restoreCursorPosition places the caret', () => {
-    const { editor } = makeFocusedEditor()
-    mockEditorGeometry(editor, { caretTop: 150 })
-    restoreCursorPosition(editor, { nodeIndex: 0, offset: 5 })
-    expect(editor.scrollTop).toBe(70)
-  })
-
   it('does not scroll when setSelectionAtOffsets sets a range selection', () => {
     const { editor, textNode } = makeFocusedEditor('hello world')
     mockEditorGeometry(editor, { caretTop: 150 })
@@ -626,5 +527,36 @@ describe('cursor round-trip across DOM rewrite', () => {
     editor.replaceChildren(document.createTextNode('HELLO world'))
     setCursorAtOffset(editor, before)
     expect(getCursorOffset(editor)).toBe(6)
+  })
+
+  it('restores the caret after a rewrite that changes the child-node count', () => {
+    // What renderSegmentsToDOM actually does: rebuild, then decorate — and
+    // every decoration pass swaps one text node for a text/<span>/text run.
+    // A child-index-based restore lands wherever the shifted count points;
+    // the offset must survive.
+    const editor = makeEditor()
+    editor.appendChild(document.createTextNode('a *b* c'))
+    editor.appendChild(document.createElement('br'))
+    const tail = document.createTextNode('tail')
+    editor.appendChild(tail)
+    placeCursor(tail, 4)
+
+    const before = getCursorOffset(editor)
+    expect(before).toBe(12) // 'a *b* c' (7) + br (1) + 'tail' (4)
+
+    // Re-render: same plain text, three children where there was one.
+    const em = document.createElement('span')
+    em.textContent = '*b*'
+    editor.replaceChildren(
+      document.createTextNode('a '),
+      em,
+      document.createTextNode(' c'),
+      document.createElement('br'),
+      document.createTextNode('tail'),
+    )
+    if (before === null) throw new Error('getCursorOffset returned null')
+    setCursorAtOffset(editor, before)
+
+    expect(getCursorOffset(editor)).toBe(12)
   })
 })

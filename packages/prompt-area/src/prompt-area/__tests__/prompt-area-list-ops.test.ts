@@ -76,6 +76,37 @@ describe('renumberOrderedListLines — counter stack', () => {
   })
 })
 
+describe('renumberOrderedListLines — seedFromFirstNumber (paste)', () => {
+  const seeded = (t: string) => renumberOrderedListLines(t, { seedFromFirstNumber: true }).text
+
+  it('keeps a run that already starts above 1', () => {
+    expect(seeded('7. a\n8. b\n9. c')).toBe('7. a\n8. b\n9. c')
+  })
+
+  it('still rebuilds contiguity within the run, from its own start', () => {
+    expect(seeded('7. a\n7. b\n7. c')).toBe('7. a\n8. b\n9. c')
+  })
+
+  it('reseeds a run that resumes after prose instead of dropping to 1', () => {
+    expect(seeded('7. a\nprose\n8. b\nprose\n9. c')).toBe('7. a\nprose\n8. b\nprose\n9. c')
+  })
+
+  it('seeds a nested run from its own first number', () => {
+    expect(seeded('7. a\n  3. sub\n  3. sub2\n8. b')).toBe('7. a\n  3. sub\n  4. sub2\n8. b')
+  })
+
+  it('matches the default when the run already starts at 1', () => {
+    expect(seeded('1. a\n1. b\n1. c')).toBe('1. a\n2. b\n3. c')
+  })
+
+  it('returns the same ref and no edits when nothing changes', () => {
+    const input = '7. a\n8. b'
+    const result = renumberOrderedListLines(input, { seedFromFirstNumber: true })
+    expect(result.text).toBe(input)
+    expect(result.edits).toHaveLength(0)
+  })
+})
+
 describe('remapOffset', () => {
   // A shrink (10→9) upstream at [0,2)→"9" and a growth (9→10) further down at
   // [10,11)→"10". Net delta before a caret past both is 0, but a caret between

@@ -10,67 +10,19 @@
  *   `getSelectionRange()` fresh.
  * - Chip nodes are treated atomically via `isChipElement` — we never descend
  *   into a contentEditable=false subtree when mapping offsets.
+ * - A caret is addressed by its plain-text offset, never by a child-node
+ *   index. Every render ends in `decorateEditor`, whose passes replace a text
+ *   node with a text/<span>/text run, so child indices do not survive a
+ *   re-render — offsets do, because findDOMPosition descends into decorations.
  */
 import {
   chipNodeTextLength,
-  getDirectChildContaining,
   getSelectionRange,
-  indexOfChildNode,
   isBRElement,
   isChipElement,
   isHTMLElement,
   isTextNode,
 } from './dom-helpers'
-
-export type SavedCursor = {
-  nodeIndex: number
-  offset: number
-}
-
-export function saveCursorPosition(editor: HTMLElement): SavedCursor | null {
-  const range = getSelectionRange()
-  if (!range) return null
-  if (!editor.contains(range.startContainer)) return null
-
-  const node = range.startContainer
-  if (node === editor) {
-    return { nodeIndex: range.startOffset, offset: 0 }
-  }
-
-  // Walk up to find the direct child of editor using type-safe helper
-  const directChild = getDirectChildContaining(editor, node)
-  if (!directChild) return null
-
-  const nodeIndex = indexOfChildNode(editor, directChild)
-  return { nodeIndex, offset: range.startOffset }
-}
-
-export function restoreCursorPosition(editor: HTMLElement, saved: SavedCursor): void {
-  const childNodes = editor.childNodes
-  if (childNodes.length === 0) return
-
-  const range = document.createRange()
-
-  if (saved.nodeIndex >= childNodes.length) {
-    const lastChild = childNodes[childNodes.length - 1]
-    if (lastChild.nodeType === Node.TEXT_NODE) {
-      range.setStart(lastChild, (lastChild.textContent ?? '').length)
-    } else {
-      range.setStartAfter(lastChild)
-    }
-  } else {
-    const targetNode = childNodes[saved.nodeIndex]
-    if (targetNode.nodeType === Node.TEXT_NODE) {
-      const maxOffset = (targetNode.textContent ?? '').length
-      range.setStart(targetNode, Math.min(saved.offset, maxOffset))
-    } else {
-      range.setStartAfter(targetNode)
-    }
-  }
-
-  range.collapse(true)
-  applySelectionRange(editor, range)
-}
 
 export function getCursorOffset(editor: HTMLElement): number | null {
   const range = getSelectionRange()

@@ -3,6 +3,7 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 import { PromptArea } from '../prompt-area'
 import { segmentsToPlainText } from '../prompt-area-engine'
+import { getCursorOffset } from '../cursor-helpers'
 import type { Segment, TriggerConfig } from '../types'
 import { placeCursorAtEnd, placeCursor } from './test-helpers'
 import { htmlToMarkdown } from '../html-to-markdown'
@@ -292,14 +293,29 @@ describe('PromptArea Word clipboard pastes', () => {
     expect(lastOnChange(onChangeSpy)).toBe('• Alpha\n  • Beta\n• Gamma')
   })
 
-  it('renumbers a pasted Word ordered list sequentially', () => {
+  // Behaviour change: this used to assert '1. First\n2. Second'. A paste
+  // carries numbering its author chose elsewhere, and forcing it back to 1
+  // rewrote real section numbers — a contract's section 7 arrived as 1. The
+  // run now keeps its own starting number; only contiguity is rebuilt (see
+  // the seedFromFirstNumber cases below and in prompt-area-list-ops.test.ts).
+  it('keeps a pasted Word ordered list on the numbers Word rendered', () => {
     const { editor, onChangeSpy } = renderEditor({ markdown: true })
     const html = wordListHtml([
       { level: 1, marker: '3.', text: 'First' },
       { level: 1, marker: '4.', text: 'Second' },
     ])
     paste(editor, { html })
-    expect(lastOnChange(onChangeSpy)).toBe('1. First\n2. Second')
+    expect(lastOnChange(onChangeSpy)).toBe('3. First\n4. Second')
+  })
+
+  it('still rebuilds contiguity inside a Word list that repeats a number', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    const html = wordListHtml([
+      { level: 1, marker: '3.', text: 'First' },
+      { level: 1, marker: '3.', text: 'Second' },
+    ])
+    paste(editor, { html })
+    expect(lastOnChange(onChangeSpy)).toBe('3. First\n4. Second')
   })
 
   it('falls back to text/plain for a Word paste when markdown is off', () => {
@@ -322,5 +338,100 @@ describe('PromptArea Word clipboard pastes', () => {
     paste(editor, { html: '<p class=MsoNormal><o:p></o:p></p>' }, [bitmap])
     expect(onImagePaste).toHaveBeenCalledWith(bitmap)
     expect(onChangeSpy).not.toHaveBeenCalled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Caret placement after a paste
+// ---------------------------------------------------------------------------
+
+describe('caret lands at the end of a decoration-heavy paste', () => {
+  // A word-processor paste arrives as HTML, so every bold run becomes `**...**`
+  // and every emphasis `*...*`. Each one makes decorateEditor swap a text node
+  // for a text/<span>/text run during the re-render that follows the paste,
+  // which used to leave a child-index-based caret restore pointing partway up
+  // the document. The caret must end up after the last pasted character.
+  const DOC = [
+    '**ANNEX No 1**',
+    '',
+    'Signed between the *Provider* and the *Client*.',
+    '',
+    '**1. Project**',
+    'Name of the project: *Client dossier*.',
+    '',
+    '**7. Contact persons**',
+    'Project manager on the *Provider* side.',
+    '',
+    '**8. Other terms**',
+    'PROVIDER: ______   CLIENT: ______',
+  ].join('\n')
+
+  it('places the caret at the end, not partway up the document', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { plain: DOC })
+
+    const text = lastOnChange(onChangeSpy)
+    expect(text).toBe(DOC)
+    expect(getCursorOffset(editor)).toBe(DOC.length)
+  })
+
+  it('keeps the caret at the paste point when pasting mid-document', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    act(() => {
+      editor.textContent = 'head tail'
+      placeCursorAtEnd(editor)
+      fireEvent.input(editor)
+    })
+    act(() => {
+      placeCursor(editor, 'head '.length)
+      fireEvent.paste(editor, { clipboardData: makeClipboard({ plain: DOC }) })
+    })
+
+    expect(lastOnChange(onChangeSpy)).toBe(`head ${DOC}tail`)
+    expect(getCursorOffset(editor)).toBe('head '.length + DOC.length)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Ordered-list numbering survives a paste
+// ---------------------------------------------------------------------------
+
+describe('pasted ordered lists keep the numbering the author wrote', () => {
+  it('keeps a list that starts above 1 (word-processor <ol start>)', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { html: '<ol start="7"><li>Contact persons</li><li>Other terms</li></ol>' })
+    expect(lastOnChange(onChangeSpy)).toBe('7. Contact persons\n8. Other terms')
+  })
+
+  it('keeps a section number when the run resumes after a paragraph of prose', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { plain: '7. Contact persons\n8. Provider side\nA paragraph.\n9. Client side' })
+    // The section that resumes after the prose keeps its own number. This used
+    // to come back as "1. / 2. / 1." — the reported symptom.
+    expect(lastOnChange(onChangeSpy)).toBe(
+      '7. Contact persons\n8. Provider side\nA paragraph.\n9. Client side',
+    )
+  })
+
+  it('repairs a stale run without dragging it back to 1', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { plain: '7. a\n8. b\n8. c' })
+    expect(lastOnChange(onChangeSpy)).toBe('7. a\n8. b\n9. c')
+  })
+
+  it('still repairs a stale copied list that starts at 1', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, { plain: '1. a\n1. b\n1. c' })
+    expect(lastOnChange(onChangeSpy)).toBe('1. a\n2. b\n3. c')
+  })
+
+  it('keeps sublist items that arrive as a sibling of their parent item', () => {
+    const { editor, onChangeSpy } = renderEditor({ markdown: true })
+    paste(editor, {
+      html: '<ol start="7"><li>Contact persons</li><ol><li>Provider side</li><li>Client side</li></ol></ol>',
+    })
+    expect(lastOnChange(onChangeSpy)).toBe(
+      '7. Contact persons\n  1. Provider side\n  2. Client side',
+    )
   })
 })

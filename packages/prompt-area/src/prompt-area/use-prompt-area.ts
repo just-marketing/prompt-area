@@ -54,8 +54,6 @@ import {
 } from './dom-helpers'
 import type { DecorateBounds } from './dom-helpers'
 import {
-  saveCursorPosition,
-  restoreCursorPosition,
   getCursorOffset,
   setCursorAtOffset,
   createRangeAtOffset,
@@ -431,7 +429,14 @@ export function usePromptArea({
 
       isSyncing.current = true
 
-      const savedCursor = saveCursorPosition(editor)
+      // Save the caret as a plain-text offset, never as a child-node index:
+      // the rebuild below ends with `decorateEditor`, whose passes each swap
+      // one text node for a text/<span>/text run, so the editor holds a
+      // different number of direct children than when the caret was captured.
+      // An index would land wherever that shifted count points (mid-document
+      // after a decoration-heavy paste); an offset survives because
+      // findDOMPosition maps it back through the decorations.
+      const savedCursor = getCursorOffset(editor)
       const savedScrollTop = editor.scrollTop
 
       // Clear DOM safely (no innerHTML assignment)
@@ -500,8 +505,9 @@ export function usePromptArea({
       // silently reset the user's scroll.
       editor.scrollTop = savedScrollTop
 
-      if (savedCursor) {
-        restoreCursorPosition(editor, savedCursor)
+      // `!== null` — offset 0 is a real caret position, and would be falsy.
+      if (savedCursor !== null) {
+        setCursorAtOffset(editor, savedCursor)
       }
 
       lastRenderedValue.current = segments
