@@ -222,8 +222,14 @@ function serializeBlockquote(node: HTMLElement, depth: number): string {
 
 /**
  * Serializes a `<ul>`/`<ol>` at nesting `depth` (0 = top level). Each `<li>`'s
- * own inline content becomes the marker line; a nested `<ul>`/`<ol>` child is
+ * own inline content becomes the marker line; a nested `<ul>`/`<ol>` is
  * serialized at `depth + 1` and appended indented below its parent item.
+ *
+ * A sublist reaches us in one of two shapes. The spec-correct one nests it
+ * INSIDE its parent `<li>`; Word, Outlook and Apple Notes instead emit it as a
+ * SIBLING of the `<li>` it belongs to. Both are handled — skipping the sibling
+ * form (anything that is not an `<li>`) silently dropped every nested item
+ * from such a paste.
  */
 function serializeList(list: HTMLElement, depth: number): string {
   const ordered = list.tagName === 'OL'
@@ -233,7 +239,18 @@ function serializeList(list: HTMLElement, depth: number): string {
   const lines: string[] = []
 
   for (const child of Array.from(list.childNodes)) {
-    if (!isHTMLElement(child) || child.tagName !== 'LI') continue
+    if (!isHTMLElement(child)) continue
+
+    // Sublist emitted as a sibling of its parent item — indent it one level
+    // deeper and keep it in document order. It is not an item of THIS list,
+    // so it must not advance the ordered counter.
+    if (child.tagName === 'UL' || child.tagName === 'OL') {
+      const nestedSibling = serializeList(child, depth + 1)
+      if (nestedSibling) lines.push(nestedSibling)
+      continue
+    }
+
+    if (child.tagName !== 'LI') continue
 
     const marker = ordered ? `${index}. ` : '- '
     index++

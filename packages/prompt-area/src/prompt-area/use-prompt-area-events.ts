@@ -236,8 +236,13 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
       // numeric-leading prose (e.g. `1985. Born / 2020. Died`) is left untouched.
       // Done at the raw-string level (the caret collapses to end-of-content after
       // insertion, so no offset remap needed).
+      //
+      // `seedFromFirstNumber` — a paste carries numbering the author chose
+      // elsewhere, so each run keeps its own starting number and only its
+      // contiguity is rebuilt. Without it, pasting a contract's section 7 (or
+      // any `<ol start="7">` a word processor emits) renumbered it to 1.
       if (markdownEnabled && hasOrderedListRun(text)) {
-        text = renumberOrderedListLines(text).text
+        text = renumberOrderedListLines(text, { seedFromFirstNumber: true }).text
       }
 
       // Insert plain text at cursor position using Selection API

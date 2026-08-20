@@ -213,6 +213,24 @@ describe('htmlToMarkdown', () => {
     expect(htmlToMarkdown(html)).toBe('1. a\n  1. see [x](https://x.io)')
   })
 
+  // Word, Outlook and Apple Notes put the sublist NEXT TO the item it belongs
+  // to rather than inside it. Skipping every non-<li> child dropped those items
+  // from the paste entirely.
+  it('keeps an ordered sublist emitted as a sibling of its parent item', () => {
+    const html = '<ol><li>a</li><ol><li>a1</li><li>a2</li></ol><li>b</li></ol>'
+    expect(htmlToMarkdown(html)).toBe('1. a\n  1. a1\n  2. a2\n2. b')
+  })
+
+  it('keeps an unordered sublist emitted as a sibling of its parent item', () => {
+    const html = '<ul><li>a</li><ul><li>a1</li></ul><li>b</li></ul>'
+    expect(htmlToMarkdown(html)).toBe('- a\n  - a1\n- b')
+  })
+
+  it('does not let a sibling sublist advance the parent list numbering', () => {
+    const html = '<ol><li>a</li><ol><li>a1</li></ol><li>b</li><ol><li>b1</li></ol></ol>'
+    expect(htmlToMarkdown(html)).toBe('1. a\n  1. a1\n2. b\n  1. b1')
+  })
+
   // -------------------------------------------------------------------------
   // Code
   // -------------------------------------------------------------------------

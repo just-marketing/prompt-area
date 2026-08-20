@@ -399,8 +399,19 @@ export function hasOrderedListRun(text: string): boolean {
  * plus the list of changed digit runs (ascending by `oldStart`) for cursor
  * remapping. When nothing changes, returns the SAME text reference and an empty
  * `edits` array — the no-op guard that keeps this off the typing hot path.
+ *
+ * `seedFromFirstNumber` changes where each run's counter STARTS, not how it
+ * counts: the run continues from its own first item's number instead of from
+ * 1. Pasted content is authored elsewhere and its starting number is meaningful
+ * — an annex numbered `7. 8. 9.` must stay at 7, and a section resuming after
+ * a paragraph of prose must not silently drop back to 1. Contiguity is still
+ * rebuilt within the run, so a stale `7. 7. 7.` lands `7. 8. 9.`. Typing leaves
+ * the flag off and keeps the restart-at-1 model described above.
  */
-export function renumberOrderedListLines(text: string): { text: string; edits: NumberEdit[] } {
+export function renumberOrderedListLines(
+  text: string,
+  opts?: { seedFromFirstNumber?: boolean },
+): { text: string; edits: NumberEdit[] } {
   // Cheap pre-gate: with no ordered-list line there is nothing to renumber, so
   // skip the per-line scan and throwaway rebuild. This runs on every structural
   // edit (Enter, Tab, bold/italic wrap) and each paste, most of which never
@@ -436,7 +447,11 @@ export function renumberOrderedListLines(text: string): { text: string; edits: N
       const level = parsed.indent
       clearDeeperThan(level, false)
       const current = counters.get(level)
-      const n = current === undefined ? 1 : current + 1
+      // First item of a run at this level seeds the counter; the rest just
+      // increment. `clearDeeperThan` already dropped this level's counter when
+      // the run was interrupted, so a resumed run reseeds from its own number.
+      const seed = opts?.seedFromFirstNumber ? parsed.number : 1
+      const n = current === undefined ? seed : current + 1
       counters.set(level, n)
 
       const newDigits = String(n)
