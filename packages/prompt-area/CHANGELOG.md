@@ -3,6 +3,43 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.7
+
+### Fixed
+
+- **The caret lands at the end of a pasted document.** Pasting several pages
+  from Word or Google Docs left the cursor partway up the document — on an
+  11k-character contract, 1679 characters short of the end, roughly 85% in.
+  The paste itself collapsed the caret correctly; the re-render that follows
+  it (the pass that decorates the pasted text) preserved the caret as a
+  child-node INDEX, and decoration replaces one text node with a
+  text/`<span>`/text run, so the editor ends up holding more direct children
+  than when the index was captured and the restore lands proportionally
+  short. The drift scaled with the document, because a word-processor paste
+  turns every bold heading into `**…**`. The caret is now preserved as a
+  plain-text offset, which survives decoration.
+- **A pasted ordered list keeps the numbering its author wrote.** Ordered-list
+  renumbering restarted every run at 1 — right for typing, where Tab-indenting
+  restarts a sublist, but wrong for a paste, whose numbering was authored
+  somewhere else. A contract's section 7 arrived as 1, and every section
+  resuming after a paragraph of prose dropped back to 1 again. A pasted run
+  now continues from its own first number; contiguity is still rebuilt, so a
+  stale `7. 7. 7.` lands `7. 8. 9.` Typing is unchanged.
+- **Sublists emitted as a sibling of their parent item are no longer dropped.**
+  Word, Outlook and Apple Notes put a nested list NEXT TO the `<li>` it belongs
+  to rather than inside it. The HTML→markdown converter skipped every child
+  that was not an `<li>`, so every nested item vanished from such a paste —
+  silent content loss. Both shapes are handled now, and a sibling sublist does
+  not advance the parent list's counter.
+
+### Changed
+
+- **A pasted Word list keeps the numbers Word rendered.** A list fragment
+  whose markers read `3.` `4.` now pastes as `3. 4.` rather than being
+  normalized to `1. 2.` (the behaviour 0.6.5 shipped). The numbers a word
+  processor renders are the author's, and rewriting them is what corrupted
+  real documents.
+
 ## 0.6.6
 
 ### Fixed
