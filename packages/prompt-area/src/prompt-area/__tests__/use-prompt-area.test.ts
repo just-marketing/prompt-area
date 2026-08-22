@@ -1324,6 +1324,183 @@ describe('usePromptArea', () => {
       vi.useRealTimers()
     })
 
+    it('creates one undo entry when a trailing input carries a further mutation (Chromium)', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'hello')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      // Chromium may emit one more non-composing input whose content differs
+      // from what compositionend observed. It belongs to the same user-visible
+      // composition, so it must not open a second undo entry.
+      populateEditor(editor, 'hello!')
+      placeCursor(editor.firstChild!, 6)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      const undoEvent = () =>
+        ({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        }) as unknown as React.KeyboardEvent<HTMLDivElement>
+
+      // First undo returns to the pre-composition state, not to the
+      // intermediate compositionend snapshot.
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
+
+      // The single entry is exhausted: a second undo is a no-op.
+      onChange.mockClear()
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('lets a real keystroke after a composition open its own undo entry', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'hello')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      // No trailing input arrives (non-Chromium engines, or any ordering where
+      // compositionend is last). A genuine later keystroke always emits
+      // keydown before its input, which releases the ended composition's
+      // claim — so the keystroke below must get its own undo entry.
+      act(() => vi.advanceTimersByTime(1000))
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: '!',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: false,
+          altKey: false,
+          shiftKey: true,
+          nativeEvent: { isComposing: false, keyCode: 49 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+      populateEditor(editor, 'hello!')
+      placeCursor(editor.firstChild!, 6)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      const undoEvent = () =>
+        ({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        }) as unknown as React.KeyboardEvent<HTMLDivElement>
+
+      // First undo removes only the keystroke, landing on the composed text...
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([{ type: 'text', text: 'hello' }])
+
+      // ...second undo removes the composition.
+      onChange.mockClear()
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('creates one undo entry when only the trailing input mutates the DOM', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      // compositionend fires before the commit reaches the DOM: the editor
+      // still holds the pre-composition state, and the committed text arrives
+      // only with the trailing input event.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      populateEditor(editor, 'hello')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      onChange.mockClear()
+
+      const undoEvent = () =>
+        ({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        }) as unknown as React.KeyboardEvent<HTMLDivElement>
+
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
+
+      onChange.mockClear()
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).not.toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
     it('keeps committed text undoable when compositionend lands after a blur', () => {
       vi.useFakeTimers()
       const onChange = vi.fn()
@@ -1429,6 +1606,110 @@ describe('usePromptArea', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1)
       expect(onChange).toHaveBeenCalledWith([{ type: 'text', text: 'AB' }])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('folds an over-cap trailing input into the composition undo entry', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            maxLength: 5,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      // compositionend fires before the commit reaches the DOM, and the
+      // trailing input carries text past the cap — handleInput truncates and
+      // returns early, so that branch owns the composition's undo entry.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      populateEditor(editor, 'helloX')
+      placeCursor(editor.firstChild!, 6)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      expect(segmentsToPlainText(onChange.mock.calls.at(-1)![0] as Segment[])).toBe('hello')
+      onChange.mockClear()
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('does not record an undo entry for a no-op composition over decorated text', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            markdown: true,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      populateEditor(editor, 'say **bold** now')
+      placeCursor(editor.firstChild!, 16)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      // The decoration pass split the line into several DOM children, which
+      // the DOM reader and the single-pass scanner model differently.
+      expect(editor.querySelectorAll('span[data-md]').length).toBeGreaterThan(0)
+      expect(editor.childNodes.length).toBeGreaterThan(1)
+
+      // A composition that commits nothing, followed by the duplicate input
+      // some engines still fire. Neither changed the content, so neither may
+      // land an undo entry.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      // The one undo entry is the pre-composition typing, not a phantom entry
+      // holding the same text in the reader's representation.
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
 
       document.body.removeChild(editor)
       vi.useRealTimers()
