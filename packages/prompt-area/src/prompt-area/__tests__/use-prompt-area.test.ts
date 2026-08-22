@@ -1501,6 +1501,64 @@ describe('usePromptArea', () => {
       vi.useRealTimers()
     })
 
+    it('flushes a pending typing undo group when a composition starts', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      // Plain typing whose undo group is still pending (debounce not elapsed)
+      // when the composition begins. compositionstart must flush that group;
+      // compositionend clears the debounce state, so without the flush the
+      // typed text would silently vanish from undo history.
+      populateEditor(editor, 'typed')
+      placeCursor(editor.firstChild!, 5)
+      act(() => result.current.handleInput())
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'typedあ')
+      placeCursor(editor.firstChild!, 6)
+      act(() => result.current.handleInput())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      const undoEvent = () =>
+        ({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        }) as unknown as React.KeyboardEvent<HTMLDivElement>
+
+      // First undo removes the composition...
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([{ type: 'text', text: 'typed' }])
+
+      // ...second undo removes the typed text.
+      onChange.mockClear()
+      act(() => result.current.handleKeyDown(undoEvent()))
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
     it('keeps committed text undoable when compositionend lands after a blur', () => {
       vi.useFakeTimers()
       const onChange = vi.fn()
