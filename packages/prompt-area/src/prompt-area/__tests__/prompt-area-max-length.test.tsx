@@ -110,4 +110,21 @@ describe('PromptArea maxLength prop', () => {
     // being forced to the end.
     expect(getCursorOffset(editor)).toBe(3)
   })
+
+  // Only the final post-compositionend value is capped; the onChange values
+  // emitted mid-composition are not (follow-up issue pending).
+  it('enforces the cap when IME composition ends', () => {
+    const { editor, onChangeSpy } = renderWithCap(4)
+
+    fireEvent.compositionStart(editor)
+    act(() => {
+      editor.textContent = 'abcdef'
+      fireEvent.input(editor)
+    })
+    fireEvent.compositionEnd(editor)
+
+    const last = onChangeSpy.mock.calls.at(-1)?.[0] as Segment[]
+    expect(segmentsToPlainText(last)).toBe('abcd')
+    expect(editor.textContent).toBe('abcd')
+  })
 })

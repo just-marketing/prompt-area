@@ -246,9 +246,9 @@ describe('Shift+Enter surgical newline', () => {
       result.current.handleKeyDown(shiftEnter())
     })
 
-    // findDOMPosition maps offset 0 to AFTER a leading chip (caret bias); the
-    // surgical path must detect that and fall back so the <br> lands where
-    // the model put the newline — before the chip.
+    // findDOMPosition resolves offset 0 to the boundary BEFORE a leading
+    // chip, so the surgical path's round-trip check passes and it inserts
+    // there — where the model put the newline.
     expect(lastChangeText(onChange)).toBe('\n@alice tail')
     expect(editor.firstChild?.nodeName).toBe('BR')
     const domText = Array.from(editor.childNodes)
@@ -300,7 +300,7 @@ describe('Shift+Enter surgical newline', () => {
     expect((brs[2] as HTMLElement).dataset.sentinel).toBe('true')
   })
 
-  it('inserts on an empty line correctly via the round-trip fallback', () => {
+  it('inserts on an empty line at the offset the round-trip check confirms', () => {
     const { result, editor, onChange } = setup()
     editor.append(
       document.createTextNode('a'),
