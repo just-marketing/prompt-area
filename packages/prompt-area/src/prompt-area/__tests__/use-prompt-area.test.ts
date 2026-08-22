@@ -1247,6 +1247,38 @@ describe('usePromptArea', () => {
       document.body.removeChild(editor)
     })
 
+    it('re-enables the keyboard when a composition is interrupted by blur', () => {
+      const onSubmit = vi.fn()
+      const { result } = renderHook(() => usePromptArea(defaultProps({ onSubmit })))
+      const editor = attachEditor(result.current)
+      populateEditor(editor, 'draft')
+
+      // compositionstart with no compositionend: focus moved away mid-IME
+      // (click elsewhere, window switch), so the browser never delivers
+      // compositionend. Blur must reset the composition flag or every later
+      // keystroke is swallowed by handleKeyDown's composition guard.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onBlur())
+
+      const preventDefault = vi.fn()
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Enter',
+          preventDefault,
+          metaKey: false,
+          ctrlKey: false,
+          altKey: false,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 13 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(preventDefault).toHaveBeenCalled()
+      expect(onSubmit).toHaveBeenCalled()
+
+      document.body.removeChild(editor)
+    })
+
     it('undoes one completed composition after a trailing duplicate input', () => {
       vi.useFakeTimers()
       const onChange = vi.fn()
@@ -1287,6 +1319,116 @@ describe('usePromptArea', () => {
       })
 
       expect(onChange).toHaveBeenCalledWith([])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('keeps committed text undoable when compositionend lands after a blur', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      populateEditor(editor, 'pre')
+      placeCursor(editor.firstChild!, 3)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+
+      // Focus leaves mid-IME, so blur drops the composition baseline; the
+      // browser still delivers compositionend afterwards, with the committed
+      // text already in the DOM. That commit has no composition bookkeeping
+      // left to record it, so the ordinary debounced path must.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onBlur())
+      populateEditor(editor, 'preあ')
+      placeCursor(editor.firstChild!, 4)
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([{ type: 'text', text: 'pre' }])
+
+      document.body.removeChild(editor)
+      vi.useRealTimers()
+    })
+
+    it('does not undo past a composition abandoned by blur', () => {
+      vi.useFakeTimers()
+      const onChange = vi.fn()
+      const { result } = renderHook(() => {
+        const [value, setValue] = useState<Segment[]>([])
+        return usePromptArea(
+          defaultProps({
+            value,
+            onChange: (nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            },
+          }),
+        )
+      })
+      const editor = attachEditor(result.current)
+
+      populateEditor(editor, 'A')
+      placeCursor(editor.firstChild!, 1)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+
+      // A composition interrupted by blur never gets its compositionend, so
+      // its baseline ("A") must not survive as the undo base of the next one.
+      act(() => result.current.eventHandlers.onCompositionStart())
+      act(() => result.current.eventHandlers.onBlur())
+
+      populateEditor(editor, 'AB')
+      placeCursor(editor.firstChild!, 2)
+      act(() => result.current.handleInput())
+      act(() => vi.advanceTimersByTime(300))
+
+      act(() => result.current.eventHandlers.onCompositionStart())
+      populateEditor(editor, 'ABC')
+      placeCursor(editor.firstChild!, 3)
+      act(() => result.current.handleInput())
+      act(() => result.current.eventHandlers.onCompositionEnd())
+      act(() => vi.advanceTimersByTime(300))
+      onChange.mockClear()
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'z',
+          preventDefault: vi.fn(),
+          metaKey: false,
+          ctrlKey: true,
+          shiftKey: false,
+          nativeEvent: { isComposing: false, keyCode: 90 },
+        } as unknown as React.KeyboardEvent<HTMLDivElement>)
+      })
+
+      expect(onChange).toHaveBeenCalledTimes(1)
+      expect(onChange).toHaveBeenCalledWith([{ type: 'text', text: 'AB' }])
 
       document.body.removeChild(editor)
       vi.useRealTimers()

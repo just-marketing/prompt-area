@@ -1839,16 +1839,38 @@ export function usePromptArea({
   const handleCompositionEnd = useCallback(() => {
     events.handleCompositionEnd()
     handleInput()
+
+    const before = compositionBaseState.current
+    compositionBaseState.current = null
+    if (!before) {
+      // No baseline: blur already closed this session's bookkeeping and the
+      // compositionend arrived late. There is no composition undo entry to
+      // record, and the debounced group the handleInput above just opened
+      // holds the pre-composition value — cancelling it here would make the
+      // committed text un-undoable. Leave the ordinary path to record it.
+      return
+    }
+
+    // The composition owns this session's undo entry, so the debounced group
+    // handleInput opened for the commit is redundant.
     if (undoTimer.current) clearTimeout(undoTimer.current)
     undoTimer.current = null
     undoBaseState.current = null
 
-    const before = compositionBaseState.current
-    compositionBaseState.current = null
-    if (before && !segmentsEqual(before, readSegmentsFromDOM())) {
+    if (!segmentsEqual(before, readSegmentsFromDOM())) {
       events.pushUndo(before)
     }
   }, [events, handleInput, readSegmentsFromDOM])
+
+  const handleBlur = useCallback(() => {
+    // events.handleBlur resets the isComposing flag: a blurred editor cannot
+    // still be mid-composition, and the browser may never deliver the
+    // compositionend for an IME session interrupted by a focus change. Drop
+    // the composition undo baseline for the same reason — without a
+    // compositionend it must not seed a future composition's undo entry.
+    compositionBaseState.current = null
+    events.handleBlur()
+  }, [events])
 
   const eventHandlers = useMemo(
     () => ({
@@ -1859,7 +1881,7 @@ export function usePromptArea({
       onDragOver: events.handleDragOver,
       onCompositionStart: handleCompositionStart,
       onCompositionEnd: handleCompositionEnd,
-      onBlur: events.handleBlur,
+      onBlur: handleBlur,
     }),
     [
       events.handlePaste,
@@ -1869,7 +1891,7 @@ export function usePromptArea({
       events.handleDragOver,
       handleCompositionStart,
       handleCompositionEnd,
-      events.handleBlur,
+      handleBlur,
     ],
   )
 

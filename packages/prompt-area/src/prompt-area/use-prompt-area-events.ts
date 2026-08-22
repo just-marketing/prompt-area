@@ -409,6 +409,13 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
   // -----------------------------------------------------------------------
 
   const handleBlur = useCallback(() => {
+    // A blurred contentEditable cannot still be mid-composition. If focus was
+    // stolen mid-IME (click elsewhere, window switch) the browser may never
+    // deliver compositionend, and a stale flag here would swallow every later
+    // keystroke via handleKeyDown's composition guard. Reset synchronously —
+    // the dismiss below is deliberately delayed, this must not be.
+    isComposing.current = false
+
     setTimeout(() => {
       const editor = editorRef.current
       if (!editor) return
