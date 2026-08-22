@@ -359,15 +359,22 @@ export function usePromptArea({
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoBaseState = useRef<Segment[] | null>(null)
+  // Undo base for the IME session in flight: the segments as they were when
+  // the composition began. Written at compositionstart (from the DOM) and by
+  // the value-sync effect when an external value lands mid-composition; read
+  // and cleared at compositionend, where it becomes the session's single undo
+  // entry and seeds postCompositionUndo below; dropped on blur, since an
+  // interrupted composition may never get its compositionend.
   const compositionBaseState = useRef<Segment[] | null>(null)
   // After compositionend, Chromium can fire one more non-composing input
   // event carrying the committed mutation. That event belongs to the
   // composition that just ended, not to a new typing session: this ref hands
   // the composition's undo base (and whether compositionend already pushed
   // it) to handleInput so the trailing event folds into the same single undo
-  // entry instead of seeding a second one. Set at compositionend; consumed by
-  // the next non-composing handleInput; cleared on compositionstart and blur
-  // so it can never go stale across sessions.
+  // entry instead of seeding a second one. Set at compositionend and consumed
+  // by the next non-composing input; revoked by any real keydown, a new
+  // compositionstart, a blur, an external value render, or a mousedown — each
+  // means the next input cannot be the composition's trailing event.
   const postCompositionUndo = useRef<{ base: Segment[]; pushed: boolean } | null>(null)
 
   // -----------------------------------------------------------------------
@@ -673,7 +680,8 @@ export function usePromptArea({
     // the next input edits this value, not the ended composition's commit.
     postCompositionUndo.current = null
     if (events.isComposing.current) compositionBaseState.current = value
-  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange, events.isComposing])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- events.isComposing is a ref: identity-stable, and .current reads must not re-run the effect
+  }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
 
   // Re-render when markdown mode changes to apply/strip decorations
   // Also convert bullet characters: • ↔ - in text segments
@@ -1649,12 +1657,14 @@ export function usePromptArea({
 
         const pos = findDOMPosition(editor, offset)
         if (!pos) return false
-        // findDOMPosition resolves boundary offsets with a caret bias: an
-        // offset at the start of a chip (or of a <br> on an empty line) maps
-        // to the position AFTER that element. Fine for placing a caret, wrong
-        // for structural insertion — the model puts the newline BEFORE the
-        // element. Only proceed when the mapping round-trips to the exact
-        // offset; otherwise the full re-render handles it.
+        // A boundary offset in front of an atomic child (a leading chip, a
+        // <br> on an empty line) resolves BEFORE that element, which is where
+        // the model puts the newline too, so those cases insert here. An
+        // offset that falls INSIDE a chip has no such position — the chip is
+        // atomic, so findDOMPosition answers with the spot after it, which is
+        // not where the model's newline goes. Only proceed when the mapping
+        // round-trips to the exact offset; otherwise the full re-render
+        // handles it.
         if (getTextOffsetAtPoint(editor, pos.node, pos.offset) !== offset) return false
 
         const br = document.createElement('br')
@@ -1924,11 +1934,8 @@ export function usePromptArea({
   }, [events, handleInput, readSegmentsFromDOM])
 
   const handleBlur = useCallback(() => {
-    // events.handleBlur resets the isComposing flag: a blurred editor cannot
-    // still be mid-composition, and the browser may never deliver the
-    // compositionend for an IME session interrupted by a focus change. Drop
-    // the composition undo baseline for the same reason — without a
-    // compositionend it must not seed a future composition's undo entry.
+    // Blur ends any in-flight composition (events.handleBlur resets the flag);
+    // composition undo state must not survive into a future session.
     compositionBaseState.current = null
     postCompositionUndo.current = null
     events.handleBlur()

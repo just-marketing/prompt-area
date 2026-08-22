@@ -111,6 +111,8 @@ describe('PromptArea maxLength prop', () => {
     expect(getCursorOffset(editor)).toBe(3)
   })
 
+  // Only the final post-compositionend value is capped; the onChange values
+  // emitted mid-composition are not (follow-up issue pending).
   it('enforces the cap when IME composition ends', () => {
     const { editor, onChangeSpy } = renderWithCap(4)
 
