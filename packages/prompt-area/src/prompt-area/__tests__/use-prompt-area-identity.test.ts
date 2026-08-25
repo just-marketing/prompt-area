@@ -99,6 +99,12 @@ describe('usePromptArea referential stability', () => {
     act(() => {
       result.current.handleInput()
     })
+    // Each keystroke mutates the DOM before its input event fires; an input
+    // event whose content is byte-identical to the last rendered value is a
+    // duplicate (e.g. Firefox's post-composition echo) and is deduped, so a
+    // second real keystroke must actually change the text node.
+    ;(editor.firstChild as Text).data = 'hellos world'
+    placeCursor(editor.firstChild!, 6)
     act(() => {
       result.current.handleInput()
     })

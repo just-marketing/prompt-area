@@ -359,6 +359,23 @@ export function usePromptArea({
   // Debounced undo: groups consecutive keystrokes into a single undo snapshot
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoBaseState = useRef<Segment[] | null>(null)
+  // Undo base for the IME session in flight: the segments as they were when
+  // the composition began. Written at compositionstart (from the DOM) and by
+  // the value-sync effect when an external value lands mid-composition; read
+  // and cleared at compositionend, where it becomes the session's single undo
+  // entry and seeds postCompositionUndo below; dropped on blur, since an
+  // interrupted composition may never get its compositionend.
+  const compositionBaseState = useRef<Segment[] | null>(null)
+  // After compositionend, Chromium can fire one more non-composing input
+  // event carrying the committed mutation. That event belongs to the
+  // composition that just ended, not to a new typing session: this ref hands
+  // the composition's undo base (and whether compositionend already pushed
+  // it) to handleInput so the trailing event folds into the same single undo
+  // entry instead of seeding a second one. Set at compositionend and consumed
+  // by the next non-composing input; revoked by any real keydown, a new
+  // compositionstart, a blur, an external value render, or a mousedown — each
+  // means the next input cannot be the composition's trailing event.
+  const postCompositionUndo = useRef<{ base: Segment[]; pushed: boolean } | null>(null)
 
   // -----------------------------------------------------------------------
   // DOM -> Model: read segments from the contentEditable DOM
@@ -659,6 +676,11 @@ export function usePromptArea({
     }
 
     renderSegmentsToDOM(value)
+    // An authoritative external render invalidates the trailing-input handoff:
+    // the next input edits this value, not the ended composition's commit.
+    postCompositionUndo.current = null
+    if (events.isComposing.current) compositionBaseState.current = value
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- events.isComposing is a ref: identity-stable, and .current reads must not re-run the effect
   }, [value, renderSegmentsToDOM, markdownEnabled, normalizeBullets, onChange])
 
   // Re-render when markdown mode changes to apply/strip decorations
@@ -697,6 +719,26 @@ export function usePromptArea({
       lastRenderedValue.current = segments
       onChange(segments)
       return
+    }
+
+    // A just-ended composition claims this one input event (the trailing
+    // input Chromium fires after compositionend), so detach the claim here,
+    // ahead of every early return below: whichever branch ends up handling
+    // this event owes the composition its undo entry, and no later unrelated
+    // input may inherit the claim.
+    const afterComposition = postCompositionUndo.current
+    postCompositionUndo.current = null
+
+    // The branches that return early still have to settle that claim: push
+    // the base when compositionend did not already and the content really
+    // moved away from it. The base was read by readSegmentsFromDOM, which
+    // splits decoration elements into their own segments where the scanner
+    // merges them, so identical content compares equal only as plain text.
+    const settleClaimedUndo = (finalText: string) => {
+      if (!afterComposition || afterComposition.pushed) return
+      if (segmentsToPlainText(afterComposition.base) !== finalText) {
+        events.pushUndo(afterComposition.base)
+      }
     }
 
     const editor = editorRef.current
@@ -743,6 +785,8 @@ export function usePromptArea({
     if (maxLength != null && editor && plainText.length > maxLength) {
       const caret = domNormalized ? getCursorOffset(editor) : savedCursorOffset
       const truncated = truncateSegmentsToLength(segments, maxLength)
+      const truncatedText = segmentsToPlainText(truncated)
+      settleClaimedUndo(truncatedText)
       lastRenderedValue.current = truncated
       onChange(truncated)
       renderSegmentsToDOM(truncated)
@@ -750,7 +794,7 @@ export function usePromptArea({
       setCursorAtOffset(editor, clamped)
       runTriggerDetection({
         segments: truncated,
-        plainText: segmentsToPlainText(truncated),
+        plainText: truncatedText,
         cursorPos: clamped,
       })
       return
@@ -760,13 +804,15 @@ export function usePromptArea({
     if (markdownEnabled && normalizeBullets && editor && savedCursorOffset !== null) {
       const formatted = autoFormatListPrefix(segments, savedCursorOffset, plainText)
       if (formatted) {
+        const formattedText = segmentsToPlainText(formatted.segments)
+        settleClaimedUndo(formattedText)
         lastRenderedValue.current = formatted.segments
         onChange(formatted.segments)
         renderSegmentsToDOM(formatted.segments)
         setCursorAtOffset(editor, formatted.cursorOffset)
         runTriggerDetection({
           segments: formatted.segments,
-          plainText: segmentsToPlainText(formatted.segments),
+          plainText: formattedText,
           cursorPos: formatted.cursorOffset,
         })
         return
@@ -792,20 +838,30 @@ export function usePromptArea({
 
     // Debounced undo: capture the pre-edit state at the start of a typing
     // session and push it to the undo stack after UNDO_DEBOUNCE_MS of idle.
-    if (!undoBaseState.current) {
-      undoBaseState.current = lastRenderedValue.current
+    const contentChanged = !segmentsEqual(nextSegments, lastRenderedValue.current)
+
+    // The mutation a claimed event carries is part of the composition that
+    // just ended, so it must not open a new undo group seeded with the
+    // intermediate compositionend snapshot — the composition's own base is
+    // the only entry this session gets.
+    if (afterComposition) {
+      if (!afterComposition.pushed && contentChanged) {
+        events.pushUndo(afterComposition.base)
+      }
+    } else if (contentChanged) {
+      if (!undoBaseState.current) undoBaseState.current = lastRenderedValue.current
+      if (undoTimer.current) clearTimeout(undoTimer.current)
+      undoTimer.current = setTimeout(() => {
+        if (undoBaseState.current) {
+          events.pushUndo(undoBaseState.current)
+          undoBaseState.current = null
+        }
+        undoTimer.current = null
+      }, UNDO_DEBOUNCE_MS)
     }
 
     lastRenderedValue.current = nextSegments
-    onChange(nextSegments)
-    if (undoTimer.current) clearTimeout(undoTimer.current)
-    undoTimer.current = setTimeout(() => {
-      if (undoBaseState.current) {
-        events.pushUndo(undoBaseState.current)
-        undoBaseState.current = null
-      }
-      undoTimer.current = null
-    }, UNDO_DEBOUNCE_MS)
+    if (contentChanged) onChange(nextSegments)
 
     // Apply the recomputed model to the DOM. A renumber rewrites text nodes,
     // so it needs a full re-render (which also re-decorates). Otherwise the
@@ -958,6 +1014,10 @@ export function usePromptArea({
   // -----------------------------------------------------------------------
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // A click repositions the caret, so the next input is a fresh edit rather
+    // than an ended composition's trailing event.
+    postCompositionUndo.current = null
+
     const target = e.target
     const editor = editorRef.current
     if (!editor || !(target instanceof Node)) {
@@ -1342,6 +1402,21 @@ export function usePromptArea({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        events.isComposing.current ||
+        e.nativeEvent.isComposing ||
+        e.nativeEvent.keyCode === 229
+      ) {
+        return
+      }
+
+      // Any real keydown bounds a just-ended composition's claim on the next
+      // input event: Chromium's trailing input follows compositionend with no
+      // keydown possible in between, so a keydown here means the next input
+      // belongs to a new keystroke, not the ended composition. (Placed after
+      // the guard above so composition keydowns don't release the claim.)
+      postCompositionUndo.current = null
+
       const applyEditResult = (
         editor: HTMLDivElement,
         result: { segments: Segment[]; cursorOffset: number },
@@ -1420,13 +1495,7 @@ export function usePromptArea({
       // the typed key actually matching a launch char, so it stays off the hot
       // path. insertChip still inserts a chip at the cursor if the consumer
       // wants one after the external selection.
-      if (
-        !e.metaKey &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.nativeEvent.isComposing &&
-        e.key.length === 1
-      ) {
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
         const launcher = triggers.find((t) => t.mode === 'launch' && t.char === e.key)
         const editor = editorRef.current
         if (launcher?.onActivate && editor) {
@@ -1588,12 +1657,14 @@ export function usePromptArea({
 
         const pos = findDOMPosition(editor, offset)
         if (!pos) return false
-        // findDOMPosition resolves boundary offsets with a caret bias: an
-        // offset at the start of a chip (or of a <br> on an empty line) maps
-        // to the position AFTER that element. Fine for placing a caret, wrong
-        // for structural insertion — the model puts the newline BEFORE the
-        // element. Only proceed when the mapping round-trips to the exact
-        // offset; otherwise the full re-render handles it.
+        // A boundary offset in front of an atomic child (a leading chip, a
+        // <br> on an empty line) resolves BEFORE that element, which is where
+        // the model puts the newline too, so those cases insert here. An
+        // offset that falls INSIDE a chip has no such position — the chip is
+        // atomic, so findDOMPosition answers with the spot after it, which is
+        // not where the model's newline goes. Only proceed when the mapping
+        // round-trips to the exact offset; otherwise the full re-render
+        // handles it.
         if (getTextOffsetAtPoint(editor, pos.node, pos.offset) !== offset) return false
 
         const br = document.createElement('br')
@@ -1631,7 +1702,7 @@ export function usePromptArea({
       }
 
       // 2.8 Shift+Enter always inserts a newline (after a list-continuation check).
-      if (e.key === 'Enter' && e.shiftKey && !e.nativeEvent.isComposing) {
+      if (e.key === 'Enter' && e.shiftKey) {
         e.preventDefault()
         const editor = editorRef.current
         if (editor && !tryListContinuation(editor)) insertPlainNewline(editor)
@@ -1640,7 +1711,7 @@ export function usePromptArea({
 
       // 3. Enter without Shift (skipping IME): continue a list, else submit when
       // `submitOnEnter` is set, else insert a newline.
-      if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      if (e.key === 'Enter' && !e.shiftKey) {
         const editor = editorRef.current
         if (editor && tryListContinuation(editor)) {
           e.preventDefault()
@@ -1663,7 +1734,7 @@ export function usePromptArea({
       }
 
       // 4.5 Non-collapsed selection delete (Backspace/Delete across <a> boundaries)
-      if ((e.key === 'Backspace' || e.key === 'Delete') && !e.nativeEvent.isComposing) {
+      if (e.key === 'Backspace' || e.key === 'Delete') {
         const editor = editorRef.current
         if (editor) {
           const offsets = getSelectionOffsets(editor)
@@ -1816,6 +1887,60 @@ export function usePromptArea({
   // Compose event handlers
   // -----------------------------------------------------------------------
 
+  const handleCompositionStart = useCallback(() => {
+    if (undoTimer.current) {
+      clearTimeout(undoTimer.current)
+      undoTimer.current = null
+    }
+    if (undoBaseState.current) {
+      events.pushUndo(undoBaseState.current)
+      undoBaseState.current = null
+    }
+    // A new composition supersedes any unconsumed trailing-input claim from
+    // the previous one.
+    postCompositionUndo.current = null
+    compositionBaseState.current = readSegmentsFromDOM()
+    events.handleCompositionStart()
+  }, [events, readSegmentsFromDOM])
+
+  const handleCompositionEnd = useCallback(() => {
+    events.handleCompositionEnd()
+    handleInput()
+
+    const before = compositionBaseState.current
+    compositionBaseState.current = null
+    if (!before) {
+      // No baseline: blur already closed this session's bookkeeping and the
+      // compositionend arrived late. There is no composition undo entry to
+      // record, and the debounced group the handleInput above just opened
+      // holds the pre-composition value — cancelling it here would make the
+      // committed text un-undoable. Leave the ordinary path to record it.
+      return
+    }
+
+    // The composition owns this session's undo entry, so the debounced group
+    // handleInput opened for the commit is redundant.
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    undoTimer.current = null
+    undoBaseState.current = null
+
+    // Push the pre-composition state as the composition's single undo entry
+    // (skipped when the commit didn't change anything — or hasn't reached
+    // the DOM yet). Either way, hand the base to handleInput for the one
+    // trailing input event Chromium may still fire for this composition.
+    const pushed = !segmentsEqual(before, readSegmentsFromDOM())
+    if (pushed) events.pushUndo(before)
+    postCompositionUndo.current = { base: before, pushed }
+  }, [events, handleInput, readSegmentsFromDOM])
+
+  const handleBlur = useCallback(() => {
+    // Blur ends any in-flight composition (events.handleBlur resets the flag);
+    // composition undo state must not survive into a future session.
+    compositionBaseState.current = null
+    postCompositionUndo.current = null
+    events.handleBlur()
+  }, [events])
+
   const eventHandlers = useMemo(
     () => ({
       onPaste: events.handlePaste,
@@ -1823,9 +1948,9 @@ export function usePromptArea({
       onCut: events.handleCut,
       onDrop: events.handleDrop,
       onDragOver: events.handleDragOver,
-      onCompositionStart: events.handleCompositionStart,
-      onCompositionEnd: events.handleCompositionEnd,
-      onBlur: events.handleBlur,
+      onCompositionStart: handleCompositionStart,
+      onCompositionEnd: handleCompositionEnd,
+      onBlur: handleBlur,
     }),
     [
       events.handlePaste,
@@ -1833,9 +1958,9 @@ export function usePromptArea({
       events.handleCut,
       events.handleDrop,
       events.handleDragOver,
-      events.handleCompositionStart,
-      events.handleCompositionEnd,
-      events.handleBlur,
+      handleCompositionStart,
+      handleCompositionEnd,
+      handleBlur,
     ],
   )
 

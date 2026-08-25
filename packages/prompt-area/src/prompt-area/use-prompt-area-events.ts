@@ -393,7 +393,9 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
   }, [])
 
   // -----------------------------------------------------------------------
-  // IME Composition: track state, defer trigger detection
+  // IME Composition: track the composing flag. Trigger detection and undo
+  // bookkeeping for compositions live in usePromptArea's wrappers around
+  // these handlers.
   // -----------------------------------------------------------------------
 
   const handleCompositionStart = useCallback(() => {
@@ -402,15 +404,19 @@ export function usePromptAreaEvents(deps: EventHandlerDeps): PromptAreaEventHand
 
   const handleCompositionEnd = useCallback(() => {
     isComposing.current = false
-    // Run trigger detection after composition ends
-    runTriggerDetection()
-  }, [runTriggerDetection])
+  }, [])
 
   // -----------------------------------------------------------------------
   // Blur: dismiss trigger dropdown with delay (so popover clicks work)
   // -----------------------------------------------------------------------
 
   const handleBlur = useCallback(() => {
+    // A blurred contentEditable cannot still be mid-composition, and the
+    // browser may never deliver compositionend once focus is gone. Reset
+    // synchronously — the dismiss below is deliberately delayed, this must
+    // not be.
+    isComposing.current = false
+
     setTimeout(() => {
       const editor = editorRef.current
       if (!editor) return
