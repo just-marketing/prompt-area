@@ -3,6 +3,54 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.6.8
+
+### Fixed
+
+- **Enter no longer submits the prompt while an IME candidate is open.**
+  Confirming a Japanese, Chinese or Korean candidate with Enter sent the
+  prompt instead of committing the text, so the composition was lost and a
+  half-finished message went out. Key handling is now skipped for the whole
+  duration of a composition, including on legacy IMEs that report `keyCode`
+  229 without setting `isComposing`.
+- **An interrupted composition no longer disables the keyboard.** The
+  composing flag was cleared only by `compositionend`, so a composition that
+  never delivered one left the editor with no Enter, no undo/redo, no Escape
+  and no chip-aware Backspace, and no way for the user to recover short of
+  starting and finishing another composition. Blur now resets the flag: a
+  blurred editor cannot still be composing.
+- **A completed composition is a single undo step.** Committing a candidate
+  could push two entries, one at `compositionend` and another opened by the
+  input event carrying the commit, so undoing one composition took two Ctrl+Z
+  presses. Both browser orderings of `compositionend` and the trailing input
+  now fold into one entry.
+- **`maxLength` is enforced when a composition completes.** An IME commit
+  could carry the content past the cap. The committed value is now truncated
+  the way typed input is. The `onChange` calls emitted DURING a composition
+  are still uncapped, so a host forwarding them straight to a backend sees
+  over-cap content until the composition ends.
+- **The caret at the start of chip-leading content lands before the chip.**
+  Not IME specific, and it affects every caret path in the package. When the
+  editor's first child was atomic (a chip, or a `<br>` on an empty line),
+  offset 0 resolved to the position AFTER it, so `setCursorAtOffset` and
+  `setSelectionAtOffsets` both placed the caret one position too far. Typing
+  at the start of `@alice hello` produced `@aliceX hello` rather than
+  `X@alice hello`, and a caret parked at offset 0 jumped past the chip on any
+  controlled value update.
+
+### Changed
+
+- **`onChange` no longer fires for input events that leave the content
+  unchanged.** The prop is documented as "called when the content changes",
+  but every input event notified, including the duplicate echo a browser emits
+  after a composition. Hosts that counted keystrokes, drove a "user is typing"
+  indicator, or set a dirty flag from `onChange` will see fewer calls. Calls
+  emitted during a composition are unaffected and still fire on every event.
+- **Key handling is fully suspended during a composition.** Trigger dropdown
+  navigation (arrows, Tab), Escape, undo/redo and the markdown shortcuts still
+  ran mid-composition; they now wait for the commit, as Enter, Backspace and
+  Delete already did.
+
 ## 0.6.7
 
 ### Fixed
