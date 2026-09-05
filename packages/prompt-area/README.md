@@ -21,11 +21,12 @@ pnpm add prompt-area
 ```
 
 Peer dependencies: `react` and `react-dom` (most React apps already have them),
-plus `clsx` and `tailwind-merge` — the two `cn` helpers, already present in any
-shadcn/Tailwind project. If you don't have them yet:
+plus [`cn`](https://www.npmjs.com/package/cn) — shadcn's compiled class-merging
+engine, the drop-in replacement for `clsx` + `tailwind-merge`. If you don't
+have it yet:
 
 ```bash
-pnpm add clsx tailwind-merge
+pnpm add cn
 ```
 
 ## Quick start
@@ -118,12 +119,14 @@ The components are client components and carry a `'use client'` boundary, so you
 
 ## Dependencies
 
-- **Peer:** `react`, `react-dom` (>= 18), plus `clsx` and `tailwind-merge` —
-  the two `cn` helpers. These are peer (not bundled) dependencies so they
-  dedupe with the copies any shadcn/Tailwind project already ships, keeping
-  prompt-area's own footprint to **zero bundled runtime dependencies**. Both
-  are tiny and already present in shadcn projects; install them explicitly if
-  you don't have them (`pnpm add clsx tailwind-merge`).
+- **Peer:** `react`, `react-dom` (>= 18), plus [`cn`](https://www.npmjs.com/package/cn)
+  (>= 0.2) — the class-merging helper. It is a peer (not bundled) dependency so
+  it dedupes with the copy any shadcn/Tailwind project already ships, keeping
+  prompt-area's own footprint to **zero bundled runtime dependencies**. It has
+  zero dependencies of its own; install it explicitly if you don't have it
+  (`pnpm add cn`). Projects still on `clsx` + `tailwind-merge` can keep
+  them — `cn` is a drop-in replacement, and `npx shadcn@latest migrate cn`
+  switches a shadcn project over in one step.
 - **Tailwind is not a peer dependency.** The prebuilt `prompt-area/styles.css`
   is self-contained and works with **any** stack — Tailwind v4, v3, or no
   Tailwind at all. The optional `prompt-area/tailwind.css` preset uses Tailwind
@@ -134,7 +137,7 @@ No animation library and no icon library: animations use CSS (`tw-animate-css`
 utilities) and icons are inline SVGs. No editor framework (ProseMirror, Slate,
 Lexical) either.
 
-ESM-only. Requires Node 18+ / a modern bundler (Next.js, Vite, etc.).
+ESM-only. Requires Node 20+ / a modern bundler (Next.js, Vite, etc.).
 
 ## License
 
