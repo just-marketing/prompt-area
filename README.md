@@ -1,6 +1,6 @@
 # Prompt Area
 
-A production-grade `contentEditable` rich text input. Install it **two ways from the same source**: an [npm package](https://www.npmjs.com/package/prompt-area) (`npm install prompt-area`) or a [shadcn registry](https://ui.shadcn.com/docs/registry) component you copy into your repo. Dependency-light either way.
+A production-grade `contentEditable` rich text input. Install it **two ways from the same source**: an [npm package](https://www.npmjs.com/package/prompt-area) (`pnpm add prompt-area` or `npm install prompt-area`) or a [shadcn registry](https://ui.shadcn.com/docs/registry) component you copy into your repo. Dependency-light either way.
 
 **Try it live:** [run the example in your browser](https://prompt-area.com/docs/try-it-live) — a full Vite + React app, no setup ([source](examples/basic)).
 
@@ -23,7 +23,8 @@ Most rich text editors are full document editors shoehorned into chat inputs. Pr
 ### npm package
 
 ```bash
-npm install prompt-area
+pnpm add prompt-area
+# or: npm install prompt-area  ·  yarn add prompt-area  ·  bun add prompt-area
 ```
 
 ```tsx
@@ -39,7 +40,8 @@ The package ships a prebuilt, self-contained `styles.css` (no Tailwind required)
 Prefer to own the source? Copy it into your project:
 
 ```bash
-npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+pnpm dlx shadcn@latest add https://prompt-area.com/r/prompt-area.json
+# or: npx shadcn@latest add https://prompt-area.com/r/prompt-area.json
 ```
 
 ### Install with AI coding agents
