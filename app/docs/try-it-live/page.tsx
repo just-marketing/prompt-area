@@ -60,8 +60,10 @@ export default function TryItLivePage() {
         Edit <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">src/App.tsx</code> and
         the preview updates live. The first run installs dependencies, so give it a few seconds.
       </DocsP>
-      {/* clsx + tailwind-merge are peerDependencies since 0.5.0 — Sandpack does
-          not auto-install peers, so they must be listed explicitly. */}
+      {/* Sandpack does not auto-install peers, so the published package's peer
+          dependencies must be listed explicitly. PROMPT_AREA_VERSION still peers
+          on clsx + tailwind-merge; swap these for `cn` when bumping to the
+          first release that peers on the `cn` package instead. */}
       <LiveExample
         files={exampleFiles}
         dependencies={{

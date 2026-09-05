@@ -89,13 +89,15 @@ import 'prompt-area/styles.css'`}
         instead for token-level theming.
       </DocsP>
       <DocsP>
-        The package bundles zero runtime dependencies:{' '}
-        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">clsx</code> and{' '}
-        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">tailwind-merge</code> are
-        peer dependencies so they dedupe with the copies most projects already have. npm, pnpm and
-        bun install them automatically; with yarn (or if your setup skips peers), add them yourself:{' '}
+        The package bundles zero runtime dependencies: the class-merging helper{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">cn</code> (shadcn&apos;s
+        drop-in replacement for{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">clsx</code> +{' '}
+        <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">tailwind-merge</code>) is a
+        peer dependency so it dedupes with the copy most projects already have. npm, pnpm and bun
+        install it automatically; with yarn (or if your setup skips peers), add it yourself:{' '}
         <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
-          yarn add prompt-area clsx tailwind-merge
+          yarn add prompt-area cn
         </code>
         .
       </DocsP>

@@ -3,6 +3,23 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.0
+
+### Changed
+
+- **BREAKING: the `cn` package replaces `clsx` + `tailwind-merge` as the
+  peer dependency.** The class-merging helper is now re-exported from
+  [`cn`](https://www.npmjs.com/package/cn), shadcn's compiled, zero-dependency
+  engine with the same API and full parity with `clsx` + `tailwind-merge`.
+  prompt-area still bundles zero runtime dependencies; `cn` is a peer so it
+  dedupes with the copy your project already ships. npm, pnpm and bun install
+  it automatically; on yarn, or in setups that skip peers, run `pnpm add cn`.
+  `clsx` and `tailwind-merge` are no longer required by prompt-area — keep
+  them only if something else in your project still imports them
+  (`npx shadcn@latest migrate cn` switches a shadcn project over).
+- **BREAKING: Node 20+ is now required**, matching the `cn` package's engine
+  range. Node 18 reached end of life in April 2025.
+
 ## 0.6.8
 
 ### Fixed
