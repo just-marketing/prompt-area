@@ -89,7 +89,7 @@
     "@tailwindcss/cli": "^4.3.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "^19.2.4",
-    "cn": "^0.2.5",
+    "cn": "^0.2.6",
     "publint": "^0.3.24",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
