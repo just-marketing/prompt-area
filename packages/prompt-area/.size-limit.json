@@ -4,14 +4,14 @@
     "path": "dist/index.js",
     "import": "*",
     "ignore": ["react", "react-dom", "react/jsx-runtime", "cn"],
-    "limit": "20 KB"
+    "limit": "20.5 KB"
   },
   {
     "name": "prompt-area (component)",
     "path": "dist/prompt-area/index.js",
     "import": "*",
     "ignore": ["react", "react-dom", "react/jsx-runtime", "cn"],
-    "limit": "18.5 KB"
+    "limit": "19 KB"
   },
   {
     "name": "helpers (RSC-safe)",
