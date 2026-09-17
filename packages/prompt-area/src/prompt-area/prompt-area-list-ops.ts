@@ -356,6 +356,15 @@ export function normalizeListPrefixes(segments: Segment[], markdownEnabled: bool
 export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
 
 /**
+ * The cheapest possible proof that a numbered line might exist anywhere in the
+ * text. Deliberately mirrors `parseListLine`'s `^(\s*)(\d+)\. ` so it can
+ * never rule out a line the parser would accept; a looser match than the
+ * parser's only costs the full scan that would have run anyway. Not
+ * sticky/global, so it carries no `lastIndex` state between calls.
+ */
+const ORDERED_LINE_GATE = /^\s*\d+\. /m
+
+/**
  * Whether the text holds a genuine ordered-list run worth renumbering — a run
  * of 2+ consecutive same-level numbered lines that either starts at 1 or is
  * already a contiguous `n, n+1, …` sequence. Used to gate the paste path so a
@@ -365,6 +374,12 @@ export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
  * left untouched.
  */
 export function hasOrderedListRun(text: string): boolean {
+  // Cheap pre-gate, mirroring renumberOrderedListLines': this runs on every
+  // keystroke to decide whether renumbering is even possible, and without it
+  // a long prompt pays a full split-and-parse of every line per character.
+  // A run needs at least one `n. ` line, so no match means no run.
+  if (!ORDERED_LINE_GATE.test(text)) return false
+
   let runLevel: number | null = null
   let runStart = 0
   let prevNumber = 0

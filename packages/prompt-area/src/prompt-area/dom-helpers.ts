@@ -21,23 +21,35 @@ export function isHTMLElement(node: Node): node is HTMLElement {
 /**
  * Type guard: checks if a DOM node is a chip element
  * (an HTMLElement with data-chip-trigger attribute).
+ *
+ * `nodeType` + `hasAttribute` rather than `instanceof` + `dataset`: these
+ * guards run once per direct child on every keystroke, and reading `dataset`
+ * materializes a `DOMStringMap` wrapper per call — measurably the single most
+ * expensive step of the typing scan on a long prompt. `hasAttribute` matches
+ * `dataset.chipTrigger !== undefined` exactly, including `data-chip-trigger=""`.
  */
 export function isChipElement(node: Node): node is HTMLElement {
-  return node instanceof HTMLElement && node.dataset.chipTrigger !== undefined
+  return node.nodeType === Node.ELEMENT_NODE && (node as Element).hasAttribute('data-chip-trigger')
 }
 
 /**
  * Type guard: checks if a DOM node is a BR element.
+ *
+ * `tagName` is uppercase for HTML elements only, so this cannot match a
+ * same-named element in a foreign (SVG/MathML) namespace.
  */
 export function isBRElement(node: Node): node is HTMLBRElement {
-  return node instanceof HTMLBRElement
+  return node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === 'BR'
 }
 
 /**
  * Type guard: checks if a DOM node is a Text node.
+ *
+ * `nodeType` is also more robust than `instanceof Text`, which is false for a
+ * node adopted from another realm (an iframe or a parsed document).
  */
 export function isTextNode(node: Node): node is Text {
-  return node instanceof Text
+  return node.nodeType === Node.TEXT_NODE
 }
 
 /**
@@ -53,7 +65,11 @@ export function getChipAutoResolved(node: Node): boolean {
  * (an HTMLAnchorElement with data-url attribute).
  */
 export function isLinkElement(node: Node): node is HTMLAnchorElement {
-  return node instanceof HTMLAnchorElement && node.dataset.url === 'true'
+  return (
+    node.nodeType === Node.ELEMENT_NODE &&
+    (node as Element).tagName === 'A' &&
+    (node as Element).getAttribute('data-url') === 'true'
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -134,8 +150,8 @@ export function getChipData(node: Node): unknown {
  * `textContent` for resilience against externally-mutated nodes.
  */
 export function chipNodeTextLength(node: HTMLElement): number {
-  const trigger = node.dataset.chipTrigger ?? ''
-  const display = node.dataset.chipDisplay ?? node.textContent ?? ''
+  const trigger = node.getAttribute('data-chip-trigger') ?? ''
+  const display = node.getAttribute('data-chip-display') ?? node.textContent ?? ''
   return trigger.length + display.length
 }
 
@@ -347,21 +363,23 @@ function forEachChildInBounds(
  * node outside the bounds untouched. Only safe when the surrounding DOM holds
  * no foreign elements (the caller establishes that via scanEditorDOM).
  */
-export function stripDecorationsInRange(editor: HTMLElement, bounds: DecorateBounds): void {
+export function stripDecorationsInRange(editor: HTMLElement, bounds: DecorateBounds): boolean {
   const stop = bounds.before
+  let changed = false
 
   let node: Node | null = bounds.after ? bounds.after.nextSibling : editor.firstChild
   while (node && node !== stop) {
     const next: Node | null = node.nextSibling
     // Chips carry data-chip-trigger and are never decorations — leave them.
-    if (isHTMLElement(node) && node.dataset.chipTrigger === undefined) {
-      if ((node.tagName === 'SPAN' && node.dataset.md !== undefined) || isLinkElement(node)) {
+    if (isHTMLElement(node) && !node.hasAttribute('data-chip-trigger')) {
+      if ((node.tagName === 'SPAN' && node.hasAttribute('data-md')) || isLinkElement(node)) {
         const text = node.textContent ?? ''
         if (text) {
           editor.replaceChild(document.createTextNode(text), node)
         } else {
           editor.removeChild(node)
         }
+        changed = true
       }
     }
     node = next
@@ -372,22 +390,26 @@ export function stripDecorationsInRange(editor: HTMLElement, bounds: DecorateBou
   node = bounds.after ? bounds.after.nextSibling : editor.firstChild
   while (node && node !== stop) {
     if (isTextNode(node)) {
-      if ((node.textContent ?? '') === '') {
+      if (node.length === 0) {
         const next: Node | null = node.nextSibling
         editor.removeChild(node)
         node = next
+        changed = true
         continue
       }
       let sibling: Node | null = node.nextSibling
       while (sibling && sibling !== stop && isTextNode(sibling)) {
-        node.textContent = (node.textContent ?? '') + (sibling.textContent ?? '')
+        node.appendData(sibling.data)
         const nextSibling: Node | null = sibling.nextSibling
         editor.removeChild(sibling)
         sibling = nextSibling
+        changed = true
       }
     }
     node = node.nextSibling
   }
+
+  return changed
 }
 
 // ---------------------------------------------------------------------------
@@ -881,18 +903,19 @@ export function decorateEditor(
   markdownEnabled: boolean,
   headingsEnabled = false,
   bounds?: DecorateBounds,
-): void {
+): boolean {
   // Whole-line passes run FIRST, while each direct-child text node is still a
   // full line. The URL and markdown passes split text nodes mid-line, so a tail
   // fragment beginning with "•" would let the bullet regex's `^` anchor
   // false-match a mid-line separator (e.g. `**bold** • middle`).
+  let changed = false
   if (markdownEnabled) {
-    if (headingsEnabled) decorateHeadingsInEditor(editor, bounds)
-    decorateListIndentInEditor(editor, bounds)
-    decorateBulletsInEditor(editor, bounds)
+    if (headingsEnabled) changed = decorateHeadingsInEditor(editor, bounds) || changed
+    changed = decorateListIndentInEditor(editor, bounds) || changed
+    changed = decorateBulletsInEditor(editor, bounds) || changed
   }
-  decorateURLsInEditor(editor, bounds)
-  if (markdownEnabled) decorateMarkdownInEditor(editor, bounds)
+  changed = decorateURLsInEditor(editor, bounds) || changed
+  if (markdownEnabled) changed = decorateMarkdownInEditor(editor, bounds) || changed
 
   // Inline emphasis *inside* a heading. The heading pass consumed the line's
   // text node into its own span, so the editor-level pass above can't reach it
@@ -904,17 +927,19 @@ export function decorateEditor(
       forEachChildInBounds(editor, bounds, (node) => {
         if (isHTMLElement(node) && node.dataset.mdHeading !== undefined) {
           const body = node.querySelector('.prompt-area-md-heading-text')
-          if (body && isHTMLElement(body)) decorateMarkdownInEditor(body)
+          if (body && isHTMLElement(body)) changed = decorateMarkdownInEditor(body) || changed
         }
       })
     } else {
       const headingTexts = editor.querySelectorAll('.prompt-area-md-heading-text')
       for (let i = 0; i < headingTexts.length; i++) {
         const body = headingTexts[i]
-        if (isHTMLElement(body)) decorateMarkdownInEditor(body)
+        if (isHTMLElement(body)) changed = decorateMarkdownInEditor(body) || changed
       }
     }
   }
+
+  return changed
 }
 
 // ---------------------------------------------------------------------------

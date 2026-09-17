@@ -171,6 +171,19 @@ describe('hasOrderedListRun — paste renumber gate', () => {
     expect(hasOrderedListRun('hello\nworld')).toBe(false)
   })
 
+  // The cheap pre-gate that keeps this off the typing hot path must never be
+  // narrower than parseListLine, whose indent class is `\s*`.
+  it('still sees runs indented with whitespace outside the space/tab class', () => {
+    expect(hasOrderedListRun('\u00a01. a\n\u00a02. b')).toBe(true)
+    expect(hasOrderedListRun('\t1. a\n\t2. b')).toBe(true)
+    expect(hasOrderedListRun('  1. a\n  2. b')).toBe(true)
+  })
+
+  it('short-circuits text with no numbered line at all', () => {
+    expect(hasOrderedListRun('- a\n- b\n\u2022 c')).toBe(false)
+    expect(hasOrderedListRun('1.no space\n2.still none')).toBe(false)
+  })
+
   it('a plain line between numbers breaks the run', () => {
     expect(hasOrderedListRun('3. a\nplain\n4. b')).toBe(false)
   })

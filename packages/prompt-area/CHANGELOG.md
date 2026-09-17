@@ -3,6 +3,41 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- **Editing a long prompt no longer slows down as the prompt grows.** Every
+  keystroke walked the whole editor three times — once to read the segment
+  model, once to measure the caret, and once more to put the caret back — so
+  per-keystroke cost rose with the document and typing started to drag well
+  before the prompt got unusual. The three walks are now one: the model scan
+  resolves the caret offset in the same pass, and the caret is only re-placed
+  when the decoration cycle actually moved the nodes it was anchored in (on a
+  plain keystroke it leaves the caret exactly where the browser put it). The
+  per-node checks on that pass also stopped reading `dataset` and
+  `textContent`, which allocate, in favour of `hasAttribute` and
+  `CharacterData.length`, which do not.
+
+  Measured in Chromium on a production build, median handler time per key
+  with the caret mid-document:
+
+  | prompt size | typing       | Enter        | Backspace    |
+  | ----------- | ------------ | ------------ | ------------ |
+  | 5k chars    | 0.8 → 0.4 ms | 0.2 → 0.3 ms | 0.6 → 0.4 ms |
+  | 50k chars   | 2.5 → 0.7 ms | 1.0 → 0.8 ms | 2.0 → 0.8 ms |
+  | 200k chars  | 6.9 → 2.0 ms | 3.6 → 2.7 ms | 6.5 → 2.0 ms |
+
+  Caret navigation (arrows, Home/End) was already off this path and is
+  unchanged at ~0.1 ms. The remaining tail is not ours: a keystroke that
+  merges two lines forces the engine to re-lay-out the whole contenteditable
+  block, which costs ~12 ms at 200k characters both before and after this
+  change.
+
+- `hasOrderedListRun` now short-circuits on a cheap regex before splitting and
+  parsing every line, so prompts with no numbered list stop paying for the
+  renumber gate on every keystroke.
+
 ## 0.7.0
 
 ### Changed
