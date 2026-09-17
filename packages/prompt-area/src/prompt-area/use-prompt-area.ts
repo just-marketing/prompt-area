@@ -34,6 +34,7 @@ import {
   renumberOrderedListSegments,
   remapOffset,
   hasOrderedListRun,
+  isPlainLineEdit,
 } from './prompt-area-list-ops'
 import {
   isHTMLElement,
@@ -401,6 +402,13 @@ export function usePromptArea({
   // Guard against circular DOM <-> model syncs
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
+
+  // The last model handleInput's ordered-list check settled (renumbered, or
+  // proven run-free), with its plain text. Keyed on the segments reference:
+  // any other path that writes lastRenderedValue (external value, paste,
+  // Enter/Tab, truncation) leaves a different array behind, which invalidates
+  // this without every such path having to know about it.
+  const settledListRun = useRef<{ segments: Segment[]; plainText: string } | null>(null)
 
   // IME-composed input skips the decoration cycle entirely (mutating the DOM
   // mid-composition breaks the composition), so the composed line is stale
@@ -888,12 +896,23 @@ export function usePromptArea({
     let nextSegments = segments
     let nextPlainText = plainText
     let renumberedCursor: number | null = null
-    if (markdownEnabled && savedCursorOffset !== null && hasOrderedListRun(plainText)) {
-      const renumbered = renumberOrderedListSegments(segments, plainText)
-      if (renumbered.edits.length > 0) {
-        nextSegments = renumbered.segments
-        nextPlainText = segmentsToPlainText(renumbered.segments)
-        renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
+    if (markdownEnabled && savedCursorOffset !== null) {
+      // A keystroke on a plain line of an already-settled model cannot have
+      // changed the list structure, so the per-line scan of the whole
+      // document is skipped: a settled model with no run stays run-free, and
+      // a settled model with a run is already numbered.
+      const settled = settledListRun.current
+      const structureUnchanged =
+        settled !== null &&
+        settled.segments === lastRenderedValue.current &&
+        isPlainLineEdit(settled.plainText, plainText, savedCursorOffset)
+      if (!structureUnchanged && hasOrderedListRun(plainText)) {
+        const renumbered = renumberOrderedListSegments(segments, plainText)
+        if (renumbered.edits.length > 0) {
+          nextSegments = renumbered.segments
+          nextPlainText = segmentsToPlainText(renumbered.segments)
+          renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
+        }
       }
     }
 
@@ -922,6 +941,10 @@ export function usePromptArea({
     }
 
     lastRenderedValue.current = nextSegments
+    settledListRun.current =
+      markdownEnabled && savedCursorOffset !== null
+        ? { segments: nextSegments, plainText: nextPlainText }
+        : null
     if (contentChanged) onChange(nextSegments)
 
     // Apply the recomputed model to the DOM. A renumber rewrites text nodes,

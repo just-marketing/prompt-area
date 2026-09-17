@@ -5,6 +5,7 @@ import {
   renumberOrderedListSegments,
   remapOffset,
   hasOrderedListRun,
+  isPlainLineEdit,
   indentListItem,
   outdentListItem,
   insertListContinuation,
@@ -254,5 +255,56 @@ describe('getListContext (unchanged behavior after classifier refactor)', () => 
     expect(ctx?.listType).toBe('bullet')
     expect(ctx?.indent).toBe(1)
     expect(ctx?.marker).toBe('•')
+  })
+})
+
+describe('isPlainLineEdit — typing hot-path list gate', () => {
+  const doc = '1. a\n2. b\n\nsome prose here\nmore prose'
+
+  it('true when a keystroke lands inside a prose line', () => {
+    const next = '1. a\n2. b\n\nsome prosex here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n2. b\n\nsome prosex'.length)).toBe(true)
+  })
+
+  it('true for a Backspace that merged two prose lines', () => {
+    const next = '1. a\n2. b\n\nsome prose heremore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n2. b\n\nsome prose here'.length)).toBe(true)
+  })
+
+  it('true at the very start and very end of the text', () => {
+    expect(isPlainLineEdit('abc', 'xabc', 0)).toBe(true)
+    expect(isPlainLineEdit('abc', 'abcx', 4)).toBe(true)
+    expect(isPlainLineEdit('', 'x', 1)).toBe(true)
+  })
+
+  it('false when the caret line is a numbered item', () => {
+    const next = '1. a\n2. bx\n\nsome prose here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n2. bx'.length)).toBe(false)
+  })
+
+  it('false when the caret line was a list item before the edit', () => {
+    // The marker was just deleted: the line reads as prose now, but the run
+    // it belonged to has changed shape.
+    const next = '1. a\nb\n\nsome prose here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n'.length)).toBe(false)
+  })
+
+  it('false when a merge pulled a list line into the caret line', () => {
+    const next = '1. a2. b\n\nsome prose here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a'.length)).toBe(false)
+  })
+
+  it('false when the caret line became a bullet', () => {
+    const next = '1. a\n2. b\n\n- some prose here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n2. b\n\n- '.length)).toBe(false)
+  })
+
+  it('false when text changed outside the caret line', () => {
+    const next = '1. a\n3. b\n\nsome prosex here\nmore prose'
+    expect(isPlainLineEdit(doc, next, '1. a\n3. b\n\nsome prosex'.length)).toBe(false)
+  })
+
+  it('false when the previous text is shorter than the unchanged prefix and suffix', () => {
+    expect(isPlainLineEdit('ab', 'abc\nd', 3)).toBe(false)
   })
 })

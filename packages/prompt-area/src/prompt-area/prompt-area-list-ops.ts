@@ -410,6 +410,37 @@ export function hasOrderedListRun(text: string): boolean {
 }
 
 /**
+ * Whether `next` differs from `prev` only inside the line holding `cursorPos`,
+ * and that region is a plain (non-list) line in both versions. Plain lines
+ * break every list run in both {@link hasOrderedListRun} and
+ * {@link renumberOrderedListLines}, so an edit confined to one cannot change
+ * the list structure: if `prev` needed no renumbering, neither does `next`.
+ *
+ * Conservative by construction. Any change outside the caret line (undo,
+ * drag and drop, a split or merge that moved list content) fails the
+ * prefix/suffix check and reports false, and the caller runs the full scan.
+ * The prefix/suffix compare is a native memcmp, unlike the per-line regex
+ * scan it replaces on the typing hot path.
+ */
+export function isPlainLineEdit(prev: string, next: string, cursorPos: number): boolean {
+  const lineStart = cursorPos === 0 ? 0 : next.lastIndexOf('\n', cursorPos - 1) + 1
+  const newlineAfter = next.indexOf('\n', cursorPos)
+  const lineEnd = newlineAfter === -1 ? next.length : newlineAfter
+  const suffixLength = next.length - lineEnd
+  if (prev.length < lineStart + suffixLength) return false
+  if (!prev.startsWith(next.slice(0, lineStart))) return false
+  if (!prev.endsWith(next.slice(lineEnd))) return false
+
+  if (parseListLine(next.slice(lineStart, lineEnd))) return false
+  // The same region in `prev` may span several lines (a Backspace merged
+  // them); every one must have been plain too.
+  for (const line of prev.slice(lineStart, prev.length - suffixLength).split('\n')) {
+    if (parseListLine(line)) return false
+  }
+  return true
+}
+
+/**
  * Recomputes ordered-list numbering across the whole text. Returns the new text
  * plus the list of changed digit runs (ascending by `oldStart`) for cursor
  * remapping. When nothing changes, returns the SAME text reference and an empty
