@@ -56,6 +56,7 @@ const SEARCH_MODELS: ModelRow[] = [
   { id: 'sonar-2', name: 'Sonar 2', icon: Radar },
   { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', icon: Atom },
   { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom, badge: 'Max' },
+  { id: 'gpt-6-astra', name: 'GPT-6 Astra', icon: Atom, badge: 'Max' },
   { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', icon: Sparkles },
   { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
   { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk, badge: 'Max' },
@@ -64,6 +65,7 @@ const SEARCH_MODELS: ModelRow[] = [
 
 // The shorter Computer-mode list, surfaced under the "Orchestrator" picker.
 const COMPUTER_MODELS: ModelRow[] = [
+  { id: 'gpt-6-astra', name: 'GPT-6 Astra', icon: Atom },
   { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom },
   { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk },
   { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
@@ -517,12 +519,14 @@ const SEARCH_MODELS: ModelRow[] = [
   { id: 'sonar-2', name: 'Sonar 2', icon: Radar },
   { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', icon: Atom },
   { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom, badge: 'Max' },
+  { id: 'gpt-6-astra', name: 'GPT-6 Astra', icon: Atom, badge: 'Max' },
   { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', icon: Sparkles },
   { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },
   { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk, badge: 'Max' },
   { id: 'nemotron-3-ultra', name: 'Nemotron 3 Ultra', icon: Hexagon, badge: 'New' },
 ]
 const COMPUTER_MODELS: ModelRow[] = [
+  { id: 'gpt-6-astra', name: 'GPT-6 Astra', icon: Atom },
   { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', icon: Atom },
   { id: 'claude-opus-5', name: 'Claude Opus 5', icon: Asterisk },
   { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', icon: Asterisk },

@@ -93,6 +93,7 @@ const DEMO_FILES: PromptAreaFile[] = [
 
 const MODELS = [
   { id: 'opus', label: 'Opus 5', icon: '/claude-icon.svg', invertInDark: false },
+  { id: 'astra', label: 'GPT-6 Astra', icon: '/openai-icon.svg', invertInDark: true },
   { id: 'gpt', label: 'GPT-5.6 Sol', icon: '/openai-icon.svg', invertInDark: true },
 ] as const
 
