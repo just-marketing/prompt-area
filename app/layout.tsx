@@ -52,8 +52,8 @@ export const metadata: Metadata = {
     'react textarea tags',
     'prompt area',
   ],
-  authors: [{ name: 'Juma.ai', url: 'https://github.com/just-marketing' }],
-  creator: 'Juma.ai',
+  authors: [{ name: 'Juma Labs', url: 'https://github.com/just-marketing' }],
+  creator: 'Juma Labs',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -150,8 +150,8 @@ export default function RootLayout({
                   ],
                   author: {
                     '@type': 'Organization',
-                    name: 'Juma.ai',
-                    url: 'https://juma.ai',
+                    name: 'Juma Labs',
+                    url: 'https://jumalabs.ai',
                     sameAs: ['https://github.com/just-marketing'],
                   },
                   offers: {
@@ -162,8 +162,8 @@ export default function RootLayout({
                 },
                 {
                   '@type': 'Organization',
-                  name: 'Juma.ai',
-                  url: 'https://juma.ai',
+                  name: 'Juma Labs',
+                  url: 'https://jumalabs.ai',
                   sameAs: ['https://github.com/just-marketing'],
                   description:
                     'An AI workspace for marketing teams. Formerly known as Team-GPT. Creators of the Prompt Area open-source component.',

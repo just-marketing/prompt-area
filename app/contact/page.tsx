@@ -47,7 +47,7 @@ export default function ContactPage() {
         <p className="text-muted-foreground">
           For partnerships, enterprise support, or other business inquiries, reach out through{' '}
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4">

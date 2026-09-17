@@ -58,11 +58,11 @@ export default function PartnersPage() {
         <p className="text-muted-foreground">
           For partnership inquiries, reach out through{' '}
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4">
-            juma.ai
+            jumalabs.ai
           </a>{' '}
           or open a discussion on{' '}
           <a
