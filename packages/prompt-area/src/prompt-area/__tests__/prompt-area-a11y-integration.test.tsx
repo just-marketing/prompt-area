@@ -1,11 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { createRef } from 'react'
 import { PromptArea } from '../prompt-area'
 import type { PromptAreaHandle, Segment, PromptAreaImage, PromptAreaFile } from '../types'
-
-expect.extend(toHaveNoViolations)
 
 // ---------------------------------------------------------------------------
 // 1. Accessibility audits
