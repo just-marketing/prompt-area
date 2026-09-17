@@ -34,6 +34,7 @@ import {
   renumberOrderedListSegments,
   remapOffset,
   hasOrderedListRun,
+  isPlainLineEdit,
 } from './prompt-area-list-ops'
 import {
   isHTMLElement,
@@ -41,6 +42,7 @@ import {
   isLinkElement,
   isBRElement,
   isTextNode,
+  chipNodeTextLength,
   chipNodeToSegment,
   getChipAutoResolved,
   getDirectChildContaining,
@@ -62,6 +64,7 @@ import {
   caretLineRect,
   findDOMPosition,
   getTextOffsetAtPoint,
+  nodeTextContribution,
 } from './cursor-helpers'
 import { usePromptAreaEvents } from './use-prompt-area-events'
 import { useTriggerSearch } from './use-trigger-search'
@@ -142,6 +145,31 @@ export type EditorScan = {
    * line scoping cannot be trusted.
    */
   sawNewlineInText: boolean
+  /**
+   * Plain-text offset of the caret, when a `selection` was handed to the scan
+   * and it resolves inside the editor — otherwise null. Identical to what
+   * `getCursorOffset(editor)` returns for the same DOM and selection; folding
+   * it into this pass is what keeps a keystroke from walking the document
+   * twice.
+   */
+  cursorOffset: number | null
+}
+
+/** A DOM boundary point for {@link scanEditorDOM} to resolve into an offset. */
+export type ScanSelection = { node: Node; offset: number }
+
+/**
+ * Offset of `point` from the start of the editor direct child `child` that
+ * holds it, under getTextOffsetAtPoint's rules: a chip is atomic (a boundary
+ * anywhere inside counts the whole chip), and a non-HTML subtree (svg,
+ * MathML) maps to its own start because the root walk never descends into it.
+ */
+function caretOffsetWithinChild(child: Node, point: ScanSelection): number {
+  if (isChipElement(child)) return chipNodeTextLength(child)
+  if (isTextNode(child) || isHTMLElement(child)) {
+    return getTextOffsetAtPoint(child, point.node, point.offset) ?? 0
+  }
+  return 0
 }
 
 /**
@@ -156,7 +184,7 @@ export type EditorScan = {
  * `editor.normalize()` merges the results. Chips and `<br>`s break runs the
  * same way real elements break `editor.normalize()`'s merging.
  */
-export function scanEditorDOM(editor: HTMLElement): EditorScan {
+export function scanEditorDOM(editor: HTMLElement, selection?: ScanSelection | null): EditorScan {
   const segments: Segment[] = []
   let plainText = ''
   let buffer = ''
@@ -164,6 +192,25 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
   let hasSentinel = false
   let sawForeignElement = false
   let sawNewlineInText = false
+
+  // Caret resolution, folded into the same walk. `consumed` is the offset
+  // length of everything already passed, counted by nodeTextContribution's
+  // rules (which getTextOffsetAtPoint uses for the prefix) rather than by
+  // plainText's — the two differ only on a malformed chip, and matching the
+  // offset rules is what keeps this identical to getCursorOffset.
+  let cursorOffset: number | null = null
+  let consumed = 0
+  // The direct child holding the caret, or — when the selection is anchored on
+  // the editor itself — the child index the caret sits before.
+  let caretDirect: Node | null = null
+  let caretChildIndex = -1
+  if (selection && editor.contains(selection.node)) {
+    if (selection.node === editor) {
+      caretChildIndex = Math.min(selection.offset, editor.childNodes.length)
+    } else {
+      caretDirect = getDirectChildContaining(editor, selection.node)
+    }
+  }
 
   const flushBuffer = (): void => {
     if (!buffer) return
@@ -173,12 +220,18 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
     buffer = ''
   }
 
-  const children = editor.childNodes
-  for (let i = 0; i < children.length; i++) {
-    const node = children[i]
+  let childIndex = 0
+  for (let node = editor.firstChild; node !== null; node = node.nextSibling, childIndex++) {
+    if (childIndex === caretChildIndex) cursorOffset = consumed
+    if (selection && node === caretDirect) {
+      cursorOffset = consumed + caretOffsetWithinChild(node, selection)
+    }
+    // One counting rule for the caret prefix, shared with getCursorOffset's
+    // walk, so the two can never drift apart per node type.
+    consumed += nodeTextContribution(node)
 
     if (isTextNode(node)) {
-      const text = node.textContent ?? ''
+      const text = node.data
       if (text) {
         if (text.includes('\n')) sawNewlineInText = true
         buffer += text
@@ -196,7 +249,7 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
       }
     } else if (isBRElement(node)) {
       flushBuffer()
-      if (node.dataset.sentinel) {
+      if (node.getAttribute('data-sentinel')) {
         hasSentinel = true
       } else {
         segments.push({ type: 'text', text: '\n' })
@@ -204,7 +257,7 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
       }
     } else if (
       isHTMLElement(node) &&
-      ((node.tagName === 'SPAN' && node.dataset.md !== undefined) || isLinkElement(node))
+      ((node.tagName === 'SPAN' && node.hasAttribute('data-md')) || isLinkElement(node))
     ) {
       const text = node.textContent ?? ''
       if (text) {
@@ -215,16 +268,17 @@ export function scanEditorDOM(editor: HTMLElement): EditorScan {
       sawForeignElement = true
     }
   }
+  if (childIndex === caretChildIndex) cursorOffset = consumed
   flushBuffer()
 
   // Same emptiness rule as readSegmentsFromDOM: without real content or our
   // sentinel, any <br>s present are the browser's filler for an emptied
   // editor and must not read back as newline content.
   if (!hasRealContent && !hasSentinel) {
-    return { segments: [], plainText: '', sawForeignElement, sawNewlineInText }
+    return { segments: [], plainText: '', sawForeignElement, sawNewlineInText, cursorOffset }
   }
 
-  return { segments, plainText, sawForeignElement, sawNewlineInText }
+  return { segments, plainText, sawForeignElement, sawNewlineInText, cursorOffset }
 }
 
 /**
@@ -348,6 +402,13 @@ export function usePromptArea({
   // Guard against circular DOM <-> model syncs
   const isSyncing = useRef(false)
   const lastRenderedValue = useRef<Segment[]>([])
+
+  // The last model handleInput's ordered-list check settled (renumbered, or
+  // proven run-free), with its plain text. Keyed on the segments reference:
+  // any other path that writes lastRenderedValue (external value, paste,
+  // Enter/Tab, truncation) leaves a different array behind, which invalidates
+  // this without every such path having to know about it.
+  const settledListRun = useRef<{ segments: Segment[]; plainText: string } | null>(null)
 
   // IME-composed input skips the decoration cycle entirely (mutating the DOM
   // mid-composition breaks the composition), so the composed line is stale
@@ -743,25 +804,33 @@ export function usePromptArea({
 
     const editor = editorRef.current
 
-    // Capture cursor offset BEFORE any DOM mutation below — stripping the
-    // decoration elements detaches the selection's anchor node and would
-    // lose the position.
-    const savedCursorOffset = editor ? getCursorOffset(editor) : null
+    // One snapshot of the selection, read BEFORE any DOM mutation below —
+    // stripping the decoration elements detaches the selection's anchor node
+    // and would lose the position. The scan resolves it into an offset and the
+    // scoped-decoration branch reuses the same boundary point, so a keystroke
+    // reads the selection once.
+    const selRange = editor ? getSelectionRange() : null
 
-    // One scan produces the segment model and the plain text every branch
-    // below needs. Only when the browser inserted an element the scan cannot
-    // model (a block wrapper, an unknown inline tag) does the legacy
-    // normalize-then-read path run — it rewrites the DOM to the flat shape
-    // first, because unwrapping those elements changes the plain text.
+    // One scan produces the segment model, the plain text, and the caret
+    // offset every branch below needs. Only when the browser inserted an
+    // element the scan cannot model (a block wrapper, an unknown inline tag)
+    // does the legacy normalize-then-read path run — it rewrites the DOM to
+    // the flat shape first, because unwrapping those elements changes the
+    // plain text.
     let segments: Segment[] = []
     let plainText = ''
+    let savedCursorOffset: number | null = null
     let domNormalized = false
     // Line scoping is only trustworthy when the DOM holds nothing but our own
     // flat shapes and every newline is a real <br> (a literal "\n" inside a
     // text node would put line content out of the caret line's node range).
     let scopedEligible = false
     if (editor) {
-      const scan = scanEditorDOM(editor)
+      const scan = scanEditorDOM(
+        editor,
+        selRange ? { node: selRange.startContainer, offset: selRange.startOffset } : null,
+      )
+      savedCursorOffset = scan.cursorOffset
       if (scan.sawForeignElement) {
         normalizeEditorDOM(editor)
         domNormalized = true
@@ -827,12 +896,23 @@ export function usePromptArea({
     let nextSegments = segments
     let nextPlainText = plainText
     let renumberedCursor: number | null = null
-    if (markdownEnabled && savedCursorOffset !== null && hasOrderedListRun(plainText)) {
-      const renumbered = renumberOrderedListSegments(segments, plainText)
-      if (renumbered.edits.length > 0) {
-        nextSegments = renumbered.segments
-        nextPlainText = segmentsToPlainText(renumbered.segments)
-        renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
+    if (markdownEnabled && savedCursorOffset !== null) {
+      // A keystroke on a plain line of an already-settled model cannot have
+      // changed the list structure, so the per-line scan of the whole
+      // document is skipped: a settled model with no run stays run-free, and
+      // a settled model with a run is already numbered.
+      const settled = settledListRun.current
+      const structureUnchanged =
+        settled !== null &&
+        settled.segments === lastRenderedValue.current &&
+        isPlainLineEdit(settled.plainText, plainText, savedCursorOffset)
+      if (!structureUnchanged && hasOrderedListRun(plainText)) {
+        const renumbered = renumberOrderedListSegments(segments, plainText)
+        if (renumbered.edits.length > 0) {
+          nextSegments = renumbered.segments
+          nextPlainText = segmentsToPlainText(renumbered.segments)
+          renumberedCursor = remapOffset(savedCursorOffset, renumbered.edits)
+        }
       }
     }
 
@@ -861,6 +941,10 @@ export function usePromptArea({
     }
 
     lastRenderedValue.current = nextSegments
+    settledListRun.current =
+      markdownEnabled && savedCursorOffset !== null
+        ? { segments: nextSegments, plainText: nextPlainText }
+        : null
     if (contentChanged) onChange(nextSegments)
 
     // Apply the recomputed model to the DOM. A renumber rewrites text nodes,
@@ -880,14 +964,29 @@ export function usePromptArea({
         finalCursor = renumberedCursor
       } else {
         let scoped = false
+        // Whether the caret still has to be re-established. The browser
+        // already left it at savedCursorOffset when it applied the native
+        // edit, so the restore is only load-bearing when the decoration cycle
+        // replaced the nodes it was anchored in — and it is not free: it walks
+        // the document to map the offset back to a node, then hands the engine
+        // a new selection range, both of which cost O(document).
+        //
+        // Skipping is only provably identical when the caret sits in a text
+        // node: the offset then maps back to that same node at that same
+        // offset. Any other anchor (inside a chip, at an element boundary)
+        // can resolve to a different-but-equivalent spot, and re-placing it is
+        // what normalizes that — so those keep the restore. A caret inside a
+        // decoration is covered too: every decoration on the caret's line is
+        // stripped below, which reports a mutation.
+        let needsCaretRestore = true
         if (scopedEligible && !imeDirty.current) {
-          const selRange = getSelectionRange()
           if (selRange && selRange.collapsed && editor.contains(selRange.startContainer)) {
             const bounds = findLineBounds(editor, selRange.startContainer, selRange.startOffset)
             if (bounds) {
-              stripDecorationsInRange(editor, bounds)
-              decorateEditor(editor, markdownEnabled, headingsEnabled, bounds)
+              const stripped = stripDecorationsInRange(editor, bounds)
+              const decorated = decorateEditor(editor, markdownEnabled, headingsEnabled, bounds)
               scoped = true
+              needsCaretRestore = stripped || decorated || !isTextNode(selRange.startContainer)
             }
           }
         }
@@ -898,7 +997,7 @@ export function usePromptArea({
           decorateEditor(editor, markdownEnabled, headingsEnabled)
           imeDirty.current = false
         }
-        if (savedCursorOffset !== null) {
+        if (savedCursorOffset !== null && needsCaretRestore) {
           // scroll: false — this placement only re-establishes the caret that
           // native editing just revealed, and the correction's layout read
           // would force a reflow on every keystroke.

@@ -38,11 +38,16 @@ export function getCursorOffset(editor: HTMLElement): number | null {
  * length, chips atomically via {@link chipNodeTextLength}, `<br>` as one
  * character (sentinel `<br>` as zero), other elements by their children.
  */
-function nodeTextContribution(node: Node): number {
-  if (isTextNode(node)) return (node.textContent ?? '').length
+export function nodeTextContribution(node: Node): number {
+  // `Text.length` is the character count as a plain attribute — unlike
+  // `textContent`, it never materializes the node's string, which matters
+  // because this runs per direct child on every caret query.
+  if (isTextNode(node)) return node.length
   if (isChipElement(node)) return chipNodeTextLength(node)
+  // The same guard the typing scan uses, so a <br> counts identically on both
+  // paths (including a cross-realm node that `instanceof` would miss).
+  if (isBRElement(node)) return node.getAttribute('data-sentinel') ? 0 : 1
   if (isHTMLElement(node)) {
-    if (node.tagName === 'BR') return node.dataset.sentinel ? 0 : 1
     let length = 0
     const children = node.childNodes
     for (let i = 0; i < children.length; i++) {
@@ -64,7 +69,9 @@ function nodeTextContribution(node: Node): number {
  * Returns null when `container` is not inside the editor.
  */
 export function getTextOffsetAtPoint(
-  editor: HTMLElement,
+  // `Node`, not `HTMLElement`: the typing scan resolves a caret relative to a
+  // single direct child, which may itself be the text node holding the caret.
+  editor: Node,
   container: Node,
   offset: number,
 ): number | null {
@@ -104,12 +111,12 @@ export function getTextOffsetAtPoint(
   }
 
   if (isTextNode(container)) {
-    return length + Math.min(offset, (container.textContent ?? '').length)
+    return length + Math.min(offset, container.length)
   }
-  if (isHTMLElement(container) && container.tagName === 'BR') {
+  if (isBRElement(container)) {
     // setEnd(<br>, 0) partially includes the <br>, whose cloned shell the
     // clone walk counts as one character (zero for the sentinel).
-    return length + (container.dataset.sentinel ? 0 : 1)
+    return length + nodeTextContribution(container)
   }
   // Element container: children before the offset index are fully included.
   const children = container.childNodes
@@ -350,8 +357,8 @@ export function findDOMPosition(
   for (let i = 0; i < container.childNodes.length; i++) {
     const child = container.childNodes[i]
 
-    if (child.nodeType === Node.TEXT_NODE) {
-      const len = (child.textContent ?? '').length
+    if (isTextNode(child)) {
+      const len = child.length
       if (remaining <= len) {
         return { node: child, offset: remaining }
       }
@@ -377,7 +384,7 @@ export function findDOMPosition(
       // caret can sit before, and skipping it would fall through to the
       // end-of-container fallback, i.e. after it.
       if (remaining === 0) return { node: container, offset: i }
-      if (child.dataset.sentinel) continue // skip sentinel <br>
+      if (child.getAttribute('data-sentinel')) continue // skip sentinel <br>
       if (remaining <= 1) {
         return { node: container, offset: i + 1 }
       }

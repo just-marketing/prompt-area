@@ -356,6 +356,15 @@ export function normalizeListPrefixes(segments: Segment[], markdownEnabled: bool
 export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
 
 /**
+ * The cheapest possible proof that a numbered line might exist anywhere in the
+ * text. Deliberately mirrors `parseListLine`'s `^(\s*)(\d+)\. ` so it can
+ * never rule out a line the parser would accept; a looser match than the
+ * parser's only costs the full scan that would have run anyway. Not
+ * sticky/global, so it carries no `lastIndex` state between calls.
+ */
+const ORDERED_LINE_GATE = /^\s*\d+\. /m
+
+/**
  * Whether the text holds a genuine ordered-list run worth renumbering — a run
  * of 2+ consecutive same-level numbered lines that either starts at 1 or is
  * already a contiguous `n, n+1, …` sequence. Used to gate the paste path so a
@@ -365,6 +374,12 @@ export type NumberEdit = { oldStart: number; oldEnd: number; newText: string }
  * left untouched.
  */
 export function hasOrderedListRun(text: string): boolean {
+  // Cheap pre-gate, mirroring renumberOrderedListLines': this runs on every
+  // keystroke to decide whether renumbering is even possible, and without it
+  // a long prompt pays a full split-and-parse of every line per character.
+  // A run needs at least one `n. ` line, so no match means no run.
+  if (!ORDERED_LINE_GATE.test(text)) return false
+
   let runLevel: number | null = null
   let runStart = 0
   let prevNumber = 0
@@ -392,6 +407,37 @@ export function hasOrderedListRun(text: string): boolean {
   }
 
   return false
+}
+
+/**
+ * Whether `next` differs from `prev` only inside the line holding `cursorPos`,
+ * and that region is a plain (non-list) line in both versions. Plain lines
+ * break every list run in both {@link hasOrderedListRun} and
+ * {@link renumberOrderedListLines}, so an edit confined to one cannot change
+ * the list structure: if `prev` needed no renumbering, neither does `next`.
+ *
+ * Conservative by construction. Any change outside the caret line (undo,
+ * drag and drop, a split or merge that moved list content) fails the
+ * prefix/suffix check and reports false, and the caller runs the full scan.
+ * The prefix/suffix compare is a native memcmp, unlike the per-line regex
+ * scan it replaces on the typing hot path.
+ */
+export function isPlainLineEdit(prev: string, next: string, cursorPos: number): boolean {
+  const lineStart = cursorPos === 0 ? 0 : next.lastIndexOf('\n', cursorPos - 1) + 1
+  const newlineAfter = next.indexOf('\n', cursorPos)
+  const lineEnd = newlineAfter === -1 ? next.length : newlineAfter
+  const suffixLength = next.length - lineEnd
+  if (prev.length < lineStart + suffixLength) return false
+  if (!prev.startsWith(next.slice(0, lineStart))) return false
+  if (!prev.endsWith(next.slice(lineEnd))) return false
+
+  if (parseListLine(next.slice(lineStart, lineEnd))) return false
+  // The same region in `prev` may span several lines (a Backspace merged
+  // them); every one must have been plain too.
+  for (const line of prev.slice(lineStart, prev.length - suffixLength).split('\n')) {
+    if (parseListLine(line)) return false
+  }
+  return true
 }
 
 /**
