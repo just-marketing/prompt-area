@@ -148,7 +148,7 @@ export default function LaunchPage() {
         <p className="text-muted-foreground leading-relaxed">
           Built by the team at{' '}
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="text-foreground underline underline-offset-4">

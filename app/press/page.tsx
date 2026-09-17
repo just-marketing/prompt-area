@@ -47,7 +47,7 @@ export default function PressPage() {
         <h2 className="text-xl font-semibold">About Juma</h2>
         <p className="text-muted-foreground">
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4">
@@ -65,11 +65,11 @@ export default function PressPage() {
         <p className="text-muted-foreground">
           For press inquiries, please reach out through{' '}
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4">
-            juma.ai
+            jumalabs.ai
           </a>
           .
         </p>

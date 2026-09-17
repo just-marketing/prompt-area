@@ -51,7 +51,7 @@ export default function AboutPage() {
         <p className="text-muted-foreground">
           Prompt Area is built and maintained by{' '}
           <a
-            href="https://juma.ai"
+            href="https://jumalabs.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4">

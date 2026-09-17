@@ -110,7 +110,7 @@ export function SiteFooter() {
           <p>
             © {year} Prompt Area · MIT License · Built by{' '}
             <a
-              href="https://juma.ai"
+              href="https://jumalabs.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground underline underline-offset-4 transition-colors">
