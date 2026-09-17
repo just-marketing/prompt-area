@@ -44,8 +44,10 @@ export function nodeTextContribution(node: Node): number {
   // because this runs per direct child on every caret query.
   if (isTextNode(node)) return node.length
   if (isChipElement(node)) return chipNodeTextLength(node)
+  // The same guard the typing scan uses, so a <br> counts identically on both
+  // paths (including a cross-realm node that `instanceof` would miss).
+  if (isBRElement(node)) return node.getAttribute('data-sentinel') ? 0 : 1
   if (isHTMLElement(node)) {
-    if (node.tagName === 'BR') return node.getAttribute('data-sentinel') ? 0 : 1
     let length = 0
     const children = node.childNodes
     for (let i = 0; i < children.length; i++) {
@@ -111,10 +113,10 @@ export function getTextOffsetAtPoint(
   if (isTextNode(container)) {
     return length + Math.min(offset, container.length)
   }
-  if (isHTMLElement(container) && container.tagName === 'BR') {
+  if (isBRElement(container)) {
     // setEnd(<br>, 0) partially includes the <br>, whose cloned shell the
     // clone walk counts as one character (zero for the sentinel).
-    return length + (container.getAttribute('data-sentinel') ? 0 : 1)
+    return length + nodeTextContribution(container)
   }
   // Element container: children before the offset index are fully included.
   const children = container.childNodes

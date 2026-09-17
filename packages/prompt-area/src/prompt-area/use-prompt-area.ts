@@ -158,6 +158,20 @@ export type EditorScan = {
 export type ScanSelection = { node: Node; offset: number }
 
 /**
+ * Offset of `point` from the start of the editor direct child `child` that
+ * holds it, under getTextOffsetAtPoint's rules: a chip is atomic (a boundary
+ * anywhere inside counts the whole chip), and a non-HTML subtree (svg,
+ * MathML) maps to its own start because the root walk never descends into it.
+ */
+function caretOffsetWithinChild(child: Node, point: ScanSelection): number {
+  if (isChipElement(child)) return chipNodeTextLength(child)
+  if (isTextNode(child) || isHTMLElement(child)) {
+    return getTextOffsetAtPoint(child, point.node, point.offset) ?? 0
+  }
+  return 0
+}
+
+/**
  * Reads the editor's direct children into the segment model in one pass,
  * producing exactly what `normalizeEditorDOM(editor)` followed by
  * `readSegmentsFromDOM()` produces — without mutating the DOM and without
@@ -208,27 +222,24 @@ export function scanEditorDOM(editor: HTMLElement, selection?: ScanSelection | n
   let childIndex = 0
   for (let node = editor.firstChild; node !== null; node = node.nextSibling, childIndex++) {
     if (childIndex === caretChildIndex) cursorOffset = consumed
-    if (node === caretDirect) {
-      // Chips are atomic: a boundary anywhere inside one counts the whole
-      // chip, exactly as getTextOffsetAtPoint resolves it.
-      cursorOffset = isChipElement(node)
-        ? consumed + chipNodeTextLength(node)
-        : consumed + (getTextOffsetAtPoint(node, selection!.node, selection!.offset) ?? 0)
+    if (selection && node === caretDirect) {
+      cursorOffset = consumed + caretOffsetWithinChild(node, selection)
     }
+    // One counting rule for the caret prefix, shared with getCursorOffset's
+    // walk, so the two can never drift apart per node type.
+    consumed += nodeTextContribution(node)
 
     if (isTextNode(node)) {
       const text = node.data
       if (text) {
         if (text.includes('\n')) sawNewlineInText = true
         buffer += text
-        consumed += text.length
       }
     } else if (isChipElement(node)) {
       // A chip breaks the text run even when malformed (chipNodeToSegment
       // null): normalize skips chip elements, so the element still separates
       // its neighboring text nodes.
       flushBuffer()
-      consumed += chipNodeTextLength(node)
       const chip = chipNodeToSegment(node)
       if (chip) {
         segments.push(chip)
@@ -242,23 +253,18 @@ export function scanEditorDOM(editor: HTMLElement, selection?: ScanSelection | n
       } else {
         segments.push({ type: 'text', text: '\n' })
         plainText += '\n'
-        consumed += 1
       }
     } else if (
       isHTMLElement(node) &&
       ((node.tagName === 'SPAN' && node.hasAttribute('data-md')) || isLinkElement(node))
     ) {
-      // Decoration wrappers hold nothing but text, so their textContent length
-      // is also their nodeTextContribution.
       const text = node.textContent ?? ''
       if (text) {
         if (text.includes('\n')) sawNewlineInText = true
         buffer += text
-        consumed += text.length
       }
     } else {
       sawForeignElement = true
-      consumed += nodeTextContribution(node)
     }
   }
   if (childIndex === caretChildIndex) cursorOffset = consumed

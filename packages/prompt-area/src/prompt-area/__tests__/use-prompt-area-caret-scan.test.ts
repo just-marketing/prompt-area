@@ -71,6 +71,29 @@ function link(url: string): HTMLAnchorElement {
   return el
 }
 
+/** A chip missing its value/display attributes: still atomic, still a chip. */
+function malformedChip(trigger: string, text: string): HTMLSpanElement {
+  const el = document.createElement('span')
+  el.contentEditable = 'false'
+  el.dataset.chipTrigger = trigger
+  el.textContent = text
+  return el
+}
+
+/** An inline element the scan does not model (browser-inserted formatting). */
+function foreignInline(text: string): HTMLElement {
+  const el = document.createElement('b')
+  el.textContent = text
+  return el
+}
+
+/** A non-HTML subtree, which the root caret walk never descends into. */
+function mathml(text: string): Element {
+  const el = document.createElementNS('http://www.w3.org/1998/Math/MathML', 'mi')
+  el.textContent = text
+  return el
+}
+
 function place(node: Node, offset: number) {
   const range = document.createRange()
   range.setStart(node, offset)
@@ -151,6 +174,37 @@ describe('scanEditorDOM cursorOffset', () => {
       () => {
         const e = makeEditor()
         e.append(br())
+        return e
+      },
+    ],
+    [
+      'malformed chip between text runs',
+      () => {
+        const e = makeEditor()
+        e.append(
+          'hi ',
+          malformedChip('@', '@broken'),
+          ' and ',
+          chip('#', 't1', 'tag'),
+          br(),
+          'next',
+        )
+        return e
+      },
+    ],
+    [
+      'foreign inline element between text runs',
+      () => {
+        const e = makeEditor()
+        e.append('bold ', foreignInline('inside'), ' after', br(), 'tail')
+        return e
+      },
+    ],
+    [
+      'non-HTML subtree between text runs',
+      () => {
+        const e = makeEditor()
+        e.append('xy', mathml('abc'), 'tail', br(), chip('@', 'u1', 'Ada'))
         return e
       },
     ],
@@ -291,6 +345,21 @@ describe('caret restore on the typing hot path', () => {
     const sel = window.getSelection()!
     expect(sel.anchorNode).toBe(line2)
     expect(sel.anchorOffset).toBe('edit mex'.length)
+  })
+
+  it('re-places the caret when it sits at an element boundary, even with no mutation', () => {
+    const { result, editor } = setup()
+    // No decorations anywhere, so strip/decorate both report no change: the
+    // only thing forcing the restore is the caret not being in a text node.
+    editor.append('first ', chip('#', 't1', 'tag'), ' second')
+    place(editor, 2)
+
+    const addRange = vi.spyOn(Selection.prototype, 'addRange')
+    act(() => {
+      result.current.handleInput()
+    })
+    expect(addRange).toHaveBeenCalled()
+    expect(getCursorOffset(editor)).toBe('first #tag'.length)
   })
 
   it('re-places the caret when the keystroke completed a decoration', () => {
