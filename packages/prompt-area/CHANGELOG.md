@@ -3,7 +3,7 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.7.1
 
 ### Fixed
 
@@ -34,9 +34,12 @@ project adheres to [Semantic Versioning](https://semver.org/).
   block, which costs ~12 ms at 200k characters both before and after this
   change.
 
-- `hasOrderedListRun` now short-circuits on a cheap regex before splitting and
-  parsing every line, so prompts with no numbered list stop paying for the
-  renumber gate on every keystroke.
+- The ordered-list renumber gate no longer scans every line on every
+  keystroke. `hasOrderedListRun` short-circuits on a cheap regex when the
+  prompt has no numbered line at all, and once a prompt is renumbered, a
+  keystroke on a plain (non-list) line is proven not to have changed the list
+  structure and skips the per-line scan entirely. Editing a list line, undo,
+  drag and drop, or an external value still run the full check.
 
 ## 0.7.0
 
