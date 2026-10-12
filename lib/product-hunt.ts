@@ -5,11 +5,11 @@
 // Variables) WITHOUT a code change. The hardcoded fallbacks keep local dev and
 // the pre-launch site working with no env set.
 //
-// The launch banner flips WITHOUT a redeploy via Vercel Edge Config: the
-// `/api/ph-flag` route reads the `productHuntLive` key and the banner polls it,
+// The launch nav badge flips WITHOUT a redeploy via Vercel Edge Config: the
+// `/api/ph-flag` route reads the `productHuntLive` key and the badge polls it,
 // so flipping the value in the Edge Config dashboard propagates in seconds.
-// `NEXT_PUBLIC_PH_LIVE=true` is a build-time OVERRIDE that forces the banner on
-// regardless of Edge Config - set it in .env.local to preview the banner during
+// `NEXT_PUBLIC_PH_LIVE=true` is a build-time OVERRIDE that forces the badge on
+// regardless of Edge Config - set it in .env.local to preview the badge during
 // local dev. Leave it false in production and use Edge Config as the switch.
 //
 // Identifiers that only change once (post id, slugs) stay as NEXT_PUBLIC_* env
@@ -23,7 +23,7 @@
 export const PH_LIVE_EDGE_CONFIG_KEY = 'productHuntLive'
 
 export const PRODUCT_HUNT = {
-  /** Build-time fallback for the banner when Edge Config is unavailable. */
+  /** Build-time fallback for the badge when Edge Config is unavailable. */
   live: process.env.NEXT_PUBLIC_PH_LIVE === 'true',
 
   /** Numeric PH post id (from the launch's "Promote → Embed" snippet). 0 = unset. */
