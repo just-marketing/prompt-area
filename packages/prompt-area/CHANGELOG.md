@@ -3,6 +3,22 @@
 All notable changes to the `prompt-area` package are documented here. This
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## 0.7.2
+
+### Fixed
+
+- **Return adds a line on phones and tablets instead of sending the prompt.**
+  `submitOnEnter` defaulted to `true` on every device. A touch keyboard has no
+  usable Shift+Enter, so there was no way to type a line break. When
+  `submitOnEnter` is not set, Enter now submits on a device whose primary
+  pointer is fine (a mouse or a trackpad) and inserts a newline on a device
+  whose primary pointer is coarse (`(pointer: coarse)`), where the send button
+  submits. An explicit `submitOnEnter={true}` or `submitOnEnter={false}`
+  behaves as before.
+
+  If you render `PromptArea` with no send button, pass `submitOnEnter={true}`
+  to keep Enter-to-submit on touch devices.
+
 ## 0.7.1
 
 ### Fixed
