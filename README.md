@@ -341,18 +341,18 @@ const triggers: TriggerConfig[] = [
 
 ## Keyboard Shortcuts
 
-| Shortcut            | Action                                   |
-| ------------------- | ---------------------------------------- |
-| `Enter`             | Submit (or continue list)                |
-| `Shift+Enter`       | Insert newline                           |
-| `Escape`            | Dismiss dropdown / fire onEscape         |
-| `Cmd/Ctrl+B`        | Toggle **bold**                          |
-| `Cmd/Ctrl+I`        | Toggle _italic_                          |
-| `Cmd/Ctrl+Z`        | Undo                                     |
-| `Cmd/Ctrl+Shift+Z`  | Redo                                     |
-| `Tab` / `Shift+Tab` | Indent / outdent list item               |
-| `ArrowUp/Down`      | Navigate dropdown suggestions            |
-| `Backspace` on chip | Delete chip (or revert if auto-resolved) |
+| Shortcut            | Action                                         |
+| ------------------- | ---------------------------------------------- |
+| `Enter`             | Submit, or newline on touch (or continue list) |
+| `Shift+Enter`       | Insert newline                                 |
+| `Escape`            | Dismiss dropdown / fire onEscape               |
+| `Cmd/Ctrl+B`        | Toggle **bold**                                |
+| `Cmd/Ctrl+I`        | Toggle _italic_                                |
+| `Cmd/Ctrl+Z`        | Undo                                           |
+| `Cmd/Ctrl+Shift+Z`  | Redo                                           |
+| `Tab` / `Shift+Tab` | Indent / outdent list item                     |
+| `ArrowUp/Down`      | Navigate dropdown suggestions                  |
+| `Backspace` on chip | Delete chip (or revert if auto-resolved)       |
 
 ## Development
 

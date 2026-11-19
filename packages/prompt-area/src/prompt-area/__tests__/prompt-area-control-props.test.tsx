@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PromptArea } from '../prompt-area'
 import type { Segment } from '../types'
@@ -77,7 +77,7 @@ describe('onKeyDown control prop', () => {
     const editor = screen.getByRole('textbox')
     placeCursorAtEnd(editor)
 
-    // submitOnEnter defaults to true; with no onSubmit, Enter must still
+    // submitOnEnter submits by default on a fine pointer; with no onSubmit, Enter must still
     // preventDefault (no native contentEditable newline) rather than fall through.
     const notPrevented = fireEvent.keyDown(editor, { key: 'Enter' })
 
@@ -137,8 +137,30 @@ describe('onRawPaste control prop', () => {
 // submitOnEnter
 // ---------------------------------------------------------------------------
 
+function stubPointer(pointer: 'coarse' | 'fine') {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(pointer: coarse)' && pointer === 'coarse',
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }))
+}
+
+function lastPlainText(onChange: ReturnType<typeof vi.fn>): string {
+  const segments = onChange.mock.calls.at(-1)![0] as Segment[]
+  return segments
+    .filter((s): s is Extract<Segment, { type: 'text' }> => s.type === 'text')
+    .map((s) => s.text)
+    .join('')
+}
+
 describe('submitOnEnter control prop', () => {
-  it('Enter submits by default (submitOnEnter defaults to true)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('Enter submits by default when the pointer is fine', () => {
+    stubPointer('fine')
     const onSubmit = vi.fn()
     const onChange = vi.fn()
     render(
@@ -202,6 +224,67 @@ describe('submitOnEnter control prop', () => {
       .map((s) => s.text)
       .join('')
     expect(plain).toContain('\n')
+  })
+
+  it('Enter inserts a newline by default when the pointer is coarse', () => {
+    stubPointer('coarse')
+    const onSubmit = vi.fn()
+    const onChange = vi.fn()
+    render(
+      <PromptArea
+        value={[{ type: 'text', text: 'hello' }]}
+        onChange={onChange}
+        onSubmit={onSubmit}
+      />,
+    )
+    const editor = screen.getByRole('textbox')
+    placeCursorAtEnd(editor)
+
+    onChange.mockClear()
+    fireEvent.keyDown(editor, { key: 'Enter' })
+
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(lastPlainText(onChange)).toBe('hello\n')
+  })
+
+  it('Enter still submits on a coarse pointer when submitOnEnter is explicitly true', () => {
+    stubPointer('coarse')
+    const onSubmit = vi.fn()
+    render(
+      <PromptArea
+        value={[{ type: 'text', text: 'hello' }]}
+        onChange={vi.fn()}
+        onSubmit={onSubmit}
+        submitOnEnter={true}
+      />,
+    )
+    const editor = screen.getByRole('textbox')
+    placeCursorAtEnd(editor)
+
+    fireEvent.keyDown(editor, { key: 'Enter' })
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('Shift+Enter inserts a newline without submitting on a coarse pointer', () => {
+    stubPointer('coarse')
+    const onSubmit = vi.fn()
+    const onChange = vi.fn()
+    render(
+      <PromptArea
+        value={[{ type: 'text', text: 'hello' }]}
+        onChange={onChange}
+        onSubmit={onSubmit}
+      />,
+    )
+    const editor = screen.getByRole('textbox')
+    placeCursorAtEnd(editor)
+
+    onChange.mockClear()
+    fireEvent.keyDown(editor, { key: 'Enter', shiftKey: true })
+
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(lastPlainText(onChange)).toBe('hello\n')
   })
 })
 
