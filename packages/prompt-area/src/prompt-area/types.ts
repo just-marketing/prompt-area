@@ -320,9 +320,11 @@ export type PromptAreaProps = {
    */
   onRawPaste?: (e: React.ClipboardEvent<HTMLDivElement>) => void
   /**
-   * Whether pressing Enter (without Shift) submits. Defaults to true. Set false
-   * to make Enter insert a newline instead (e.g. on touch devices where submit
-   * is a dedicated button).
+   * Whether pressing Enter (without Shift) submits. When unset, Enter submits
+   * on devices with a fine primary pointer and inserts a newline on touch-primary
+   * devices, where the keyboard has no Shift+Enter and submit is a dedicated
+   * button. Set true to submit on Enter everywhere, or false to always insert a
+   * newline.
    */
   submitOnEnter?: boolean
   /** Forwarded to the editable element. */

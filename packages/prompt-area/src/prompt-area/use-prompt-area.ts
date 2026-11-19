@@ -53,6 +53,7 @@ import {
   stripDecorationsInRange,
   safeJsonStringify,
   getSelectionRange,
+  isCoarsePrimaryPointer,
 } from './dom-helpers'
 import type { DecorateBounds } from './dom-helpers'
 import {
@@ -350,7 +351,7 @@ export function usePromptArea({
   markdown: markdownEnabled = true,
   markdownHeadings: headingsEnabled = false,
   normalizeBullets = true,
-  submitOnEnter = true,
+  submitOnEnter,
   maxLength,
 }: UsePromptAreaOptions): UsePromptAreaReturn {
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -1808,15 +1809,17 @@ export function usePromptArea({
         return
       }
 
-      // 3. Enter without Shift (skipping IME): continue a list, else submit when
-      // `submitOnEnter` is set, else insert a newline.
+      // 3. Enter without Shift (skipping IME): continue a list, else submit, else
+      // insert a newline. An unset `submitOnEnter` submits only on a fine pointer,
+      // since a touch keyboard has no Shift+Enter. Read at keydown, not render, to
+      // stay hydration-safe.
       if (e.key === 'Enter' && !e.shiftKey) {
         const editor = editorRef.current
         if (editor && tryListContinuation(editor)) {
           e.preventDefault()
           return
         }
-        if (submitOnEnter) {
+        if (submitOnEnter ?? !isCoarsePrimaryPointer()) {
           e.preventDefault()
           onSubmit?.(readSegmentsFromDOM())
           return

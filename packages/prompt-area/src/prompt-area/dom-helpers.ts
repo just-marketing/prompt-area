@@ -7,6 +7,17 @@
 
 import type { ChipSegment } from './types'
 
+const COARSE_POINTER_QUERY = '(pointer: coarse)'
+
+/**
+ * True when the primary input is a touch screen. Safe where `matchMedia` is
+ * missing (SSR, jsdom).
+ */
+export function isCoarsePrimaryPointer(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+  return window.matchMedia(COARSE_POINTER_QUERY).matches
+}
+
 // ---------------------------------------------------------------------------
 // Type Guards
 // ---------------------------------------------------------------------------
